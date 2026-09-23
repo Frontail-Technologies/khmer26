@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { MobilePageHeader } from "@/components/shared/mobile-page-header"
 import { Container } from "@/components/layout/Container"
 import { ListingBreadcrumbs } from "@/features/listings/components/detail/listing-breadcrumbs"
 import { ListingGallery } from "@/features/listings/components/detail/listing-gallery"
@@ -59,7 +60,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const similarListings = getSimilarListings(listing.slug, 5)
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-12">
+    <div className="min-h-dvh bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12">
+      <MobilePageHeader
+        backHref="/search"
+        backLabel="Back to search results"
+        title={listing.title}
+      />
       <Container className="py-3 sm:py-4">
         <ListingBreadcrumbs
           categoryPath={listing.categoryPath}

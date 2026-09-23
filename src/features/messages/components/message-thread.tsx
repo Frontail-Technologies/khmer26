@@ -52,7 +52,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 no-scrollbar">
+    <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-4 no-scrollbar">
       <SafetyNotice />
 
       {groupedMessages.map((group) => (

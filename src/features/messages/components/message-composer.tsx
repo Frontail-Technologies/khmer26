@@ -70,7 +70,7 @@ export function MessageComposer({
   }
 
   return (
-    <div className="p-2.5 sm:p-3 bg-card border-t border-border/70 space-y-2">
+    <div className="p-2.5 sm:p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] bg-card border-t border-border/70 space-y-2">
       {stagedImage && (
         <div className="relative inline-block">
           <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-border bg-muted">
@@ -108,9 +108,9 @@ export function MessageComposer({
           size="icon-sm"
           onClick={() => fileInputRef.current?.click()}
           aria-label="Attach photo"
-          className="size-9 rounded-xl text-muted-foreground hover:text-foreground shrink-0"
+          className="size-10 rounded-xl text-muted-foreground hover:text-foreground shrink-0"
         >
-          <Paperclip size={18} />
+          <Paperclip size={19} />
         </Button>
 
         {role === "buyer" && listing.status === "active" && (
@@ -119,7 +119,7 @@ export function MessageComposer({
             variant="outline"
             size="xs"
             onClick={onOpenMakeOffer}
-            className="h-9 px-2.5 rounded-xl text-xs font-bold gap-1 text-accent border-accent/30 hover:bg-accent/10 shrink-0 hidden xs:inline-flex"
+            className="h-10 px-2.5 rounded-xl text-xs font-bold gap-1 text-accent border-accent/30 hover:bg-accent/10 shrink-0 hidden xs:inline-flex"
           >
             <Tag size={15} weight="bold" />
             <span>Offer</span>
@@ -132,7 +132,7 @@ export function MessageComposer({
           onKeyDown={handleKeyDown}
           placeholder="Type a message... (Enter to send)"
           rows={1}
-          className="min-h-9 max-h-24 py-2 px-3 text-xs sm:text-sm bg-background rounded-xl resize-none flex-1 leading-normal"
+          className="min-h-10 max-h-24 py-2 px-3 text-base md:text-sm bg-background rounded-xl resize-none flex-1 leading-normal"
         />
 
         <Button
@@ -141,9 +141,9 @@ export function MessageComposer({
           disabled={!text.trim() && !stagedImage}
           size="icon-sm"
           aria-label="Send message"
-          className="size-9 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+          className="size-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
         >
-          <PaperPlaneRight size={17} weight="fill" />
+          <PaperPlaneRight size={18} weight="fill" />
         </Button>
       </div>
     </div>

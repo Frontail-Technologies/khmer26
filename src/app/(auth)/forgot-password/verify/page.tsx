@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function VerifyCodePage() {
   return (
-    <AuthCard maxWidth="sm">
+    <AuthCard maxWidth="sm" backHref="/forgot-password" backLabel="Back to recovery">
       <AuthHeader
         eyebrow="ACCOUNT RECOVERY"
         title="Enter verification code"

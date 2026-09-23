@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <AuthCard maxWidth="md">
+    <AuthCard maxWidth="md" backHref="/" backLabel="Back to marketplace">
       <AuthHeader
         eyebrow="JOIN KHMER26"
         title="Create your Khmer26 account"

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { MobilePageHeader } from "@/components/shared/mobile-page-header"
 import { Container } from "@/components/layout/Container"
 import { SellerBreadcrumbs } from "@/features/sellers/components/seller-breadcrumbs"
 import { SellerProfileHeader } from "@/features/sellers/components/seller-profile-header"
@@ -50,7 +51,12 @@ export default async function SellerPage({ params }: SellerPageProps) {
   const reviews = getSellerReviews(seller.slug)
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-dvh bg-background pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-16">
+      <MobilePageHeader
+        backHref="/search"
+        backLabel="Back to marketplace"
+        title={seller.name}
+      />
       <Container className="py-3 sm:py-4">
         <SellerBreadcrumbs sellerName={seller.name} />
 

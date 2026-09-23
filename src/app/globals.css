@@ -92,6 +92,9 @@
 
   --radius: 0.5rem;
 
+  --mobile-nav-height: 4rem;
+  --mobile-action-height: 4.25rem;
+
   --sidebar:                    oklch(0.98 0.005 250);
   --sidebar-foreground:         oklch(0.16 0.02 250);
   --sidebar-primary:            var(--brand-blue);
@@ -136,6 +139,9 @@
 
   --radius: 0.5rem;
 
+  --mobile-nav-height: 4rem;
+  --mobile-action-height: 4.25rem;
+
   --sidebar:                    oklch(0.15 0.02 250);
   --sidebar-foreground:         oklch(0.95 0.005 250);
   --sidebar-primary:            var(--brand-blue);
@@ -156,11 +162,13 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-padding-bottom: calc(var(--mobile-action-height) + env(safe-area-inset-bottom, 0px) + 1rem);
   }
 
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100dvh;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -185,4 +193,26 @@
     @apply bg-muted-foreground/30;
   }
 }
+
+@utility safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+@utility safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+}
+
+@utility safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+@utility safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 

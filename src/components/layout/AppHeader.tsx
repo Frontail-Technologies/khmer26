@@ -23,6 +23,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { shouldShowAppHeader } from "@/lib/constants/route-policy"
 import { SearchBar } from "./SearchBar"
 import { LanguageSelector } from "./LanguageSelector"
 import { ThemeToggle } from "./ThemeToggle"
@@ -31,15 +32,7 @@ export function AppHeader() {
   const pathname = usePathname()
   const isLoggedIn = false
 
-  const isFocusedFlowPage =
-    pathname === "/post-ad" ||
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname.startsWith("/forgot-password") ||
-    pathname === "/reset-password" ||
-    pathname.startsWith("/messages")
-
-  if (isFocusedFlowPage) {
+  if (!shouldShowAppHeader(pathname)) {
     return null
   }
 

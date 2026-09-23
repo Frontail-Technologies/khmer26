@@ -9,7 +9,7 @@ export default function AccountLayout({
   children: ReactNode
 }) {
   return (
-    <main className="min-h-screen bg-background pt-3 sm:pt-6 md:pt-8 pb-24 sm:pb-12">
+    <main className="min-h-dvh bg-background pt-3 sm:pt-6 md:pt-8 pb-[calc(var(--mobile-nav-height,4rem)+env(safe-area-inset-bottom,0px)+1rem)] sm:pb-12">
       <Container>
         <AccountMobileNav />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">

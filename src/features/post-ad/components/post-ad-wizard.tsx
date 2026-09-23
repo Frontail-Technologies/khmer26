@@ -203,7 +203,7 @@ export function PostAdWizard() {
   const showPreviewSidebar = currentStep >= 2 && currentStep <= 5
 
   return (
-    <div className="space-y-6 pb-20 md:pb-8">
+    <div className="space-y-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         <div className="md:col-span-3 lg:col-span-3 md:sticky md:top-20">
           <PostAdProgress
@@ -308,7 +308,7 @@ export function PostAdWizard() {
       </div>
 
       {currentStep < 6 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-card/95 backdrop-blur-md p-3 px-4 shadow-lg md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-card/95 backdrop-blur-md p-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-lg md:hidden">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -330,7 +330,6 @@ export function PostAdWizard() {
               <ArrowRight size={16} weight="bold" className="ml-1" />
             </Button>
           </div>
-          <div className="h-safe-area-inset-bottom bg-transparent" />
         </div>
       )}
     </div>

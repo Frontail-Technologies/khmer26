@@ -18,7 +18,7 @@ export function ListingMobileActionBar({
   const [showPhone, setShowPhone] = useState(false)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-card/95 backdrop-blur-md px-4 py-2.5 shadow-lg md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-card/95 backdrop-blur-md px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-lg md:hidden">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
@@ -39,7 +39,6 @@ export function ListingMobileActionBar({
           <span>Chat with Seller</span>
         </Button>
       </div>
-      <div className="h-safe-area-inset-bottom bg-transparent" />
     </div>
   )
 }

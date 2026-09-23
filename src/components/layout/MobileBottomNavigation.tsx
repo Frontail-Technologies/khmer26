@@ -1,6 +1,7 @@
 "use client"
 
 import { BOTTOM_NAV } from "@/lib/constants/navigation"
+import { shouldShowMobileBottomNavigation } from "@/lib/constants/route-policy"
 import {
   ChatCircle,
   Compass,
@@ -27,16 +28,7 @@ function NavIcon({ name, size = 22 }: { name: string; size?: number }) {
 export function MobileBottomNavigation() {
   const pathname = usePathname()
 
-  const isAuthOrDetailPage =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname.startsWith("/forgot-password") ||
-    pathname === "/reset-password" ||
-    pathname.startsWith("/listing/") ||
-    pathname.startsWith("/messages/") ||
-    pathname === "/post-ad"
-
-  if (isAuthOrDetailPage) {
+  if (!shouldShowMobileBottomNavigation(pathname)) {
     return null
   }
 
@@ -74,7 +66,7 @@ export function MobileBottomNavigation() {
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
                 isActive
-                  ? "text-primary"
+                  ? "text-primary font-bold"
                   : "text-muted-foreground hover:text-foreground",
               )}
               aria-label={item.label}
@@ -86,7 +78,7 @@ export function MobileBottomNavigation() {
           )
         })}
       </div>
-      <div className="h-safe-area-inset-bottom bg-card" />
+      <div className="h-[env(safe-area-inset-bottom,0px)] bg-card" />
     </nav>
   )
 }

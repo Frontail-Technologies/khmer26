@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <AuthCard maxWidth="sm">
+    <AuthCard maxWidth="sm" backHref="/" backLabel="Back to marketplace">
       <AuthHeader
         eyebrow="WELCOME BACK"
         title="Sign in to Khmer26"

@@ -112,7 +112,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
       </div>
 
       {images.length > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+        <div className="flex items-center gap-2 overflow-x-auto py-1.5 px-0.5 -mx-0.5 scrollbar-thin snap-x snap-mandatory scroll-smooth">
           {images.map((img, idx) => {
             const isSelected = idx === activeIndex
             return (
@@ -123,9 +123,9 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                 aria-label={`Select photo ${idx + 1}`}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative h-16 w-20 sm:h-20 sm:w-24 shrink-0 overflow-hidden rounded-lg border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  "relative h-16 w-20 sm:h-20 sm:w-24 shrink-0 overflow-hidden rounded-lg border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary snap-start scroll-mx-1",
                   isSelected
-                    ? "border-primary ring-2 ring-primary/40 shadow-xs"
+                    ? "border-primary ring-2 ring-primary/60 shadow-xs scale-102"
                     : "border-border/80 opacity-70 hover:opacity-100"
                 )}
               >
@@ -147,7 +147,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
           <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md" />
           <DialogPrimitive.Popup
             data-slot="gallery-fullscreen-popup"
-            className="fixed inset-0 z-50 flex flex-col justify-between w-screen h-screen bg-black/95 text-white p-3 sm:p-6 select-none overflow-hidden outline-none"
+            className="fixed inset-0 z-50 flex flex-col justify-between w-screen h-dvh bg-black/95 text-white p-3 sm:p-6 select-none overflow-hidden outline-none"
           >
             <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-3">
               <div className="flex items-center gap-3 min-w-0">

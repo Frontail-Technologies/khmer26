@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <AuthCard maxWidth="sm">
+    <AuthCard maxWidth="sm" backHref="/forgot-password/verify" backLabel="Back to verification">
       <AuthHeader
         eyebrow="ACCOUNT RECOVERY"
         title="Create a new password"

@@ -53,10 +53,18 @@ export function ListingCard({ listing, featured = false, className }: ListingCar
   return (
     <Card
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card p-0 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card p-0 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md cursor-pointer",
         className
       )}
     >
+      <Link
+        href={`/listing/${listing.slug}`}
+        className="absolute inset-0 z-0 focus-visible:outline-hidden"
+        aria-label={listing.title}
+      >
+        <span className="sr-only">{listing.title}</span>
+      </Link>
+
       <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
         <Image
           src={imageUrl}
@@ -72,7 +80,7 @@ export function ListingCard({ listing, featured = false, className }: ListingCar
           />
         </div>
         {isFeatured && (
-          <div className="absolute top-2 left-2 z-10">
+          <div className="absolute top-2 left-2 z-10 pointer-events-none">
             <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-xs">
               Featured
             </span>
@@ -80,7 +88,7 @@ export function ListingCard({ listing, featured = false, className }: ListingCar
         )}
       </div>
 
-      <CardContent className="flex flex-1 flex-col justify-between p-3">
+      <CardContent className="flex flex-1 flex-col justify-between p-3 pointer-events-none">
         <div>
           <div className="flex items-baseline justify-between gap-1.5">
             <span className="text-[17px] sm:text-lg font-black tracking-tight text-primary">
@@ -93,12 +101,9 @@ export function ListingCard({ listing, featured = false, className }: ListingCar
             )}
           </div>
 
-          <Link
-            href={`/listing/${listing.slug}`}
-            className="mt-1 block font-semibold text-foreground line-clamp-2 transition-colors group-hover:text-primary text-xs sm:text-[13px] leading-snug focus-visible:outline-hidden"
-          >
+          <h3 className="mt-1 block font-semibold text-foreground line-clamp-2 transition-colors group-hover:text-primary text-xs sm:text-[13px] leading-snug">
             {listing.title}
-          </Link>
+          </h3>
 
           {listing.metadata && listing.metadata.length > 0 && (
             <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground truncate font-normal">

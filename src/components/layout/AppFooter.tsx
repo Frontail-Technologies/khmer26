@@ -6,20 +6,13 @@ import { SITE } from "@/lib/constants/site"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { shouldShowAppFooter } from "@/lib/constants/route-policy"
 
 export function AppFooter() {
   const pathname = usePathname()
   const currentYear = new Date().getFullYear()
 
-  const isFocusedFlowPage =
-    pathname === "/post-ad" ||
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname.startsWith("/forgot-password") ||
-    pathname === "/reset-password" ||
-    pathname.startsWith("/messages")
-
-  if (isFocusedFlowPage) {
+  if (!shouldShowAppFooter(pathname)) {
     return null
   }
 
@@ -124,8 +117,6 @@ export function AppFooter() {
             <p className="hidden sm:block">{SITE.tagline}</p>
           </div>
         </div>
-
-        <div className="h-14 md:hidden" aria-hidden="true" />
       </div>
     </footer>
   )
