@@ -10,7 +10,7 @@ import {
   Crown,
   CreditCard,
 } from "@phosphor-icons/react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
   {

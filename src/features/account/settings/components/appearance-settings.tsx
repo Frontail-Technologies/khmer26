@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 interface AppearanceSettingsProps {
   language: "en" | "km"

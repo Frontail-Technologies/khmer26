@@ -1,5 +1,5 @@
 import { Check, Checks, Clock } from "@phosphor-icons/react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { ImageMessage } from "./image-message"
 import { OfferMessageCard } from "./offer-message-card"
 import { SystemMessage } from "./system-message"

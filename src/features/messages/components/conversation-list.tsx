@@ -6,7 +6,7 @@ import { MagnifyingGlass, ChatCircle, ArrowLeft } from "@phosphor-icons/react"
 import { Input } from "@/components/ui/input"
 import { ConversationListItem } from "./conversation-list-item"
 import type { Conversation } from "../types"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 interface ConversationListProps {
   conversations: Conversation[]

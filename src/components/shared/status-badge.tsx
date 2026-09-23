@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 export type StatusTone =
   | "neutral"

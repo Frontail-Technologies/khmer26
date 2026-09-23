@@ -1,6 +1,6 @@
 import { CaretUp, CaretDown, CaretUpDown } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import type { DataTableColumnHeaderProps } from "./types"
 
 export function DataTableColumnHeader<TData, TValue>({

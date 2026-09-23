@@ -2,7 +2,7 @@ import Image from "next/image"
 import { SealCheck } from "@phosphor-icons/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import type { Conversation } from "../types"
 
 interface ConversationListItemProps {

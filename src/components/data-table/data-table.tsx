@@ -23,7 +23,7 @@ import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { DataTableEmpty } from "./data-table-empty"
 import type { DataTableProps } from "./types"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 export function DataTable<TData, TValue>({
   columns,

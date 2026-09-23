@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import type { AccountListingItem } from "../../types"
 
 interface PromoteListingDialogProps {
