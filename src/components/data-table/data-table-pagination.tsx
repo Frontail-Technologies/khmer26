@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  getSelectOptionLabel,
 } from "@/components/ui/select"
 import type { DataTablePaginationProps } from "./types"
 
@@ -22,6 +23,11 @@ export function DataTablePagination<TData>({
   const pageCount = table.getPageCount() || 1
   const pageSize = table.getState().pagination.pageSize
   const rowCount = table.getFilteredRowModel().rows.length
+
+  const pageSizeSelectOptions = pageSizeOptions.map((size) => ({
+    value: `${size}`,
+    label: `${size}`,
+  }))
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 py-3">
@@ -36,16 +42,19 @@ export function DataTablePagination<TData>({
           <span className="text-xs text-muted-foreground whitespace-nowrap">Rows per page</span>
           <Select
             value={`${pageSize}`}
+            items={pageSizeSelectOptions}
             onValueChange={(val) => {
               if (val) table.setPageSize(Number(val))
             }}
           >
-            <SelectTrigger className="h-8 w-16 text-xs bg-background">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-18 text-xs bg-background rounded-lg border-input">
+              <SelectValue>
+                {(val) => getSelectOptionLabel(pageSizeSelectOptions, val, `${pageSize}`)}
+              </SelectValue>
             </SelectTrigger>
-            <SelectContent side="top">
+            <SelectContent side="top" className="rounded-lg shadow-md">
               {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={`${size}`}>
+                <SelectItem key={size} value={`${size}`} className="text-xs">
                   {size}
                 </SelectItem>
               ))}
@@ -61,45 +70,45 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             aria-label="First page"
           >
-            <CaretDoubleLeft size={14} />
+            <CaretDoubleLeft size={13} weight="bold" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             aria-label="Previous page"
           >
-            <CaretLeft size={14} />
+            <CaretLeft size={13} weight="bold" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             aria-label="Next page"
           >
-            <CaretRight size={14} />
+            <CaretRight size={13} weight="bold" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
             onClick={() => table.setPageIndex(pageCount - 1)}
             disabled={!table.getCanNextPage()}
             aria-label="Last page"
           >
-            <CaretDoubleRight size={14} />
+            <CaretDoubleRight size={13} weight="bold" />
           </Button>
         </div>
       </div>

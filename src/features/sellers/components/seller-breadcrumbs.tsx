@@ -14,7 +14,7 @@ interface SellerBreadcrumbsProps {
 
 export function SellerBreadcrumbs({ sellerName }: SellerBreadcrumbsProps) {
   return (
-    <Breadcrumb className="py-2.5 text-xs sm:text-sm">
+    <Breadcrumb className="hidden sm:block py-2.5 text-xs sm:text-sm">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink render={<Link href="/">Home</Link>} />

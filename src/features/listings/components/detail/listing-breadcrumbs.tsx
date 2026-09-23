@@ -15,7 +15,7 @@ interface ListingBreadcrumbsProps {
 
 export function ListingBreadcrumbs({ categoryPath = [], title }: ListingBreadcrumbsProps) {
   return (
-    <Breadcrumb className="py-2 text-xs sm:text-sm">
+    <Breadcrumb className="hidden sm:block py-2 text-xs sm:text-sm">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink render={<Link href="/">Home</Link>} />

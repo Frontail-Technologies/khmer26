@@ -18,7 +18,7 @@ export function ResultsHeader({
 
   return (
     <div className="border-b border-border/70 pb-3 pt-2 mb-4">
-      <nav aria-label="Breadcrumb" className="mb-2">
+      <nav aria-label="Breadcrumb" className="hidden sm:block mb-2">
         <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1

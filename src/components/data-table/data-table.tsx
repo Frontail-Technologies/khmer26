@@ -69,52 +69,54 @@ export function DataTable<TData, TValue>({
         />
       )}
 
-      <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-2xs">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted/40 hover:bg-muted/40">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-xs font-bold text-foreground">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => onRowClick && onRowClick(row.original)}
-                  className={cn(
-                    "transition-colors",
-                    onRowClick && "cursor-pointer hover:bg-muted/50"
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-xs">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+      <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="bg-muted/30 hover:bg-muted/30 border-b border-border/60 select-none">
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className="py-3 px-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <DataTableEmpty
-                colSpan={columns.length}
-                title={emptyTitle}
-                description={emptyDescription}
-              />
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => onRowClick && onRowClick(row.original)}
+                    className={cn(
+                      "transition-colors hover:bg-muted/30 border-b border-border/60",
+                      onRowClick && "cursor-pointer"
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="py-3.5 px-4 text-xs">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <DataTableEmpty
+                  colSpan={columns.length}
+                  title={emptyTitle}
+                  description={emptyDescription}
+                />
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <DataTablePagination table={table} />

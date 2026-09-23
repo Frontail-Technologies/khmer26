@@ -5,6 +5,22 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { CaretDown, Check, CaretUp } from "@phosphor-icons/react"
 
+export type SelectOption = {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
+export function getSelectOptionLabel(
+  options: ReadonlyArray<SelectOption>,
+  value: string | null | undefined,
+  placeholder = ""
+): string {
+  if (!value) return placeholder
+  const found = options.find((opt) => opt.value === value)
+  return found ? found.label : value
+}
+
 const Select = SelectPrimitive.Root
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
@@ -40,7 +56,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-full min-w-0 items-center justify-between gap-2 rounded-xl border border-input bg-background py-2 px-3 text-xs sm:text-sm shadow-2xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-9.5 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 cursor-pointer text-foreground",
+        "flex w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-input bg-background py-2 px-3 text-xs shadow-2xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive data-placeholder:text-muted-foreground data-[size=default]:h-9.5 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 cursor-pointer text-foreground",
         className
       )}
       {...props}
@@ -83,7 +99,7 @@ function SelectContent({
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
           className={cn(
-            "relative isolate z-50 max-h-75 min-w-(--anchor-width) w-full max-w-[calc(100vw-2rem)] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-popover text-popover-foreground p-1 shadow-lg duration-150 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "relative isolate z-50 max-h-75 min-w-(--anchor-width) w-full max-w-[calc(100vw-2rem)] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground p-1 shadow-lg duration-150 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
@@ -119,7 +135,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg py-2 pr-8 pl-2.5 text-xs sm:text-sm font-medium outline-hidden select-none transition-colors hover:bg-muted/80 focus:bg-accent focus:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 text-foreground",
+        "relative flex w-full cursor-pointer items-center justify-between gap-2 rounded-md py-2 pr-8 pl-2.5 text-xs font-medium outline-hidden select-none transition-colors hover:bg-muted/80 focus:bg-accent focus:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 text-foreground",
         className
       )}
       {...props}
@@ -199,4 +215,3 @@ export {
   SelectTrigger,
   SelectValue,
 }
-

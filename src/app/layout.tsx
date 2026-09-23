@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Geist_Mono } from "next/font/google"
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google"
 import type { ReactNode } from "react"
 import "./globals.css"
 import { AppProviders } from "@/providers/AppProviders"
@@ -9,9 +9,9 @@ import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigati
 import { SEO } from "@/lib/constants/site"
 import { cn } from "@/lib/utils"
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-plus-jakarta",
   display: "swap",
 })
 
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(inter.variable, geistMono.variable, "h-full")}
+      className={cn(plusJakartaSans.variable, geistMono.variable, "h-full font-sans")}
     >
       <body
         suppressHydrationWarning
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       >
         <AppProviders>
           <AppHeader />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1" suppressHydrationWarning>{children}</main>
           <AppFooter />
           <MobileBottomNavigation />
         </AppProviders>

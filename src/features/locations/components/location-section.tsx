@@ -19,7 +19,7 @@ export function LocationSection() {
           </Link>
         }
       />
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2.5">
         {DEMO_LOCATIONS.map((location) => (
           <LocationCard key={location.id} location={location} />
         ))}

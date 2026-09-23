@@ -102,7 +102,7 @@ export function ConversationList({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-2 pb-24 md:pb-2 space-y-1.5 no-scrollbar">
         {filtered.length > 0 ? (
           filtered.map((conv) => (
             <ConversationListItem

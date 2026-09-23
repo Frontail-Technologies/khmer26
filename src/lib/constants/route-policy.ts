@@ -1,5 +1,6 @@
 export function shouldShowMobileBottomNavigation(pathname: string): boolean {
   if (
+    pathname.startsWith("/admin") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname.startsWith("/forgot-password") ||
@@ -21,6 +22,7 @@ export function shouldShowMobileBottomNavigation(pathname: string): boolean {
 
 export function shouldShowAppHeader(pathname: string): boolean {
   if (
+    pathname.startsWith("/admin") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname.startsWith("/forgot-password") ||
@@ -35,6 +37,7 @@ export function shouldShowAppHeader(pathname: string): boolean {
 
 export function shouldShowAppFooter(pathname: string): boolean {
   if (
+    pathname.startsWith("/admin") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname.startsWith("/forgot-password") ||

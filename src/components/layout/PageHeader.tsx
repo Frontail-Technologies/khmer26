@@ -32,7 +32,7 @@ export function PageHeader({
   return (
     <div className={cn("space-y-2 pb-6 pt-4", className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumb>
+        <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1

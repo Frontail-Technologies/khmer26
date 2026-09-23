@@ -14,13 +14,24 @@ export function DataTableColumnHeader<TData, TValue>({
 
   const isSorted = column.getIsSorted()
 
+  const handleToggleSort = () => {
+    if (!isSorted) {
+      column.toggleSorting(false)
+    } else if (isSorted === "asc") {
+      column.toggleSorting(true)
+    } else {
+      column.clearSorting()
+    }
+  }
+
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      onClick={handleToggleSort}
+      aria-sort={isSorted === "asc" ? "ascending" : isSorted === "desc" ? "descending" : "none"}
       className={cn(
-        "-ml-2.5 h-8 px-2.5 text-xs font-bold text-foreground hover:text-foreground data-[state=open]:bg-muted flex items-center gap-1",
+        "-ml-2.5 h-8 px-2.5 text-xs font-bold text-foreground hover:text-foreground hover:bg-muted/70 flex items-center gap-1 cursor-pointer select-none",
         className
       )}
     >
@@ -30,7 +41,7 @@ export function DataTableColumnHeader<TData, TValue>({
       ) : isSorted === "asc" ? (
         <CaretUp size={14} weight="bold" className="text-primary" />
       ) : (
-        <CaretUpDown size={14} className="text-muted-foreground/70" />
+        <CaretUpDown size={14} className="text-muted-foreground/60" />
       )}
     </Button>
   )
