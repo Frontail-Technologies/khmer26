@@ -59,9 +59,9 @@ const STATUS_OPTIONS = [
 
 const VERIFICATION_OPTIONS = [
   { value: "all", label: "All Verifications" },
-  { value: "verified", label: "Verified Only" },
-  { value: "unverified", label: "Unverified Only" },
-  { value: "pending", label: "Pending Verification" },
+  { value: "verified", label: "Verified" },
+  { value: "pending", label: "Pending" },
+  { value: "unverified", label: "Unverified" },
 ]
 
 const PROVINCE_OPTIONS = [
@@ -93,7 +93,7 @@ export function UserToolbar({
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
   return (
-    <div className="space-y-2.5">
+    <div className="p-3.5 sm:p-4 border-b border-border/60 space-y-2.5">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div className="relative flex-1 min-w-[240px]">
           <MagnifyingGlass
@@ -102,20 +102,20 @@ export function UserToolbar({
           />
           <input
             type="text"
-            placeholder="Search by name, ID, business, email, or phone..."
+            placeholder="Search name, account ID, email, phone or business..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <div className="hidden xl:flex items-center gap-2 shrink-0">
           <Select
             value={accountTypeFilter}
             items={ACCOUNT_TYPE_OPTIONS}
             onValueChange={(val) => onAccountTypeChange(val ?? "all")}
           >
-            <SelectTrigger className="h-9 text-xs w-[150px]">
+            <SelectTrigger className="h-9 text-xs w-[145px]">
               <SelectValue>
                 {(val) => getSelectOptionLabel(ACCOUNT_TYPE_OPTIONS, val, "All Account Types")}
               </SelectValue>
@@ -134,7 +134,7 @@ export function UserToolbar({
             items={STATUS_OPTIONS}
             onValueChange={(val) => onStatusChange(val ?? "all")}
           >
-            <SelectTrigger className="h-9 text-xs w-[130px]">
+            <SelectTrigger className="h-9 text-xs w-[125px]">
               <SelectValue>
                 {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
               </SelectValue>
@@ -153,7 +153,7 @@ export function UserToolbar({
             items={VERIFICATION_OPTIONS}
             onValueChange={(val) => onVerificationChange(val ?? "all")}
           >
-            <SelectTrigger className="h-9 text-xs w-[140px]">
+            <SelectTrigger className="h-9 text-xs w-[135px]">
               <SelectValue>
                 {(val) => getSelectOptionLabel(VERIFICATION_OPTIONS, val, "All Verifications")}
               </SelectValue>
@@ -172,7 +172,7 @@ export function UserToolbar({
             items={PROVINCE_OPTIONS}
             onValueChange={(val) => onProvinceChange(val ?? "all")}
           >
-            <SelectTrigger className="h-9 text-xs w-[140px]">
+            <SelectTrigger className="h-9 text-xs w-[135px]">
               <SelectValue>
                 {(val) => getSelectOptionLabel(PROVINCE_OPTIONS, val, "All Provinces")}
               </SelectValue>
@@ -191,7 +191,7 @@ export function UserToolbar({
               variant="ghost"
               size="sm"
               onClick={onReset}
-              className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground"
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <ArrowCounterClockwise size={14} className="mr-1" />
               Reset
@@ -199,11 +199,11 @@ export function UserToolbar({
           )}
         </div>
 
-        <div className="flex lg:hidden items-center justify-between gap-2">
+        <div className="flex xl:hidden items-center justify-between gap-2">
           <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
             <SheetTrigger
               render={
-                <Button variant="outline" size="sm" className="h-9 text-xs flex-1">
+                <Button variant="outline" size="sm" className="h-9 text-xs flex-1 cursor-pointer">
                   <Funnel size={14} className="mr-1.5" />
                   Filters {hasActiveFilters && "(Active)"}
                 </Button>
@@ -211,7 +211,7 @@ export function UserToolbar({
             />
             <SheetContent side="right" className="w-[300px] sm:w-[360px] p-4 space-y-4">
               <SheetHeader>
-                <SheetTitle className="text-sm font-semibold">Filter Users</SheetTitle>
+                <SheetTitle className="text-sm font-semibold">Filter Accounts</SheetTitle>
               </SheetHeader>
 
               <div className="space-y-3 pt-2">
@@ -313,7 +313,7 @@ export function UserToolbar({
                       onReset()
                       setMobileFilterOpen(false)
                     }}
-                    className="flex-1 text-xs"
+                    className="flex-1 text-xs cursor-pointer"
                   >
                     Reset
                   </Button>
@@ -321,13 +321,25 @@ export function UserToolbar({
                 <Button
                   size="sm"
                   onClick={() => setMobileFilterOpen(false)}
-                  className="flex-1 text-xs"
+                  className="flex-1 text-xs cursor-pointer"
                 >
                   Apply Filters
                 </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <ArrowCounterClockwise size={14} className="mr-1" />
+              Reset
+            </Button>
+          )}
         </div>
       </div>
 

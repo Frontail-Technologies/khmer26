@@ -1,0 +1,68 @@
+import type { AdminReportReasonItem } from "../types"
+
+export const DEMO_REPORT_REASONS: AdminReportReasonItem[] = [
+  {
+    id: "RSN-01",
+    label: "Misleading Description",
+    description: "Item specifications, condition, or photos significantly differ from reality.",
+    appliesTo: ["listing"],
+    isActive: true,
+    createdAt: "2024-01-10",
+  },
+  {
+    id: "RSN-02",
+    label: "Fake / Counterfeit Item",
+    description: "Allegations of replica, counterfeit, or unverified branded goods.",
+    appliesTo: ["listing"],
+    isActive: true,
+    createdAt: "2024-01-10",
+  },
+  {
+    id: "RSN-03",
+    label: "Suspected Scam / Fraud",
+    description: "Requests for off-platform deposits, wire transfers, or deceptive payment links.",
+    appliesTo: ["listing", "user", "chat"],
+    isActive: true,
+    createdAt: "2024-01-12",
+  },
+  {
+    id: "RSN-04",
+    label: "Spam / Mass Messaging",
+    description: "Unsolicited promotional links, automated mass copy-paste messages.",
+    appliesTo: ["user", "chat"],
+    isActive: true,
+    createdAt: "2024-01-15",
+  },
+  {
+    id: "RSN-05",
+    label: "Inappropriate / Offensive Content",
+    description: "Profanity, harassment, or explicit prohibited imagery.",
+    appliesTo: ["listing", "user", "chat"],
+    isActive: true,
+    createdAt: "2024-02-01",
+  },
+  {
+    id: "RSN-06",
+    label: "Wrong Category or Location",
+    description: "Listing is posted in the wrong marketplace category or invalid province.",
+    appliesTo: ["listing"],
+    isActive: true,
+    createdAt: "2024-02-10",
+  },
+  {
+    id: "RSN-07",
+    label: "Prohibited Goods / Services",
+    description: "Restricted goods under Cambodian commerce and safety regulations.",
+    appliesTo: ["listing"],
+    isActive: true,
+    createdAt: "2024-02-15",
+  },
+  {
+    id: "RSN-08",
+    label: "Suspicious Account Activity",
+    description: "Impersonation, unverified commercial business, or suspicious behavior.",
+    appliesTo: ["user"],
+    isActive: true,
+    createdAt: "2024-03-01",
+  },
+]

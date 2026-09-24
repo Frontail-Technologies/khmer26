@@ -28,6 +28,10 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
     badge: "8 Open",
     badgeVariant: "destructive",
   },
+  "/admin/reports/reasons": {
+    title: "Report Reasons",
+    subtitle: "Manage reasons and categories available for user reporting.",
+  },
   "/admin/users": {
     title: "Users & Sellers",
     subtitle: "Manage marketplace accounts, profiles, and seller activity.",
@@ -120,10 +124,10 @@ export function getAdminRouteInfo(pathname: string): AdminRouteInfo {
     }
   }
 
-  if (pathname.startsWith("/admin/reports/") && pathname !== "/admin/reports") {
+  if (pathname.startsWith("/admin/reports/") && pathname !== "/admin/reports" && pathname !== "/admin/reports/reasons") {
     return {
       title: "Report Review",
-      subtitle: "Review reported content, evidence and moderation history.",
+      subtitle: "Review reported content and resolution options.",
     }
   }
 

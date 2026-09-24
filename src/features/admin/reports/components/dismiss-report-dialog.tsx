@@ -53,11 +53,11 @@ export function DismissReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
-          <div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center mb-1">
-            <XCircle size={22} weight="bold" />
+          <div className="size-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center mb-1">
+            <XCircle size={20} weight="bold" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">
-            Dismiss Report #{report.id}
+            Dismiss Report {report.id}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
             Dismiss this report without taking punitive action against the reported target.
@@ -72,7 +72,7 @@ export function DismissReportDialog({
               items={DISMISS_REASONS}
               onValueChange={(val) => setReason(val ?? "")}
             >
-              <SelectTrigger size="sm" className="h-9.5 text-xs rounded-lg">
+              <SelectTrigger size="sm" className="h-9 text-xs rounded-lg">
                 <SelectValue>
                   {(val) => getSelectOptionLabel(DISMISS_REASONS, val, "Select dismissal reason")}
                 </SelectValue>
@@ -88,7 +88,7 @@ export function DismissReportDialog({
           </Field>
 
           <Field>
-            <FieldLabel>Internal Dismissal Notes</FieldLabel>
+            <FieldLabel>Administrative Notes</FieldLabel>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -110,9 +110,10 @@ export function DismissReportDialog({
           </Button>
           <Button
             type="button"
+            variant="secondary"
             size="sm"
             onClick={handleSubmit}
-            className="flex-1 sm:flex-initial h-9 px-4 text-xs bg-muted hover:bg-muted/80 text-foreground font-bold rounded-lg cursor-pointer"
+            className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
           >
             Confirm Dismissal
           </Button>

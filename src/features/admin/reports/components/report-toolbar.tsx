@@ -31,8 +31,6 @@ interface ReportToolbarProps {
   onStatusChange: (value: string) => void
   targetTypeFilter: string
   onTargetTypeChange: (value: string) => void
-  priorityFilter: string
-  onPriorityChange: (value: string) => void
   reasonFilter: string
   onReasonChange: (value: string) => void
   onReset: () => void
@@ -44,25 +42,15 @@ interface ReportToolbarProps {
 const TARGET_TYPE_OPTIONS = [
   { value: "all", label: "All Target Types" },
   { value: "listing", label: "Listings" },
-  { value: "seller", label: "Sellers" },
-  { value: "user", label: "Users" },
-  { value: "chat", label: "Chat Conversations" },
+  { value: "user", label: "Users & Sellers" },
+  { value: "chat", label: "Chats & Messages" },
 ]
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Statuses" },
   { value: "open", label: "Open" },
-  { value: "in_review", label: "In Review" },
-  { value: "escalated", label: "Escalated" },
   { value: "resolved", label: "Resolved" },
   { value: "dismissed", label: "Dismissed" },
-]
-
-const PRIORITY_OPTIONS = [
-  { value: "all", label: "All Priorities" },
-  { value: "urgent", label: "Urgent" },
-  { value: "high", label: "High" },
-  { value: "normal", label: "Normal" },
 ]
 
 const REASON_OPTIONS = [
@@ -70,7 +58,7 @@ const REASON_OPTIONS = [
   { value: "suspected_scam", label: "Suspected Scam" },
   { value: "misleading", label: "Misleading Information" },
   { value: "duplicate", label: "Duplicate Listing" },
-  { value: "spam", label: "Spam / Mass Messaging" },
+  { value: "spam", label: "Spam / Messages" },
   { value: "wrong_category", label: "Wrong Category" },
   { value: "inappropriate", label: "Inappropriate Content" },
   { value: "prohibited_item", label: "Prohibited Item" },
@@ -85,8 +73,6 @@ export function ReportToolbar({
   onStatusChange,
   targetTypeFilter,
   onTargetTypeChange,
-  priorityFilter,
-  onPriorityChange,
   reasonFilter,
   onReasonChange,
   onReset,
@@ -97,34 +83,34 @@ export function ReportToolbar({
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-      <div className="relative flex-1 max-w-md">
-        <MagnifyingGlass
-          size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-        />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search report ID, target title, reporter, or reason..."
-          className="h-9 w-full pl-9 pr-3 text-xs bg-muted/40 border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-        />
-      </div>
+    <div className="p-3.5 sm:p-4 border-b border-border/60 space-y-2.5">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <div className="relative flex-1 min-w-[240px]">
+          <MagnifyingGlass
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search reporter, reported item, report ID or reason..."
+            className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
 
-      <div className="hidden xl:flex items-center gap-2 flex-wrap">
-        <div className="w-40">
+        <div className="hidden xl:flex items-center gap-2 shrink-0">
           <Select
             value={targetTypeFilter || "all"}
             items={TARGET_TYPE_OPTIONS}
             onValueChange={(val) => onTargetTypeChange(val === "all" ? "" : (val ?? ""))}
           >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-muted/40 rounded-xl">
+            <SelectTrigger className="h-9 text-xs w-[140px] rounded-lg">
               <SelectValue>
                 {(val) => getSelectOptionLabel(TARGET_TYPE_OPTIONS, val, "All Target Types")}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent side="bottom" align="start">
+            <SelectContent>
               {TARGET_TYPE_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
@@ -132,20 +118,18 @@ export function ReportToolbar({
               ))}
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="w-36">
           <Select
             value={statusFilter || "all"}
             items={STATUS_OPTIONS}
             onValueChange={(val) => onStatusChange(val === "all" ? "" : (val ?? ""))}
           >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-muted/40 rounded-xl">
+            <SelectTrigger className="h-9 text-xs w-[130px] rounded-lg">
               <SelectValue>
                 {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent side="bottom" align="start">
+            <SelectContent>
               {STATUS_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
@@ -153,41 +137,18 @@ export function ReportToolbar({
               ))}
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="w-36">
-          <Select
-            value={priorityFilter || "all"}
-            items={PRIORITY_OPTIONS}
-            onValueChange={(val) => onPriorityChange(val === "all" ? "" : (val ?? ""))}
-          >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-muted/40 rounded-xl">
-              <SelectValue>
-                {(val) => getSelectOptionLabel(PRIORITY_OPTIONS, val, "All Priorities")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start">
-              {PRIORITY_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-44">
           <Select
             value={reasonFilter || "all"}
             items={REASON_OPTIONS}
             onValueChange={(val) => onReasonChange(val === "all" ? "" : (val ?? ""))}
           >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-muted/40 rounded-xl">
+            <SelectTrigger className="h-9 text-xs w-[150px] rounded-lg">
               <SelectValue>
                 {(val) => getSelectOptionLabel(REASON_OPTIONS, val, "All Reasons")}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent side="bottom" align="start">
+            <SelectContent>
               {REASON_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
@@ -195,157 +156,150 @@ export function ReportToolbar({
               ))}
             </SelectContent>
           </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
+            >
+              <ArrowCounterClockwise size={13} />
+              <span>Reset</span>
+            </Button>
+          )}
         </div>
 
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onReset}
-            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer"
-          >
-            <ArrowCounterClockwise size={13} />
-            <span>Reset</span>
-          </Button>
-        )}
-      </div>
-
-      <div className="flex xl:hidden items-center justify-between gap-2">
-        <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-          <SheetTrigger
-            render={
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 text-xs font-semibold gap-1.5 rounded-xl flex-1 cursor-pointer"
-              >
-                <Funnel size={14} />
-                <span>Filters {hasActiveFilters && "(Active)"}</span>
-              </Button>
-            }
-          />
-          <SheetContent side="bottom" className="p-4 rounded-t-2xl max-h-[85dvh] space-y-4">
-            <SheetHeader>
-              <SheetTitle className="text-sm font-bold">Filter Reports</SheetTitle>
-            </SheetHeader>
-
-            <div className="space-y-3 pt-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Target Type</label>
-                <Select
-                  value={targetTypeFilter || "all"}
-                  items={TARGET_TYPE_OPTIONS}
-                  onValueChange={(val) => onTargetTypeChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-xl">
-                    <SelectValue>
-                      {(val) => getSelectOptionLabel(TARGET_TYPE_OPTIONS, val, "All Target Types")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {TARGET_TYPE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Status</label>
-                <Select
-                  value={statusFilter || "all"}
-                  items={STATUS_OPTIONS}
-                  onValueChange={(val) => onStatusChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-xl">
-                    <SelectValue>
-                      {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {STATUS_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Priority</label>
-                <Select
-                  value={priorityFilter || "all"}
-                  items={PRIORITY_OPTIONS}
-                  onValueChange={(val) => onPriorityChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-xl">
-                    <SelectValue>
-                      {(val) => getSelectOptionLabel(PRIORITY_OPTIONS, val, "All Priorities")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {PRIORITY_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Reason</label>
-                <Select
-                  value={reasonFilter || "all"}
-                  items={REASON_OPTIONS}
-                  onValueChange={(val) => onReasonChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-xl">
-                    <SelectValue>
-                      {(val) => getSelectOptionLabel(REASON_OPTIONS, val, "All Reasons")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {REASON_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <SheetFooter className="flex flex-row gap-2 pt-3">
-              {hasActiveFilters && (
+        <div className="flex xl:hidden items-center justify-between gap-2">
+          <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+            <SheetTrigger
+              render={
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    onReset()
-                    setMobileSheetOpen(false)
-                  }}
-                  className="flex-1 h-9.5 text-xs rounded-xl"
+                  className="h-9 text-xs font-semibold gap-1.5 rounded-lg flex-1 cursor-pointer"
                 >
-                  Reset
+                  <Funnel size={14} />
+                  <span>Filters {hasActiveFilters && "(Active)"}</span>
                 </Button>
-              )}
-              <Button
-                size="sm"
-                onClick={() => setMobileSheetOpen(false)}
-                className="flex-1 h-9.5 text-xs bg-primary text-primary-foreground font-semibold rounded-xl"
-              >
-                Apply Filters
-              </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+              }
+            />
+            <SheetContent side="right" className="w-[300px] sm:w-[360px] p-4 space-y-4">
+              <SheetHeader>
+                <SheetTitle className="text-sm font-semibold">Filter Reports</SheetTitle>
+              </SheetHeader>
 
-        <span className="text-[11px] text-muted-foreground shrink-0">
-          Showing {filteredCount} of {totalCount}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground">Target Type</label>
+                  <Select
+                    value={targetTypeFilter || "all"}
+                    items={TARGET_TYPE_OPTIONS}
+                    onValueChange={(val) => onTargetTypeChange(val === "all" ? "" : (val ?? ""))}
+                  >
+                    <SelectTrigger className="h-9 text-xs w-full rounded-lg">
+                      <SelectValue>
+                        {(val) => getSelectOptionLabel(TARGET_TYPE_OPTIONS, val, "All Target Types")}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TARGET_TYPE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground">Status</label>
+                  <Select
+                    value={statusFilter || "all"}
+                    items={STATUS_OPTIONS}
+                    onValueChange={(val) => onStatusChange(val === "all" ? "" : (val ?? ""))}
+                  >
+                    <SelectTrigger className="h-9 text-xs w-full rounded-lg">
+                      <SelectValue>
+                        {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground">Reason</label>
+                  <Select
+                    value={reasonFilter || "all"}
+                    items={REASON_OPTIONS}
+                    onValueChange={(val) => onReasonChange(val === "all" ? "" : (val ?? ""))}
+                  >
+                    <SelectTrigger className="h-9 text-xs w-full rounded-lg">
+                      <SelectValue>
+                        {(val) => getSelectOptionLabel(REASON_OPTIONS, val, "All Reasons")}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REASON_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <SheetFooter className="flex flex-row gap-2 pt-4">
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onReset()
+                      setMobileSheetOpen(false)
+                    }}
+                    className="flex-1 text-xs cursor-pointer"
+                  >
+                    Reset
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={() => setMobileSheetOpen(false)}
+                  className="flex-1 text-xs cursor-pointer"
+                >
+                  Apply Filters
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <ArrowCounterClockwise size={14} className="mr-1" />
+              Reset
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
+        <span>
+          Showing <span className="font-semibold text-foreground">{filteredCount}</span> of{" "}
+          <span className="font-semibold text-foreground">{totalCount}</span> reports
         </span>
       </div>
     </div>

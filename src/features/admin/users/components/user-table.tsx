@@ -10,6 +10,8 @@ import {
   getPaginationRowModel,
   type SortingState,
 } from "@tanstack/react-table"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -24,13 +26,17 @@ import { userColumns } from "../columns"
 import { UserToolbar } from "./user-toolbar"
 import { UserMobileCards } from "./user-mobile-cards"
 import type { AdminUserListItem } from "../types"
+import { cn } from "@/lib/utils"
 
 interface UserTableProps {
   initialData: AdminUserListItem[]
 }
 
+type AccountTabKey = "all" | "buyer" | "seller" | "business_dealer" | "restricted"
+
 export function UserTable({ initialData }: UserTableProps) {
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState<AccountTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "name", desc: false },
   ])
@@ -40,10 +46,46 @@ export function UserTable({ initialData }: UserTableProps) {
   const [verificationFilter, setVerificationFilter] = useState("all")
   const [provinceFilter, setProvinceFilter] = useState("all")
 
+  const counts = useMemo(() => {
+    return {
+      all: initialData.length,
+      buyer: initialData.filter((u) => u.accountType === "buyer").length,
+      seller: initialData.filter((u) => u.accountType === "seller" || u.accountType === "business" || u.accountType === "dealer").length,
+      business_dealer: initialData.filter((u) => u.accountType === "business" || u.accountType === "dealer").length,
+      restricted: initialData.filter((u) => u.status === "restricted" || u.status === "suspended").length,
+    }
+  }, [initialData])
+
   const filteredData = useMemo(() => {
     return initialData.filter((user) => {
+      if (activeTab === "buyer" && user.accountType !== "buyer") {
+        return false
+      }
+      if (
+        activeTab === "seller" &&
+        user.accountType !== "seller" &&
+        user.accountType !== "business" &&
+        user.accountType !== "dealer"
+      ) {
+        return false
+      }
+      if (
+        activeTab === "business_dealer" &&
+        user.accountType !== "business" &&
+        user.accountType !== "dealer"
+      ) {
+        return false
+      }
+      if (
+        activeTab === "restricted" &&
+        user.status !== "restricted" &&
+        user.status !== "suspended"
+      ) {
+        return false
+      }
+
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase()
+        const q = searchQuery.toLowerCase().trim()
         const matchesName = user.name.toLowerCase().includes(q)
         const matchesId = user.id.toLowerCase().includes(q)
         const matchesEmail = user.email.toLowerCase().includes(q)
@@ -74,6 +116,7 @@ export function UserTable({ initialData }: UserTableProps) {
     })
   }, [
     initialData,
+    activeTab,
     searchQuery,
     accountTypeFilter,
     statusFilter,
@@ -113,8 +156,54 @@ export function UserTable({ initialData }: UserTableProps) {
     setProvinceFilter("all")
   }
 
+  const tabs: { key: AccountTabKey; label: string; count?: number; warning?: boolean }[] = [
+    { key: "all", label: "All Accounts", count: counts.all },
+    { key: "buyer", label: "Buyers", count: counts.buyer },
+    { key: "seller", label: "Sellers", count: counts.seller },
+    { key: "business_dealer", label: "Businesses & Dealers", count: counts.business_dealer },
+    { key: "restricted", label: "Restricted", count: counts.restricted, warning: counts.restricted > 0 },
+  ]
+
   return (
-    <div className="space-y-3.5">
+    <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden flex flex-col">
+      <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 min-w-max">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
+                  isActive
+                    ? "bg-card text-foreground border-primary shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                )}
+              >
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      tab.warning
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                        : isActive
+                        ? "bg-muted text-foreground border-border"
+                        : "bg-background/80 text-muted-foreground border-border/60"
+                    )}
+                  >
+                    {tab.count}
+                  </Badge>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <UserToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -132,7 +221,7 @@ export function UserTable({ initialData }: UserTableProps) {
         filteredCount={filteredData.length}
       />
 
-      <div className="hidden md:block rounded-xl bg-card overflow-hidden shadow-2xs">
+      <div className="hidden md:block flex-1">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -164,7 +253,7 @@ export function UserTable({ initialData }: UserTableProps) {
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => router.push(`/admin/users/${row.original.id}`)}
-                    className="transition-colors hover:bg-muted/30 border-b border-border/60 cursor-pointer"
+                    className="transition-colors hover:bg-muted/30 border-b border-border/60 cursor-pointer h-16"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-2.5 px-3.5 text-xs">
@@ -177,7 +266,7 @@ export function UserTable({ initialData }: UserTableProps) {
                 <DataTableEmpty
                   colSpan={userColumns.length}
                   title="No accounts found"
-                  description="Try adjusting your search terms or active account filters."
+                  description="Try adjusting your search terms, account tabs, or active filters."
                 />
               )}
             </TableBody>
@@ -185,11 +274,13 @@ export function UserTable({ initialData }: UserTableProps) {
         </div>
       </div>
 
-      <div className="block md:hidden">
+      <div className="block md:hidden p-3.5">
         <UserMobileCards data={filteredData} />
       </div>
 
-      <DataTablePagination table={table} />
-    </div>
+      <div className="border-t border-border/60 bg-muted/10 p-2 sm:p-3">
+        <DataTablePagination table={table} />
+      </div>
+    </Card>
   )
 }

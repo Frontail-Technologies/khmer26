@@ -3,23 +3,8 @@ export type AdminReportStatus =
   | "in_review"
   | "resolved"
   | "dismissed"
-  | "escalated"
-
-export type AdminReportPriority = "normal" | "high" | "urgent"
 
 export type AdminReportTargetType = "listing" | "user" | "seller" | "chat"
-
-export type AdminReportReason =
-  | "suspected_scam"
-  | "misleading"
-  | "duplicate"
-  | "spam"
-  | "wrong_category"
-  | "inappropriate"
-  | "prohibited_item"
-  | "harassment"
-  | "suspicious_account"
-  | "other"
 
 export interface AdminReportTargetParticipant {
   name: string
@@ -65,58 +50,29 @@ export interface AdminReportEvidence {
   uploadedAt?: string
 }
 
-export interface AdminReportAuditEvent {
-  id: string
-  action: string
-  actor: string
-  actorRole: string
-  timestamp: string
-  details: string
-}
-
-export interface AdminReportInternalNote {
-  id: string
-  author: string
-  authorAvatar?: string
-  authorRole: string
-  timestamp: string
-  content: string
-}
-
-export interface AdminReportResolution {
-  outcome: string
-  reason: string
-  resolvedBy: string
-  resolvedAt: string
-  notes?: string
-}
-
 export interface AdminReport {
   id: string
   targetType: AdminReportTargetType
   target: AdminReportTargetReference
-  reason: AdminReportReason
+  reason: string
   reasonLabel: string
   statement: string
-  priority: AdminReportPriority
   status: AdminReportStatus
   reporter: AdminReportReporter
-  assignedTo?: string
   createdAt: string
   createdDate: string
   timestamp: number
-  sourceSurface?: string
-  evidence: AdminReportEvidence[]
-  internalNotes: AdminReportInternalNote[]
-  history: AdminReportAuditEvent[]
-  relatedReportIds?: string[]
-  resolution?: AdminReportResolution
+  evidence?: AdminReportEvidence[]
+  resolvedAt?: string
+  resolvedBy?: string
+  resolutionNote?: string
 }
 
-export interface AdminReportStats {
-  open: number
-  inReview: number
-  urgent: number
-  resolved30d: number
-  avgResolutionHours: number
+export interface AdminReportReasonItem {
+  id: string
+  label: string
+  description?: string
+  appliesTo: AdminReportTargetType[]
+  isActive: boolean
+  createdAt?: string
 }

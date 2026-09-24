@@ -84,6 +84,16 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         icon: WarningCircle,
         badge: 8,
         badgeVariant: "destructive",
+        subItems: [
+          {
+            title: "All Reports",
+            href: "/admin/reports",
+          },
+          {
+            title: "Report Reasons",
+            href: "/admin/reports/reasons",
+          },
+        ],
       },
       {
         title: "Verifications",

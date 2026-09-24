@@ -54,14 +54,14 @@ export function ResolveReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
-          <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-1">
-            <CheckCircle size={22} weight="fill" />
+          <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-1">
+            <CheckCircle size={20} weight="fill" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">
-            Resolve Report #{report.id}
+            Resolve Report {report.id}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Mark this community complaint case as resolved. Specify the operational outcome and internal findings.
+            Mark this community report as resolved. Specify the operational outcome and resolution notes.
           </DialogDescription>
         </DialogHeader>
 
@@ -73,7 +73,7 @@ export function ResolveReportDialog({
               items={RESOLUTION_OUTCOMES}
               onValueChange={(val) => setOutcome(val ?? "")}
             >
-              <SelectTrigger size="sm" className="h-9.5 text-xs rounded-lg">
+              <SelectTrigger size="sm" className="h-9 text-xs rounded-lg">
                 <SelectValue>
                   {(val) => getSelectOptionLabel(RESOLUTION_OUTCOMES, val, "Select outcome")}
                 </SelectValue>
@@ -89,7 +89,7 @@ export function ResolveReportDialog({
           </Field>
 
           <Field>
-            <FieldLabel>Moderation Resolution Notes</FieldLabel>
+            <FieldLabel>Resolution Notes</FieldLabel>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -113,7 +113,7 @@ export function ResolveReportDialog({
             type="button"
             size="sm"
             onClick={handleSubmit}
-            className="flex-1 sm:flex-initial h-9 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg cursor-pointer"
+            className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
           >
             Confirm Resolve
           </Button>

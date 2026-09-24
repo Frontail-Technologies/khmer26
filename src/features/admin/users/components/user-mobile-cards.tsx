@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CheckCircle, WarningCircle, CaretRight } from "@phosphor-icons/react"
+import { CaretRight, WarningOctagon } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -19,11 +19,24 @@ const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   dealer: "Dealer",
 }
 
+const ACCOUNT_TYPE_VARIANTS: Record<string, "secondary" | "outline" | "default"> = {
+  buyer: "outline",
+  seller: "secondary",
+  business: "default",
+  dealer: "default",
+}
+
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   active: { label: "Active", tone: "success" },
   pending: { label: "Pending", tone: "warning" },
   suspended: { label: "Suspended", tone: "destructive" },
   restricted: { label: "Restricted", tone: "warning" },
+}
+
+const VERIFICATION_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
+  verified: { label: "Verified", tone: "success" },
+  pending: { label: "Pending", tone: "warning" },
+  unverified: { label: "Unverified", tone: "neutral" },
 }
 
 export function UserMobileCards({ data }: UserMobileCardsProps) {
@@ -38,14 +51,17 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
   return (
     <div className="space-y-2.5">
       {data.map((user) => {
-        const initials = user.name
+        const displayName = user.businessName || user.name
+        const initials = displayName
           .split(" ")
           .map((n) => n[0])
           .slice(0, 2)
           .join("")
           .toUpperCase()
 
-        const conf = STATUS_CONFIG[user.status] || { label: user.status, tone: "neutral" as StatusTone }
+        const primaryContact = user.phone || user.email
+        const statusConf = STATUS_CONFIG[user.status] || { label: user.status, tone: "neutral" as StatusTone }
+        const verifConf = VERIFICATION_CONFIG[user.verificationStatus] || { label: user.verificationStatus, tone: "neutral" as StatusTone }
 
         return (
           <Link
@@ -53,37 +69,55 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
             href={`/admin/users/${user.id}`}
             className="block group"
           >
-            <Card className="p-3 bg-card shadow-2xs rounded-xl hover:bg-muted/20 transition-colors border-0">
+            <Card className="p-3.5 bg-card shadow-2xs rounded-xl hover:bg-muted/20 transition-colors border-0">
               <div className="flex items-start justify-between gap-2.5 mb-2.5">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar className="size-9 rounded-md shrink-0 border border-border/60">
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
-                    <AvatarFallback className="text-xs font-semibold bg-muted text-muted-foreground rounded-md">
+                  <Avatar className="size-9 rounded-lg shrink-0 border border-border/60">
+                    <AvatarImage src={user.avatarUrl} alt={displayName} />
+                    <AvatarFallback className="text-xs font-semibold bg-muted text-muted-foreground rounded-lg">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-0.5 min-w-0">
-                    <span className="font-semibold text-xs text-foreground block truncate group-hover:text-primary transition-colors">
-                      {user.name}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-semibold text-xs text-foreground block truncate group-hover:text-primary transition-colors">
+                        {displayName}
+                      </span>
+                      {user.reportsCount > 0 && (
+                        <Badge
+                          variant="destructive"
+                          className="text-[10px] font-bold px-1.5 py-0 h-4 shrink-0 gap-0.5"
+                        >
+                          <WarningOctagon size={11} weight="fill" />
+                          <span>{user.reportsCount}</span>
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
                       <span className="font-mono text-[10px]">{user.id}</span>
-                      <span>•</span>
-                      <span>{user.phone}</span>
+                      {primaryContact && (
+                        <>
+                          <span>·</span>
+                          <span className="truncate">{primaryContact}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
+                  <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
                   <CaretRight size={14} className="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-border/40">
+              <div className="grid grid-cols-2 gap-2 text-[11px] pt-2.5 border-t border-border/40">
                 <div>
                   <span className="text-muted-foreground block text-[10px]">Account Type</span>
-                  <Badge variant="outline" className="text-[10px] font-medium mt-0.5 px-1.5 py-0 h-4">
+                  <Badge
+                    variant={ACCOUNT_TYPE_VARIANTS[user.accountType] || "outline"}
+                    className="text-[10px] font-medium mt-0.5 px-1.5 py-0 h-4.5"
+                  >
                     {ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
                   </Badge>
                 </div>
@@ -91,19 +125,7 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
                 <div>
                   <span className="text-muted-foreground block text-[10px]">Verification</span>
                   <div className="mt-0.5">
-                    {user.verificationStatus === "verified" ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle size={12} weight="fill" />
-                        Verified
-                      </span>
-                    ) : user.verificationStatus === "pending" ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-                        <WarningCircle size={12} weight="fill" />
-                        Pending
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-muted-foreground">Unverified</span>
-                    )}
+                    <StatusBadge label={verifConf.label} tone={verifConf.tone} size="sm" />
                   </div>
                 </div>
 
@@ -117,7 +139,7 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
                 <div>
                   <span className="text-muted-foreground block text-[10px]">Listings</span>
                   <span className="font-medium text-foreground block mt-0.5">
-                    {user.listingsCount} items
+                    {user.listingsCount} {user.listingsCount === 1 ? "item" : "items"}
                   </span>
                 </div>
               </div>
