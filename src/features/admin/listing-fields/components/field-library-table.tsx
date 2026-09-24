@@ -298,7 +298,7 @@ export function FieldLibraryTable({ fields, onUpdateFields }: FieldLibraryTableP
       </div>
 
       <div className="p-3.5 sm:p-4 pt-0">
-        <div className="rounded-xl border border-border/60 overflow-hidden">
+        <div className="min-w-0 rounded-xl border border-border/60 overflow-hidden">
           <Table>
             <TableHeader className="bg-muted/40">
               {table.getHeaderGroups().map((headerGroup) => (

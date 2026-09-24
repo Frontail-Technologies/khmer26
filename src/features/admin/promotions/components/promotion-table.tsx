@@ -110,7 +110,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+    <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4">
         <div className="relative flex-1 min-w-[240px]">
           <MagnifyingGlass
@@ -167,7 +167,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
         </div>
       </div>
 
-      <div className="border-t border-border/60 overflow-x-auto">
+      <div className="border-t border-border/60">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

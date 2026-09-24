@@ -122,7 +122,7 @@ export function AuditTable({ stats, initialEntries }: AuditTableProps) {
     <div className="space-y-4 sm:space-y-5">
       <AuditSummaryMetrics stats={stats} />
 
-      <div className="rounded-xl bg-card overflow-hidden shadow-2xs">
+      <div className="min-w-0 rounded-xl bg-card overflow-hidden shadow-2xs">
         <AuditToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -136,7 +136,7 @@ export function AuditTable({ stats, initialEntries }: AuditTableProps) {
           hasActiveFilters={hasActiveFilters}
         />
 
-        <div className="border-t border-border/60 overflow-x-auto">
+        <div className="border-t border-border/60">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (

@@ -80,9 +80,8 @@ export function NotificationHistoryTable({ initialCampaigns }: NotificationHisto
         />
       </div>
 
-      <div className="rounded-xl bg-card overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <Table>
+      <div className="min-w-0 rounded-xl bg-card overflow-hidden shadow-2xs">
+        <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -127,8 +126,7 @@ export function NotificationHistoryTable({ initialCampaigns }: NotificationHisto
                 />
               )}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       </div>
 
       <DataTablePagination table={table} />

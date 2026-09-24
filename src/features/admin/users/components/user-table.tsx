@@ -221,9 +221,8 @@ export function UserTable({ initialData }: UserTableProps) {
         filteredCount={filteredData.length}
       />
 
-      <div className="hidden md:block flex-1">
-        <div className="overflow-x-auto">
-          <Table>
+      <div className="hidden md:block flex-1 min-w-0">
+        <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -270,8 +269,7 @@ export function UserTable({ initialData }: UserTableProps) {
                 />
               )}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       </div>
 
       <div className="block md:hidden p-3.5">

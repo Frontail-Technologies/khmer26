@@ -99,9 +99,8 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
         filteredCount={filteredData.length}
       />
 
-      <div className="hidden md:block rounded-xl bg-card overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <Table>
+      <div className="hidden md:block min-w-0 rounded-xl bg-card overflow-hidden shadow-2xs">
+        <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -148,8 +147,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
                 />
               )}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       </div>
 
       <div className="block md:hidden">
