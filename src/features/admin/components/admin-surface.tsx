@@ -10,7 +10,7 @@ export function AdminSurface({ children, className }: AdminSurfaceProps) {
   return (
     <div
       className={cn(
-        "rounded-xl bg-card shadow-2xs overflow-hidden",
+        "min-w-0 rounded-xl bg-card shadow-2xs overflow-hidden",
         className
       )}
     >

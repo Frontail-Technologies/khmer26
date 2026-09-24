@@ -11,9 +11,9 @@ export function AdminShell({ children }: AdminShellProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <AdminSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <AdminTopbar />
-        <main className="flex-1 p-3.5 sm:p-4.5 lg:px-6 lg:py-4.5 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] max-w-[1480px] w-full mx-auto">
+        <main className="min-w-0 flex-1 p-3.5 sm:p-4.5 lg:px-6 lg:py-4.5 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] max-w-[1480px] w-full mx-auto">
           {children}
         </main>
       </SidebarInset>
