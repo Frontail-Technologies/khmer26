@@ -4,6 +4,14 @@ import { useState, useMemo } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Sliders, BookBookmark } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  getSelectOptionLabel,
+} from "@/components/ui/select"
 import { AssignedFieldsList } from "./assigned-fields-list"
 import { FieldLibraryTable } from "./field-library-table"
 import {
@@ -66,6 +74,20 @@ export function ListingFieldsWorkspace() {
   const selectedSub = useMemo(() => {
     return subcategories.find((s) => s.slug === selectedSubSlug) ?? subcategories[0]
   }, [subcategories, selectedSubSlug])
+
+  const rootSelectOptions = useMemo(() => {
+    return DEMO_ADMIN_CATEGORIES.map((cat) => ({
+      value: cat.id,
+      label: cat.name,
+    }))
+  }, [])
+
+  const subSelectOptions = useMemo(() => {
+    return subcategories.map((sub) => ({
+      value: sub.slug,
+      label: sub.name,
+    }))
+  }, [subcategories])
 
   const handleRootChange = (newRootId: string) => {
     setManualRootId(newRootId)
@@ -133,34 +155,48 @@ export function ListingFieldsWorkspace() {
                 <span className="text-xs font-bold text-muted-foreground shrink-0 hidden sm:inline">
                   Root:
                 </span>
-                <select
+                <Select
                   value={selectedRootId}
-                  onChange={(e) => handleRootChange(e.target.value)}
-                  className="h-8.5 px-2.5 rounded-lg bg-background border border-input text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer min-w-44"
+                  items={rootSelectOptions}
+                  onValueChange={(val) => val && handleRootChange(val)}
                 >
-                  {DEMO_ADMIN_CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger size="sm" className="h-8.5 px-2.5 rounded-lg bg-background text-xs font-semibold min-w-44">
+                    <SelectValue>
+                      {(val) => getSelectOptionLabel(rootSelectOptions, val, "Select Root Category")}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rootSelectOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-muted-foreground shrink-0 hidden sm:inline">
                   Subcategory:
                 </span>
-                <select
+                <Select
                   value={selectedSubSlug}
-                  onChange={(e) => handleSubChange(e.target.value)}
-                  className="h-8.5 px-2.5 rounded-lg bg-background border border-input text-xs font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer min-w-44"
+                  items={subSelectOptions}
+                  onValueChange={(val) => val && handleSubChange(val)}
                 >
-                  {subcategories.map((sub) => (
-                    <option key={sub.id} value={sub.slug}>
-                      {sub.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger size="sm" className="h-8.5 px-2.5 rounded-lg bg-background text-xs font-bold min-w-44">
+                    <SelectValue>
+                      {(val) => getSelectOptionLabel(subSelectOptions, val, "Select Subcategory")}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subSelectOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}

@@ -8,6 +8,7 @@ import {
   Plus,
   Funnel,
   Sliders,
+  DotsSixVertical,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +33,51 @@ export function AssignedFieldsList({
   onUpdateAssignments,
 }: AssignedFieldsListProps) {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", index.toString())
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetIndex: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    const newItems = [...assignments]
+    const [removed] = newItems.splice(draggedIndex, 1)
+    newItems.splice(targetIndex, 0, removed)
+    newItems.forEach((item, idx) => {
+      item.assignment.sortOrder = idx + 1
+    })
+
+    onUpdateAssignments(newItems)
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
 
   const handleMoveUp = (index: number) => {
     if (index === 0) return
@@ -123,12 +169,38 @@ export function AssignedFieldsList({
         ) : (
           <div className="space-y-2">
             {assignments.map(({ assignment, field }, index) => {
+              const isBeingDragged = draggedIndex === index
+              const isDropTarget = dragOverIndex === index && draggedIndex !== index
+
               return (
                 <div
                   key={assignment.id || `${field.id}-${index}`}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-border/60 bg-card hover:bg-muted/10 transition-colors gap-2.5"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border transition-all gap-2.5 ${
+                    isBeingDragged
+                      ? "opacity-40 scale-[0.99] border-dashed border-primary bg-primary/5 shadow-inner"
+                      : isDropTarget
+                      ? "border-primary ring-2 ring-primary/20 bg-primary/5 scale-[1.01]"
+                      : "border-border/60 bg-card hover:bg-muted/10"
+                  }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div
+                      className="cursor-grab active:cursor-grabbing p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 shrink-0 transition-colors"
+                      title="Drag to reorder field position"
+                    >
+                      <DotsSixVertical size={16} weight="bold" />
+                    </div>
+
+                    <div className="size-6 rounded-md bg-muted/70 flex items-center justify-center font-mono text-[10px] font-bold text-muted-foreground shrink-0">
+                      #{index + 1}
+                    </div>
+
                     <div className="flex flex-col items-center gap-0.5 shrink-0">
                       <button
                         type="button"
