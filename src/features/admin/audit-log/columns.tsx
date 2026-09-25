@@ -5,10 +5,9 @@ import { Eye } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
-import type { AdminAuditEntry } from "./types"
+import type { AdminAuditEntry, AuditModule } from "./types"
 
-const MODULE_LABELS: Record<string, string> = {
+const MODULE_LABELS: Record<AuditModule, string> = {
   listings: "Listings",
   verifications: "Verifications",
   reports: "Reports",
@@ -16,29 +15,24 @@ const MODULE_LABELS: Record<string, string> = {
   payments: "Payments",
   content: "Content",
   settings: "Settings",
-  roles: "Roles & Access",
-  auth: "Security Auth",
-}
-
-const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
-  success: { label: "Success", tone: "success" },
-  warning: { label: "Warning", tone: "warning" },
-  failure: { label: "Failed", tone: "destructive" },
+  roles: "Roles",
 }
 
 interface AuditColumnOptions {
   onViewDetails: (entry: AdminAuditEntry) => void
 }
 
-export function createAuditColumns({ onViewDetails }: AuditColumnOptions): ColumnDef<AdminAuditEntry>[] {
+export function createAuditColumns({
+  onViewDetails,
+}: AuditColumnOptions): ColumnDef<AdminAuditEntry>[] {
   return [
     {
       accessorKey: "timestamp",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Timestamp" />
+        <DataTableColumnHeader column={column} title="Time" />
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
           {row.original.timestamp}
         </span>
       ),
@@ -52,9 +46,11 @@ export function createAuditColumns({ onViewDetails }: AuditColumnOptions): Colum
       cell: ({ row }) => {
         const entry = row.original
         return (
-          <div className="space-y-0.5">
-            <span className="font-semibold text-xs text-foreground block">{entry.actorName}</span>
-            <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+          <div className="space-y-0.5 min-w-[130px]">
+            <span className="font-semibold text-xs text-foreground block">
+              {entry.actorName}
+            </span>
+            <span className="text-[10px] text-muted-foreground block">
               {entry.actorRole}
             </span>
           </div>
@@ -65,10 +61,10 @@ export function createAuditColumns({ onViewDetails }: AuditColumnOptions): Colum
     {
       accessorKey: "action",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Action Taken" />
+        <DataTableColumnHeader column={column} title="Action" />
       ),
       cell: ({ row }) => (
-        <span className="font-bold text-xs text-foreground block">
+        <span className="font-semibold text-xs text-foreground block min-w-[200px] max-w-[320px]">
           {row.original.action}
         </span>
       ),
@@ -82,7 +78,7 @@ export function createAuditColumns({ onViewDetails }: AuditColumnOptions): Colum
       cell: ({ row }) => {
         const mod = row.original.module
         return (
-          <Badge variant="outline" className="text-[10px] font-medium">
+          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5">
             {MODULE_LABELS[mod] || mod}
           </Badge>
         )
@@ -97,42 +93,30 @@ export function createAuditColumns({ onViewDetails }: AuditColumnOptions): Colum
       cell: ({ row }) => {
         const entry = row.original
         return (
-          <div className="space-y-0.5 min-w-[160px] max-w-[220px]">
+          <div className="space-y-0.5 min-w-[160px] max-w-[240px]">
             <span className="font-medium text-xs text-foreground block truncate">
               {entry.targetName}
             </span>
-            <span className="font-mono text-[10px] text-muted-foreground block">
-              {entry.targetType}: {entry.targetId}
-            </span>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <span>{entry.targetType}</span>
+              <span>•</span>
+              <span className="font-mono">{entry.targetId}</span>
+            </div>
           </div>
         )
       },
       enableSorting: false,
     },
     {
-      accessorKey: "status",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Result" />
-      ),
-      cell: ({ row }) => {
-        const conf = STATUS_CONFIG[row.original.status] || { label: row.original.status, tone: "neutral" as StatusTone }
-        return <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
-      },
-      sortingFn: "alphanumeric",
-    },
-    {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="icon-xs"
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewDetails(row.original)
-            }}
+            onClick={() => onViewDetails(row.original)}
             className="size-7 text-muted-foreground hover:text-foreground"
-            aria-label="Inspect metadata"
+            aria-label="Inspect audit log details"
           >
             <Eye size={14} />
           </Button>

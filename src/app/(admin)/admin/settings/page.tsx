@@ -3,10 +3,10 @@ import { SettingsWorkspace } from "@/features/admin/settings/components/settings
 import { DEMO_PLATFORM_SETTINGS } from "@/features/admin/settings/data/demo-settings-data"
 
 export const metadata: Metadata = {
-  title: "Platform Settings",
-  description: "Platform configuration, security policies, and localization preferences.",
+  title: "Settings",
+  description: "Manage Khmer26 marketplace settings.",
 }
 
 export default function AdminSettingsPage() {
-  return <SettingsWorkspace settings={DEMO_PLATFORM_SETTINGS} />
+  return <SettingsWorkspace initialSettings={DEMO_PLATFORM_SETTINGS} />
 }

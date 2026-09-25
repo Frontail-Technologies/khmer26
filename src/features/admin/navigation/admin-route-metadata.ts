@@ -64,21 +64,17 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
     title: "Reported Chats",
     subtitle: "Investigate flagged buyer-seller conversations and scam alerts.",
   },
-  "/admin/locations": {
-    title: "Locations",
-    subtitle: "Manage Cambodia administrative divisions, provinces, and districts.",
-  },
   "/admin/roles": {
     title: "Admin Roles",
-    subtitle: "Configure staff permissions, RBAC policies, and administrative roles.",
+    subtitle: "Manage Admin access and roles.",
   },
   "/admin/settings": {
     title: "Settings",
-    subtitle: "Platform configuration, security policies, and localization preferences.",
+    subtitle: "Manage Khmer26 marketplace settings.",
   },
   "/admin/audit-log": {
     title: "Audit Log",
-    subtitle: "Comprehensive chronological ledger of administrative operations.",
+    subtitle: "Review Admin activity.",
   },
   "/admin/content": {
     title: "Content Management",

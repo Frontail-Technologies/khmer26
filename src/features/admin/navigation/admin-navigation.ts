@@ -16,7 +16,6 @@ import {
   Bell,
   Chats,
   ChatCircleDots,
-  MapPin,
   ShieldCheck,
   Gear,
   ClockCounterClockwise,
@@ -195,11 +194,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     id: "system",
     label: "System",
     items: [
-      {
-        title: "Locations",
-        href: "/admin/locations",
-        icon: MapPin,
-      },
       {
         title: "Admin Roles",
         href: "/admin/roles",

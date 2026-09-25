@@ -1,6 +1,6 @@
 export type AdminStaffRole = "super_admin" | "admin" | "moderator" | "support"
 
-export type AdminStaffStatus = "active" | "inactive" | "suspended"
+export type AdminStaffStatus = "active" | "inactive"
 
 export interface AdminStaffMember {
   id: string
@@ -9,36 +9,27 @@ export interface AdminStaffMember {
   avatarUrl?: string
   role: AdminStaffRole
   status: AdminStaffStatus
-  twoFactorEnabled: boolean
   lastActiveAt: string
-  assignedModules: string[]
   joinedAt: string
 }
 
-export interface PermissionItem {
-  key: string
-  name: string
-  description: string
-}
-
-export interface PermissionGroup {
+export interface PermissionModuleGroup {
   id: string
   name: string
   description: string
-  permissions: PermissionItem[]
+  permissions: {
+    id: string
+    name: string
+    description: string
+  }[]
 }
 
 export interface RoleDefinition {
   id: AdminStaffRole
   name: string
   description: string
-  assignedStaffCount: number
-  grantedPermissions: string[]
-}
-
-export interface RoleStats {
-  totalStaff: number
-  superAdmins: number
-  moderators: number
-  supportAgents: number
+  staffCount: number
+  accessSummary: string
+  isSystem?: boolean
+  permissions: string[]
 }
