@@ -3,23 +3,17 @@
 import { useState } from "react"
 import Link from "next/link"
 import {
-  User,
-  Storefront,
   Star,
   WarningOctagon,
-  ClockCounterClockwise,
   ArrowSquareOut,
-  Lock,
-  ShieldWarning,
-  CheckCircle,
   ListBullets,
+  ClockCounterClockwise,
 } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
-import { UserActionDialogs } from "./user-action-dialogs"
 import type { AdminUserDetail } from "../types"
 
 interface UserDetailsPanelProps {
@@ -34,411 +28,298 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   resolved: { label: "Resolved", tone: "neutral" },
 }
 
+function InfoRow({ label, value }: { label: string; value?: string | null }) {
+  if (!value) return null
+  return (
+    <div>
+      <span className="text-[11px] text-muted-foreground block mb-0.5">{label}</span>
+      <span className="text-xs font-medium text-foreground">{value}</span>
+    </div>
+  )
+}
+
 export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
-  const [activeDialog, setActiveDialog] = useState<"restrict" | "suspend" | "restore" | null>(null)
+  const [adminNote, setAdminNote] = useState("")
+  const [isActive, setIsActive] = useState(user.status === "active")
+  const [allowPosting, setAllowPosting] = useState(user.status === "active")
+  const [isVerified, setIsVerified] = useState(user.verificationStatus === "verified")
 
   const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
-  const accountStatusConf = STATUS_CONFIG[user.status] || { label: user.status, tone: "neutral" as StatusTone }
-
-  const availableTabs: { key: string; label: string; count?: number }[] = [
-    { key: "overview", label: "Overview" },
-  ]
-
-  if (isSeller) {
-    availableTabs.push({ key: "listings", label: "Listings", count: user.activeListingsCount })
-    if (user.reviewsCount !== undefined && user.reviewsCount > 0) {
-      availableTabs.push({ key: "reviews", label: "Reviews", count: user.reviewsCount })
-    }
-  }
-
-  if (user.relatedReports.length > 0) {
-    availableTabs.push({ key: "reports", label: "Reports", count: user.relatedReports.length })
-  }
-
-  availableTabs.push({ key: "activity", label: "Activity" })
 
   return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        <div className="lg:col-span-8 space-y-4">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="flex items-center justify-start h-9 bg-muted/60 p-1 w-full overflow-x-auto no-scrollbar">
-              {availableTabs.map((tab) => (
-                <TabsTrigger key={tab.key} value={tab.key} className="text-xs px-3 cursor-pointer shrink-0">
-                  {tab.label}
-                  {tab.count !== undefined && (
-                    <span className="ml-1.5 text-[10px] opacity-70">({tab.count})</span>
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-4 pt-3">
-              <Card className="bg-card border-0 shadow-2xs rounded-xl">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <User size={14} />
-                    Account Profile Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3.5 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <span className="text-muted-foreground block text-[11px]">Full Name</span>
-                      <span className="font-semibold text-foreground">{user.name}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block text-[11px]">Email Address</span>
-                      <span className="font-semibold text-foreground">{user.email}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block text-[11px]">Phone Number</span>
-                      <span className="font-semibold text-foreground">{user.phone}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block text-[11px]">Location</span>
-                      <span className="font-semibold text-foreground">{user.location}</span>
-                    </div>
-                    {user.nationalIdMasked && (
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">National ID (Verified)</span>
-                        <span className="font-mono font-semibold text-foreground">{user.nationalIdMasked}</span>
-                      </div>
-                    )}
-                    {user.registeredBusinessNumber && (
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">Business Registration No.</span>
-                        <span className="font-mono font-semibold text-foreground">{user.registeredBusinessNumber}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {user.bio && (
-                    <div className="pt-2 border-t border-border/40">
-                      <span className="text-muted-foreground block text-[11px] mb-1">About / Bio</span>
-                      <p className="text-foreground leading-relaxed bg-muted/30 p-2.5 rounded-md border border-border/40">
-                        {user.bio}
-                      </p>
-                    </div>
-                  )}
-
-                  {user.address && (
-                    <div className="pt-2 border-t border-border/40">
-                      <span className="text-muted-foreground block text-[11px] mb-1">Registered Address</span>
-                      <p className="text-foreground leading-relaxed">{user.address}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {user.businessName && (
-                <Card className="bg-card border-0 shadow-2xs rounded-xl">
-                  <CardHeader className="py-3 px-4 border-b border-border/60">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <Storefront size={14} />
-                      Business & Merchant Profile
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 space-y-3 text-xs">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">Store / Business Name</span>
-                        <span className="font-semibold text-foreground">{user.businessName}</span>
-                      </div>
-                      {user.totalSalesVolume && (
-                        <div>
-                          <span className="text-muted-foreground block text-[11px]">Estimated Marketplace Volume</span>
-                          <span className="font-semibold text-foreground">{user.totalSalesVolume}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <div className="lg:col-span-8 space-y-4">
+        <Card className="bg-card border-0 shadow-2xs rounded-xl">
+          <CardHeader className="py-3 px-4 border-b border-border/60">
+            <CardTitle className="text-xs font-semibold text-foreground">Basic Info</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InfoRow label="Full Name" value={user.name} />
+              {user.businessName && <InfoRow label="Business Name" value={user.businessName} />}
+              <InfoRow label="Email" value={user.email} />
+              <InfoRow label="Phone" value={user.phone} />
+              <InfoRow label="Location" value={user.location} />
+              <InfoRow label="Province" value={user.province} />
+              {user.nationalIdMasked && (
+                <InfoRow label="National ID" value={user.nationalIdMasked} />
               )}
-            </TabsContent>
-
-            {isSeller && (
-              <TabsContent value="listings" className="pt-3">
-                <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-                  <CardHeader className="py-3 px-4 border-b border-border/60 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <ListBullets size={14} />
-                      Recent Seller Listings
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      render={
-                        <Link href={`/admin/listings?search=${encodeURIComponent(user.name)}`} className="cursor-pointer">
-                          <ArrowSquareOut size={12} className="mr-1" />
-                          View All in Listings
-                        </Link>
-                      }
-                    />
-                  </CardHeader>
-                  <CardContent className="p-0 divide-y divide-border/60">
-                    {user.recentListings.length > 0 ? (
-                      user.recentListings.map((listing) => {
-                        const listConf = STATUS_CONFIG[listing.status] || { label: listing.status, tone: "neutral" as StatusTone }
-                        return (
-                          <div key={listing.id} className="p-3.5 flex items-center justify-between gap-3 text-xs">
-                            <div className="space-y-1 min-w-0">
-                              <span className="font-semibold text-foreground block truncate">
-                                {listing.title}
-                              </span>
-                              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                                <span>{listing.category}</span>
-                                <span>·</span>
-                                <span>${listing.price.toLocaleString()}</span>
-                                <span>·</span>
-                                <span>{listing.createdAt}</span>
-                              </div>
-                            </div>
-                            <StatusBadge label={listConf.label} tone={listConf.tone} size="sm" />
-                          </div>
-                        )
-                      })
-                    ) : (
-                      <div className="p-6 text-center text-xs text-muted-foreground">
-                        No active listings found for this seller.
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+              {user.registeredBusinessNumber && (
+                <InfoRow label="Business Reg. No." value={user.registeredBusinessNumber} />
+              )}
+            </div>
+            {user.bio && (
+              <div className="mt-4 pt-4 border-t border-border/40">
+                <span className="text-[11px] text-muted-foreground block mb-1">Bio</span>
+                <p className="text-xs text-foreground leading-relaxed">{user.bio}</p>
+              </div>
             )}
+          </CardContent>
+        </Card>
 
-            {isSeller && user.recentReviews && user.recentReviews.length > 0 && (
-              <TabsContent value="reviews" className="pt-3">
-                <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-                  <CardHeader className="py-3 px-4 border-b border-border/60">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <Star size={14} />
-                      Customer Reviews & Feedback
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 divide-y divide-border/60">
-                    {user.recentReviews.map((rev) => (
-                      <div key={rev.id} className="p-3.5 space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{rev.authorName}</span>
-                            <div className="flex items-center text-amber-500 font-semibold text-[11px]">
-                              <Star size={12} weight="fill" className="mr-0.5" />
-                              {rev.rating}.0
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground">{rev.createdAt}</span>
-                        </div>
-                        <p className="text-muted-foreground leading-relaxed">{rev.comment}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-
-            {user.relatedReports.length > 0 && (
-              <TabsContent value="reports" className="pt-3">
-                <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-                  <CardHeader className="py-3 px-4 border-b border-border/60 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <WarningOctagon size={14} />
-                      Moderation Reports Filed
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      render={
-                        <Link href={`/admin/reports?search=${encodeURIComponent(user.name)}`} className="cursor-pointer">
-                          <ArrowSquareOut size={12} className="mr-1" />
-                          View in Reports
-                        </Link>
-                      }
-                    />
-                  </CardHeader>
-                  <CardContent className="p-0 divide-y divide-border/60">
-                    {user.relatedReports.map((rep) => {
-                      const repConf = STATUS_CONFIG[rep.status] || { label: rep.status, tone: "neutral" as StatusTone }
-                      return (
-                        <div key={rep.id} className="p-3.5 flex items-center justify-between gap-3 text-xs">
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-semibold text-foreground">{rep.id}</span>
-                              <Badge variant="outline" className="text-[10px] font-medium">
-                                By {rep.reporterName}
-                              </Badge>
-                            </div>
-                            <p className="text-muted-foreground truncate">{rep.reason}</p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <StatusBadge label={repConf.label} tone={repConf.tone} size="sm" />
-                            <Button
-                              variant="ghost"
-                              size="xs"
-                              render={
-                                <Link href={`/admin/reports?search=${encodeURIComponent(user.name)}`} className="cursor-pointer">
-                                  <ArrowSquareOut size={13} />
-                                </Link>
-                              }
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-
-            <TabsContent value="activity" className="pt-3">
-              <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-                <CardHeader className="py-3 px-4 border-b border-border/60">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <ClockCounterClockwise size={14} />
-                    Account Administrative Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    {user.accountHistory.map((item) => (
-                      <div key={item.id} className="flex gap-3 text-xs">
-                        <div className="size-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{item.action}</span>
-                            <span className="text-[10px] text-muted-foreground">{item.timestamp}</span>
-                          </div>
-                          <span className="text-[11px] text-muted-foreground block">
-                            Logged by: <span className="text-foreground">{item.actor}</span>
-                          </span>
-                          {item.note && (
-                            <p className="text-[11px] text-muted-foreground/90 bg-muted/40 p-2 rounded mt-1 border border-border/40">
-                              {item.note}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <div className="lg:col-span-4 space-y-4">
-          <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-            <CardHeader className="py-3 px-4 border-b border-border/60">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Account Summary
-              </CardTitle>
+        {isSeller && (
+          <Card className="bg-card border-0 shadow-2xs rounded-xl">
+            <CardHeader className="py-3 px-4 border-b border-border/60 flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-semibold text-foreground">Marketplace</CardTitle>
+              <Button
+                variant="ghost"
+                size="xs"
+                render={
+                  <Link
+                    href={`/admin/listings?search=${encodeURIComponent(user.name)}`}
+                    className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <ArrowSquareOut size={12} />
+                    View Listings
+                  </Link>
+                }
+              />
             </CardHeader>
-            <CardContent className="p-4 space-y-3 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Account Status</span>
-                <StatusBadge label={accountStatusConf.label} tone={accountStatusConf.tone} size="sm" />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Joined Date</span>
-                <span className="font-semibold text-foreground">{user.joinedAt}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Last Active</span>
-                <span className="font-semibold text-foreground">{user.lastActiveAt}</span>
-              </div>
-              {isSeller && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Active Listings</span>
-                    <span className="font-semibold text-foreground">{user.activeListingsCount}</span>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <span className="text-[11px] text-muted-foreground block mb-0.5">Active Listings</span>
+                  <span className="text-sm font-bold text-foreground">{user.activeListingsCount}</span>
+                </div>
+                <div>
+                  <span className="text-[11px] text-muted-foreground block mb-0.5">Sold</span>
+                  <span className="text-sm font-bold text-foreground">{user.soldListingsCount}</span>
+                </div>
+                {user.reviewsCount !== undefined && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Reviews</span>
+                    <span className="text-sm font-bold text-foreground">{user.reviewsCount}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Sold Listings</span>
-                    <span className="font-semibold text-foreground">{user.soldListingsCount}</span>
+                )}
+                {user.rating && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Rating</span>
+                    <span className="text-sm font-bold text-amber-500 flex items-center gap-1">
+                      <Star size={13} weight="fill" />
+                      {user.rating}
+                    </span>
                   </div>
-                  {user.rating && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Seller Rating</span>
-                      <span className="font-semibold text-amber-500 flex items-center gap-1">
-                        <Star size={12} weight="fill" />
-                        {user.rating} / 5.0
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-              {user.assignedModerator && (
-                <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                  <span className="text-muted-foreground">Assigned Moderator</span>
-                  <span className="font-semibold text-foreground">{user.assignedModerator}</span>
+                )}
+              </div>
+
+              {user.recentListings.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
+                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+                    <ListBullets size={11} />
+                    Recent Listings
+                  </span>
+                  {user.recentListings.slice(0, 3).map((listing) => {
+                    const conf = STATUS_CONFIG[listing.status] || { label: listing.status, tone: "neutral" as StatusTone }
+                    return (
+                      <div key={listing.id} className="flex items-center justify-between gap-3 py-1.5 border-b border-border/30 last:border-0">
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium text-foreground block truncate">{listing.title}</span>
+                          <span className="text-[11px] text-muted-foreground">{listing.category} · ${listing.price.toLocaleString()}</span>
+                        </div>
+                        <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
           </Card>
+        )}
 
-          <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden">
-            <CardHeader className="py-3 px-4 border-b border-border/60">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Account Actions
+        {user.relatedReports.length > 0 && (
+          <Card className="bg-card border-0 shadow-2xs rounded-xl">
+            <CardHeader className="py-3 px-4 border-b border-border/60 flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <WarningOctagon size={13} className="text-amber-500" />
+                Reports ({user.relatedReports.length})
               </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-2">
               <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs justify-start cursor-pointer text-amber-600 dark:text-amber-400 hover:text-amber-700"
-                onClick={() => setActiveDialog("restrict")}
-              >
-                <Lock size={14} className="mr-2" />
-                Restrict Account
-              </Button>
-
-              {user.status === "suspended" ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs justify-start text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 cursor-pointer"
-                  onClick={() => setActiveDialog("restore")}
-                >
-                  <CheckCircle size={14} className="mr-2 text-emerald-500" />
-                  Restore Account
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs justify-start text-destructive hover:text-destructive cursor-pointer"
-                  onClick={() => setActiveDialog("suspend")}
-                >
-                  <ShieldWarning size={14} className="mr-2 text-destructive" />
-                  Suspend Account
-                </Button>
-              )}
-
-              {user.reportsCount > 0 && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs justify-start cursor-pointer"
-                  render={
-                    <Link href={`/admin/reports?search=${encodeURIComponent(user.name)}`}>
-                      <WarningOctagon size={14} className="mr-2" />
-                      View Related Reports ({user.reportsCount})
-                    </Link>
-                  }
-                />
-              )}
+                variant="ghost"
+                size="xs"
+                render={
+                  <Link
+                    href={`/admin/reports?search=${encodeURIComponent(user.name)}`}
+                    className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <ArrowSquareOut size={12} />
+                    Open in Reports
+                  </Link>
+                }
+              />
+            </CardHeader>
+            <CardContent className="p-0 divide-y divide-border/50">
+              {user.relatedReports.map((rep) => {
+                const conf = STATUS_CONFIG[rep.status] || { label: rep.status, tone: "neutral" as StatusTone }
+                return (
+                  <div key={rep.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="min-w-0">
+                      <span className="text-xs font-medium text-foreground block">{rep.reason}</span>
+                      <span className="text-[11px] text-muted-foreground">By {rep.reporterName} · {rep.createdAt}</span>
+                    </div>
+                    <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
+                  </div>
+                )
+              })}
             </CardContent>
           </Card>
-        </div>
+        )}
+
+        <Card className="bg-card border-0 shadow-2xs rounded-xl">
+          <CardHeader className="py-3 px-4 border-b border-border/60">
+            <CardTitle className="text-xs font-semibold text-foreground">Internal Notes</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3">
+            <Textarea
+              placeholder="Add an internal admin note for this account..."
+              value={adminNote}
+              onChange={(e) => setAdminNote(e.target.value)}
+              rows={3}
+              className="text-xs resize-none"
+            />
+            <Button size="sm" className="h-8 text-xs font-semibold cursor-pointer" disabled={!adminNote.trim()}>
+              Save Note
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      <UserActionDialogs
-        user={user}
-        actionType={activeDialog}
-        onClose={() => setActiveDialog(null)}
-      />
-    </>
+      <div className="lg:col-span-4 space-y-4">
+        <Card className="bg-card border-0 shadow-2xs rounded-xl">
+          <CardHeader className="py-3 px-4 border-b border-border/60">
+            <CardTitle className="text-xs font-semibold text-foreground">Admin Controls</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-medium text-foreground block">Active Account</span>
+                <span className="text-[11px] text-muted-foreground">Allow login and access</span>
+              </div>
+              <Switch
+                checked={isActive}
+                onCheckedChange={setIsActive}
+                aria-label="Toggle active account"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-medium text-foreground block">Allow Posting</span>
+                <span className="text-[11px] text-muted-foreground">Can submit listings</span>
+              </div>
+              <Switch
+                checked={allowPosting}
+                onCheckedChange={setAllowPosting}
+                aria-label="Toggle allow posting"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-medium text-foreground block">Verified</span>
+                <span className="text-[11px] text-muted-foreground">Identity confirmed</span>
+              </div>
+              <Switch
+                checked={isVerified}
+                onCheckedChange={setIsVerified}
+                aria-label="Toggle verified status"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-0 shadow-2xs rounded-xl">
+          <CardHeader className="py-3 px-4 border-b border-border/60">
+            <CardTitle className="text-xs font-semibold text-foreground">Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Status</span>
+              <StatusBadge
+                label={STATUS_CONFIG[user.status]?.label ?? user.status}
+                tone={STATUS_CONFIG[user.status]?.tone ?? "neutral"}
+                size="sm"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Joined</span>
+              <span className="font-medium text-foreground">{user.joinedAt}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Last Active</span>
+              <span className="font-medium text-foreground">{user.lastActiveAt}</span>
+            </div>
+            {isSeller && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Listings</span>
+                  <span className="font-medium text-foreground">{user.activeListingsCount} active</span>
+                </div>
+                {user.totalSalesVolume && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Volume</span>
+                    <span className="font-medium text-foreground">{user.totalSalesVolume}</span>
+                  </div>
+                )}
+              </>
+            )}
+            {user.reportsCount > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Reports</span>
+                <span className="font-medium text-amber-600 dark:text-amber-400">{user.reportsCount}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {user.accountHistory.length > 0 && (
+          <Card className="bg-card border-0 shadow-2xs rounded-xl">
+            <CardHeader className="py-3 px-4 border-b border-border/60">
+              <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <ClockCounterClockwise size={13} />
+                Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3.5">
+              {user.accountHistory.map((item) => (
+                <div key={item.id} className="flex gap-2.5">
+                  <div className="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                  <div className="space-y-0.5 min-w-0">
+                    <span className="text-xs font-medium text-foreground block">{item.action}</span>
+                    <span className="text-[11px] text-muted-foreground block">
+                      {item.actor} · {item.timestamp}
+                    </span>
+                    {item.note && (
+                      <p className="text-[11px] text-muted-foreground/80 bg-muted/40 px-2 py-1.5 rounded mt-1 border border-border/30">
+                        {item.note}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
   )
 }

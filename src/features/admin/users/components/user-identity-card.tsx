@@ -1,10 +1,26 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
-import { ArrowLeft } from "@phosphor-icons/react"
+import {
+  ArrowLeft,
+  DotsThreeVertical,
+  PencilSimple,
+  Lock,
+  ShieldWarning,
+  CheckCircle,
+  ListBullets,
+  WarningOctagon,
+} from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { AdminUserDetail } from "../types"
 
@@ -14,16 +30,9 @@ interface UserIdentityCardProps {
 
 const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   buyer: "Buyer",
-  seller: "Individual Seller",
+  seller: "Seller",
   business: "Business",
   dealer: "Dealer",
-}
-
-const ACCOUNT_TYPE_VARIANTS: Record<string, "secondary" | "outline" | "default"> = {
-  buyer: "outline",
-  seller: "secondary",
-  business: "default",
-  dealer: "default",
 }
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
@@ -48,58 +57,131 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
     .join("")
     .toUpperCase()
 
-  const conf = STATUS_CONFIG[user.status] || { label: user.status, tone: "neutral" as StatusTone }
+  const statusConf = STATUS_CONFIG[user.status] || { label: user.status, tone: "neutral" as StatusTone }
   const verifConf = VERIFICATION_CONFIG[user.verificationStatus] || { label: user.verificationStatus, tone: "neutral" as StatusTone }
+  const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
 
   return (
-    <div className="space-y-3">
-      <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          render={
-            <Link href="/admin/users" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer">
-              <ArrowLeft size={14} />
-              <span>Users & Sellers</span>
-            </Link>
-          }
-        />
-      </div>
+    <div className="space-y-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        render={
+          <Link href="/admin/users" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer">
+            <ArrowLeft size={14} />
+            <span>Users & Sellers</span>
+          </Link>
+        }
+      />
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-card shadow-2xs border-0">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <Avatar className="size-12 rounded-xl border border-border/60 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl bg-card shadow-2xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <Avatar className="size-11 rounded-xl border border-border/60 shrink-0">
             <AvatarImage src={user.avatarUrl} alt={displayName} />
             <AvatarFallback className="text-sm font-bold bg-muted text-muted-foreground rounded-xl">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="space-y-1 min-w-0">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base font-bold text-foreground truncate">{displayName}</h1>
-              <span className="font-mono text-xs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
+              <h1 className="text-base font-bold text-foreground">{displayName}</h1>
+              <span className="font-mono text-[11px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
                 {user.id}
               </span>
-              <Badge
-                variant={ACCOUNT_TYPE_VARIANTS[user.accountType] || "outline"}
-                className="text-[10px] font-medium px-2 py-0.5 h-5"
-              >
+              <Badge variant="outline" className="text-[10px] font-medium px-2 py-0 h-5">
                 {ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
               </Badge>
+              <StatusBadge label={verifConf.label} tone={verifConf.tone} size="sm" />
+              <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-              <span>{user.email}</span>
-              <span>·</span>
-              <span>{user.phone}</span>
-              <span>·</span>
-              <span>{user.province}</span>
-            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {user.email} · {user.phone} · {user.province}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <StatusBadge label={verifConf.label} tone={verifConf.tone} />
-          <StatusBadge label={conf.label} tone={conf.tone} />
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-semibold cursor-pointer"
+            render={
+              <Link href={`/admin/users/${user.id}`} className="flex items-center gap-1.5">
+                <PencilSimple size={13} />
+                Edit Account
+              </Link>
+            }
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  className="size-8 cursor-pointer"
+                  aria-label="More actions"
+                >
+                  <DotsThreeVertical size={15} weight="bold" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-48">
+              {isSeller && (
+                <DropdownMenuItem
+                  render={
+                    <Link
+                      href={`/admin/listings?search=${encodeURIComponent(user.name)}`}
+                      className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                      <ListBullets size={14} />
+                      <span>View Listings</span>
+                    </Link>
+                  }
+                />
+              )}
+              {user.reportsCount > 0 && (
+                <DropdownMenuItem
+                  render={
+                    <Link
+                      href={`/admin/reports?search=${encodeURIComponent(user.name)}`}
+                      className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                      <WarningOctagon size={14} />
+                      <span>View Reports ({user.reportsCount})</span>
+                    </Link>
+                  }
+                />
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                render={
+                  <button className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
+                    <Lock size={14} />
+                    <span>Restrict Account</span>
+                  </button>
+                }
+              />
+              {user.status === "suspended" ? (
+                <DropdownMenuItem
+                  render={
+                    <button className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle size={14} />
+                      <span>Restore Account</span>
+                    </button>
+                  }
+                />
+              ) : (
+                <DropdownMenuItem
+                  render={
+                    <button className="flex items-center gap-2 cursor-pointer w-full text-destructive">
+                      <ShieldWarning size={14} />
+                      <span>Suspend Account</span>
+                    </button>
+                  }
+                />
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

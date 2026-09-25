@@ -1,14 +1,17 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
 import {
   DotsThreeVertical,
   Eye,
+  PencilSimple,
   WarningOctagon,
   ListBullets,
   Lock,
   ShieldWarning,
+  CheckCircle,
+  Phone,
 } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
@@ -26,16 +29,9 @@ import type { AdminUserListItem } from "./types"
 
 const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   buyer: "Buyer",
-  seller: "Individual Seller",
+  seller: "Seller",
   business: "Business",
   dealer: "Dealer",
-}
-
-const ACCOUNT_TYPE_VARIANTS: Record<string, "secondary" | "outline" | "default"> = {
-  buyer: "outline",
-  seller: "secondary",
-  business: "default",
-  dealer: "default",
 }
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
@@ -66,41 +62,35 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
         .slice(0, 2)
         .join("")
         .toUpperCase()
-
-      const primaryContact = user.phone || user.email
+      const contact = user.phone || user.email
 
       return (
-        <div className="flex items-center gap-3 min-w-[220px]">
-          <Avatar className="size-9 rounded-lg shrink-0 border border-border/60">
+        <div className="flex items-center gap-3 min-w-[200px]">
+          <Avatar className="size-8 rounded-lg shrink-0 border border-border/60">
             <AvatarImage src={user.avatarUrl} alt={displayName} />
-            <AvatarFallback className="text-[11px] font-semibold bg-muted text-muted-foreground rounded-lg">
+            <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground rounded-lg">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="space-y-0.5 min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-semibold text-xs text-foreground truncate">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-xs text-foreground truncate max-w-[160px]">
                 {displayName}
               </span>
               {user.reportsCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="text-[10px] font-bold px-1.5 py-0 h-4 shrink-0 gap-0.5"
+                  className="text-[9px] font-bold px-1 py-0 h-3.5 shrink-0 gap-0.5"
                 >
-                  <WarningOctagon size={11} weight="fill" />
-                  <span>{user.reportsCount} {user.reportsCount === 1 ? "report" : "reports"}</span>
+                  <WarningOctagon size={9} weight="fill" />
+                  {user.reportsCount}
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-              <span className="font-mono text-[10px] text-muted-foreground/80">{user.id}</span>
-              {primaryContact && (
-                <>
-                  <span>·</span>
-                  <span className="truncate">{primaryContact}</span>
-                </>
-              )}
-            </div>
+            <span className="text-[11px] text-muted-foreground truncate block">
+              <span className="font-mono text-[10px]">{user.id}</span>
+              {contact && <span className="ml-1">· {contact}</span>}
+            </span>
           </div>
         </div>
       )
@@ -110,19 +100,13 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
   {
     accessorKey: "accountType",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Account Type" />
+      <DataTableColumnHeader column={column} title="Type" />
     ),
-    cell: ({ row }) => {
-      const type = row.original.accountType
-      return (
-        <Badge
-          variant={ACCOUNT_TYPE_VARIANTS[type] || "outline"}
-          className="text-[10px] font-medium px-2 py-0.5 h-5"
-        >
-          {ACCOUNT_TYPE_LABELS[type] || type}
-        </Badge>
-      )
-    },
+    cell: ({ row }) => (
+      <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5 whitespace-nowrap">
+        {ACCOUNT_TYPE_LABELS[row.original.accountType] || row.original.accountType}
+      </Badge>
+    ),
     sortingFn: "alphanumeric",
   },
   {
@@ -131,10 +115,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
       <DataTableColumnHeader column={column} title="Location" />
     ),
     cell: ({ row }) => (
-      <div className="text-xs space-y-0.5 min-w-[120px]">
-        <span className="text-foreground font-medium block truncate">{row.original.province}</span>
-        <span className="text-[10px] text-muted-foreground block truncate">{row.original.location}</span>
-      </div>
+      <span className="text-xs text-foreground whitespace-nowrap">{row.original.province}</span>
     ),
     enableSorting: false,
   },
@@ -143,14 +124,11 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Listings" />
     ),
-    cell: ({ row }) => {
-      const count = row.original.listingsCount
-      return (
-        <span className="text-xs font-semibold text-foreground">
-          {count}
-        </span>
-      )
-    },
+    cell: ({ row }) => (
+      <span className="text-xs font-semibold text-foreground tabular-nums">
+        {row.original.listingsCount}
+      </span>
+    ),
     sortingFn: "basic",
   },
   {
@@ -171,8 +149,8 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const status = row.original.status
-      const conf = STATUS_CONFIG[status] || { label: status, tone: "neutral" as StatusTone }
+      const s = row.original.status
+      const conf = STATUS_CONFIG[s] || { label: s, tone: "neutral" as StatusTone }
       return <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
     },
     sortingFn: "alphanumeric",
@@ -191,7 +169,8 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original
-      const isSellerType = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
+      const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
+      const isActive = user.status === "active"
 
       return (
         <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
@@ -208,7 +187,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
                 </Button>
               }
             />
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
                 render={
                   <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
@@ -217,7 +196,23 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
                   </Link>
                 }
               />
-              {isSellerType && (
+              <DropdownMenuItem
+                render={
+                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
+                    <PencilSimple size={14} />
+                    <span>Edit Account</span>
+                  </Link>
+                }
+              />
+              <DropdownMenuItem
+                render={
+                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
+                    <Phone size={14} />
+                    <span>Edit Contact Info</span>
+                  </Link>
+                }
+              />
+              {isSeller && (
                 <DropdownMenuItem
                   render={
                     <Link
@@ -244,22 +239,35 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
                 />
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                render={
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
-                    <Lock size={14} />
-                    <span>Restrict Account</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-destructive">
-                    <ShieldWarning size={14} />
-                    <span>Suspend Account</span>
-                  </Link>
-                }
-              />
+              {isActive && (
+                <DropdownMenuItem
+                  render={
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
+                      <Lock size={14} />
+                      <span>Restrict Account</span>
+                    </Link>
+                  }
+                />
+              )}
+              {user.status === "suspended" ? (
+                <DropdownMenuItem
+                  render={
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle size={14} />
+                      <span>Restore Account</span>
+                    </Link>
+                  }
+                />
+              ) : (
+                <DropdownMenuItem
+                  render={
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-destructive">
+                      <ShieldWarning size={14} />
+                      <span>Suspend Account</span>
+                    </Link>
+                  }
+                />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
