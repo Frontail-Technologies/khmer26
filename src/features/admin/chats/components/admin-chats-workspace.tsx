@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -47,6 +47,8 @@ export function AdminChatsWorkspace({
     initialConversationId ? "chat" : initialUserId ? "conversations" : "users"
   )
 
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+
   const filteredUsers = useMemo(() => {
     if (!userSearch.trim()) return users
     const q = userSearch.toLowerCase().trim()
@@ -90,6 +92,12 @@ export function AdminChatsWorkspace({
     return userConversations[0] || null
   }, [userConversations, selectedConversationId])
 
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    }
+  }, [selectedConversation?.id, selectedConversation?.messages.length])
+
   const handleSelectUser = (user: AdminChatParticipant) => {
     setSelectedUserId(user.id)
     setSelectedConversationId("")
@@ -109,15 +117,15 @@ export function AdminChatsWorkspace({
   }, [selectedConversation, selectedUser])
 
   return (
-    <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs h-[calc(100vh-140px)] min-h-[550px] flex flex-col">
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
+    <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs h-[calc(100dvh-7.5rem-env(safe-area-inset-bottom,0px))] min-h-[500px] flex flex-col">
+      <div className="flex-1 min-h-0 min-w-0 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
         <div
           className={cn(
-            "md:col-span-4 lg:col-span-3 border-r border-border/60 flex flex-col h-full bg-muted/10",
+            "md:col-span-4 lg:col-span-3 border-r border-border/60 flex flex-col h-full min-h-0 min-w-0 bg-muted/10",
             mobileStep !== "users" && "hidden md:flex"
           )}
         >
-          <div className="p-3 border-b border-border/60 bg-muted/20">
+          <div className="shrink-0 p-3 border-b border-border/60 bg-muted/20">
             <div className="relative">
               <MagnifyingGlass
                 size={14}
@@ -133,7 +141,7 @@ export function AdminChatsWorkspace({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-border/40">
+          <div className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/40">
             {filteredUsers.length ? (
               filteredUsers.map((user) => {
                 const isSelected = selectedUser?.id === user.id
@@ -181,12 +189,12 @@ export function AdminChatsWorkspace({
 
         <div
           className={cn(
-            "md:col-span-8 lg:col-span-4 border-r border-border/60 flex flex-col h-full bg-background",
+            "md:col-span-8 lg:col-span-4 border-r border-border/60 flex flex-col h-full min-h-0 min-w-0 bg-background",
             mobileStep !== "conversations" && "hidden lg:flex",
             mobileStep === "conversations" && "flex md:col-span-12"
           )}
         >
-          <div className="p-3 border-b border-border/60 bg-muted/20 space-y-2">
+          <div className="shrink-0 p-3 border-b border-border/60 bg-muted/20 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <button
@@ -228,7 +236,7 @@ export function AdminChatsWorkspace({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-border/40">
+          <div className="min-h-0 flex-1 overflow-y-auto divide-y divide-border/40">
             {userConversations.length ? (
               userConversations.map((conv) => {
                 const other =
@@ -300,14 +308,14 @@ export function AdminChatsWorkspace({
 
         <div
           className={cn(
-            "lg:col-span-5 flex flex-col h-full bg-card",
+            "lg:col-span-5 flex flex-col h-full min-h-0 min-w-0 bg-card",
             mobileStep !== "chat" && "hidden lg:flex",
             mobileStep === "chat" && "flex md:col-span-12"
           )}
         >
           {selectedConversation && otherParticipant ? (
             <>
-              <div className="p-3 border-b border-border/60 bg-muted/20 flex flex-col gap-2">
+              <div className="shrink-0 p-3 border-b border-border/60 bg-muted/20 flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <button
@@ -400,7 +408,10 @@ export function AdminChatsWorkspace({
                 )}
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/5">
+              <div
+                ref={messagesContainerRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 bg-muted/5"
+              >
                 {selectedConversation.messages.map((msg) => {
                   const isFromSelectedUser = msg.senderId === selectedUser?.id
 
@@ -441,13 +452,13 @@ export function AdminChatsWorkspace({
                 })}
               </div>
 
-              <div className="p-3 border-t border-border/60 bg-muted/20 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
+              <div className="shrink-0 p-3 border-t border-border/60 bg-muted/20 flex items-center justify-center gap-1.5 text-xs text-muted-foreground select-none">
                 <LockSimple size={14} className="text-muted-foreground/80" />
                 <span>Read-only Admin Inspection Mode</span>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground space-y-2">
+            <div className="min-h-0 flex-1 flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground space-y-2">
               <ChatTeardropText size={36} className="text-muted-foreground/40" />
               <p className="font-semibold text-foreground">Select a conversation to inspect</p>
               <p className="text-[11px] text-muted-foreground max-w-xs">
