@@ -142,10 +142,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
             title: "Safety Tips",
             href: "/admin/content/tips",
           },
-          {
-            title: "Static Pages",
-            href: "/admin/content/pages",
-          },
         ],
       },
     ],
