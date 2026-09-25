@@ -18,6 +18,9 @@ import {
 import { EmptyState } from "@/components/shared/EmptyState"
 import { AccountPageHeader } from "../../components/account-page-header"
 import { ListingGrid } from "@/features/listings/components/listing-grid"
+import { ListingListRow } from "@/features/listings/components/listing-list-row"
+import { ListingViewToggle } from "@/features/listings/components/listing-view-toggle"
+import { useListingViewMode } from "@/features/listings/hooks/use-listing-view-mode"
 import { DEMO_LISTINGS } from "@/features/listings/data/demo-listings"
 import type { ListingCard as ListingCardType } from "@/types"
 
@@ -40,6 +43,7 @@ export function AccountFavoritesView() {
   const [favorites] = useState<ListingCardType[]>(() =>
     DEMO_LISTINGS.slice(0, 6).map((item) => ({ ...item, isFavorited: true }))
   )
+  const [viewMode, setViewMode] = useListingViewMode()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [sortOption, setSortOption] = useState<FavoriteSortOption>("recent")
@@ -146,14 +150,24 @@ export function AccountFavoritesView() {
                 </SelectContent>
               </Select>
             </div>
+
+            <ListingViewToggle viewMode={viewMode} onChange={setViewMode} />
           </div>
         </div>
 
         {filteredFavorites.length > 0 ? (
-          <ListingGrid
-            listings={filteredFavorites}
-            className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
-          />
+          viewMode === "grid" ? (
+            <ListingGrid
+              listings={filteredFavorites}
+              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
+            />
+          ) : (
+            <div className="space-y-2.5 sm:space-y-3">
+              {filteredFavorites.map((listing) => (
+                <ListingListRow key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )
         ) : (
           <div className="rounded-2xl border border-dashed border-border/80 p-6 sm:p-10 bg-card/40">
             {searchQuery || categoryFilter !== "all" ? (

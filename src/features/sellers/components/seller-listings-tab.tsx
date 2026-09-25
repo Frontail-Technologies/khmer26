@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ListingGrid } from "@/features/listings/components/listing-grid"
+import { ListingListRow } from "@/features/listings/components/listing-list-row"
+import { ListingViewToggle } from "@/features/listings/components/listing-view-toggle"
+import { useListingViewMode } from "@/features/listings/hooks/use-listing-view-mode"
 import { EmptyState } from "@/components/shared/EmptyState"
 import type { ListingCard as ListingCardType } from "@/types"
 
@@ -32,6 +35,7 @@ export function SellerListingsTab({
   initialListings,
   sellerName,
 }: SellerListingsTabProps) {
+  const [viewMode, setViewMode] = useListingViewMode()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState<SortOption>("newest")
@@ -156,6 +160,8 @@ export function SellerListingsTab({
                 <SelectItem value="price-desc">Price: High to Low</SelectItem>
               </SelectContent>
             </Select>
+
+            <ListingViewToggle viewMode={viewMode} onChange={setViewMode} />
           </div>
         </div>
       </div>
@@ -168,7 +174,15 @@ export function SellerListingsTab({
             </span>
           </div>
 
-          <ListingGrid listings={displayedListings} />
+          {viewMode === "grid" ? (
+            <ListingGrid listings={displayedListings} />
+          ) : (
+            <div className="space-y-2.5 sm:space-y-3">
+              {displayedListings.map((listing) => (
+                <ListingListRow key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
 
           {hasMore && (
             <div className="flex justify-center pt-4">
