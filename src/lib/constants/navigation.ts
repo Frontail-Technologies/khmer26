@@ -50,8 +50,8 @@ export const FOOTER_NAV = {
     { label: "Send Feedback", href: "/contact?type=feedback" },
   ],
   legal: [
-    { label: "Terms of Service", href: "/posting-rules" },
-    { label: "Privacy Policy", href: "/posting-rules" },
-    { label: "Cookie Policy", href: "/posting-rules" },
+    { label: "Terms of Service", href: "/posting-rules#terms" },
+    { label: "Privacy Policy", href: "/posting-rules#privacy" },
+    { label: "Cookie Policy", href: "/posting-rules#cookies" },
   ],
 } as const

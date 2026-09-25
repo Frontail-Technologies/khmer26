@@ -43,7 +43,7 @@ export function AppFooter() {
               </h3>
               <ul className="mt-2.5 space-y-1.5">
                 {FOOTER_NAV.marketplace.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
                       className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -61,7 +61,7 @@ export function AppFooter() {
               </h3>
               <ul className="mt-2.5 space-y-1.5">
                 {FOOTER_NAV.account.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
                       className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -79,7 +79,7 @@ export function AppFooter() {
               </h3>
               <ul className="mt-2.5 space-y-1.5">
                 {FOOTER_NAV.help.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
                       className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -97,7 +97,7 @@ export function AppFooter() {
               </h3>
               <ul className="mt-2.5 space-y-1.5">
                 {FOOTER_NAV.legal.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
                       className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors"
