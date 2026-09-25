@@ -14,7 +14,6 @@ import {
   ArrowCounterClockwise,
   Eye,
 } from "@phosphor-icons/react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -40,6 +39,7 @@ import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { createPaymentColumns } from "../columns"
 import { PaymentDetailSheet } from "./payment-detail-sheet"
 import type { AdminPaymentTransaction } from "../types"
+import { cn } from "@/lib/utils"
 
 interface PaymentTableProps {
   initialPayments: AdminPaymentTransaction[]
@@ -58,8 +58,10 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   failed: { label: "Failed", tone: "destructive" },
 }
 
+type PaymentTabKey = "all" | "subscription" | "promotion"
+
 export function PaymentTable({ initialPayments }: PaymentTableProps) {
-  const [purposeTab, setPurposeTab] = useState<string>("all")
+  const [activeTab, setActiveTab] = useState<PaymentTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
   ])
@@ -77,9 +79,17 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
     return createPaymentColumns({ onViewDetails: handleViewDetails })
   }, [])
 
+  const counts = useMemo(() => {
+    return {
+      all: initialPayments.length,
+      subscription: initialPayments.filter((p) => p.purpose === "subscription").length,
+      promotion: initialPayments.filter((p) => p.purpose === "promotion").length,
+    }
+  }, [initialPayments])
+
   const filteredData = useMemo(() => {
     return initialPayments.filter((tx) => {
-      if (purposeTab !== "all" && tx.purpose !== purposeTab) {
+      if (activeTab !== "all" && tx.purpose !== activeTab) {
         return false
       }
 
@@ -102,7 +112,7 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
 
       return true
     })
-  }, [initialPayments, purposeTab, searchQuery, statusFilter])
+  }, [initialPayments, activeTab, searchQuery, statusFilter])
 
   const table = useReactTable({
     data: filteredData,
@@ -128,42 +138,65 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
     setStatusFilter("all")
   }
 
-  const subCount = useMemo(() => initialPayments.filter((p) => p.purpose === "subscription").length, [initialPayments])
-  const promoCount = useMemo(() => initialPayments.filter((p) => p.purpose === "promotion").length, [initialPayments])
+  const tabs: { key: PaymentTabKey; label: string; count: number }[] = [
+    { key: "all", label: "All", count: counts.all },
+    { key: "subscription", label: "Subscriptions", count: counts.subscription },
+    { key: "promotion", label: "Promotions", count: counts.promotion },
+  ]
 
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 min-w-max">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
+                    isActive
+                      ? "bg-card text-foreground border-primary shadow-2xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      isActive
+                        ? "bg-muted text-foreground border-border"
+                        : "bg-background/80 text-muted-foreground border-border/60"
+                    )}
+                  >
+                    {tab.count}
+                  </Badge>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <Tabs value={purposeTab} onValueChange={setPurposeTab} className="w-full sm:w-auto">
-            <TabsList className="h-9 bg-muted/70 p-1 w-full sm:w-auto grid grid-cols-3">
-              <TabsTrigger value="all" className="text-xs px-3">
-                All ({initialPayments.length})
-              </TabsTrigger>
-              <TabsTrigger value="subscription" className="text-xs px-3">
-                Subscriptions ({subCount})
-              </TabsTrigger>
-              <TabsTrigger value="promotion" className="text-xs px-3">
-                Promotions ({promoCount})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="relative flex-1 min-w-[240px]">
+            <MagnifyingGlass
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search payment ID, reference, or payer..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
 
-          <div className="flex items-center gap-2 flex-1 sm:justify-end">
-            <div className="relative flex-1 sm:max-w-[280px]">
-              <MagnifyingGlass
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
-              <input
-                type="text"
-                placeholder="Search payment ID, reference, or payer..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <Select
               value={statusFilter}
               items={STATUS_OPTIONS}

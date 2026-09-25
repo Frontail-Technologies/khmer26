@@ -21,7 +21,6 @@ import {
   ArrowSquareOut,
   StopCircle,
 } from "@phosphor-icons/react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -47,6 +46,7 @@ import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { createPromotionColumns } from "../columns"
 import { PromotionDetailSheet } from "./promotion-detail-sheet"
 import type { ActivePromotionItem, PromotionType } from "../types"
+import { cn } from "@/lib/utils"
 
 interface PromotionTableProps {
   initialPromotions: ActivePromotionItem[]
@@ -85,9 +85,11 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   expired: { label: "Expired", tone: "neutral" },
 }
 
+type PromotionTabKey = "all" | "active" | "expired"
+
 export function PromotionTable({ initialPromotions }: PromotionTableProps) {
   const [promotions, setPromotions] = useState<ActivePromotionItem[]>(initialPromotions)
-  const [statusTab, setStatusTab] = useState<string>("all")
+  const [activeTab, setActiveTab] = useState<PromotionTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "startedAt", desc: true },
   ])
@@ -116,9 +118,17 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
     })
   }, [])
 
+  const counts = useMemo(() => {
+    return {
+      all: promotions.length,
+      active: promotions.filter((p) => p.status === "active").length,
+      expired: promotions.filter((p) => p.status === "expired").length,
+    }
+  }, [promotions])
+
   const filteredData = useMemo(() => {
     return promotions.filter((item) => {
-      if (statusTab !== "all" && item.status !== statusTab) {
+      if (activeTab !== "all" && item.status !== activeTab) {
         return false
       }
 
@@ -139,7 +149,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
 
       return true
     })
-  }, [promotions, statusTab, searchQuery, typeFilter])
+  }, [promotions, activeTab, searchQuery, typeFilter])
 
   const table = useReactTable({
     data: filteredData,
@@ -165,42 +175,65 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
     setTypeFilter("all")
   }
 
-  const activeCount = useMemo(() => promotions.filter((p) => p.status === "active").length, [promotions])
-  const expiredCount = useMemo(() => promotions.filter((p) => p.status === "expired").length, [promotions])
+  const tabs: { key: PromotionTabKey; label: string; count: number }[] = [
+    { key: "all", label: "All", count: counts.all },
+    { key: "active", label: "Active", count: counts.active },
+    { key: "expired", label: "Expired", count: counts.expired },
+  ]
 
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 min-w-max">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
+                    isActive
+                      ? "bg-card text-foreground border-primary shadow-2xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      isActive
+                        ? "bg-muted text-foreground border-border"
+                        : "bg-background/80 text-muted-foreground border-border/60"
+                    )}
+                  >
+                    {tab.count}
+                  </Badge>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <Tabs value={statusTab} onValueChange={setStatusTab} className="w-full sm:w-auto">
-            <TabsList className="h-9 bg-muted/70 p-1 w-full sm:w-auto grid grid-cols-3">
-              <TabsTrigger value="all" className="text-xs px-3">
-                All ({promotions.length})
-              </TabsTrigger>
-              <TabsTrigger value="active" className="text-xs px-3">
-                Active ({activeCount})
-              </TabsTrigger>
-              <TabsTrigger value="expired" className="text-xs px-3">
-                Expired ({expiredCount})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="relative flex-1 min-w-[240px]">
+            <MagnifyingGlass
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search listing, seller, or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-9.5 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
 
-          <div className="flex items-center gap-2 flex-1 sm:justify-end">
-            <div className="relative flex-1 sm:max-w-[280px]">
-              <MagnifyingGlass
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
-              <input
-                type="text"
-                placeholder="Search listing, seller, or ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <Select
               value={typeFilter}
               items={TYPE_OPTIONS}
