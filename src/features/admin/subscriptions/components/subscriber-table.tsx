@@ -73,7 +73,7 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 
 export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "startedAt", desc: true },
+    { id: "expiresAt", desc: true },
   ])
   const [searchQuery, setSearchQuery] = useState("")
   const [planFilter, setPlanFilter] = useState("all")
