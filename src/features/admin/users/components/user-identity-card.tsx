@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import {
@@ -153,32 +153,20 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
                 />
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                render={
-                  <button className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
-                    <Lock size={14} />
-                    <span>Restrict Account</span>
-                  </button>
-                }
-              />
+              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
+                <Lock size={14} />
+                <span>Restrict Account</span>
+              </DropdownMenuItem>
               {user.status === "suspended" ? (
-                <DropdownMenuItem
-                  render={
-                    <button className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle size={14} />
-                      <span>Restore Account</span>
-                    </button>
-                  }
-                />
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle size={14} />
+                  <span>Restore Account</span>
+                </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem
-                  render={
-                    <button className="flex items-center gap-2 cursor-pointer w-full text-destructive">
-                      <ShieldWarning size={14} />
-                      <span>Suspend Account</span>
-                    </button>
-                  }
-                />
+                <DropdownMenuItem variant="destructive" className="flex items-center gap-2 cursor-pointer w-full">
+                  <ShieldWarning size={14} />
+                  <span>Suspend Account</span>
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
