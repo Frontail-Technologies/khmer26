@@ -1,37 +1,14 @@
-export type NotificationChannel = "in_app" | "push" | "sms" | "telegram"
+export type NotificationAudience = "all_users" | "buyers" | "sellers" | "dealers" | "specific_user"
 
-export type NotificationAudience = "all_users" | "sellers" | "dealers" | "buyers"
+export type NotificationStatus = "sent" | "pending" | "failed"
 
-export type NotificationDeliveryStatus = "delivered" | "sending" | "scheduled" | "failed"
-
-export interface NotificationCampaign {
+export interface NotificationRecord {
   id: string
   title: string
   message: string
-  targetUrl?: string
   audience: NotificationAudience
-  channel: NotificationChannel
+  targetUser?: string
   sentAt: string
-  status: NotificationDeliveryStatus
-  recipientsCount: number
-  deliveryRate: string
+  status: NotificationStatus
   sentBy: string
-}
-
-export interface NotificationTemplate {
-  id: string
-  key: string
-  name: string
-  category: "transactional" | "moderation" | "security" | "marketing"
-  defaultChannel: NotificationChannel
-  templateText: string
-  variables: string[]
-  isActive: boolean
-}
-
-export interface NotificationStats {
-  broadcasts30d: number
-  activeTemplates: number
-  deliveryRate: string
-  estimatedAudience: string
 }

@@ -1,60 +1,73 @@
 "use client"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PaperPlaneTilt, ListBullets, FileText } from "@phosphor-icons/react"
-import { NotificationSummaryMetrics } from "./notification-summary-metrics"
+import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { NotificationComposer } from "./notification-composer"
 import { NotificationHistoryTable } from "./notification-history-table"
-import { NotificationTemplatesGrid } from "./notification-templates-grid"
-import type {
-  NotificationStats,
-  NotificationCampaign,
-  NotificationTemplate,
-} from "../types"
+import type { NotificationRecord } from "../types"
+import { cn } from "@/lib/utils"
 
 interface NotificationWorkspaceProps {
-  stats: NotificationStats
-  campaigns: NotificationCampaign[]
-  templates: NotificationTemplate[]
+  records: NotificationRecord[]
 }
 
+type NotificationTabKey = "compose" | "history"
+
 export function NotificationWorkspace({
-  stats,
-  campaigns,
-  templates,
+  records,
 }: NotificationWorkspaceProps) {
+  const [activeTab, setActiveTab] = useState<NotificationTabKey>("compose")
+
+  const tabs: { key: NotificationTabKey; label: string; count?: number }[] = [
+    { key: "compose", label: "Send Notification" },
+    { key: "history", label: "History", count: records.length },
+  ]
+
   return (
     <div className="space-y-3.5 sm:space-y-4">
-      <NotificationSummaryMetrics stats={stats} />
+      <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 min-w-max">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
+                    isActive
+                      ? "bg-card text-foreground border-primary shadow-2xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                        isActive
+                          ? "bg-muted text-foreground border-border"
+                          : "bg-background/80 text-muted-foreground border-border/60"
+                      )}
+                    >
+                      {tab.count}
+                    </Badge>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
-      <Tabs defaultValue="compose" className="w-full">
-        <TabsList className="grid grid-cols-3 h-9 bg-muted/60 p-1 mb-4 w-full sm:w-[480px]">
-          <TabsTrigger value="compose" className="text-xs">
-            <PaperPlaneTilt size={13} className="mr-1.5" />
-            Compose Broadcast
-          </TabsTrigger>
-          <TabsTrigger value="history" className="text-xs">
-            <ListBullets size={13} className="mr-1.5" />
-            History ({campaigns.length})
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="text-xs">
-            <FileText size={13} className="mr-1.5" />
-            Templates ({templates.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="compose">
+        {activeTab === "compose" ? (
           <NotificationComposer />
-        </TabsContent>
-
-        <TabsContent value="history">
-          <NotificationHistoryTable initialCampaigns={campaigns} />
-        </TabsContent>
-
-        <TabsContent value="templates">
-          <NotificationTemplatesGrid templates={templates} />
-        </TabsContent>
-      </Tabs>
+        ) : (
+          <NotificationHistoryTable initialRecords={records} />
+        )}
+      </div>
     </div>
   )
 }
