@@ -129,7 +129,7 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
   }
 
   return (
-    <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
+    <>
       <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 min-w-[240px]">
           <MagnifyingGlass
@@ -344,6 +344,6 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
       <div className="p-3 sm:p-4 border-t border-border/60 bg-muted/10">
         <DataTablePagination table={table} />
       </div>
-    </div>
+    </>
   )
 }
