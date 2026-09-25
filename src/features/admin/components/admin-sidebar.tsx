@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { ArrowSquareOut, CaretDown, CaretRight } from "@phosphor-icons/react"
 import {
@@ -20,23 +20,68 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { ADMIN_NAV_CONFIG } from "../navigation/admin-navigation"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
-export function AdminSidebar() {
+function checkSubItemActive(
+  subHref: string,
+  currentPathname: string,
+  currentSection: string | null
+): boolean {
+  if (subHref.includes("?")) {
+    const [subPath, subQuery] = subHref.split("?")
+    if (currentPathname !== subPath) return false
+    const parsed = new URLSearchParams(subQuery)
+    const targetSection = parsed.get("section")
+    if (targetSection === "general") {
+      return currentSection === "general" || !currentSection
+    }
+    return currentSection === targetSection
+  }
+
+  if (subHref === "/admin/listings") {
+    return (
+      currentPathname === "/admin/listings" ||
+      (currentPathname.startsWith("/admin/listings/") &&
+        !currentPathname.startsWith("/admin/categories") &&
+        !currentPathname.startsWith("/admin/listing-fields"))
+    )
+  }
+
+  if (subHref === "/admin/chats") {
+    return (
+      currentPathname === "/admin/chats" ||
+      (currentPathname.startsWith("/admin/chats/") &&
+        !currentPathname.startsWith("/admin/reported-chats"))
+    )
+  }
+
+  return currentPathname === subHref || currentPathname.startsWith(`${subHref}/`)
+}
+
+function AdminSidebarInner() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentSection = searchParams.get("section")
+  const { isMobile, setOpenMobile } = useSidebar()
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     Listings: true,
+    Reports: false,
+    "Content Management": false,
+    "Chat Management": false,
+    Settings: false,
   })
 
   useEffect(() => {
     ADMIN_NAV_CONFIG.forEach((group) => {
       group.items.forEach((item) => {
-        if (item.subItems) {
-          const isChildActive = item.subItems.some(
-            (sub) => pathname === sub.href || pathname.startsWith(`${sub.href}/`)
+        if (item.subItems && item.subItems.length > 0) {
+          const isChildActive = item.subItems.some((sub) =>
+            checkSubItemActive(sub.href, pathname, currentSection)
           )
           if (isChildActive) {
             setExpandedItems((prev) => ({ ...prev, [item.title]: true }))
@@ -44,7 +89,7 @@ export function AdminSidebar() {
         }
       })
     })
-  }, [pathname])
+  }, [pathname, currentSection])
 
   const toggleExpand = (title: string) => {
     setExpandedItems((prev) => ({
@@ -53,11 +98,18 @@ export function AdminSidebar() {
     }))
   }
 
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="h-16 border-b border-border/70 flex justify-center px-4 bg-card/60">
         <Link
           href="/admin"
+          onClick={handleLinkClick}
           className="flex items-center gap-2.5 min-w-0"
           aria-label="Khmer26 Admin Dashboard"
         >
@@ -92,7 +144,7 @@ export function AdminSidebar() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      render={<Link href={item.href} />}
+                      render={<Link href={item.href} onClick={handleLinkClick} />}
                       isActive={isActive}
                       tooltip={item.title}
                       className={cn(
@@ -124,11 +176,8 @@ export function AdminSidebar() {
                     const isExpanded = Boolean(expandedItems[item.title])
 
                     if (hasSubItems && item.subItems) {
-                      const isAnyChildActive = item.subItems.some(
-                        (sub) =>
-                          pathname === sub.href ||
-                          (sub.href !== "/admin/listings" && pathname.startsWith(`${sub.href}/`)) ||
-                          (sub.href === "/admin/listings" && pathname === "/admin/listings")
+                      const isAnyChildActive = item.subItems.some((sub) =>
+                        checkSubItemActive(sub.href, pathname, currentSection)
                       )
 
                       return (
@@ -176,15 +225,21 @@ export function AdminSidebar() {
                           {isExpanded && (
                             <SidebarMenuSub className="mt-0.5 space-y-0.5">
                               {item.subItems.map((sub) => {
-                                const isSubActive =
-                                  sub.href === "/admin/listings"
-                                    ? pathname === "/admin/listings" || (pathname.startsWith("/admin/listings/") && !pathname.startsWith("/admin/categories"))
-                                    : pathname === sub.href || pathname.startsWith(`${sub.href}/`)
+                                const isSubActive = checkSubItemActive(
+                                  sub.href,
+                                  pathname,
+                                  currentSection
+                                )
 
                                 return (
                                   <SidebarMenuSubItem key={sub.href}>
                                     <SidebarMenuSubButton
-                                      render={<Link href={sub.href} />}
+                                      render={
+                                        <Link
+                                          href={sub.href}
+                                          onClick={handleLinkClick}
+                                        />
+                                      }
                                       isActive={isSubActive}
                                       className={cn(
                                         "h-8 px-2.5 rounded-lg text-xs transition-colors",
@@ -212,7 +267,7 @@ export function AdminSidebar() {
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton
-                          render={<Link href={item.href} />}
+                          render={<Link href={item.href} onClick={handleLinkClick} />}
                           isActive={isActive}
                           tooltip={item.title}
                           className={cn(
@@ -264,6 +319,7 @@ export function AdminSidebar() {
                   href="/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={handleLinkClick}
                 />
               }
               tooltip="View Public Marketplace"
@@ -276,5 +332,13 @@ export function AdminSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+  )
+}
+
+export function AdminSidebar() {
+  return (
+    <Suspense fallback={null}>
+      <AdminSidebarInner />
+    </Suspense>
   )
 }

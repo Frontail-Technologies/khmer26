@@ -7,15 +7,12 @@ import {
   SealCheck,
   Users,
   Star,
-  House,
-  Image,
-  Sparkle,
+  Layout,
   Megaphone,
   Crown,
   CreditCard,
   Bell,
   Chats,
-  ChatCircleDots,
   ShieldCheck,
   Gear,
   ClockCounterClockwise,
@@ -125,24 +122,31 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     label: "Content",
     items: [
       {
-        title: "Homepage",
+        title: "Content Management",
         href: "/admin/content/homepage",
-        icon: House,
-      },
-      {
-        title: "Featured Sections",
-        href: "/admin/content/featured",
-        icon: Sparkle,
-      },
-      {
-        title: "Banners",
-        href: "/admin/content/banners",
-        icon: Image,
-      },
-      {
-        title: "Safety Tips",
-        href: "/admin/content/tips",
-        icon: ShieldCheck,
+        icon: Layout,
+        subItems: [
+          {
+            title: "Homepage",
+            href: "/admin/content/homepage",
+          },
+          {
+            title: "Featured Sections",
+            href: "/admin/content/featured",
+          },
+          {
+            title: "Banners",
+            href: "/admin/content/banners",
+          },
+          {
+            title: "Safety Tips",
+            href: "/admin/content/tips",
+          },
+          {
+            title: "Static Pages",
+            href: "/admin/content/pages",
+          },
+        ],
       },
     ],
   },
@@ -177,16 +181,21 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         icon: Bell,
       },
       {
-        title: "Chats",
+        title: "Chat Management",
         href: "/admin/chats",
         icon: Chats,
-      },
-      {
-        title: "Reported Chats",
-        href: "/admin/reported-chats",
-        icon: ChatCircleDots,
         badge: 3,
         badgeVariant: "warning",
+        subItems: [
+          {
+            title: "Chats",
+            href: "/admin/chats",
+          },
+          {
+            title: "Reported Chats",
+            href: "/admin/reported-chats",
+          },
+        ],
       },
     ],
   },
@@ -203,6 +212,16 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Settings",
         href: "/admin/settings",
         icon: Gear,
+        subItems: [
+          {
+            title: "General",
+            href: "/admin/settings?section=general",
+          },
+          {
+            title: "Marketplace",
+            href: "/admin/settings?section=marketplace",
+          },
+        ],
       },
       {
         title: "Audit Log",

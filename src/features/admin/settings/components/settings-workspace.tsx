@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Check, FloppyDisk } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -44,10 +45,21 @@ const DURATION_OPTIONS: SelectOption[] = [
 ]
 
 export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
-  const [activeTab, setActiveTab] = useState<SettingsTabKey>("general")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const sectionParam = searchParams.get("section")
+  const activeTab: SettingsTabKey = sectionParam === "marketplace" ? "marketplace" : "general"
+
   const [general, setGeneral] = useState<GeneralSettings>(initialSettings.general)
   const [marketplace, setMarketplace] = useState<MarketplaceSettings>(initialSettings.marketplace)
   const [savedSuccess, setSavedSuccess] = useState(false)
+
+  const handleTabChange = (key: SettingsTabKey) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("section", key)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,7 +85,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                 <button
                   key={tab.key}
                   type="button"
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => handleTabChange(tab.key)}
                   className={cn(
                     "relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
                     isActive
