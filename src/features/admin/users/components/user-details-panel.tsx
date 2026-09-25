@@ -150,13 +150,21 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
                     {user.recentListings.slice(0, 3).map((listing) => {
                       const conf = STATUS_CONFIG[listing.status] || { label: listing.status, tone: "neutral" as StatusTone }
                       return (
-                        <div key={listing.id} className="flex items-center justify-between gap-3 py-1.5 border-b border-border/30 last:border-0">
+                        <Link
+                          key={listing.id}
+                          href={`/admin/listings/${listing.id}`}
+                          className="flex items-center justify-between gap-3 py-1.5 px-2 -mx-2 rounded-md hover:bg-muted/50 transition-colors group cursor-pointer border-b border-border/30 last:border-0"
+                        >
                           <div className="min-w-0">
-                            <span className="text-xs font-medium text-foreground block truncate">{listing.title}</span>
-                            <span className="text-[11px] text-muted-foreground">{listing.category} · ${listing.price.toLocaleString()}</span>
+                            <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors block truncate">
+                              {listing.title}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {listing.category} · ${listing.price.toLocaleString()}
+                            </span>
                           </div>
                           <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
-                        </div>
+                        </Link>
                       )
                     })}
                   </div>
