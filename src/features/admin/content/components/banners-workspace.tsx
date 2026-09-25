@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { AdminImageThumbnail } from "@/components/shared/admin-image-preview"
 import { Field, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -298,15 +299,12 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
                   <TableRow key={b.id} className="border-b border-border/50 hover:bg-muted/20">
                     <TableCell className="min-w-64">
                       <div className="flex items-center gap-3">
-                        <div className="size-12 rounded-lg overflow-hidden bg-muted/60 relative shrink-0 border border-border/50">
-                          <Image
-                            src={b.imageUrl}
-                            alt={b.title}
-                            fill
-                            sizes="48px"
-                            className="object-cover"
-                          />
-                        </div>
+                        <AdminImageThumbnail
+                          src={b.imageUrl}
+                          alt={b.title}
+                          containerClassName="size-12 rounded-lg bg-muted/60 shrink-0 border border-border/50"
+                          sizes="48px"
+                        />
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-foreground block truncate">
                             {b.title}

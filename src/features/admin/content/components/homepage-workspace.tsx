@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { AdminImageThumbnail } from "@/components/shared/admin-image-preview"
 import {
   Dialog,
   DialogContent,
@@ -299,15 +300,12 @@ export function HomepageWorkspace({
                   className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-background/60 hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="size-10 rounded-lg overflow-hidden bg-muted/50 border border-border/40 shrink-0 relative">
-                      <Image
-                        src={cat.imageUrl}
-                        alt={cat.name}
-                        fill
-                        sizes="40px"
-                        className="object-cover"
-                      />
-                    </div>
+                    <AdminImageThumbnail
+                      src={cat.imageUrl}
+                      alt={cat.name}
+                      containerClassName="size-10 rounded-lg bg-muted/50 border border-border/40 shrink-0"
+                      sizes="40px"
+                    />
                     <div className="min-w-0">
                       <span className="text-xs font-semibold text-foreground block truncate">
                         {cat.name}
