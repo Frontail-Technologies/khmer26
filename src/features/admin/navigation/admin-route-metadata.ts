@@ -42,7 +42,7 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   },
   "/admin/reviews": {
     title: "Reviews",
-    subtitle: "Monitor seller reviews, customer ratings, and feedback.",
+    subtitle: "Manage marketplace reviews and reported feedback.",
   },
   "/admin/promotions": {
     title: "Promotions",
