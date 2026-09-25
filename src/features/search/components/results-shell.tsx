@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { ListingGrid } from "@/features/listings/components/listing-grid"
+import { ListingListRow } from "@/features/listings/components/listing-list-row"
+import { useListingViewMode } from "@/features/listings/hooks/use-listing-view-mode"
 import type { ListingCard } from "@/types"
 import type { FilterState, SortOption } from "@/features/search/types"
 import { DesktopFilterSidebar } from "./desktop-filter-sidebar"
@@ -47,6 +49,7 @@ export function ResultsShell({
   })
 
   const [sortBy, setSortBy] = useState<SortOption>("recommended")
+  const [viewMode, setViewMode] = useListingViewMode()
   const [visibleCount, setVisibleCount] = useState<number>(ITEMS_PER_BATCH)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
@@ -236,6 +239,8 @@ export function ResultsShell({
           onSortChange={setSortBy}
           onOpenMobileFilters={() => setIsMobileSheetOpen(true)}
           activeFilterCount={activeFilterCount}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
 
         <ActiveFilterChips
@@ -247,10 +252,18 @@ export function ResultsShell({
         <div>
           {displayedListings.length > 0 ? (
             <div className="space-y-6">
-              <ListingGrid
-                listings={displayedListings}
-                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4"
-              />
+              {viewMode === "grid" ? (
+                <ListingGrid
+                  listings={displayedListings}
+                  className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4"
+                />
+              ) : (
+                <div className="space-y-2.5 sm:space-y-3">
+                  {displayedListings.map((listing) => (
+                    <ListingListRow key={listing.id} listing={listing} />
+                  ))}
+                </div>
+              )}
 
               <div ref={observerTargetRef} className="py-4 flex justify-center">
                 {isLoadingMore ? (

@@ -1,4 +1,3 @@
-
 export interface NavLink {
   label: string
   href: string
@@ -46,14 +45,13 @@ export const FOOTER_NAV = {
     { label: "My Listings", href: "/account/listings" },
   ],
   help: [
-    { label: "How It Works", href: "/how-it-works" },
-    { label: "Safety Tips", href: "/safety" },
+    { label: "Posting Rules", href: "/posting-rules" },
     { label: "Contact Us", href: "/contact" },
-    { label: "FAQ", href: "/faq" },
+    { label: "Send Feedback", href: "/contact?type=feedback" },
   ],
   legal: [
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Cookie Policy", href: "/cookies" },
+    { label: "Terms of Service", href: "/posting-rules" },
+    { label: "Privacy Policy", href: "/posting-rules" },
+    { label: "Cookie Policy", href: "/posting-rules" },
   ],
 } as const
