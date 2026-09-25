@@ -41,8 +41,8 @@ export function FeaturedListingsSlider({
   const scroll = (direction: "left" | "right") => {
     const el = scrollRef.current
     if (!el) return
-    const cardWidth = el.firstElementChild?.clientWidth || 260
-    const scrollDistance = cardWidth * (el.clientWidth > 768 ? 2 : 1) + 16
+    const cardWidth = el.firstElementChild?.clientWidth || 220
+    const scrollDistance = cardWidth * (el.clientWidth > 768 ? 2 : 1) + 12
     el.scrollBy({
       left: direction === "left" ? -scrollDistance : scrollDistance,
       behavior: "smooth",
@@ -103,12 +103,12 @@ export function FeaturedListingsSlider({
       <div
         ref={scrollRef}
         onScroll={updateScrollState}
-        className="flex gap-2.5 sm:gap-3 lg:gap-3.5 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-1.5 pt-0.5 -mx-3 px-3 sm:mx-0 sm:px-0 scroll-smooth"
+        className="flex gap-2.5 sm:gap-3 lg:gap-3.5 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-1.5 pt-0.5 scroll-smooth"
       >
         {listings.map((listing) => (
           <div
             key={listing.id}
-            className="w-[72vw] sm:w-[230px] md:w-[245px] lg:w-[260px] shrink-0 snap-start select-none"
+            className="w-[52vw] min-w-[175px] max-w-[210px] sm:w-[220px] sm:max-w-none md:w-[235px] lg:w-[250px] shrink-0 snap-start select-none"
           >
             <ListingCard
               listing={listing}
