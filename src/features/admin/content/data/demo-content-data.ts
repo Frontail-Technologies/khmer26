@@ -4,7 +4,6 @@ import type {
   FeaturedSectionItem,
   AdminBannerItem,
   SafetyTipItem,
-  StaticPageItem,
 } from "../types"
 
 export const DEMO_HOMEPAGE_SECTIONS: HomepageSectionConfig[] = [
@@ -282,53 +281,5 @@ export const DEMO_SAFETY_TIPS: SafetyTipItem[] = [
     context: "general_safety",
     isActive: true,
     sortOrder: 5,
-  },
-]
-
-export const DEMO_STATIC_PAGES: StaticPageItem[] = [
-  {
-    id: "page-1",
-    title: "About Khmer26",
-    slug: "about",
-    category: "General",
-    status: "published",
-    updatedAt: "2026-03-15",
-    content: "Khmer26 is Cambodia's premier online marketplace connecting trusted local buyers and verified sellers across all 25 provinces.",
-  },
-  {
-    id: "page-2",
-    title: "Terms & Conditions",
-    slug: "terms",
-    category: "Legal",
-    status: "published",
-    updatedAt: "2026-02-28",
-    content: "Please read these Terms of Service carefully before accessing or using the Khmer26 platform and digital services.",
-  },
-  {
-    id: "page-3",
-    title: "Privacy Policy",
-    slug: "privacy",
-    category: "Legal",
-    status: "published",
-    updatedAt: "2026-02-28",
-    content: "Khmer26 respects user privacy and data security under applicable personal data protection frameworks.",
-  },
-  {
-    id: "page-4",
-    title: "Marketplace Safety Guidelines",
-    slug: "safety",
-    category: "Safety",
-    status: "published",
-    updatedAt: "2026-03-10",
-    content: "Essential tips and security standards for safe in-person trading, vehicle inspections, and verified buyer payments.",
-  },
-  {
-    id: "page-5",
-    title: "Help & Support Center",
-    slug: "help",
-    category: "Support",
-    status: "published",
-    updatedAt: "2026-03-20",
-    content: "Frequently asked questions regarding posting ads, boosting listings, account verification, and contacting support.",
   },
 ]

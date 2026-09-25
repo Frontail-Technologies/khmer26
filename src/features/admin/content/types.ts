@@ -64,13 +64,3 @@ export interface SafetyTipItem {
   isActive: boolean
   sortOrder: number
 }
-
-export interface StaticPageItem {
-  id: string
-  title: string
-  slug: string
-  category: string
-  status: "published" | "draft"
-  updatedAt: string
-  content: string
-}
