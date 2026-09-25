@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
-import { FeaturedCurator } from "@/features/admin/content/components/featured-curator"
-import { DEMO_FEATURED_LISTINGS } from "@/features/admin/content/data/demo-content-data"
+import { FeaturedSectionsWorkspace } from "@/features/admin/content/components/featured-sections-workspace"
+import { DEMO_FEATURED_SECTIONS } from "@/features/admin/content/data/demo-content-data"
 
 export const metadata: Metadata = {
-  title: "Featured Content",
-  description: "Select and prioritize sponsored listings and categories.",
+  title: "Featured Sections",
+  description: "Manage dynamic listing collections on homepage and discovery surfaces.",
 }
 
 export default function AdminFeaturedContentPage() {
-  return <FeaturedCurator initialFeaturedListings={DEMO_FEATURED_LISTINGS} />
+  return <FeaturedSectionsWorkspace initialSections={DEMO_FEATURED_SECTIONS} />
 }

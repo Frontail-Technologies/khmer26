@@ -1,12 +1,20 @@
 import type { Metadata } from "next"
-import { HomepageEditor } from "@/features/admin/content/components/homepage-editor"
-import { DEMO_HOMEPAGE_SECTIONS } from "@/features/admin/content/data/demo-content-data"
+import { HomepageWorkspace } from "@/features/admin/content/components/homepage-workspace"
+import {
+  DEMO_HOMEPAGE_SECTIONS,
+  DEMO_POPULAR_CATEGORIES,
+} from "@/features/admin/content/data/demo-content-data"
 
 export const metadata: Metadata = {
-  title: "Homepage Content",
-  description: "Curate featured collections, slider banners, and discovery blocks.",
+  title: "Homepage Management",
+  description: "Manage homepage sections, visibility, ordering, and popular categories.",
 }
 
 export default function AdminHomepageContentPage() {
-  return <HomepageEditor initialSections={DEMO_HOMEPAGE_SECTIONS} />
+  return (
+    <HomepageWorkspace
+      initialSections={DEMO_HOMEPAGE_SECTIONS}
+      initialPopularCategories={DEMO_POPULAR_CATEGORIES}
+    />
+  )
 }

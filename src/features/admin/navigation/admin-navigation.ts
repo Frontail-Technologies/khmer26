@@ -17,6 +17,7 @@ import {
   ChatCircle,
   MapPin,
   ShieldCheck,
+  Article,
   Gear,
   ClockCounterClockwise,
 } from "@phosphor-icons/react"
@@ -130,14 +131,24 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         icon: House,
       },
       {
+        title: "Featured Sections",
+        href: "/admin/content/featured",
+        icon: Sparkle,
+      },
+      {
         title: "Banners",
         href: "/admin/content/banners",
         icon: Image,
       },
       {
-        title: "Featured Content",
-        href: "/admin/content/featured",
-        icon: Sparkle,
+        title: "Safety Tips",
+        href: "/admin/content/tips",
+        icon: ShieldCheck,
+      },
+      {
+        title: "Static Pages",
+        href: "/admin/content/pages",
+        icon: Article,
       },
     ],
   },

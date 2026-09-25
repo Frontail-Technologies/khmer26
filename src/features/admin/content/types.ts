@@ -8,28 +8,69 @@ export interface HomepageSectionConfig {
   itemCount?: number
 }
 
+export interface PopularCategoryItem {
+  id: string
+  name: string
+  slug: string
+  imageUrl: string
+  parentCategoryName?: string
+  listingCount: number
+  sortOrder: number
+}
+
+export type FeaturedSourceType = "category" | "latest" | "featured" | "most_viewed"
+export type FeaturedSortMode = "recent" | "price_low" | "price_high" | "featured"
+
+export interface FeaturedSectionItem {
+  id: string
+  title: string
+  slug: string
+  sourceType: FeaturedSourceType
+  categoryIds: string[]
+  categoryNames: string[]
+  sortMode: FeaturedSortMode
+  displayStyle: "grid"
+  isActive: boolean
+  sortOrder: number
+  itemsCount: number
+}
+
+export type BannerPlacement = "homepage_hero" | "homepage_cta" | "category_header" | "listing_sidebar"
+export type BannerDestinationType = "no_action" | "category" | "listing" | "url"
+
 export interface AdminBannerItem {
   id: string
   title: string
-  placement: "homepage_hero" | "category_header" | "listing_sidebar" | "mobile_interstitial"
+  placement: BannerPlacement
   imageUrl: string
-  targetUrl: string
-  startDate: string
-  endDate: string
+  mobileImageUrl?: string
+  destinationType: BannerDestinationType
+  destinationValue: string
+  destinationLabel?: string
+  startDate?: string
+  endDate?: string
   isActive: boolean
-  clicksCount: number
-  viewsCount: number
+  sortOrder: number
+  clicksCount?: number
+  viewsCount?: number
 }
 
-export interface FeaturedItem {
+export type SafetyTipContext = "listing_detail" | "chat_messages" | "general_safety"
+
+export interface SafetyTipItem {
   id: string
-  entityId: string
-  title: string
-  subtitle: string
-  imageUrl?: string
-  category?: string
-  price?: number
-  currency?: string
-  sortOrder: number
+  tip: string
+  context: SafetyTipContext
   isActive: boolean
+  sortOrder: number
+}
+
+export interface StaticPageItem {
+  id: string
+  title: string
+  slug: string
+  category: string
+  status: "published" | "draft"
+  updatedAt: string
+  content: string
 }
