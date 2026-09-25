@@ -1,54 +1,41 @@
-export type ChatReportStatus = "open" | "in_review" | "resolved" | "dismissed"
-
-export type ChatReportPriority = "critical" | "high" | "medium" | "low"
+export type ReportedChatStatus = "open" | "resolved" | "dismissed"
 
 export interface ReportedChatMessage {
   id: string
   senderId: string
   senderName: string
   text: string
-  timestamp: string
-  isFlagged: boolean
+  createdAt: string
+  isReported?: boolean
   flagReason?: string
-  attachmentUrl?: string
 }
 
-export interface ReportedChatCase {
+export interface ReportedChatRecord {
   id: string
-  reportId: string
-  priority: ChatReportPriority
-  status: ChatReportStatus
-  reportedReason: string
-  createdAt: string
-  assignedModerator?: string
+  conversationId: string
+  reportedUserId: string
+  reportedUserName: string
+  reportedUserAccountType: string
   reporterId: string
-  buyer: {
+  reporterName: string
+  reason: string
+  status: ReportedChatStatus
+  createdAt: string
+  participantA: {
     id: string
     name: string
-    avatarUrl?: string
-    phone: string
   }
-  seller: {
+  participantB: {
     id: string
     name: string
-    businessName?: string
-    avatarUrl?: string
-    phone: string
   }
-  listing: {
+  listing?: {
     id: string
     title: string
     price: number
     currency: string
     imageUrl?: string
   }
+  reportedMessageText: string
   messages: ReportedChatMessage[]
-  notes?: string
-}
-
-export interface ReportedChatStats {
-  openCases: number
-  inReviewCases: number
-  autoFlaggedSpam: number
-  resolved30d: number
 }
