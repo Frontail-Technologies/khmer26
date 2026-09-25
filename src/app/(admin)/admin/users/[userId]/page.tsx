@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { DEMO_ADMIN_USERS } from "@/features/admin/users/data/demo-admin-users"
-import { UserIdentityCard } from "@/features/admin/users/components/user-identity-card"
-import { UserDetailsPanel } from "@/features/admin/users/components/user-details-panel"
+import { UserDetailWorkspace } from "@/features/admin/users/components/user-detail-workspace"
 
 interface UserDetailPageProps {
   params: Promise<{
@@ -16,7 +15,7 @@ export async function generateMetadata({ params }: UserDetailPageProps): Promise
 
   return {
     title: user ? `${user.name} (${user.id})` : "User Details",
-    description: "Review marketplace user profile and seller history.",
+    description: "Manage account information and access.",
   }
 }
 
@@ -28,10 +27,5 @@ export default async function AdminUserDetailPage({ params }: UserDetailPageProp
     notFound()
   }
 
-  return (
-    <div className="space-y-4">
-      <UserIdentityCard user={user} />
-      <UserDetailsPanel user={user} />
-    </div>
-  )
+  return <UserDetailWorkspace initialUser={user} />
 }

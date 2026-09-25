@@ -10,6 +10,7 @@ import {
   CheckCircle,
   ListBullets,
   WarningOctagon,
+  Phone,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -26,6 +27,7 @@ import type { AdminUserDetail } from "../types"
 
 interface UserIdentityCardProps {
   user: AdminUserDetail
+  onEditClick: () => void
 }
 
 const ACCOUNT_TYPE_LABELS: Record<string, string> = {
@@ -48,7 +50,7 @@ const VERIFICATION_CONFIG: Record<string, { label: string; tone: StatusTone }> =
   unverified: { label: "Unverified", tone: "neutral" },
 }
 
-export function UserIdentityCard({ user }: UserIdentityCardProps) {
+export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
   const displayName = user.businessName || user.name
   const initials = displayName
     .split(" ")
@@ -104,14 +106,13 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="h-8 text-xs font-semibold cursor-pointer"
-            render={
-              <Link href={`/admin/users/${user.id}`} className="flex items-center gap-1.5">
-                <PencilSimple size={13} />
-                Edit Account
-              </Link>
-            }
-          />
+            onClick={onEditClick}
+            className="h-8 text-xs font-semibold cursor-pointer gap-1.5"
+          >
+            <PencilSimple size={13} />
+            Edit Account
+          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -126,12 +127,19 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
               }
             />
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={onEditClick}
+                className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
+              >
+                <Phone size={14} />
+                <span>Edit Contact Info</span>
+              </DropdownMenuItem>
               {isSeller && (
                 <DropdownMenuItem
                   render={
                     <Link
                       href={`/admin/listings?search=${encodeURIComponent(user.name)}`}
-                      className="flex items-center gap-2 cursor-pointer w-full"
+                      className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
                     >
                       <ListBullets size={14} />
                       <span>View Listings</span>
@@ -144,7 +152,7 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
                   render={
                     <Link
                       href={`/admin/reports?search=${encodeURIComponent(user.name)}`}
-                      className="flex items-center gap-2 cursor-pointer w-full"
+                      className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
                     >
                       <WarningOctagon size={14} />
                       <span>View Reports ({user.reportsCount})</span>
@@ -153,17 +161,17 @@ export function UserIdentityCard({ user }: UserIdentityCardProps) {
                 />
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
+              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-amber-600 dark:text-amber-400">
                 <Lock size={14} />
                 <span>Restrict Account</span>
               </DropdownMenuItem>
               {user.status === "suspended" ? (
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-emerald-600 dark:text-emerald-400">
                   <CheckCircle size={14} />
                   <span>Restore Account</span>
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem variant="destructive" className="flex items-center gap-2 cursor-pointer w-full">
+                <DropdownMenuItem variant="destructive" className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium">
                   <ShieldWarning size={14} />
                   <span>Suspend Account</span>
                 </DropdownMenuItem>
