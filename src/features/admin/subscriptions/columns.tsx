@@ -15,25 +15,23 @@ import {
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { SubscriberRecord } from "./types"
 
-const PLAN_BADGES: Record<string, "default" | "secondary" | "outline"> = {
-  free: "outline",
-  pro: "secondary",
-  business: "default",
-  enterprise: "default",
+const PLAN_BADGES: Record<string, { label: string; badgeClass: string }> = {
+  free: { label: "Free Plan", badgeClass: "bg-muted text-muted-foreground border-border/80" },
+  seller_plus: { label: "Seller Plus", badgeClass: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+  business: { label: "Business Pro", badgeClass: "bg-primary/10 text-primary border-primary/20" },
 }
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   active: { label: "Active", tone: "success" },
-  past_due: { label: "Past Due", tone: "warning" },
-  canceled: { label: "Canceled", tone: "destructive" },
-  trialing: { label: "Trialing", tone: "info" },
+  expired: { label: "Expired", tone: "neutral" },
+  paused: { label: "Paused", tone: "warning" },
 }
 
 export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
   {
     accessorKey: "sellerName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Seller / Business" />
+      <DataTableColumnHeader column={column} title="Seller" />
     ),
     cell: ({ row }) => {
       const sub = row.original
@@ -57,16 +55,20 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
   {
     accessorKey: "planName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Plan Tier" />
+      <DataTableColumnHeader column={column} title="Plan" />
     ),
     cell: ({ row }) => {
       const sub = row.original
+      const planConfig = PLAN_BADGES[sub.planTier] || {
+        label: sub.planName,
+        badgeClass: "bg-muted text-muted-foreground border-border/80",
+      }
       return (
         <Badge
-          variant={PLAN_BADGES[sub.planTier] || "outline"}
-          className="text-[10px] font-semibold px-1.5 py-0 h-4.5"
+          variant="outline"
+          className={`text-[10px] font-semibold px-2 py-0.5 h-5 ${planConfig.badgeClass}`}
         >
-          {sub.planName}
+          {planConfig.label}
         </Badge>
       )
     },
@@ -75,18 +77,18 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
   {
     accessorKey: "listingUsage",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Listings Usage" />
+      <DataTableColumnHeader column={column} title="Listing Usage" />
     ),
     cell: ({ row }) => {
       const usage = row.original.listingUsage
       const pct = Math.round((usage.used / usage.limit) * 100)
       return (
-        <div className="space-y-1 min-w-[100px]">
+        <div className="space-y-1 min-w-[120px]">
           <div className="flex items-center justify-between text-[11px]">
             <span className="font-semibold text-foreground">
               {usage.used} / {usage.limit}
             </span>
-            <span className="text-muted-foreground">{pct}%</span>
+            <span className="text-muted-foreground text-[10px]">{pct}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
             <div
@@ -100,22 +102,12 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "startedAt",
+    accessorKey: "expiresAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Started" />
+      <DataTableColumnHeader column={column} title="Expires" />
     ),
     cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground">{row.original.startedAt}</span>
-    ),
-    sortingFn: "datetime",
-  },
-  {
-    accessorKey: "renewsAt",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Next Renewal" />
-    ),
-    cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground">{row.original.renewsAt}</span>
+      <span className="text-xs text-muted-foreground whitespace-nowrap">{row.original.expiresAt}</span>
     ),
     sortingFn: "datetime",
   },
@@ -125,7 +117,10 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const conf = STATUS_CONFIG[row.original.status] || { label: row.original.status, tone: "neutral" as StatusTone }
+      const conf = STATUS_CONFIG[row.original.status] || {
+        label: row.original.status,
+        tone: "neutral" as StatusTone,
+      }
       return <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
     },
     sortingFn: "alphanumeric",
@@ -152,7 +147,10 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
             <DropdownMenuContent align="end" className="w-40 text-xs">
               <DropdownMenuItem
                 render={
-                  <Link href={`/admin/users/${sub.sellerId}`} className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link
+                    href={`/admin/users/${sub.sellerId}`}
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
                     <Eye size={13} />
                     <span>View Account</span>
                   </Link>
@@ -160,7 +158,10 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
               />
               <DropdownMenuItem
                 render={
-                  <Link href={`/admin/listings?search=${encodeURIComponent(sub.sellerName)}`} className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link
+                    href={`/admin/listings?search=${encodeURIComponent(sub.sellerName)}`}
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
                     <Storefront size={13} />
                     <span>View Listings</span>
                   </Link>

@@ -4,11 +4,9 @@ import Link from "next/link"
 import {
   Receipt,
   User,
-  CreditCard,
-  QrCode,
-  DeviceMobile,
   ArrowSquareOut,
   Info,
+  QrCode,
 } from "@phosphor-icons/react"
 import {
   Sheet,
@@ -28,17 +26,8 @@ interface PaymentDetailSheetProps {
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
   successful: { label: "Successful", tone: "success" },
-  pending: { label: "Pending Settlement", tone: "warning" },
-  failed: { label: "Failed Authorization", tone: "destructive" },
-  refunded: { label: "Refunded", tone: "neutral" },
-}
-
-const GATEWAY_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
-  bakong: { label: "Bakong KHQR (National Bank of Cambodia)", icon: <QrCode size={16} className="text-red-500" /> },
-  aba: { label: "ABA PayWay Instant Mobile App", icon: <DeviceMobile size={16} className="text-blue-500" /> },
-  acleda: { label: "ACLEDA Bank KHQR / Cards", icon: <CreditCard size={16} className="text-amber-500" /> },
-  wing: { label: "Wing Bank Mobile Wallet", icon: <DeviceMobile size={16} className="text-emerald-500" /> },
-  card: { label: "International Card (Visa / Mastercard)", icon: <CreditCard size={16} className="text-indigo-500" /> },
+  pending: { label: "Pending", tone: "warning" },
+  failed: { label: "Failed", tone: "destructive" },
 }
 
 export function PaymentDetailSheet({
@@ -48,8 +37,10 @@ export function PaymentDetailSheet({
 }: PaymentDetailSheetProps) {
   if (!transaction) return null
 
-  const conf = STATUS_CONFIG[transaction.status] || { label: transaction.status, tone: "neutral" as StatusTone }
-  const gw = GATEWAY_LABELS[transaction.gateway] || { label: transaction.gateway, icon: null }
+  const conf = STATUS_CONFIG[transaction.status] || {
+    label: transaction.status,
+    tone: "neutral" as StatusTone,
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -58,12 +49,12 @@ export function PaymentDetailSheet({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
               <Receipt size={16} />
-              <span>Transaction Receipt</span>
+              <span>Payment Details</span>
             </div>
             <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
           </div>
           <span className="font-mono text-[11px] text-muted-foreground block pt-1">
-            {transaction.id} • Ref: {transaction.transactionReference}
+            {transaction.id}
           </span>
         </SheetHeader>
 
@@ -83,12 +74,41 @@ export function PaymentDetailSheet({
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-[10px] text-muted-foreground">Item / Service Details</span>
+            <span className="text-[10px] text-muted-foreground">Purpose Details</span>
             <span className="font-semibold text-foreground block">{transaction.purposeTitle}</span>
           </div>
         </div>
 
         <div className="space-y-3 pt-1">
+          <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <QrCode size={13} />
+              Payment Method & Reference
+            </span>
+            <div className="space-y-1.5 text-[11px]">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Payment Method</span>
+                <span className="font-semibold text-foreground">{transaction.paymentMethod}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">ABA KHQR Reference</span>
+                <span className="font-mono font-semibold text-foreground">
+                  {transaction.transactionReference}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Initiated Date</span>
+                <span className="text-foreground">{transaction.createdAt}</span>
+              </div>
+              {transaction.paidAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Paid At</span>
+                  <span className="text-foreground font-medium">{transaction.paidAt}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <User size={13} />
@@ -116,38 +136,6 @@ export function PaymentDetailSheet({
                   </Link>
                 }
               />
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <CreditCard size={13} />
-              Gateway & Ledger Telemetry
-            </span>
-            <div className="space-y-1.5 text-[11px]">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Processor</span>
-                <div className="flex items-center gap-1 font-medium text-foreground">
-                  {gw.icon}
-                  <span>{gw.label}</span>
-                </div>
-              </div>
-              {transaction.gatewayTxnId && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Gateway TXN</span>
-                  <span className="font-mono font-semibold text-foreground">{transaction.gatewayTxnId}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Initiated At</span>
-                <span className="text-foreground">{transaction.createdAt}</span>
-              </div>
-              {transaction.settledAt && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Settled At</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{transaction.settledAt}</span>
-                </div>
-              )}
             </div>
           </div>
 

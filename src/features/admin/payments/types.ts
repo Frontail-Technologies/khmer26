@@ -1,6 +1,4 @@
-export type PaymentStatus = "successful" | "pending" | "failed" | "refunded"
-
-export type PaymentGateway = "bakong" | "aba" | "acleda" | "wing" | "card"
+export type PaymentStatus = "successful" | "pending" | "failed"
 
 export type PaymentPurpose = "promotion" | "subscription"
 
@@ -16,19 +14,9 @@ export interface AdminPaymentTransaction {
   purpose: PaymentPurpose
   purposeTitle: string
   relatedId?: string
-  gateway: PaymentGateway
-  gatewayTxnId?: string
+  paymentMethod: "ABA KHQR"
   status: PaymentStatus
   createdAt: string
-  settledAt?: string
-  receiptUrl?: string
+  paidAt?: string
   notes?: string
-}
-
-export interface PaymentFinancialStats {
-  totalVolume: string
-  totalVolumeGrowth: string
-  successfulCount: number
-  pendingCount: number
-  failedRefundedCount: number
 }
