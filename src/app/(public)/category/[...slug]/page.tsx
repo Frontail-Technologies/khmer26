@@ -1,62 +1,78 @@
-import { Container } from "@/components/layout/Container"
-import { ResultsHeader } from "@/features/search/components/results-header"
-import { ResultsShell } from "@/features/search/components/results-shell"
-import { DEMO_SEARCH_LISTINGS } from "@/features/search/data/demo-results-listings"
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { Container } from "@/components/layout/Container"
+import { resolveCategoryFromSlugs } from "@/features/categories/lib/category-taxonomy"
+import { CategoryPageHeader } from "@/features/categories/components/category-page-header"
+import { SubcategoryDiscovery } from "@/features/categories/components/subcategory-discovery"
+import { CategorySiblingNav } from "@/features/categories/components/category-sibling-nav"
+import { CategoryResultsShell } from "@/features/categories/components/category-results-shell"
+import { ALL_MARKETPLACE_LISTINGS } from "@/features/search/data/all-marketplace-listings"
 
 interface CategoryPageProps {
   params: Promise<{ slug: string[] }>
-}
-
-function formatCategorySegment(segment: string): string {
-  return segment
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params
-  const categoryTitle = slug.map(formatCategorySegment).join(" › ")
+  const taxonomy = resolveCategoryFromSlugs(slug)
+
+  if (!taxonomy) {
+    return {
+      title: "Category in Cambodia — Khmer26",
+      description: "Browse verified classified listings in Cambodia on Khmer26.",
+    }
+  }
+
+  const { title, rootCategory, isRoot } = taxonomy
+  const pageTitle = isRoot
+    ? `${rootCategory.name} in Cambodia — Khmer26`
+    : `${title} — ${rootCategory.name} in Cambodia — Khmer26`
+
+  const description = isRoot
+    ? rootCategory.description
+    : `Find verified ${title} listings in ${rootCategory.name} from trusted sellers across Cambodia on Khmer26.`
+
   return {
-    title: `${categoryTitle} in Cambodia`,
-    description: `Browse verified ${categoryTitle} listings from trusted sellers across Cambodia on Khmer26.`,
+    title: pageTitle,
+    description,
+    openGraph: {
+      title: pageTitle,
+      description,
+      type: "website",
+    },
   }
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params
+  const taxonomy = resolveCategoryFromSlugs(slug)
 
-  const breadcrumbs = [
-    { label: "Home", href: "/" },
-    { label: "Categories", href: "/categories" },
-    ...slug.map((segment, i) => ({
-      label: formatCategorySegment(segment),
-      href:
-        i === slug.length - 1
-          ? undefined
-          : `/category/${slug.slice(0, i + 1).join("/")}`,
-    })),
-  ]
-
-  const lastSegment = slug[slug.length - 1] ?? "vehicles"
-  const formattedCurrent = formatCategorySegment(lastSegment)
-  const pageTitle =
-    lastSegment.toLowerCase() === "cars"
-      ? "Used Cars in Cambodia"
-      : `${formattedCurrent} in Cambodia`
+  if (!taxonomy) {
+    notFound()
+  }
 
   return (
     <Container className="py-2 pb-14">
-      <ResultsHeader
-        title={pageTitle}
-        totalCount={DEMO_SEARCH_LISTINGS.length}
-        breadcrumbs={breadcrumbs}
+      <CategoryPageHeader
+        taxonomy={taxonomy}
+        totalCount={
+          taxonomy.currentSubcategory
+            ? taxonomy.currentSubcategory.listingCount
+            : taxonomy.rootCategory.listingCount
+        }
       />
-      <ResultsShell
-        initialListings={DEMO_SEARCH_LISTINGS}
-        initialCategory={lastSegment}
+
+      {taxonomy.isRoot ? (
+        <SubcategoryDiscovery taxonomy={taxonomy} />
+      ) : (
+        <CategorySiblingNav taxonomy={taxonomy} />
+      )}
+
+      <CategoryResultsShell
+        taxonomy={taxonomy}
+        initialListings={ALL_MARKETPLACE_LISTINGS}
       />
     </Container>
   )

@@ -9,41 +9,20 @@ import { FavoriteButton } from "./favorite-button"
 interface ListingCardProps {
   listing: ListingCardType
   featured?: boolean
+  compact?: boolean
   className?: string
 }
 
-function formatPrice(amount: number, currency: string = "USD"): string {
-  if (currency === "USD") {
-    return `$${amount.toLocaleString("en-US")}`
-  }
-  return `${amount.toLocaleString("en-US")} ${currency}`
-}
+import { formatPriceWithCurrency } from "@/lib/formatters/currency"
+import { formatRelativeTime } from "@/lib/formatters/date"
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffMinutes < 60) {
-    return `${Math.max(1, diffMinutes)}m ago`
-  }
-  if (diffHours < 24) {
-    return `${diffHours}h ago`
-  }
-  if (diffDays === 1) {
-    return "1d ago"
-  }
-  if (diffDays < 7) {
-    return `${diffDays}d ago`
-  }
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-}
-
-export function ListingCard({ listing, featured = false, className }: ListingCardProps) {
-  const formattedPrice = formatPrice(listing.price, listing.currency)
+export function ListingCard({
+  listing,
+  featured = false,
+  compact = false,
+  className,
+}: ListingCardProps) {
+  const formattedPrice = formatPriceWithCurrency(listing.price, listing.currency)
   const timeAgo = formatRelativeTime(listing.createdAt)
   const imageUrl = listing.primaryImage?.url ?? "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80"
   const imageAlt = listing.primaryImage?.alt ?? listing.title
@@ -73,51 +52,81 @@ export function ListingCard({ listing, featured = false, className }: ListingCar
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10">
           <FavoriteButton
             listingId={listing.id}
             initialFavorited={listing.isFavorited}
+            className={compact ? "h-6.5 w-6.5" : undefined}
           />
         </div>
-        {isFeatured && (
-          <div className="absolute top-2 left-2 z-10 pointer-events-none">
-            <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-xs">
+        <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10 pointer-events-none flex flex-col gap-1 items-start">
+          {isFeatured && (
+            <span className={cn(
+              "inline-flex items-center rounded-md bg-accent text-accent-foreground font-bold tracking-wider uppercase shadow-xs",
+              compact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]"
+            )}>
               Featured
             </span>
-          </div>
-        )}
+          )}
+          {listing.urgent && (
+            <span className={cn(
+              "inline-flex items-center rounded-md bg-destructive text-destructive-foreground font-bold tracking-wider uppercase shadow-xs",
+              compact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]"
+            )}>
+              Urgent
+            </span>
+          )}
+        </div>
       </div>
 
-      <CardContent className="flex flex-1 flex-col justify-between p-3 pointer-events-none">
+      <CardContent className={cn(
+        "flex flex-1 flex-col justify-between pointer-events-none",
+        compact ? "p-2 sm:p-3" : "p-3"
+      )}>
         <div>
-          <div className="flex items-baseline justify-between gap-1.5">
-            <span className="text-[17px] sm:text-lg font-black tracking-tight text-primary">
+          <div className="flex items-baseline justify-between gap-1">
+            <span className={cn(
+              "font-bold tracking-tight text-primary",
+              compact ? "text-[15px] sm:text-lg sm:font-black" : "text-[17px] sm:text-lg sm:font-black"
+            )}>
               {formattedPrice}
             </span>
             {listing.negotiable && (
-              <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-sm shrink-0">
+              <span className={cn(
+                "font-medium text-muted-foreground bg-muted/60 rounded-sm shrink-0",
+                compact ? "text-[9px] px-1 py-0.2" : "text-[10px] px-1.5 py-0.5"
+              )}>
                 Negotiable
               </span>
             )}
           </div>
 
-          <h3 className="mt-1 block font-semibold text-foreground line-clamp-2 transition-colors group-hover:text-primary text-xs sm:text-[13px] leading-snug">
+          <h3 className={cn(
+            "block font-semibold text-foreground line-clamp-2 transition-colors group-hover:text-primary leading-snug",
+            compact ? "mt-0.5 text-xs sm:text-[13px]" : "mt-1 text-xs sm:text-[13px]"
+          )}>
             {listing.title}
           </h3>
 
           {listing.metadata && listing.metadata.length > 0 && (
-            <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground truncate font-normal">
+            <div className={cn(
+              "flex items-center gap-1.5 text-muted-foreground truncate font-normal",
+              compact ? "mt-1 text-[10px] sm:text-[11px]" : "mt-1.5 text-[11px]"
+            )}>
               <span>{listing.metadata.join(" • ")}</span>
             </div>
           )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-1 pt-2 border-t border-border/50 text-[11px] text-muted-foreground">
+        <div className={cn(
+          "flex items-center justify-between gap-1 border-t border-border/50 text-muted-foreground",
+          compact ? "mt-2 pt-1.5 text-[10px] sm:text-[11px] sm:mt-3 sm:pt-2" : "mt-3 pt-2 text-[11px]"
+        )}>
           <div className="flex items-center gap-1 min-w-0 max-w-[70%]">
             <span className="truncate">{locationLabel}</span>
             {listing.verified && (
               <ShieldCheck
-                size={14}
+                size={compact ? 13 : 14}
                 weight="fill"
                 className="text-primary shrink-0"
                 aria-label="Verified Seller"

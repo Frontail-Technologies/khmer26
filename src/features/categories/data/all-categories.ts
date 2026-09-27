@@ -271,7 +271,7 @@ export const ALL_DETAILED_CATEGORIES: DetailedCategory[] = [
   {
     id: "bikes",
     name: "Bicycles & Electric Rides",
-    slug: "motorcycles",
+    slug: "bikes",
     imageUrl: "/images/categories/bikes.jpg",
     iconName: "Bicycle",
     description: "Mountain bikes, road racing bicycles, folding bikes, electric scooters, and cycling gear",
@@ -301,7 +301,7 @@ export const ALL_DETAILED_CATEGORIES: DetailedCategory[] = [
   {
     id: "commercial",
     name: "Commercial & Machinery",
-    slug: "vehicles",
+    slug: "commercial",
     imageUrl: "/images/categories/commercial.jpg",
     iconName: "Truck",
     description: "Industrial equipment, agricultural machines, generators, heavy excavators, and commercial tools",

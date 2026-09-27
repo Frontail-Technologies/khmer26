@@ -12,42 +12,15 @@ interface ListingListRowProps {
   className?: string
 }
 
-function formatPrice(amount: number, currency: string = "USD"): string {
-  if (currency === "USD") {
-    return `$${amount.toLocaleString("en-US")}`
-  }
-  return `${amount.toLocaleString("en-US")} ${currency}`
-}
-
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffMinutes < 60) {
-    return `${Math.max(1, diffMinutes)}m ago`
-  }
-  if (diffHours < 24) {
-    return `${diffHours}h ago`
-  }
-  if (diffDays === 1) {
-    return "1d ago"
-  }
-  if (diffDays < 7) {
-    return `${diffDays}d ago`
-  }
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-}
+import { formatPriceWithCurrency } from "@/lib/formatters/currency"
+import { formatRelativeTime } from "@/lib/formatters/date"
 
 export function ListingListRow({
   listing,
   featured = false,
   className,
 }: ListingListRowProps) {
-  const formattedPrice = formatPrice(listing.price, listing.currency)
+  const formattedPrice = formatPriceWithCurrency(listing.price, listing.currency)
   const timeAgo = formatRelativeTime(listing.createdAt)
   const imageUrl =
     listing.primaryImage?.url ??
@@ -79,13 +52,18 @@ export function ListingListRow({
           sizes="(max-width: 640px) 112px, (max-width: 768px) 176px, 208px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {isFeatured && (
-          <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none">
+        <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none flex flex-col gap-1 items-start">
+          {isFeatured && (
             <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-xs">
               Featured
             </span>
-          </div>
-        )}
+          )}
+          {listing.urgent && (
+            <span className="inline-flex items-center rounded-md bg-destructive text-destructive-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-xs">
+              Urgent
+            </span>
+          )}
+        </div>
       </div>
 
       <CardContent className="flex flex-1 flex-col justify-between p-2.5 sm:p-3.5 min-w-0 pointer-events-none">

@@ -10,14 +10,14 @@ export const POPULAR_CATEGORIES: VisualCategory[] = [
   {
     id: "cars",
     name: "Cars",
-    slug: "cars",
+    slug: "vehicles/cars",
     imageUrl: "/images/categories/cars.jpg",
     imageAlt: "Cars",
   },
   {
     id: "bikes",
     name: "Bikes",
-    slug: "motorcycles",
+    slug: "vehicles/motorcycles",
     imageUrl: "/images/categories/bikes.jpg",
     imageAlt: "Bikes",
   },
@@ -45,7 +45,7 @@ export const POPULAR_CATEGORIES: VisualCategory[] = [
   {
     id: "commercial",
     name: "Commercial Vehicles & Spares",
-    slug: "vehicles",
+    slug: "vehicles/trucks",
     imageUrl: "/images/categories/commercial.jpg",
     imageAlt: "Commercial Vehicles & Spares",
   },
