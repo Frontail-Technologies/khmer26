@@ -11,8 +11,8 @@ const SAFETY_TIPS = [
 
 export function ListingSafetyCard() {
   return (
-    <Card className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5 shadow-xs">
-      <CardContent className="p-0 space-y-3">
+    <Card size="sm" className="bg-primary/5 ring-primary/20">
+      <CardContent className="pt-(--card-spacing) space-y-3">
         <div className="flex items-center gap-2 text-primary">
           <ShieldCheck size={20} weight="fill" />
           <h3 className="text-sm sm:text-base font-bold text-foreground">

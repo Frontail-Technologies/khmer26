@@ -11,6 +11,7 @@ import { ListingDescription } from "@/features/listings/components/detail/listin
 import { ListingLocation } from "@/features/listings/components/detail/listing-location"
 import { ListingSafetyCard } from "@/features/listings/components/detail/listing-safety-card"
 import { ListingMobileActionBar } from "@/features/listings/components/detail/listing-mobile-action-bar"
+import { LoanCalculatorCard } from "@/features/listings/components/detail/loan-calculator/loan-calculator-card"
 import { ListingSection } from "@/features/listings/components/listing-section"
 import {
   getListingBySlug,
@@ -57,10 +58,15 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound()
   }
 
-  const similarListings = getSimilarListings(listing.slug, 5)
+  const similarListings = getSimilarListings(listing.slug, 8)
+  const isEligibleForLoan =
+    listing.price >= 500 ||
+    listing.categoryPath.some((cat) =>
+      /vehicle|car|motorcycle|property|house|land|apartment|condo/i.test(cat)
+    )
 
   return (
-    <div className="min-h-dvh bg-background pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12">
+    <div className="min-h-dvh bg-background pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-12">
       <MobilePageHeader
         backHref="/search"
         backLabel="Back to search results"
@@ -73,17 +79,31 @@ export default async function ListingPage({ params }: ListingPageProps) {
         />
 
         <div className="mt-2 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          <div className="lg:col-span-8 space-y-6">
-            <ListingGallery images={listing.images} title={listing.title} />
+          <div className="lg:col-span-8 space-y-5 sm:space-y-6">
+            <ListingGallery
+              images={listing.images}
+              title={listing.title}
+              listingId={listing.id}
+              isFavorited={listing.isFavorited}
+            />
 
             <div className="block lg:hidden space-y-4">
               <ListingPrimaryPanel listing={listing} />
-              <ListingSellerCard seller={listing.seller} />
             </div>
 
-            <ListingSpecifications attributes={listing.attributes || []} />
+            <ListingSpecifications listing={listing} />
 
             <ListingDescription description={listing.description} />
+
+            {isEligibleForLoan && (
+              <div className="block lg:hidden">
+                <LoanCalculatorCard price={listing.price} currency={listing.currency} />
+              </div>
+            )}
+
+            <div className="block lg:hidden">
+              <ListingSellerCard seller={listing.seller} listingId={listing.id} />
+            </div>
 
             <ListingLocation location={listing.location} />
 
@@ -94,7 +114,10 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
           <div className="hidden lg:block lg:col-span-4 space-y-4 lg:sticky lg:top-20">
             <ListingPrimaryPanel listing={listing} />
-            <ListingSellerCard seller={listing.seller} />
+            <ListingSellerCard seller={listing.seller} listingId={listing.id} />
+            {isEligibleForLoan && (
+              <LoanCalculatorCard price={listing.price} currency={listing.currency} />
+            )}
             <ListingSafetyCard />
           </div>
         </div>
@@ -102,7 +125,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
         {similarListings.length > 0 && (
           <div className="mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-border/70">
             <ListingSection
-              title="Similar Listings"
+              title="Related Posts"
               description="More items you might be interested in"
               listings={similarListings}
               viewAllHref="/search"
@@ -114,6 +137,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
       <ListingMobileActionBar
         listingId={listing.id}
         sellerPhone={listing.seller?.phone}
+        isFavorited={listing.isFavorited}
       />
     </div>
   )

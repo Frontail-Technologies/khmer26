@@ -48,6 +48,8 @@ export interface Listing {
   viewCount?: number
   isFavorited?: boolean
   featured?: boolean
+  urgent?: boolean
+  topListing?: boolean
   verified?: boolean
   metadata?: string[]
   attributes?: Array<{
@@ -77,6 +79,8 @@ export interface ListingCard {
   createdAt: string
   isFavorited?: boolean
   featured?: boolean
+  urgent?: boolean
+  topListing?: boolean
   verified?: boolean
   metadata?: string[]
   attributes?: Array<{

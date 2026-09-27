@@ -10,8 +10,8 @@ export function ListingLocation({ location }: ListingLocationProps) {
   const displayLocation = location.label || `${location.district ? `${location.district}, ` : ""}${location.province}, Cambodia`
 
   return (
-    <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
-      <CardHeader className="p-0 pb-3 sm:pb-4 flex flex-row items-center justify-between gap-2">
+    <Card size="sm">
+      <CardHeader className="flex flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <MapPin size={18} className="text-primary shrink-0" />
           <CardTitle className="text-base sm:text-lg font-bold text-foreground">
@@ -23,9 +23,9 @@ export function ListingLocation({ location }: ListingLocationProps) {
         </span>
       </CardHeader>
 
-      <CardContent className="p-0 space-y-3">
+      <CardContent className="space-y-3">
         <div className="relative aspect-21/9 sm:aspect-3/1 w-full overflow-hidden rounded-lg border border-border/70 bg-muted/50 flex flex-col items-center justify-center p-4 text-center">
-          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[16px_16px]" />
+          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(var(--foreground)_1px,transparent_1px)] bg-size-[16px_16px]" />
           
           <div className="relative z-10 flex flex-col items-center space-y-1.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md animate-bounce">
@@ -41,9 +41,22 @@ export function ListingLocation({ location }: ListingLocationProps) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Exact seller address and landmark details are shared directly upon contacting the seller.
-        </p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+          <p className="text-xs text-muted-foreground flex-1">
+            Exact address and landmarks are shared directly upon contacting the seller.
+          </p>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${location.label || location.province}, Cambodia`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline shrink-0"
+          >
+            <NavigationArrow size={14} weight="bold" />
+            <span>View on Map</span>
+          </a>
+        </div>
       </CardContent>
     </Card>
   )

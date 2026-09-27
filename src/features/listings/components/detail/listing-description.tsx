@@ -16,15 +16,15 @@ export function ListingDescription({ description }: ListingDescriptionProps) {
   const paragraphs = description.split("\n\n").filter(Boolean)
 
   return (
-    <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
-      <CardHeader className="p-0 pb-3 sm:pb-4 flex flex-row items-center gap-2">
+    <Card size="sm">
+      <CardHeader className="flex flex-row items-center gap-2">
         <Article size={18} className="text-primary shrink-0" />
         <CardTitle className="text-base sm:text-lg font-bold text-foreground">
           Description
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="p-0 space-y-3">
+      <CardContent className="space-y-3">
         <div
           className={`space-y-2.5 text-xs sm:text-sm text-foreground/90 leading-relaxed font-normal ${
             !isExpanded && isLong ? "line-clamp-6" : ""

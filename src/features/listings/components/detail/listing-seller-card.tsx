@@ -5,6 +5,8 @@ import {
   CalendarBlank,
   Storefront,
   ArrowRight,
+  ChatCircleDots,
+  Phone,
 } from "@phosphor-icons/react/dist/ssr"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,9 +15,10 @@ import type { ListingSeller } from "@/types"
 
 interface ListingSellerCardProps {
   seller: ListingSeller
+  listingId?: string
 }
 
-export function ListingSellerCard({ seller }: ListingSellerCardProps) {
+export function ListingSellerCard({ seller, listingId }: ListingSellerCardProps) {
   const initials = seller.name
     .split(" ")
     .map((w) => w[0])
@@ -24,8 +27,8 @@ export function ListingSellerCard({ seller }: ListingSellerCardProps) {
     .toUpperCase()
 
   return (
-    <Card className="rounded-xl border border-border/80 bg-card p-4 shadow-xs">
-      <CardContent className="p-0 space-y-3.5">
+    <Card size="sm">
+      <CardContent className="pt-(--card-spacing) space-y-3.5">
         <div className="flex items-center gap-3">
           <Avatar size="lg" className="h-12 w-12 border border-border/70">
             {seller.avatar && (
@@ -85,13 +88,43 @@ export function ListingSellerCard({ seller }: ListingSellerCardProps) {
           )}
         </div>
 
-        <div className="pt-1">
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          {seller.phone && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8.5 text-xs font-semibold rounded-lg gap-1 border-border hover:bg-muted"
+              render={
+                <a href={`tel:${seller.phone.replace(/\s+/g, "")}`}>
+                  <Phone size={14} weight="bold" />
+                  <span>Call</span>
+                </a>
+              }
+            />
+          )}
+
+          {listingId && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8.5 text-xs font-semibold rounded-lg gap-1 border-border hover:bg-muted"
+              render={
+                <Link href={`/messages?listingId=${listingId}`}>
+                  <ChatCircleDots size={14} weight="bold" />
+                  <span>Chat</span>
+                </Link>
+              }
+            />
+          )}
+        </div>
+
+        <div className="pt-0.5">
           <Button
             variant="outline"
             className="w-full h-9 text-xs font-semibold rounded-lg justify-between border-border hover:bg-muted"
             render={
               <Link href={`/seller/${seller.slug}`}>
-                <span>View Profile</span>
+                <span>View Store Profile</span>
                 <ArrowRight size={14} weight="bold" />
               </Link>
             }

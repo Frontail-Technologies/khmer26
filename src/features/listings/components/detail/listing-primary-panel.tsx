@@ -25,20 +25,8 @@ interface ListingPrimaryPanelProps {
   listing: ListingDetail
 }
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffMinutes < 60) return `${Math.max(1, diffMinutes)}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays === 1) return "1d ago"
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-}
+import { formatPriceWithCurrency } from "@/lib/formatters/currency"
+import { formatRelativeTime } from "@/lib/formatters/date"
 
 export function ListingPrimaryPanel({ listing }: ListingPrimaryPanelProps) {
   const router = useRouter()
@@ -47,10 +35,7 @@ export function ListingPrimaryPanel({ listing }: ListingPrimaryPanelProps) {
   const [reportOpen, setReportOpen] = useState(false)
   const [offerOpen, setOfferOpen] = useState(false)
 
-  const formattedPrice =
-    listing.currency === "USD"
-      ? `$${listing.price.toLocaleString("en-US")}`
-      : `${listing.price.toLocaleString("en-US")} ${listing.currency}`
+  const formattedPrice = formatPriceWithCurrency(listing.price, listing.currency)
 
   const sellerPhone = listing.seller?.phone || "+855 12 889 977"
   const timeAgo = formatRelativeTime(listing.createdAt)
@@ -76,8 +61,8 @@ export function ListingPrimaryPanel({ listing }: ListingPrimaryPanelProps) {
 
   return (
     <>
-      <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
-        <CardContent className="p-0 space-y-4">
+      <Card size="sm">
+        <CardContent className="pt-(--card-spacing) space-y-4">
           <div className="space-y-1.5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-baseline gap-2 flex-wrap">
