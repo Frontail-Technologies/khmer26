@@ -121,7 +121,7 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
             {request.riskScore && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Risk Assessment</span>
-                <span className="font-bold uppercase text-[10px] text-emerald-600 dark:text-emerald-400">
+                <span className="font-bold uppercase text-[10px] text-success">
                   {request.riskScore} Risk
                 </span>
               </div>
@@ -159,7 +159,7 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
           {requestInfoNotice && (
             <div className="p-2.5 rounded-lg bg-muted/50 border border-border text-[11px] text-muted-foreground space-y-1">
               <div className="flex items-center gap-1 font-semibold text-foreground">
-                <WarningCircle size={13} className="text-amber-500" />
+                <WarningCircle size={13} className="text-accent" />
                 <span>Request Info Workflow</span>
               </div>
               <p>
@@ -169,7 +169,7 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
           )}
 
           {request.status === "approved" && (
-            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs flex items-start gap-2">
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
               <p className="leading-relaxed">
                 This seller has been approved and verified. The trust badge is active on their profile.

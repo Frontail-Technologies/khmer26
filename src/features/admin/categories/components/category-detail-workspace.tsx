@@ -80,7 +80,7 @@ export function CategoryDetailWorkspace({
               variant="secondary"
               className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                 isActive
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                  ? "bg-success/10 text-success border-success/20"
                   : "bg-muted text-muted-foreground"
               }`}
             >
@@ -334,14 +334,14 @@ export function CategoryDetailWorkspace({
 
                           <div className="flex items-center gap-3 shrink-0">
                             <span className="text-[11px] font-semibold text-foreground/80 px-2 py-0.5 rounded-md bg-muted/60">
-                              {sub.listingCount.toLocaleString()} ads
+                              {sub.listingCount.toLocaleString()} listings
                             </span>
 
                             <Badge
                               variant="secondary"
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                                 sub.isActive
-                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                  ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted text-muted-foreground"
                               }`}
                             >

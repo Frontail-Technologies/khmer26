@@ -46,7 +46,7 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   },
   "/admin/promotions": {
     title: "Promotions",
-    subtitle: "Manage featured ads, homepage spotlights, and promotional campaigns.",
+    subtitle: "Manage featured listings, top listing boosts, and urgent badge campaigns.",
   },
   "/admin/subscriptions": {
     title: "Subscriptions",
@@ -54,7 +54,7 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   },
   "/admin/payments": {
     title: "Payments",
-    subtitle: "Review marketplace transactions, payment gateways, and settlements.",
+    subtitle: "Review marketplace ABA KHQR payment transactions and subscriptions.",
   },
   "/admin/notifications": {
     title: "Notifications",

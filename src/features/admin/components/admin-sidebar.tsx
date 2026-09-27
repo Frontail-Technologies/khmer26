@@ -293,7 +293,7 @@ function AdminSidebarInner() {
                                 : item.badgeVariant === "destructive"
                                 ? "bg-destructive/15 text-destructive"
                                 : item.badgeVariant === "warning"
-                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                                ? "bg-accent/15 text-accent"
                                 : "bg-muted text-muted-foreground"
                             )}
                           >

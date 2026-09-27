@@ -113,7 +113,7 @@ export function SubscriptionPlansTable({
                 </TableCell>
                 <TableCell className="py-3 px-4 text-xs">
                   <span className="font-semibold text-foreground">
-                    {plan.maxListings >= 500 ? "500 (Unlimited)" : `${plan.maxListings} listings`}
+                    {plan.maxListings === 0 ? "Custom / Unset" : `${plan.maxListings} listings`}
                   </span>
                 </TableCell>
                 <TableCell className="py-3 px-4 text-xs">
@@ -123,7 +123,7 @@ export function SubscriptionPlansTable({
                 </TableCell>
                 <TableCell className="py-3 px-4 text-xs">
                   <span className="font-bold text-xs text-foreground">
-                    {plan.price === 0 ? "Free" : `$${plan.price} USD`}
+                    {plan.price === 0 && plan.tier === "free" ? "Free" : plan.price === 0 ? "Unset" : `$${plan.price} USD`}
                   </span>
                 </TableCell>
                 <TableCell className="py-3 px-4 text-xs">
@@ -174,13 +174,13 @@ export function SubscriptionPlansTable({
               <div className="p-2 rounded-lg bg-muted/40 border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground block">Listing Limit</span>
                 <span className="font-semibold text-foreground">
-                  {plan.maxListings >= 500 ? "500 (Unlimited)" : `${plan.maxListings} listings`}
+                  {plan.maxListings === 0 ? "Custom / Unset" : `${plan.maxListings} listings`}
                 </span>
               </div>
               <div className="p-2 rounded-lg bg-muted/40 border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground block">Price</span>
                 <span className="font-bold text-foreground">
-                  {plan.price === 0 ? "Free" : `$${plan.price} / mo`}
+                  {plan.price === 0 && plan.tier === "free" ? "Free" : plan.price === 0 ? "Unset" : `$${plan.price} / mo`}
                 </span>
               </div>
             </div>

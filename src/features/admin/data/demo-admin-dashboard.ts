@@ -333,9 +333,9 @@ export const DEMO_TOP_SELLERS: AdminTopSeller[] = [
 
 export const DEMO_SELLER_DISTRIBUTION = [
   { label: "Verified Dealerships", count: "1,420", percent: 38, color: "bg-primary" },
-  { label: "Business Stores", count: "1,180", percent: 32, color: "bg-purple-500" },
-  { label: "Individual Verified", count: "890", percent: 24, color: "bg-blue-500" },
-  { label: "Pending Verification", count: "210", percent: 6, color: "bg-amber-500" },
+  { label: "Business Stores", count: "1,180", percent: 32, color: "bg-accent" },
+  { label: "Individual Verified", count: "890", percent: 24, color: "bg-primary/70" },
+  { label: "Pending Verification", count: "210", percent: 6, color: "bg-muted-foreground" },
 ]
 
 export const DEMO_SUBSCRIPTION_DISTRIBUTION = [

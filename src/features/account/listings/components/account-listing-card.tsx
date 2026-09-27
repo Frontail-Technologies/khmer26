@@ -130,7 +130,7 @@ export function AccountListingCard({
                 className="inline-flex items-center gap-1"
                 title={`${listing.favoritesCount} favorites`}
               >
-                <Heart size={14} className="text-rose-500" />
+                <Heart size={14} className="text-destructive" />
                 <span className="font-semibold text-foreground">
                   {listing.favoritesCount}
                 </span>

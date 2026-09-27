@@ -83,13 +83,13 @@ export function ReviewDetailSheet({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div className="p-3.5 rounded-xl bg-background border border-border/70 space-y-2.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-amber-500">
+              <div className="flex items-center gap-1 text-accent">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     size={16}
                     weight="fill"
-                    className={i < review.rating ? "text-amber-500" : "text-muted-foreground/25"}
+                    className={i < review.rating ? "text-accent" : "text-muted-foreground/25"}
                   />
                 ))}
                 <span className="font-bold text-xs text-foreground ml-1.5">
@@ -231,7 +231,7 @@ export function ReviewDetailSheet({
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground pt-0.5">
-              <span className="flex items-center text-amber-500 font-semibold">
+              <span className="flex items-center text-accent font-semibold">
                 <Star size={11} weight="fill" className="mr-0.5" />
                 {review.seller.rating}
               </span>

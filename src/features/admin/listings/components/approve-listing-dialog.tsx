@@ -41,7 +41,7 @@ export function ApproveListingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
-          <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-1">
+          <div className="size-10 rounded-xl bg-success/10 text-success flex items-center justify-center mb-1">
             <ShieldCheck size={24} weight="fill" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">
@@ -70,7 +70,7 @@ export function ApproveListingDialog({
             </div>
           </div>
 
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs leading-snug">
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-success/10 border border-success/20 text-success text-xs leading-snug">
             <CheckCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
             <span>
               Approving will immediately index this listing in search results and notify the seller.

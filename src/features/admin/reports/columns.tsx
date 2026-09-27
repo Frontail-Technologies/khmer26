@@ -237,7 +237,7 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
                   render={
                     <Link
                       href={`/admin/reports/${report.id}`}
-                      className="flex items-center gap-2 w-full text-xs font-medium text-emerald-600 dark:text-emerald-400 cursor-pointer"
+                      className="flex items-center gap-2 w-full text-xs font-medium text-success cursor-pointer"
                     >
                       <CheckCircle size={14} />
                       <span>Resolve</span>

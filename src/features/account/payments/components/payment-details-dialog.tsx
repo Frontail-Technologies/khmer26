@@ -42,7 +42,7 @@ export function PaymentDetailsDialog({
     pending: {
       label: "Pending",
       icon: Clock,
-      className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      className: "bg-accent/10 text-accent border-accent/20",
     },
     failed: {
       label: "Failed",

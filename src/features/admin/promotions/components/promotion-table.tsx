@@ -71,7 +71,7 @@ const PROMOTION_TYPE_CONFIG: Record<
   top_listing: {
     label: "Top Listing Boost",
     icon: Star,
-    badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    badgeClass: "bg-accent/10 text-accent border-accent/20",
   },
   urgent: {
     label: "Urgent Badge",

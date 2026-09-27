@@ -38,7 +38,7 @@ export function AdminOverviewPanel() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Marketplace Activity
           </CardTitle>
-          <Badge variant="secondary" className="text-[10px] font-bold h-4.5 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 rounded-md">
+          <Badge variant="secondary" className="text-[10px] font-bold h-4.5 px-2 bg-success/10 text-success border-success/20 rounded-md">
             Live Feed
           </Badge>
         </div>
@@ -70,9 +70,9 @@ export function AdminOverviewPanel() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                48,290 Ads
+                48,290 Listings
               </span>
-              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-success">
                 <TrendUp size={12} weight="bold" />
                 <span>+12.4%</span>
               </span>

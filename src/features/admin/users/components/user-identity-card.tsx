@@ -161,12 +161,12 @@ export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
                 />
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-amber-600 dark:text-amber-400">
+              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-accent">
                 <Lock size={14} />
                 <span>Restrict Account</span>
               </DropdownMenuItem>
               {user.status === "suspended" ? (
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-primary">
                   <CheckCircle size={14} />
                   <span>Restore Account</span>
                 </DropdownMenuItem>

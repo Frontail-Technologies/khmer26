@@ -133,7 +133,7 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
                   {user.rating && (
                     <div>
                       <span className="text-[11px] text-muted-foreground block mb-0.5">Rating</span>
-                      <span className="text-sm font-bold text-amber-500 flex items-center gap-1">
+                      <span className="text-sm font-bold text-accent flex items-center gap-1">
                         <Star size={13} weight="fill" />
                         {user.rating}
                       </span>
@@ -179,7 +179,7 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                    <WarningOctagon size={13} className="text-amber-500" />
+                    <WarningOctagon size={13} className="text-accent" />
                     Reports ({user.relatedReports.length})
                   </h2>
                   <Button
@@ -330,7 +330,7 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
             {user.reportsCount > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Reports</span>
-                <span className="font-medium text-amber-600 dark:text-amber-400">{user.reportsCount}</span>
+                <span className="font-medium text-accent">{user.reportsCount}</span>
               </div>
             )}
           </div>

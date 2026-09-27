@@ -132,7 +132,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
               {listing.reports.length > 0 && (
                 <>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-0.5 text-rose-600 dark:text-rose-400 font-bold text-[10px]">
+                  <span className="inline-flex items-center gap-0.5 text-destructive font-bold text-[10px]">
                     <Flag size={10} weight="fill" />
                     <span>{listing.reports.length}</span>
                   </span>
@@ -345,7 +345,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
                     render={
                       <Link
                         href={`/admin/listings/${listing.id}`}
-                        className="flex items-center gap-2 w-full text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                        className="flex items-center gap-2 w-full text-xs font-medium text-success"
                       >
                         <CheckCircle size={14} />
                         <span>Approve Listing</span>

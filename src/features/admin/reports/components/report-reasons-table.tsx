@@ -185,9 +185,9 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
                           aria-label={reason.isActive ? "Disable reason" : "Enable reason"}
                         >
                           {reason.isActive ? (
-                            <Prohibit size={14} className="text-amber-500" />
+                            <Prohibit size={14} className="text-accent" />
                           ) : (
-                            <CheckCircle size={14} className="text-emerald-500" />
+                            <CheckCircle size={14} className="text-primary" />
                           )}
                         </Button>
                       </div>

@@ -311,7 +311,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
               Save Settings
             </Button>
             {savedSuccess && (
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-in fade-in duration-200">
+              <span className="text-xs font-semibold text-success flex items-center gap-1 animate-in fade-in duration-200">
                 <Check size={14} weight="bold" />
                 Settings updated successfully
               </span>

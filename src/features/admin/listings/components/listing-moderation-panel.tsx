@@ -157,9 +157,9 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
                 <span
                   className={`font-bold uppercase text-[10px] ${
                     listing.riskLevel === "low"
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-primary"
                       : listing.riskLevel === "medium"
-                      ? "text-amber-600 dark:text-amber-400"
+                      ? "text-accent"
                       : "text-destructive"
                   }`}
                 >
@@ -221,7 +221,7 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
           </div>
 
           {listing.status === "active" && (
-            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs flex items-start gap-2">
+            <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-success text-xs flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
               <p className="leading-relaxed">
                 This listing is active and published across the marketplace search index.

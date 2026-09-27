@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
@@ -242,7 +242,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
               {isActive && (
                 <DropdownMenuItem
                   render={
-                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-amber-600 dark:text-amber-400">
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-accent">
                       <Lock size={14} />
                       <span>Restrict Account</span>
                     </Link>
@@ -252,7 +252,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
               {user.status === "suspended" ? (
                 <DropdownMenuItem
                   render={
-                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-primary">
                       <CheckCircle size={14} />
                       <span>Restore Account</span>
                     </Link>

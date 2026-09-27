@@ -397,13 +397,13 @@ export function ReviewWorkspace({ initialReviews }: ReviewWorkspaceProps) {
                 className="p-3.5 space-y-2.5 hover:bg-muted/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-1 text-amber-500">
+                  <div className="flex items-center gap-1 text-accent">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
                         size={12}
                         weight="fill"
-                        className={i < rev.rating ? "text-amber-500" : "text-muted-foreground/25"}
+                        className={i < rev.rating ? "text-accent" : "text-muted-foreground/25"}
                       />
                     ))}
                     <span className="font-bold text-xs text-foreground ml-1">

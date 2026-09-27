@@ -25,7 +25,7 @@ export function VerificationHistoryTimeline({ history }: VerificationHistoryTime
               <div key={event.id || index} className="flex items-start gap-3 text-xs relative">
                 <div className="size-6 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5 text-muted-foreground border border-border/60">
                   {isApproved ? (
-                    <CheckCircle size={14} className="text-emerald-600 dark:text-emerald-400" weight="fill" />
+                    <CheckCircle size={14} className="text-success" weight="fill" />
                   ) : isRejected ? (
                     <XCircle size={14} className="text-destructive" weight="fill" />
                   ) : (

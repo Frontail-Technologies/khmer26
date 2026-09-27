@@ -81,7 +81,7 @@ export function SecuritySettings() {
                       <span className="font-bold text-foreground">
                         Chrome on Windows (Current Session)
                       </span>
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-success" />
                     </div>
                     <span className="text-muted-foreground text-[11px]">
                       Phnom Penh, Cambodia • Active now

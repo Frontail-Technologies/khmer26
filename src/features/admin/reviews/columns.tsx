@@ -47,13 +47,13 @@ export function createReviewColumns({
         const rev = row.original
         return (
           <div className="space-y-1 min-w-[220px] max-w-[320px]">
-            <div className="flex items-center gap-1 text-amber-500">
+            <div className="flex items-center gap-1 text-accent">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   size={12}
                   weight="fill"
-                  className={i < rev.rating ? "text-amber-500" : "text-muted-foreground/25"}
+                  className={i < rev.rating ? "text-accent" : "text-muted-foreground/25"}
                 />
               ))}
               <span className="text-[11px] font-bold text-foreground ml-1">

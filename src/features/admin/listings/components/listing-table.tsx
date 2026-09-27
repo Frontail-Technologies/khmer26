@@ -188,9 +188,9 @@ export function ListingTable({ initialData }: ListingTableProps) {
                     className={cn(
                       "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
                       tab.urgent
-                        ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                        ? "bg-destructive/10 text-destructive border-destructive/30"
                         : tab.warning
-                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                        ? "bg-accent/10 text-accent border-accent/30"
                         : isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"
@@ -233,7 +233,7 @@ export function ListingTable({ initialData }: ListingTableProps) {
             <Button
               size="sm"
               variant="outline"
-              className="h-7 text-xs gap-1.5 rounded-lg border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+              className="h-7 text-xs gap-1.5 rounded-lg border-success/30 text-success hover:bg-success/10 cursor-pointer"
               onClick={() => {
                 setRowSelection({})
               }}

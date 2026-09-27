@@ -110,7 +110,7 @@ export function RejectListingDialog({
             />
           </Field>
 
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs leading-snug">
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20 text-accent text-xs leading-snug">
             <WarningCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
             <span>
               The seller will receive a rejection notification and can edit the listing to resubmit.

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-export type AdminMetricTone = "neutral" | "primary" | "success" | "warning" | "destructive" | "indigo" | "purple"
+export type AdminMetricTone = "neutral" | "primary" | "accent" | "success" | "warning" | "destructive" | "info" | "indigo" | "purple"
 
 export interface AdminMetricItemProps {
   label: string
@@ -15,19 +15,23 @@ export interface AdminMetricItemProps {
 const TONE_CONTAINER_CLASSES: Record<AdminMetricTone, string> = {
   neutral: "bg-muted/60 text-muted-foreground border-transparent",
   primary: "bg-primary/10 text-primary border-transparent",
-  success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-transparent",
-  warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-transparent",
-  destructive: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-transparent",
-  indigo: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-transparent",
-  purple: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-transparent",
+  accent: "bg-accent/10 text-accent border-transparent",
+  success: "bg-success/10 text-success border-transparent",
+  warning: "bg-warning/10 text-warning border-transparent",
+  destructive: "bg-destructive/10 text-destructive border-transparent",
+  info: "bg-info/10 text-info border-transparent",
+  indigo: "bg-primary/10 text-primary border-transparent",
+  purple: "bg-accent/10 text-accent border-transparent",
 }
 
 const TONE_VALUE_CLASSES: Record<AdminMetricTone, string> = {
   neutral: "text-foreground",
   primary: "text-foreground",
+  accent: "text-accent",
   success: "text-foreground",
-  warning: "text-amber-600 dark:text-amber-400",
-  destructive: "text-rose-600 dark:text-rose-400",
+  warning: "text-warning",
+  destructive: "text-destructive",
+  info: "text-foreground",
   indigo: "text-foreground",
   purple: "text-foreground",
 }

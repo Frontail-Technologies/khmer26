@@ -145,7 +145,7 @@ export function VerificationSellerCard({
         {businessDetails && (
           <div className="space-y-2.5 pt-2 border-t border-border/60">
             <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <Buildings size={16} className="text-blue-600 dark:text-blue-400" />
+              <Buildings size={16} className="text-primary" />
               <span>Business Information</span>
             </div>
 

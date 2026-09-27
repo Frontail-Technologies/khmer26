@@ -26,7 +26,7 @@ const PROMO_OPTIONS = [
     name: "Featured Listing",
     duration: "7 Days",
     price: "$15.00",
-    description: "Pinned to homepage hero banner and category top spotlights for 5x more views.",
+    description: "Featured in homepage slider and spotlight placement for increased discovery.",
     icon: Sparkle,
   },
   {
@@ -34,7 +34,7 @@ const PROMO_OPTIONS = [
     name: "Top Listing Boost",
     duration: "3 Days",
     price: "$6.00",
-    description: "Stays above standard listings in search results and relevant category feeds.",
+    description: "Boosted placement above standard listings in discovery feeds.",
     icon: Star,
   },
   {
@@ -42,7 +42,7 @@ const PROMO_OPTIONS = [
     name: "Urgent Badge",
     duration: "48 Hours",
     price: "$3.00",
-    description: "High-visibility red badge to alert active buyers looking for quick deals.",
+    description: "High-visibility urgent badge to alert active buyers looking for quick deals.",
     icon: Lightning,
   },
 ]

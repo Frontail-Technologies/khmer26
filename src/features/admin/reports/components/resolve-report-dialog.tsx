@@ -54,7 +54,7 @@ export function ResolveReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
-          <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-1">
+          <div className="size-9 rounded-xl bg-success/10 text-success flex items-center justify-center mb-1">
             <CheckCircle size={20} weight="fill" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">

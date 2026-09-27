@@ -182,7 +182,7 @@ export function ReportedChatsWorkspace({
                     className={cn(
                       "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
                       tab.warning
-                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                        ? "bg-accent/10 text-accent border-accent/30"
                         : isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"

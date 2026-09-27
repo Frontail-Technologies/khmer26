@@ -271,7 +271,7 @@ export function AssignedFieldsList({
                       onClick={() => handleToggleActive(index)}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
                         assignment.active
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground line-through"
                       }`}
                     >

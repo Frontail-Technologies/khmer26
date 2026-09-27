@@ -93,7 +93,7 @@ export function AdminModulePlaceholder({
                         className={cn(
                           "inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0",
                           isUp
-                            ? "text-emerald-600 dark:text-emerald-400"
+                            ? "text-success"
                             : isDown
                             ? "text-destructive"
                             : "text-muted-foreground"
@@ -116,9 +116,9 @@ export function AdminModulePlaceholder({
                         metric.variant === "destructive"
                           ? "text-destructive"
                           : metric.variant === "warning"
-                          ? "text-amber-600 dark:text-amber-400"
+                          ? "text-accent"
                           : metric.variant === "success"
-                          ? "text-emerald-600 dark:text-emerald-400"
+                          ? "text-primary"
                           : "text-foreground"
                       )}
                     >

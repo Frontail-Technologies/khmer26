@@ -56,19 +56,25 @@ export function PlanBenefits({ plans }: PlanBenefitsProps) {
                     </div>
 
                     <div className="pt-2">
-                      <span className="text-2xl font-black text-foreground">
-                        ${plan.priceMonthly}
-                        <span className="text-xs font-normal text-muted-foreground">
-                          {" "}
-                          / month
+                      {plan.priceMonthly > 0 ? (
+                        <span className="text-2xl font-black text-foreground">
+                          ${plan.priceMonthly}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            {" "}
+                            / month
+                          </span>
                         </span>
-                      </span>
+                      ) : (
+                        <span className="text-sm font-bold text-muted-foreground">
+                          Pricing to be announced
+                        </span>
+                      )}
                     </div>
 
                     <CardDescription className="text-xs text-muted-foreground pt-1">
                       {isPlus
-                        ? "Ideal for active individual sellers and pro traders."
-                        : "For established businesses, auto dealerships, and real estate agencies."}
+                        ? "For active individual sellers and merchants."
+                        : "For auto showrooms, dealerships, and agencies."}
                     </CardDescription>
                   </CardHeader>
 
@@ -88,7 +94,7 @@ export function PlanBenefits({ plans }: PlanBenefitsProps) {
                     disabled
                     className="w-full h-auto min-h-10 py-2.5 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground opacity-70 cursor-not-allowed whitespace-normal text-center"
                   >
-                    Upgrade to {plan.name}
+                    {plan.priceMonthly > 0 ? `Upgrade to ${plan.name}` : "Coming Soon"}
                   </Button>
                 </div>
               </Card>

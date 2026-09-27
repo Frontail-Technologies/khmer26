@@ -22,7 +22,7 @@ interface PromotionDetailSheetProps {
 
 const TYPE_CONFIG = {
   featured: { label: "Featured Listing", icon: Sparkle, badgeClass: "bg-primary/10 text-primary border-primary/20" },
-  top_listing: { label: "Top Listing Boost", icon: Star, badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
+  top_listing: { label: "Top Listing Boost", icon: Star, badgeClass: "bg-accent/10 text-accent border-accent/20" },
   urgent: { label: "Urgent Badge", icon: Lightning, badgeClass: "bg-destructive/10 text-destructive border-destructive/20" },
 }
 

@@ -5,8 +5,8 @@ import { DEMO_CATEGORY_DISTRIBUTION } from "../../data/demo-admin-dashboard"
 
 export function AdminCategoryChart() {
   const statusSummary = [
-    { label: "Active", count: "48,290", percent: 84, color: "bg-emerald-500" },
-    { label: "Pending", count: "42", percent: 6, color: "bg-amber-500" },
+    { label: "Active", count: "48,290", percent: 84, color: "bg-primary" },
+    { label: "Pending", count: "42", percent: 6, color: "bg-accent" },
     { label: "Reported", count: "8", percent: 2, color: "bg-destructive" },
     { label: "Expired", count: "1,204", percent: 8, color: "bg-muted-foreground" },
   ]

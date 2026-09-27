@@ -103,7 +103,7 @@ export interface AdminPaymentOverview {
   type: string
   amount: number
   amountFormatted: string
-  gateway: "Bakong KHQR" | "ABA PayWay" | "Credit Card"
+  gateway: "ABA KHQR"
   status: "success" | "pending" | "refunded" | "failed"
   date: string
 }

@@ -49,7 +49,7 @@ export function AdminModerationQueue() {
                     item.type === "report"
                       ? "bg-destructive/10 text-destructive border-destructive/20"
                       : item.type === "verification"
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                      ? "bg-accent/10 text-accent border-accent/20"
                       : "bg-primary/10 text-primary border-primary/20"
                   )}
                 >
@@ -74,7 +74,7 @@ export function AdminModerationQueue() {
                         isUrgent
                           ? "border-destructive/40 text-destructive bg-destructive/5"
                           : isHigh
-                          ? "border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5"
+                          ? "border-accent/40 text-accent bg-accent/5"
                           : "border-border text-muted-foreground"
                       )}
                     >

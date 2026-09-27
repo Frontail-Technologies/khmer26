@@ -186,9 +186,9 @@ export function AdminRecentListingsTable() {
                         className={cn(
                           "text-[9px] font-bold px-2 py-0.5 h-5 uppercase rounded-md",
                           isActive
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                            ? "bg-primary/10 text-primary border-primary/20"
                             : isPending
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                            ? "bg-accent/10 text-accent border-accent/20"
                             : "bg-muted text-muted-foreground border-border"
                         )}
                       >

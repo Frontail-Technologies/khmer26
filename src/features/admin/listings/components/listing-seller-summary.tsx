@@ -72,7 +72,7 @@ export function ListingSellerSummary({ seller }: ListingSellerSummaryProps) {
                 <span>{seller.activeListings} active listings</span>
               </div>
               {seller.rating && (
-                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
+                <div className="flex items-center gap-1 text-accent font-semibold">
                   <Star size={13} weight="fill" />
                   <span>{seller.rating.toFixed(1)}</span>
                 </div>

@@ -60,7 +60,7 @@ export function AdminTopSellersCard() {
             </div>
 
             <div className="text-right shrink-0">
-              <div className="flex items-center gap-1 justify-end text-xs font-bold text-amber-600 dark:text-amber-400">
+              <div className="flex items-center gap-1 justify-end text-xs font-bold text-accent">
                 <Star size={12} weight="fill" />
                 <span>{seller.rating.toFixed(1)}</span>
               </div>

@@ -61,8 +61,8 @@ const STATUS_OPTIONS: SelectOption[] = [
 
 const PLAN_BADGES: Record<string, { label: string; badgeClass: string }> = {
   free: { label: "Free Plan", badgeClass: "bg-muted text-muted-foreground border-border/80" },
-  seller_plus: { label: "Seller Plus", badgeClass: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
-  business: { label: "Business Pro", badgeClass: "bg-primary/10 text-primary border-primary/20" },
+  seller_plus: { label: "Seller Plus", badgeClass: "bg-primary/10 text-primary border-primary/20" },
+  business: { label: "Business Pro", badgeClass: "bg-accent/10 text-accent border-accent/20" },
 }
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {

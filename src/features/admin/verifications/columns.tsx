@@ -103,9 +103,9 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
           {type === "identity" ? (
             <IdentificationCard size={15} className="text-primary shrink-0" />
           ) : type === "business" ? (
-            <Buildings size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+            <Buildings size={15} className="text-primary shrink-0" />
           ) : (
-            <UserCircle size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            <UserCircle size={15} className="text-accent shrink-0" />
           )}
           <span className="capitalize font-medium text-foreground">{type}</span>
         </div>

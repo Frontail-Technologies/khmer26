@@ -14,7 +14,7 @@ export function AdminReportedChatsCard() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Reported Messages
           </CardTitle>
-          <Badge variant="secondary" className="h-4.5 px-2 text-[9px] font-bold rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
+          <Badge variant="secondary" className="h-4.5 px-2 text-[9px] font-bold rounded-md bg-accent/10 text-accent border-accent/20">
             {recentChats.length} In Review
           </Badge>
         </div>
@@ -35,7 +35,7 @@ export function AdminReportedChatsCard() {
             className="p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-start gap-3 min-w-0">
-              <div className="size-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <div className="size-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-accent/10 text-accent">
                 <ChatCircleDots size={16} weight="bold" />
               </div>
 

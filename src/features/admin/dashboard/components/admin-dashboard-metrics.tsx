@@ -19,7 +19,7 @@ export function AdminDashboardMetrics() {
       change: "+18.2%",
       trend: "up",
       icon: Users,
-      color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+      color: "bg-primary/10 text-primary border-primary/20",
       href: "/admin/users",
     },
     {
@@ -29,7 +29,7 @@ export function AdminDashboardMetrics() {
       change: "+6.5%",
       trend: "up",
       icon: Crown,
-      color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      color: "bg-accent/10 text-accent border-accent/20",
       href: "/admin/subscriptions",
     },
     {
@@ -39,7 +39,7 @@ export function AdminDashboardMetrics() {
       change: "Action required",
       trend: "alert",
       icon: SealCheck,
-      color: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+      color: "bg-destructive/10 text-destructive border-destructive/20",
       href: "/admin/verifications",
       urgent: true,
     },
@@ -50,7 +50,7 @@ export function AdminDashboardMetrics() {
       change: "4.9 Avg Star",
       trend: "neutral",
       icon: Star,
-      color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      color: "bg-accent/10 text-accent border-accent/20",
       href: "/admin/reviews",
     },
   ]
@@ -89,12 +89,12 @@ export function AdminDashboardMetrics() {
 
               <div className="pt-0.5 flex items-center gap-1 text-xs font-medium">
                 {kpi.trend === "up" ? (
-                  <span className="inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                  <span className="inline-flex items-center gap-0.5 text-primary font-bold text-xs">
                     <TrendUp size={12} weight="bold" />
                     <span>{kpi.change}</span>
                   </span>
                 ) : kpi.urgent ? (
-                  <span className="font-bold text-rose-600 dark:text-rose-400 text-xs">
+                  <span className="font-bold text-destructive text-xs">
                     {kpi.change}
                   </span>
                 ) : (

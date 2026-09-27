@@ -27,7 +27,7 @@ export function ListingReports({ reports }: ListingReportsProps) {
       <CardContent className="p-4 sm:p-5">
         {reports.length === 0 ? (
           <div className="p-3.5 rounded-lg bg-muted/20 border border-border/50 text-xs text-muted-foreground flex items-center gap-2.5">
-            <CheckCircle size={16} className="text-emerald-500 shrink-0" />
+            <CheckCircle size={16} className="text-success shrink-0" />
             <span>No reports or community flags submitted for this listing.</span>
           </div>
         ) : (

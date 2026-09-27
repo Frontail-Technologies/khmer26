@@ -59,9 +59,9 @@ export function UserActionDialogs({
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
           <div className="flex items-center gap-2 text-foreground font-semibold">
-            {actionType === "restrict" && <Lock size={20} className="text-amber-500" />}
+            {actionType === "restrict" && <Lock size={20} className="text-accent" />}
             {actionType === "suspend" && <ShieldWarning size={20} className="text-destructive" />}
-            {actionType === "restore" && <ArrowCounterClockwise size={20} className="text-emerald-500" />}
+            {actionType === "restore" && <ArrowCounterClockwise size={20} className="text-primary" />}
             <DialogTitle className="text-sm sm:text-base">{getTitle()}</DialogTitle>
           </div>
           <DialogDescription className="text-xs text-muted-foreground pt-1 leading-relaxed">
