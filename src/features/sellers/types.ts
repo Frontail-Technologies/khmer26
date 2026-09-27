@@ -34,7 +34,7 @@ export interface SellerReview {
   rating: number
   date: string
   comment: string
-  verifiedPurchase?: boolean
+  verifiedUser?: boolean
   listingTitle?: string
 }
 

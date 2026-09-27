@@ -22,7 +22,7 @@ export default function PricingPage() {
           icon={<CurrencyDollar size={32} aria-hidden="true" />}
           title="Pricing Plans Coming Soon"
           description="Subscription tiers and pricing will be fetched from the backend and displayed here."
-          action={{ label: "Post an Ad", href: "/post-ad" }}
+          action={{ label: "Post a Listing", href: "/post-ad" }}
         />
       </Section>
     </Container>

@@ -150,12 +150,12 @@ export function SellerReviewsTab({ seller, reviews }: SellerReviewsTabProps) {
                           <span className="text-xs sm:text-sm font-bold text-foreground">
                             {review.authorName}
                           </span>
-                          {review.verifiedPurchase && (
+                          {review.verifiedUser && (
                             <ShieldCheck
                               size={15}
                               weight="fill"
                               className="text-primary shrink-0"
-                              aria-label="Verified Purchase"
+                              aria-label="Verified User"
                             />
                           )}
                         </div>

@@ -80,15 +80,15 @@ export default function PostingRulesPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="p-4 sm:p-5 rounded-2xl border border-emerald-500/30 bg-card shadow-2xs space-y-3">
-            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm sm:text-base">
+          <Card className="p-4 sm:p-5 rounded-2xl border border-success/30 bg-card shadow-2xs space-y-3">
+            <div className="flex items-center gap-2 text-success font-bold text-sm sm:text-base">
               <CheckCircle size={20} weight="fill" />
               <span>What You Should Do</span>
             </div>
             <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               {ALLOWED_RULES.map((rule) => (
                 <li key={rule} className="flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-success mt-2 shrink-0" />
                   <span className="leading-relaxed">{rule}</span>
                 </li>
               ))}

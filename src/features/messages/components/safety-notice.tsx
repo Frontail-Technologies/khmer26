@@ -20,9 +20,9 @@ export function SafetyNotice() {
 
   return (
     <>
-      <div className="mx-3 my-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between gap-2.5">
+      <div className="mx-3 my-2 p-2.5 rounded-xl bg-accent/10 border border-accent/20 text-xs flex items-center justify-between gap-2.5">
         <div className="flex items-center gap-2 min-w-0">
-          <ShieldWarning size={16} weight="fill" className="text-amber-600 dark:text-amber-400 shrink-0" />
+          <ShieldWarning size={16} weight="fill" className="text-accent shrink-0" />
           <div className="min-w-0">
             <span className="font-bold text-foreground text-[11px] sm:text-xs">
               Stay safe on Khmer26:{" "}

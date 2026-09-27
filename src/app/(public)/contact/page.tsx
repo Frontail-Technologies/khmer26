@@ -101,7 +101,7 @@ function ContactForm() {
         <Card className="p-5 sm:p-6 rounded-2xl border border-border/80 bg-card shadow-2xs">
           {isSubmitted ? (
             <div className="py-10 text-center space-y-3 animate-in fade-in duration-300">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success">
                 <CheckCircle size={28} weight="fill" />
               </div>
               <h3 className="text-base font-bold text-foreground">
