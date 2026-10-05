@@ -5,12 +5,11 @@ import {
   ArrowLeft,
   DotsThreeVertical,
   PencilSimple,
-  Lock,
   ShieldWarning,
   CheckCircle,
   ListBullets,
   WarningOctagon,
-  Phone,
+  Trash,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +26,10 @@ import type { AdminUserDetail } from "../types"
 
 interface UserIdentityCardProps {
   user: AdminUserDetail
-  onEditClick: () => void
+  onStatusAction: (action: "suspend" | "restore") => void
+  onEdit: () => void
+  onDelete: () => void
+  canManageStatus?: boolean
 }
 
 const ACCOUNT_TYPE_LABELS: Record<string, string> = {
@@ -50,7 +52,13 @@ const VERIFICATION_CONFIG: Record<string, { label: string; tone: StatusTone }> =
   unverified: { label: "Unverified", tone: "neutral" },
 }
 
-export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
+export function UserIdentityCard({
+  user,
+  onStatusAction,
+  onEdit,
+  onDelete,
+  canManageStatus = true,
+}: UserIdentityCardProps) {
   const displayName = user.businessName || user.name
   const initials = displayName
     .split(" ")
@@ -87,12 +95,14 @@ export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-base font-bold text-foreground">{displayName}</h1>
-              <span className="font-mono text-[11px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
-                {user.id}
-              </span>
               <Badge variant="outline" className="text-[10px] font-medium px-2 py-0 h-5">
                 {ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
               </Badge>
+              {user.role === "admin" && (
+                <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0 h-5 bg-primary/10 text-primary border-primary/20">
+                  Administrator
+                </Badge>
+              )}
               <StatusBadge label={verifConf.label} tone={verifConf.tone} size="sm" />
               <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
             </div>
@@ -104,15 +114,14 @@ export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
 
         <div className="flex items-center gap-2 shrink-0">
           <Button
-            size="sm"
             variant="outline"
-            onClick={onEditClick}
-            className="h-8 text-xs font-semibold cursor-pointer gap-1.5"
+            size="sm"
+            onClick={onEdit}
+            className="h-8 text-xs font-semibold"
           >
-            <PencilSimple size={13} />
-            Edit Account
+            <PencilSimple size={14} className="mr-1.5" />
+            Edit
           </Button>
-
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -127,13 +136,6 @@ export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
               }
             />
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={onEditClick}
-                className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
-              >
-                <Phone size={14} />
-                <span>Edit Contact Info</span>
-              </DropdownMenuItem>
               {isSeller && (
                 <DropdownMenuItem
                   render={
@@ -160,21 +162,37 @@ export function UserIdentityCard({ user, onEditClick }: UserIdentityCardProps) {
                   }
                 />
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-accent">
-                <Lock size={14} />
-                <span>Restrict Account</span>
-              </DropdownMenuItem>
-              {user.status === "suspended" ? (
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-primary">
-                  <CheckCircle size={14} />
-                  <span>Restore Account</span>
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem variant="destructive" className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium">
-                  <ShieldWarning size={14} />
-                  <span>Suspend Account</span>
-                </DropdownMenuItem>
+              {canManageStatus && (
+                <>
+                  {(isSeller || user.reportsCount > 0) && <DropdownMenuSeparator />}
+                  {user.status === "suspended" ? (
+                    <DropdownMenuItem
+                      onClick={() => onStatusAction("restore")}
+                      className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium text-primary"
+                    >
+                      <CheckCircle size={14} />
+                      <span>Restore Account</span>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => onStatusAction("suspend")}
+                      className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
+                    >
+                      <ShieldWarning size={14} />
+                      <span>Suspend Account</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={onDelete}
+                    className="flex items-center gap-2 cursor-pointer w-full text-xs font-medium"
+                  >
+                    <Trash size={14} />
+                    <span>Delete Account</span>
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

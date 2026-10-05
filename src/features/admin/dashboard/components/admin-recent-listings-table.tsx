@@ -21,8 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DEMO_RECENT_LISTINGS } from "../../data/demo-admin-dashboard"
 import { cn } from "@/lib/utils"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
 
 type SortField = "title" | "price" | "status" | "createdAt"
 type SortOrder = "asc" | "desc" | null
@@ -30,6 +30,8 @@ type SortOrder = "asc" | "desc" | null
 export function AdminRecentListingsTable() {
   const [sortField, setSortField] = useState<SortField | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>(null)
+  const { data } = useAdminDashboard()
+  const listings = data?.recentListings ?? []
 
   const handleSort = (field: SortField) => {
     if (sortField !== field) {
@@ -43,10 +45,12 @@ export function AdminRecentListingsTable() {
     }
   }
 
-  const sortedListings = [...DEMO_RECENT_LISTINGS].sort((a, b) => {
+  const sortedListings = [...listings].sort((a, b) => {
     if (!sortField || !sortOrder) return 0
     if (sortField === "price") {
-      return sortOrder === "asc" ? a.price - b.price : b.price - a.price
+      const priceA = Number(a.price ?? 0)
+      const priceB = Number(b.price ?? 0)
+      return sortOrder === "asc" ? priceA - priceB : priceB - priceA
     }
     if (sortField === "title") {
       return sortOrder === "asc"
@@ -58,8 +62,22 @@ export function AdminRecentListingsTable() {
         ? a.status.localeCompare(b.status)
         : b.status.localeCompare(a.status)
     }
-    return 0
+    return sortOrder === "asc"
+      ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
+
+  const formatPrice = (price: string | null, currency: "USD" | "KHR" | null) => {
+    if (!price || !currency) return "Not set"
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: currency === "KHR" ? 0 : 2,
+    }).format(Number(price))
+  }
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(value))
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
@@ -146,16 +164,17 @@ export function AdminRecentListingsTable() {
             <tbody className="divide-y divide-border/60">
               {sortedListings.map((listing) => {
                 const isActive = listing.status === "active"
-                const isPending = listing.status === "pending"
+                const isPending = listing.moderationStatus === "pending_review"
+                const statusLabel = isPending ? "pending" : listing.moderationStatus === "rejected" ? "rejected" : listing.status
 
                 return (
                   <tr key={listing.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="size-9 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center shrink-0 text-muted-foreground">
-                          {listing.category === "Vehicles" || listing.category === "Motorcycles" ? (
+                          {listing.categoryName === "Vehicles" || listing.categoryName === "Motorcycles" ? (
                             <Car size={18} weight="duotone" />
-                          ) : listing.category === "Properties" ? (
+                          ) : listing.categoryName === "Properties" ? (
                             <House size={18} weight="duotone" />
                           ) : (
                             <DeviceMobile size={18} weight="duotone" />
@@ -163,22 +182,22 @@ export function AdminRecentListingsTable() {
                         </div>
                         <div className="min-w-0 max-w-44 sm:max-w-56 space-y-0.5">
                           <Link
-                            href="/admin/listings"
+                            href={`/admin/listings/${listing.id}`}
                             className="font-bold text-foreground hover:text-primary transition-colors truncate block"
                           >
                             {listing.title}
                           </Link>
                           <span className="text-[10px] text-muted-foreground block truncate font-medium">
-                            {listing.category}
+                            {listing.categoryName}
                           </span>
                         </div>
                       </div>
                     </td>
                     <td className="py-3.5 px-3 text-muted-foreground truncate max-w-28 text-[11px] font-medium">
-                      {listing.seller}
+                      {listing.sellerEmail ?? "Unknown seller"}
                     </td>
                     <td className="py-3.5 px-3 font-bold text-foreground">
-                      {listing.priceFormatted}
+                      {formatPrice(listing.price, listing.currency)}
                     </td>
                     <td className="py-3.5 px-3">
                       <Badge
@@ -192,11 +211,11 @@ export function AdminRecentListingsTable() {
                             : "bg-muted text-muted-foreground border-border"
                         )}
                       >
-                        {listing.status}
+                          {statusLabel}
                       </Badge>
                     </td>
                     <td className="py-3.5 px-3 text-muted-foreground text-[11px]">
-                      {listing.createdAt}
+                      {formatDate(listing.createdAt)}
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <DropdownMenu>

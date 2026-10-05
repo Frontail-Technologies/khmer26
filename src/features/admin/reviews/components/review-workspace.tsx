@@ -59,9 +59,11 @@ import { createReviewColumns } from "../columns"
 import { ReviewDetailSheet } from "./review-detail-sheet"
 import type { AdminReview } from "../types"
 import { cn } from "@/lib/utils"
+import { useAdminReviews } from "../hooks/reviews.queries"
+import { useUpdateReviewStatus } from "../hooks/reviews.mutations"
 
 interface ReviewWorkspaceProps {
-  initialReviews: AdminReview[]
+  initialReviews?: AdminReview[]
 }
 
 type ReviewTabKey = "all" | "reported" | "hidden"
@@ -81,8 +83,16 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "hidden", label: "Hidden" },
 ]
 
-export function ReviewWorkspace({ initialReviews }: ReviewWorkspaceProps) {
+export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
+  const { data } = useAdminReviews()
+  const updateStatusMutation = useUpdateReviewStatus()
   const [reviews, setReviews] = useState<AdminReview[]>(initialReviews)
+  const [hasHydrated, setHasHydrated] = useState(false)
+
+  if (data && !hasHydrated) {
+    setHasHydrated(true)
+    setReviews(data.items)
+  }
   const [activeTab, setActiveTab] = useState<ReviewTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
@@ -105,25 +115,28 @@ export function ReviewWorkspace({ initialReviews }: ReviewWorkspaceProps) {
 
   const handleConfirmHide = () => {
     if (!reviewToHide) return
+    const hiddenId = reviewToHide.id
+    updateStatusMutation.mutate({ id: hiddenId, visibility: "hidden" })
     setReviews((prev) =>
       prev.map((r) =>
-        r.id === reviewToHide.id ? { ...r, status: "hidden" as const } : r
+        r.id === hiddenId ? { ...r, status: "hidden" as const } : r
       )
     )
-    if (selectedReview?.id === reviewToHide.id) {
+    if (selectedReview?.id === hiddenId) {
       setSelectedReview((prev) => (prev ? { ...prev, status: "hidden" as const } : null))
     }
     setReviewToHide(null)
   }
 
   const handleRestore = useCallback((id: string) => {
+    updateStatusMutation.mutate({ id, visibility: "visible" })
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: "visible" as const } : r))
     )
     if (selectedReview?.id === id) {
       setSelectedReview((prev) => (prev ? { ...prev, status: "visible" as const } : null))
     }
-  }, [selectedReview?.id])
+  }, [selectedReview?.id, updateStatusMutation])
 
   const handleDismissReports = useCallback((id: string) => {
     setReviews((prev) =>
@@ -493,7 +506,6 @@ export function ReviewWorkspace({ initialReviews }: ReviewWorkspaceProps) {
             ))
           ) : (
             <DataTableEmpty
-              colSpan={1}
               title="No reviews found"
               description="Try clearing search or filter parameters."
             />

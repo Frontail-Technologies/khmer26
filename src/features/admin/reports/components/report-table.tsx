@@ -25,17 +25,20 @@ import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { ReportToolbar } from "./report-toolbar"
 import { ReportMobileCards } from "./report-mobile-cards"
 import { reportColumns } from "../columns"
+import { useAdminReports } from "../hooks/reports.queries"
 import type { AdminReport } from "../types"
 import { cn } from "@/lib/utils"
 
 interface ReportTableProps {
-  initialData: AdminReport[]
+  initialData?: AdminReport[]
 }
 
 type ReportTabKey = "all" | "open" | "resolved" | "dismissed"
 
-export function ReportTable({ initialData }: ReportTableProps) {
+export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps) {
   const router = useRouter()
+  const { data } = useAdminReports({ page: 1, limit: 100 })
+  const initialData = data?.items ?? fallbackData
   const [activeTab, setActiveTab] = useState<ReportTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([])
   const [searchQuery, setSearchQuery] = useState("")

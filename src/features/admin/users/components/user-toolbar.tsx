@@ -87,7 +87,7 @@ export function UserToolbar({
           />
           <input
             type="text"
-            placeholder="Search name, ID, email, phone or business..."
+            placeholder="Search name, email, phone, or business..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"

@@ -21,6 +21,7 @@ import {
   SelectValue,
   getSelectOptionLabel,
 } from "@/components/ui/select"
+import { useResolveReport } from "../hooks/reports.mutations"
 import type { AdminReport } from "../types"
 
 interface ResolveReportDialogProps {
@@ -45,9 +46,15 @@ export function ResolveReportDialog({
 }: ResolveReportDialogProps) {
   const [outcome, setOutcome] = useState("handled_listing")
   const [notes, setNotes] = useState("")
+  const resolveReport = useResolveReport()
 
+  const outcomeLabel = RESOLUTION_OUTCOMES.find((o) => o.value === outcome)?.label
   const handleSubmit = () => {
-    onOpenChange(false)
+    const resolutionNote = [outcomeLabel, notes.trim()].filter(Boolean).join(" — ")
+    resolveReport.mutate(
+      { id: report.id, notes: resolutionNote || undefined },
+      { onSuccess: () => onOpenChange(false) }
+    )
   }
 
   return (
@@ -113,6 +120,7 @@ export function ResolveReportDialog({
             type="button"
             size="sm"
             onClick={handleSubmit}
+            disabled={resolveReport.isPending}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
           >
             Confirm Resolve

@@ -3,16 +3,31 @@ import { EmptyState } from "@/components/shared/EmptyState"
 import { Database } from "@phosphor-icons/react"
 
 interface DataTableEmptyProps {
-  colSpan: number
+  colSpan?: number
   title?: string
   description?: string
+  className?: string
 }
 
 export function DataTableEmpty({
   colSpan,
   title = "No results found",
   description = "There are no records matching your criteria.",
+  className,
 }: DataTableEmptyProps) {
+  if (colSpan === undefined) {
+    return (
+      <div className="py-8 px-4 text-center">
+        <EmptyState
+          icon={<Database size={32} className="text-muted-foreground" />}
+          title={title}
+          description={description}
+          className={className}
+        />
+      </div>
+    )
+  }
+
   return (
     <TableRow>
       <TableCell colSpan={colSpan} className="h-48 text-center p-0">
@@ -20,6 +35,7 @@ export function DataTableEmpty({
           icon={<Database size={32} className="text-muted-foreground" />}
           title={title}
           description={description}
+          className={className}
         />
       </TableCell>
     </TableRow>

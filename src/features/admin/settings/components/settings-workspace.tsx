@@ -16,13 +16,20 @@ import {
   type SelectOption,
 } from "@/components/ui/select"
 import type { PlatformSettings, GeneralSettings, MarketplaceSettings } from "../types"
+import { useAdminSettings } from "../hooks/settings.queries"
+import { useUpdateAdminSettings } from "../hooks/settings.mutations"
 import { cn } from "@/lib/utils"
 
 interface SettingsWorkspaceProps {
-  initialSettings: PlatformSettings
+  initialSettings?: PlatformSettings
 }
 
 type SettingsTabKey = "general" | "marketplace"
+
+const EMPTY_SETTINGS: PlatformSettings = {
+  general: { marketplaceName: "", supportEmail: "", supportPhone: "", primaryLanguage: "en", timezone: "Asia/Phnom_Penh" },
+  marketplace: { freeListingLimit: 0, defaultListingStatus: "under_review", sellerPostingEnabled: false, listingDurationDays: 30 },
+}
 
 const LANGUAGE_OPTIONS: SelectOption[] = [
   { value: "km", label: "Khmer (ភាសាខ្មែរ)" },
@@ -45,15 +52,20 @@ const DURATION_OPTIONS: SelectOption[] = [
 ]
 
 export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
+  const { data: remoteSettings } = useAdminSettings()
+  const updateSettings = useUpdateAdminSettings()
+  const settings = remoteSettings ?? initialSettings
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const sectionParam = searchParams.get("section")
   const activeTab: SettingsTabKey = sectionParam === "marketplace" ? "marketplace" : "general"
 
-  const [general, setGeneral] = useState<GeneralSettings>(initialSettings.general)
-  const [marketplace, setMarketplace] = useState<MarketplaceSettings>(initialSettings.marketplace)
+  const [generalDraft, setGeneralDraft] = useState<GeneralSettings | null>(null)
+  const [marketplaceDraft, setMarketplaceDraft] = useState<MarketplaceSettings | null>(null)
   const [savedSuccess, setSavedSuccess] = useState(false)
+  const general = generalDraft ?? settings?.general ?? EMPTY_SETTINGS.general
+  const marketplace = marketplaceDraft ?? settings?.marketplace ?? EMPTY_SETTINGS.marketplace
 
   const handleTabChange = (key: SettingsTabKey) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -63,10 +75,19 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
-    setSavedSuccess(true)
-    setTimeout(() => {
-      setSavedSuccess(false)
-    }, 2500)
+    updateSettings.mutate(
+      { general, marketplace },
+      {
+        onSuccess: () => {
+          setGeneralDraft(null)
+          setMarketplaceDraft(null)
+          setSavedSuccess(true)
+          setTimeout(() => {
+            setSavedSuccess(false)
+          }, 2500)
+        },
+      }
+    )
   }
 
   const tabs: { key: SettingsTabKey; label: string }[] = [
@@ -110,7 +131,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                   required
                   value={general.marketplaceName}
                   onChange={(e) =>
-                    setGeneral((prev) => ({ ...prev, marketplaceName: e.target.value }))
+                    setGeneralDraft((prev) => ({ ...(prev ?? general), marketplaceName: e.target.value }))
                   }
                   className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
@@ -124,7 +145,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     required
                     value={general.supportEmail}
                     onChange={(e) =>
-                      setGeneral((prev) => ({ ...prev, supportEmail: e.target.value }))
+                      setGeneralDraft((prev) => ({ ...(prev ?? general), supportEmail: e.target.value }))
                     }
                     className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
@@ -137,7 +158,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     required
                     value={general.supportPhone}
                     onChange={(e) =>
-                      setGeneral((prev) => ({ ...prev, supportPhone: e.target.value }))
+                      setGeneralDraft((prev) => ({ ...(prev ?? general), supportPhone: e.target.value }))
                     }
                     className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
@@ -151,8 +172,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     value={general.primaryLanguage}
                     items={LANGUAGE_OPTIONS}
                     onValueChange={(val) =>
-                      setGeneral((prev) => ({
-                        ...prev,
+                      setGeneralDraft((prev) => ({
+                        ...(prev ?? general),
                         primaryLanguage: (val as "km" | "en") ?? "km",
                       }))
                     }
@@ -178,8 +199,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     value={general.timezone}
                     items={TIMEZONE_OPTIONS}
                     onValueChange={(val) =>
-                      setGeneral((prev) => ({
-                        ...prev,
+                      setGeneralDraft((prev) => ({
+                        ...(prev ?? general),
                         timezone: val ?? "Asia/Phnom_Penh",
                       }))
                     }
@@ -212,8 +233,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     required
                     value={marketplace.freeListingLimit}
                     onChange={(e) =>
-                      setMarketplace((prev) => ({
-                        ...prev,
+                      setMarketplaceDraft((prev) => ({
+                        ...(prev ?? marketplace),
                         freeListingLimit: Number.parseInt(e.target.value, 10) || 1,
                       }))
                     }
@@ -227,8 +248,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                     value={String(marketplace.listingDurationDays)}
                     items={DURATION_OPTIONS}
                     onValueChange={(val) =>
-                      setMarketplace((prev) => ({
-                        ...prev,
+                      setMarketplaceDraft((prev) => ({
+                        ...(prev ?? marketplace),
                         listingDurationDays: Number.parseInt(val ?? "30", 10),
                       }))
                     }
@@ -255,8 +276,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                   value={marketplace.defaultListingStatus}
                   items={LISTING_STATUS_OPTIONS}
                   onValueChange={(val) =>
-                    setMarketplace((prev) => ({
-                      ...prev,
+                    setMarketplaceDraft((prev) => ({
+                      ...(prev ?? marketplace),
                       defaultListingStatus: (val as "active" | "under_review") ?? "active",
                     }))
                   }
@@ -290,8 +311,8 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                 <Switch
                   checked={marketplace.sellerPostingEnabled}
                   onCheckedChange={(checked) =>
-                    setMarketplace((prev) => ({
-                      ...prev,
+                    setMarketplaceDraft((prev) => ({
+                      ...(prev ?? marketplace),
                       sellerPostingEnabled: checked,
                     }))
                   }

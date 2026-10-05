@@ -14,28 +14,41 @@ import {
 } from "@/components/ui/select"
 import { AssignedFieldsList } from "./assigned-fields-list"
 import { FieldLibraryTable } from "./field-library-table"
+import { useAdminCategories } from "@/features/admin/categories/hooks/categories.queries"
 import {
-  DEMO_LISTING_FIELDS,
-  getAssignedFieldsForCategory,
-} from "../data/demo-listing-fields"
-import { DEMO_ADMIN_CATEGORIES } from "@/features/admin/categories/data/demo-admin-categories"
-import type { ListingField, CategoryFieldAssignment } from "@/features/admin/categories/types"
+  useAdminCategoryFields,
+  useAdminFieldLibrary,
+} from "@/features/admin/categories/hooks/categories.queries"
+import {
+  useAssignCategoryField,
+  useUpdateCategoryFieldAssignment,
+  useRemoveCategoryFieldAssignment,
+  useCreateFieldDefinition,
+  useUpdateFieldDefinition,
+  useDeleteFieldDefinition,
+} from "@/features/admin/categories/hooks/categories.mutations"
+import type { ListingField, CategoryFieldAssignment, AdminCategoryItem } from "@/features/admin/categories/types"
 
-function getInitialCategorySelection(categoryParam: string | null) {
+const EMPTY_CATEGORIES: AdminCategoryItem[] = []
+
+function getInitialCategorySelection(
+  categories: AdminCategoryItem[],
+  categoryParam: string | null
+) {
   if (categoryParam) {
-    for (const root of DEMO_ADMIN_CATEGORIES) {
+    for (const root of categories) {
       const sub = root.subcategories.find(
-        (s) => s.slug === categoryParam || s.id === categoryParam
+        (s) => s.id === categoryParam || s.slug === categoryParam
       )
       if (sub) {
-        return { rootId: root.id, subSlug: sub.slug }
+        return { rootId: root.id, subId: sub.id }
       }
     }
   }
-  const defaultRoot = DEMO_ADMIN_CATEGORIES[0]
+  const defaultRoot = categories[0]
   return {
-    rootId: defaultRoot?.id ?? "vehicles",
-    subSlug: defaultRoot?.subcategories[0]?.slug ?? "cars",
+    rootId: defaultRoot?.id ?? "",
+    subId: defaultRoot?.subcategories[0]?.id ?? "",
   }
 }
 
@@ -44,77 +57,130 @@ export function ListingFieldsWorkspace() {
   const router = useRouter()
   const categoryParam = searchParams.get("category")
 
-  const [activeTab, setActiveTab] = useState<"assigned" | "library">("assigned")
-  const [fields, setFields] = useState<ListingField[]>(DEMO_LISTING_FIELDS)
-  const [assignmentsMap, setAssignmentsMap] = useState<Record<string, { assignment: CategoryFieldAssignment; field: ListingField }[]>>(() => {
-    const initialMap: Record<string, { assignment: CategoryFieldAssignment; field: ListingField }[]> = {}
-    DEMO_ADMIN_CATEGORIES.forEach((cat) => {
-      cat.subcategories.forEach((sub) => {
-        initialMap[sub.slug] = getAssignedFieldsForCategory(sub.slug)
-      })
-    })
-    return initialMap
-  })
+  const { data: remoteCategories } = useAdminCategories()
+  const categories = remoteCategories ?? EMPTY_CATEGORIES
 
-  const selection = useMemo(() => getInitialCategorySelection(categoryParam), [categoryParam])
+  const { data: remoteFields } = useAdminFieldLibrary()
+  const fields = remoteFields ?? []
+
+  const [activeTab, setActiveTab] = useState<"assigned" | "library">("assigned")
+
+  const selection = useMemo(
+    () => getInitialCategorySelection(categories, categoryParam),
+    [categories, categoryParam]
+  )
   const [manualRootId, setManualRootId] = useState<string | null>(null)
-  const [manualSubSlug, setManualSubSlug] = useState<string | null>(null)
+  const [manualSubId, setManualSubId] = useState<string | null>(null)
 
   const selectedRootId = manualRootId ?? selection.rootId
-  const selectedSubSlug = manualSubSlug ?? selection.subSlug
+  const selectedSubId = manualSubId ?? selection.subId
 
   const selectedRoot = useMemo(() => {
-    return DEMO_ADMIN_CATEGORIES.find((c) => c.id === selectedRootId) ?? DEMO_ADMIN_CATEGORIES[0]
-  }, [selectedRootId])
+    return categories.find((c) => c.id === selectedRootId) ?? categories[0]
+  }, [categories, selectedRootId])
 
   const subcategories = useMemo(() => {
     return selectedRoot?.subcategories ?? []
   }, [selectedRoot])
 
   const selectedSub = useMemo(() => {
-    return subcategories.find((s) => s.slug === selectedSubSlug) ?? subcategories[0]
-  }, [subcategories, selectedSubSlug])
+    return subcategories.find((s) => s.id === selectedSubId) ?? subcategories[0]
+  }, [subcategories, selectedSubId])
 
   const rootSelectOptions = useMemo(() => {
-    return DEMO_ADMIN_CATEGORIES.map((cat) => ({
+    return categories.map((cat) => ({
       value: cat.id,
       label: cat.name,
     }))
-  }, [])
+  }, [categories])
 
   const subSelectOptions = useMemo(() => {
     return subcategories.map((sub) => ({
-      value: sub.slug,
+      value: sub.id,
       label: sub.name,
     }))
   }, [subcategories])
 
   const handleRootChange = (newRootId: string) => {
     setManualRootId(newRootId)
-    const newRoot = DEMO_ADMIN_CATEGORIES.find((c) => c.id === newRootId)
+    const newRoot = categories.find((c) => c.id === newRootId)
     const firstSub = newRoot?.subcategories[0]
     if (firstSub) {
-      setManualSubSlug(firstSub.slug)
-      router.replace(`/admin/listing-fields?category=${firstSub.slug}`)
+      setManualSubId(firstSub.id)
+      router.replace(`/admin/listing-fields?category=${firstSub.id}`)
     }
   }
 
-  const handleSubChange = (newSubSlug: string) => {
-    setManualSubSlug(newSubSlug)
-    router.replace(`/admin/listing-fields?category=${newSubSlug}`)
+  const handleSubChange = (newSubId: string) => {
+    setManualSubId(newSubId)
+    router.replace(`/admin/listing-fields?category=${newSubId}`)
   }
 
-  const currentAssignments = useMemo(() => {
-    const key = selectedSub?.slug ?? "cars"
-    return assignmentsMap[key] ?? getAssignedFieldsForCategory(key)
-  }, [assignmentsMap, selectedSub])
+  const { data: currentAssignments } = useAdminCategoryFields(selectedSub?.id ?? "")
+  const assignments = currentAssignments ?? []
 
-  const handleUpdateCurrentAssignments = (newAssignments: { assignment: CategoryFieldAssignment; field: ListingField }[]) => {
+  const assignField = useAssignCategoryField()
+  const updateAssignment = useUpdateCategoryFieldAssignment()
+  const removeAssignment = useRemoveCategoryFieldAssignment()
+  const createField = useCreateFieldDefinition()
+  const updateField = useUpdateFieldDefinition()
+  const deleteField = useDeleteFieldDefinition()
+
+  const handleReorder = (newItems: { assignment: CategoryFieldAssignment; field: ListingField }[]) => {
     if (!selectedSub) return
-    setAssignmentsMap((prev) => ({
-      ...prev,
-      [selectedSub.slug]: newAssignments,
-    }))
+    newItems.forEach(({ assignment }) => {
+      updateAssignment.mutate({
+        assignmentId: assignment.id,
+        categoryId: selectedSub.id,
+        data: { displayOrder: assignment.sortOrder },
+      })
+    })
+  }
+
+  const handleToggleActive = (_assignmentId: string, field: ListingField) => {
+    updateField.mutate({ id: field.id, data: { isActive: !field.isActive } })
+  }
+
+  const handleRemove = (assignmentId: string) => {
+    if (!selectedSub) return
+    removeAssignment.mutate({ assignmentId, categoryId: selectedSub.id })
+  }
+
+  const handleAssign = (
+    field: ListingField,
+    options: { required: boolean; filterable: boolean; sortOrder: number }
+  ) => {
+    if (!selectedSub) return
+    assignField.mutate({
+      categoryId: selectedSub.id,
+      data: {
+        name: field.key,
+        labelEn: field.label,
+        fieldType: field.type,
+        isRequired: options.required,
+        isFilterable: options.filterable,
+        displayOrder: options.sortOrder,
+        options: field.options?.map((value) => ({ labelEn: value, value })),
+      },
+    })
+  }
+
+  const handleCreateField = (field: ListingField) => {
+    createField.mutate({
+      name: field.key,
+      labelEn: field.label,
+      fieldType: field.type,
+      isActive: field.isActive,
+      options: field.options?.map((value) => ({ labelEn: value, value })),
+    })
+  }
+
+  const handleUpdateField = (id: string, field: ListingField) => {
+    updateField.mutate({ id, data: { labelEn: field.label, isActive: field.isActive } })
+  }
+
+  const handleDeleteField = (id: string) => {
+    deleteField.mutate(id)
   }
 
   return (
@@ -180,7 +246,7 @@ export function ListingFieldsWorkspace() {
                   Subcategory:
                 </span>
                 <Select
-                  value={selectedSubSlug}
+                  value={selectedSubId}
                   items={subSelectOptions}
                   onValueChange={(val) => val && handleSubChange(val)}
                 >
@@ -204,15 +270,23 @@ export function ListingFieldsWorkspace() {
 
         {activeTab === "assigned" ? (
           <AssignedFieldsList
-            categoryId={selectedSub?.id ?? "cars"}
-            categoryName={selectedSub?.name ?? "Cars & SUVs"}
-            parentCategoryName={selectedRoot?.name ?? "Vehicles & Automotive"}
-            assignments={currentAssignments}
+            categoryId={selectedSub?.id ?? ""}
+            categoryName={selectedSub?.name ?? ""}
+            parentCategoryName={selectedRoot?.name ?? ""}
+            assignments={assignments}
             allFields={fields}
-            onUpdateAssignments={handleUpdateCurrentAssignments}
+            onReorder={handleReorder}
+            onToggleActive={handleToggleActive}
+            onRemove={handleRemove}
+            onAssign={handleAssign}
           />
         ) : (
-          <FieldLibraryTable fields={fields} onUpdateFields={setFields} />
+          <FieldLibraryTable
+            fields={fields}
+            onCreate={handleCreateField}
+            onUpdate={handleUpdateField}
+            onDelete={handleDeleteField}
+          />
         )}
       </Card>
     </div>

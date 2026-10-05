@@ -80,8 +80,7 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
                       )}
                     </div>
                     <span className="text-[11px] text-muted-foreground truncate block">
-                      <span className="font-mono text-[10px]">{user.id}</span>
-                      {contact && <span className="ml-1">· {contact}</span>}
+                      {contact || ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
                     </span>
                   </div>
                 </div>

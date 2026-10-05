@@ -40,10 +40,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAdminSafetyTips } from "../hooks/content.queries"
+import { useCreateSafetyTip, useUpdateSafetyTip } from "../hooks/content.mutations"
+import { safetyTipFormSchema } from "../schemas/content.schema"
+import { toast } from "sonner"
 import type { SafetyTipItem, SafetyTipContext } from "../types"
 
 interface SafetyTipsWorkspaceProps {
-  initialTips: SafetyTipItem[]
+  initialTips?: SafetyTipItem[]
 }
 
 const CONTEXT_OPTIONS = [
@@ -52,8 +56,11 @@ const CONTEXT_OPTIONS = [
   { value: "general_safety", label: "General Safety Guidelines" },
 ]
 
-export function SafetyTipsWorkspace({ initialTips }: SafetyTipsWorkspaceProps) {
-  const [tips, setTips] = useState<SafetyTipItem[]>(initialTips)
+export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTipsWorkspaceProps) {
+  const { data: remoteTips } = useAdminSafetyTips()
+  const tips = remoteTips ?? fallbackTips
+  const createTip = useCreateSafetyTip()
+  const updateTip = useUpdateSafetyTip()
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingTip, setEditingTip] = useState<SafetyTipItem | null>(null)
@@ -79,9 +86,7 @@ export function SafetyTipsWorkspace({ initialTips }: SafetyTipsWorkspaceProps) {
   }
 
   const handleToggleActive = (id: string, isActive: boolean) => {
-    setTips((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, isActive } : t))
-    )
+    updateTip.mutate({ id, data: { isActive } })
   }
 
   const handleMoveTip = (index: number, direction: "up" | "down") => {
@@ -96,44 +101,41 @@ export function SafetyTipsWorkspace({ initialTips }: SafetyTipsWorkspaceProps) {
     newTips[index] = target
     newTips[targetIndex] = temp
 
-    setTips(newTips.map((t, idx) => ({ ...t, sortOrder: idx + 1 })))
+    newTips.forEach((t, idx) => {
+      updateTip.mutate({ id: t.id, data: { sortOrder: idx + 1 } })
+    })
   }
 
   const handleDeleteTip = (id: string) => {
-    setTips((prev) =>
-      prev.filter((t) => t.id !== id).map((t, idx) => ({ ...t, sortOrder: idx + 1 }))
-    )
+    updateTip.mutate({ id, data: { isActive: false } })
   }
 
   const handleSaveForm = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formTip.trim()) return
 
-    if (editingTip) {
-      setTips((prev) =>
-        prev.map((t) =>
-          t.id === editingTip.id
-            ? {
-                ...t,
-                tip: formTip.trim(),
-                context: formContext,
-                isActive: formIsActive,
-              }
-            : t
-        )
-      )
-    } else {
-      const newTip: SafetyTipItem = {
-        id: `tip-${tips.length + 1}`,
-        tip: formTip.trim(),
-        context: formContext,
-        isActive: formIsActive,
-        sortOrder: tips.length + 1,
-      }
-      setTips((prev) => [...prev, newTip])
+    const validationResult = safetyTipFormSchema.safeParse({
+      tip: formTip.trim(),
+      context: formContext,
+      isActive: formIsActive,
+      sortOrder: editingTip ? editingTip.sortOrder : tips.length + 1,
+    })
+
+    if (!validationResult.success) {
+      toast.error(validationResult.error.issues[0]?.message || "Please check form inputs")
+      return
     }
 
-    setIsDialogOpen(false)
+    if (editingTip) {
+      updateTip.mutate(
+        { id: editingTip.id, data: { tip: formTip.trim(), context: formContext, isActive: formIsActive } },
+        { onSuccess: () => setIsDialogOpen(false) }
+      )
+    } else {
+      createTip.mutate(
+        { tip: formTip.trim(), context: formContext, isActive: formIsActive, sortOrder: tips.length + 1 },
+        { onSuccess: () => setIsDialogOpen(false) }
+      )
+    }
   }
 
   const filteredTips = tips.filter((t) => {

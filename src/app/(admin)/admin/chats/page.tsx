@@ -1,9 +1,5 @@
 import type { Metadata } from "next"
 import { AdminChatsWorkspace } from "@/features/admin/chats/components/admin-chats-workspace"
-import {
-  DEMO_CHAT_USERS,
-  DEMO_CHAT_CONVERSATIONS,
-} from "@/features/admin/chats/data/demo-chats-data"
 
 export const metadata: Metadata = {
   title: "Chats",
@@ -24,8 +20,6 @@ export default async function AdminChatsPage({
 
   return (
     <AdminChatsWorkspace
-      users={DEMO_CHAT_USERS}
-      conversations={DEMO_CHAT_CONVERSATIONS}
       initialUserId={resolvedParams?.user}
       initialConversationId={resolvedParams?.conversation}
     />

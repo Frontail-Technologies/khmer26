@@ -25,7 +25,7 @@ export interface PermissionModuleGroup {
 }
 
 export interface RoleDefinition {
-  id: AdminStaffRole
+  id: string
   name: string
   description: string
   staffCount: number

@@ -1,12 +1,15 @@
+"use client"
+
 import Link from "next/link"
-import { Warning, ArrowRight } from "@phosphor-icons/react/dist/ssr"
+import { Warning, ArrowRight } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/shared/status-badge"
-import { DEMO_ADMIN_REPORTS } from "@/features/admin/reports/data/demo-admin-reports"
+import { useAdminReports } from "@/features/admin/reports/hooks/reports.queries"
 
 export function AdminRecentReportsCard() {
-  const recentReports = DEMO_ADMIN_REPORTS.slice(0, 4)
+  const { data } = useAdminReports({ page: 1, limit: 4, status: "open" })
+  const recentReports = data?.items ?? []
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">

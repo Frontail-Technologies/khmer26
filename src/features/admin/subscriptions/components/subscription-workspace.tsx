@@ -4,20 +4,25 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { SubscriberTable } from "./subscriber-table"
 import { SubscriptionPlansTable } from "./subscription-plans-table"
+import { useAdminSubscribers, useAdminSubscriptionPlans } from "../hooks/subscriptions.queries"
 import type { SubscriptionPlan, SubscriberRecord } from "../types"
 import { cn } from "@/lib/utils"
 
 interface SubscriptionWorkspaceProps {
-  plans: SubscriptionPlan[]
-  subscribers: SubscriberRecord[]
+  plans?: SubscriptionPlan[]
+  subscribers?: SubscriberRecord[]
 }
 
 type SubscriptionTabKey = "subscribers" | "plans"
 
 export function SubscriptionWorkspace({
-  plans,
-  subscribers,
+  plans: fallbackPlans = [],
+  subscribers: fallbackSubscribers = [],
 }: SubscriptionWorkspaceProps) {
+  const { data: remotePlans } = useAdminSubscriptionPlans()
+  const { data: remoteSubscribers } = useAdminSubscribers()
+  const plans = remotePlans ?? fallbackPlans
+  const subscribers = remoteSubscribers ?? fallbackSubscribers
   const [activeTab, setActiveTab] = useState<SubscriptionTabKey>("subscribers")
 
   const tabs: { key: SubscriptionTabKey; label: string; count: number }[] = [

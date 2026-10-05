@@ -1,28 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import {
-  ShieldCheck,
-  XCircle,
-  Question,
-  User,
-  CheckCircle,
-  WarningCircle,
-} from "@phosphor-icons/react"
+import { ShieldCheck, XCircle, CheckCircle } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Field, FieldLabel } from "@/components/ui/field"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-} from "@/components/ui/select"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { ApproveVerificationDialog } from "./approve-verification-dialog"
 import { RejectVerificationDialog } from "./reject-verification-dialog"
+import { useApproveVerification, useRejectVerification } from "../hooks/verifications.mutations"
 import type { VerificationRequest, VerificationStatus } from "../types"
 
 interface VerificationReviewPanelProps {
@@ -43,18 +28,24 @@ const STATUS_LABEL_MAP: Record<VerificationStatus, string> = {
   rejected: "Rejected",
 }
 
-const MODERATOR_OPTIONS = [
-  { value: "unassigned", label: "Unassigned" },
-  { value: "Dara Sok", label: "Dara Sok — Super Admin" },
-  { value: "Channary Meas", label: "Channary Meas — Moderator" },
-  { value: "Vannak Lim", label: "Vannak Lim — Moderator" },
-]
-
 export function VerificationReviewPanel({ request }: VerificationReviewPanelProps) {
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
-  const [assignedAdmin, setAssignedAdmin] = useState(request.assignedTo || "unassigned")
-  const [requestInfoNotice, setRequestInfoNotice] = useState(false)
+  const approveVerification = useApproveVerification()
+  const rejectVerification = useRejectVerification()
+
+  const handleApprove = async () => {
+    await approveVerification.mutateAsync(request.id)
+    setApproveDialogOpen(false)
+  }
+
+  const handleReject = async (reason: string, note?: string) => {
+    await rejectVerification.mutateAsync({
+      id: request.id,
+      reason: note ? `${reason}: ${note}` : reason,
+    })
+    setRejectDialogOpen(false)
+  }
 
   return (
     <>
@@ -86,51 +77,16 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
               <span className="font-medium text-foreground">{request.submittedDate}</span>
             </div>
 
-            <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
+            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Attached Files</span>
               <span className="font-bold text-foreground">{request.documents.length} documents</span>
             </div>
-
-            <div className="pb-2.5 border-b border-border/60">
-              <Field className="gap-2">
-                <FieldLabel className="flex items-center gap-1">
-                  <User size={13} />
-                  <span>Assigned Moderator</span>
-                </FieldLabel>
-                <Select
-                  value={assignedAdmin}
-                  items={MODERATOR_OPTIONS}
-                  onValueChange={(val) => val && setAssignedAdmin(val)}
-                >
-                  <SelectTrigger className="h-8.5 w-full text-xs">
-                    <SelectValue>
-                      {(val) => getSelectOptionLabel(MODERATOR_OPTIONS, val, "Select Moderator")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MODERATOR_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-
-            {request.riskScore && (
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Risk Assessment</span>
-                <span className="font-bold uppercase text-[10px] text-success">
-                  {request.riskScore} Risk
-                </span>
-              </div>
-            )}
           </div>
 
           <div className="space-y-2 pt-2 border-t border-border/60">
             <Button
               onClick={() => setApproveDialogOpen(true)}
+              disabled={request.status === "approved" || approveVerification.isPending || rejectVerification.isPending}
               className="w-full h-10 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs rounded-lg gap-2 cursor-pointer shadow-xs"
             >
               <ShieldCheck size={16} weight="bold" />
@@ -138,35 +94,15 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
             </Button>
 
             <Button
-              variant="outline"
-              onClick={() => setRequestInfoNotice(true)}
-              className="w-full h-9 text-xs font-semibold rounded-lg gap-1.5 cursor-pointer"
-            >
-              <Question size={15} />
-              <span>Request More Information</span>
-            </Button>
-
-            <Button
               variant="ghost"
               onClick={() => setRejectDialogOpen(true)}
+              disabled={request.status === "rejected" || approveVerification.isPending || rejectVerification.isPending}
               className="w-full h-9 text-xs font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg gap-1.5 cursor-pointer"
             >
               <XCircle size={15} />
               <span>Reject Request</span>
             </Button>
           </div>
-
-          {requestInfoNotice && (
-            <div className="p-2.5 rounded-lg bg-muted/50 border border-border text-[11px] text-muted-foreground space-y-1">
-              <div className="flex items-center gap-1 font-semibold text-foreground">
-                <WarningCircle size={13} className="text-accent" />
-                <span>Request Info Workflow</span>
-              </div>
-              <p>
-                In production, this will prompt the seller for specific missing documents without marking the verification as rejected.
-              </p>
-            </div>
-          )}
 
           {request.status === "approved" && (
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs flex items-start gap-2">
@@ -190,12 +126,16 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
         request={request}
         open={approveDialogOpen}
         onOpenChange={setApproveDialogOpen}
+        onApprove={() => void handleApprove()}
+        isSubmitting={approveVerification.isPending}
       />
 
       <RejectVerificationDialog
         request={request}
         open={rejectDialogOpen}
         onOpenChange={setRejectDialogOpen}
+        onReject={(reason, note) => void handleReject(reason, note)}
+        isSubmitting={rejectVerification.isPending}
       />
     </>
   )

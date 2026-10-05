@@ -23,7 +23,7 @@ function getOfferStatusConfig(status: ConversationOffer["status"]): { label: str
     case "declined":
       return { label: "Offer Declined", tone: "destructive" }
     case "countered":
-      return { label: "Countered", tone: "accent" }
+      return { label: "Countered", tone: "info" }
     case "withdrawn":
       return { label: "Withdrawn", tone: "neutral" }
     case "expired":

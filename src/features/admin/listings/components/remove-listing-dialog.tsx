@@ -23,6 +23,7 @@ import {
   type SelectOption,
 } from "@/components/ui/select"
 import type { AdminListing } from "../types"
+import { useSuspendListing } from "../hooks/listings.mutations"
 
 interface RemoveListingDialogProps {
   listing: AdminListing
@@ -48,15 +49,16 @@ export function RemoveListingDialog({
 }: RemoveListingDialogProps) {
   const [selectedReason, setSelectedReason] = useState(REMOVAL_REASONS[0].value)
   const [internalNote, setInternalNote] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const suspendListing = useSuspendListing()
 
   const handleRemove = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onRemoveSuccess?.(selectedReason, internalNote)
-      onOpenChange(false)
-    }, 400)
+    const reason = internalNote.trim() ? `${selectedReason}: ${internalNote.trim()}` : selectedReason
+    suspendListing.mutate({ id: listing.id, reason }, {
+      onSuccess: () => {
+        onRemoveSuccess?.(selectedReason, internalNote)
+        onOpenChange(false)
+      },
+    })
   }
 
   return (
@@ -70,7 +72,7 @@ export function RemoveListingDialog({
             Remove Active Listing
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Take down <span className="font-semibold text-foreground">&ldquo;{listing.title}&rdquo;</span> (#{listing.id}) from the public marketplace.
+            Take down <span className="font-semibold text-foreground">&ldquo;{listing.title}&rdquo;</span> from the public marketplace.
           </DialogDescription>
         </DialogHeader>
 
@@ -129,11 +131,11 @@ export function RemoveListingDialog({
           <Button
             type="button"
             size="sm"
-            disabled={isSubmitting}
+            disabled={suspendListing.isPending}
             onClick={handleRemove}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5 rounded-lg cursor-pointer"
           >
-            {isSubmitting ? (
+            {suspendListing.isPending ? (
               <SpinnerGap size={14} className="animate-spin" />
             ) : (
               <Trash size={15} weight="bold" />

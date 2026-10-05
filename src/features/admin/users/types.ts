@@ -10,6 +10,7 @@ export interface AdminUserListItem {
   email: string
   phone: string
   avatarUrl?: string
+  role?: 'user' | 'admin'
   accountType: AdminAccountType
   businessName?: string
   location: string
@@ -33,6 +34,23 @@ export interface AdminUserDetail extends AdminUserListItem {
   soldListingsCount: number
   totalSalesVolume?: string
   verifiedAt?: string
+  verification?: {
+    id: string
+    status: string
+    type: string
+    legalName?: string | null
+    rejectionReason?: string | null
+    reviewedAt?: string | null
+    createdAt: string
+  } | null
+  subscription?: {
+    id: string
+    status: string
+    planName: string
+    planSlug: string
+    startedAt: string
+    expiresAt?: string | null
+  } | null
   assignedModerator?: string
   restrictionReason?: string
   accountHistory: Array<{

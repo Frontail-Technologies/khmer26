@@ -12,6 +12,7 @@ import {
   ShieldWarning,
   CheckCircle,
   Phone,
+  Trash,
 } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
@@ -47,7 +48,8 @@ const VERIFICATION_CONFIG: Record<string, { label: string; tone: StatusTone }> =
   unverified: { label: "Unverified", tone: "neutral" },
 }
 
-export const userColumns: ColumnDef<AdminUserListItem>[] = [
+export function createUserColumns(onDelete?: (user: AdminUserListItem) => void): ColumnDef<AdminUserListItem>[] {
+  return [
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -88,8 +90,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
               )}
             </div>
             <span className="text-[11px] text-muted-foreground truncate block">
-              <span className="font-mono text-[10px]">{user.id}</span>
-              {contact && <span className="ml-1">· {contact}</span>}
+              {contact || ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
             </span>
           </div>
         </div>
@@ -190,7 +191,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
                 render={
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
                     <Eye size={14} />
                     <span>View Account</span>
                   </Link>
@@ -198,7 +199,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
               />
               <DropdownMenuItem
                 render={
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
                     <PencilSimple size={14} />
                     <span>Edit Account</span>
                   </Link>
@@ -206,7 +207,7 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
               />
               <DropdownMenuItem
                 render={
-                  <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
                     <Phone size={14} />
                     <span>Edit Contact Info</span>
                   </Link>
@@ -268,6 +269,19 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
                   }
                 />
               )}
+              {onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => onDelete(user)}
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <Trash size={14} />
+                    <span>Delete Account</span>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -275,4 +289,5 @@ export const userColumns: ColumnDef<AdminUserListItem>[] = [
     },
     enableSorting: false,
   },
-]
+  ]
+}

@@ -29,10 +29,12 @@ import type { ListingField } from "@/features/admin/categories/types"
 
 interface FieldLibraryTableProps {
   fields: ListingField[]
-  onUpdateFields: (fields: ListingField[]) => void
+  onCreate: (field: ListingField) => void
+  onUpdate: (id: string, field: ListingField) => void
+  onDelete: (id: string) => void
 }
 
-export function FieldLibraryTable({ fields, onUpdateFields }: FieldLibraryTableProps) {
+export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: FieldLibraryTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string>("all")
@@ -60,17 +62,17 @@ export function FieldLibraryTable({ fields, onUpdateFields }: FieldLibraryTableP
   const handleSaveField = (savedField: ListingField) => {
     const exists = fields.some((f) => f.id === savedField.id)
     if (exists) {
-      onUpdateFields(fields.map((f) => (f.id === savedField.id ? savedField : f)))
+      onUpdate(savedField.id, savedField)
     } else {
-      onUpdateFields([savedField, ...fields])
+      onCreate(savedField)
     }
   }
 
   const handleDeleteField = useCallback(
     (id: string) => {
-      onUpdateFields(fields.filter((f) => f.id !== id))
+      onDelete(id)
     },
-    [fields, onUpdateFields]
+    [onDelete]
   )
 
   const columns = useMemo<ColumnDef<ListingField>[]>(

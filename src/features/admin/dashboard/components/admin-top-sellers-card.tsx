@@ -1,11 +1,22 @@
+"use client"
+
 import Link from "next/link"
-import { SealCheck, Star, ArrowRight } from "@phosphor-icons/react/dist/ssr"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ArrowRight, SealCheck } from "@phosphor-icons/react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { DEMO_TOP_SELLERS } from "../../data/demo-admin-dashboard"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+
+const formatSellerType = (value: string) =>
+  value
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
 
 export function AdminTopSellersCard() {
+  const { data } = useAdminDashboard()
+  const sellers = data?.topSellers ?? []
+
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
       <CardHeader className="p-4 sm:p-5 pb-3 flex flex-row items-center justify-between border-b border-border/60">
@@ -14,7 +25,7 @@ export function AdminTopSellersCard() {
             Top Verified Merchants
           </CardTitle>
           <Badge variant="outline" className="h-4.5 px-2 text-[9px] font-bold rounded-md text-primary border-primary/30">
-            High Volume
+            Active Listings
           </Badge>
         </div>
 
@@ -28,14 +39,13 @@ export function AdminTopSellersCard() {
       </CardHeader>
 
       <CardContent className="p-0 divide-y divide-border/60 flex-1">
-        {DEMO_TOP_SELLERS.map((seller) => (
+        {sellers.map((seller) => (
           <div
-            key={seller.id}
+            key={seller.profileId}
             className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
               <Avatar className="size-9 rounded-full border border-border shrink-0">
-                <AvatarImage src={seller.avatar} alt={seller.name} />
                 <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
                   {seller.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -43,30 +53,18 @@ export function AdminTopSellersCard() {
 
               <div className="space-y-0.5 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-bold text-foreground truncate">
+                  <Link href={`/admin/users/${seller.sellerId}`} className="text-xs font-bold text-foreground hover:text-primary truncate">
                     {seller.name}
-                  </span>
-                  {seller.verified && (
-                    <SealCheck size={14} weight="fill" className="text-primary shrink-0" />
-                  )}
+                  </Link>
+                  <SealCheck size={14} weight="fill" className="text-primary shrink-0" />
                 </div>
 
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <span className="truncate">{seller.category}</span>
-                  <span>•</span>
-                  <span className="font-semibold text-foreground">{seller.activeAds} active ads</span>
+                  <span className="truncate">{formatSellerType(seller.sellerType)}</span>
+                  <span>|</span>
+                  <span className="font-semibold text-foreground">{seller.activeListings.toLocaleString()} active ads</span>
                 </div>
               </div>
-            </div>
-
-            <div className="text-right shrink-0">
-              <div className="flex items-center gap-1 justify-end text-xs font-bold text-accent">
-                <Star size={12} weight="fill" />
-                <span>{seller.rating.toFixed(1)}</span>
-              </div>
-              <span className="text-[10px] font-mono text-muted-foreground block">
-                {seller.totalVolume}
-              </span>
             </div>
           </div>
         ))}

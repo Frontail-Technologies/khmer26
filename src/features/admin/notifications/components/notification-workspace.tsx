@@ -4,18 +4,21 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { NotificationComposer } from "./notification-composer"
 import { NotificationHistoryTable } from "./notification-history-table"
+import { useAdminBroadcasts } from "../hooks/notifications.queries"
 import type { NotificationRecord } from "../types"
 import { cn } from "@/lib/utils"
 
 interface NotificationWorkspaceProps {
-  records: NotificationRecord[]
+  records?: NotificationRecord[]
 }
 
 type NotificationTabKey = "compose" | "history"
 
 export function NotificationWorkspace({
-  records,
+  records: fallbackRecords = [],
 }: NotificationWorkspaceProps) {
+  const { data } = useAdminBroadcasts()
+  const records = data?.items ?? fallbackRecords
   const [activeTab, setActiveTab] = useState<NotificationTabKey>("compose")
 
   const tabs: { key: NotificationTabKey; label: string; count?: number }[] = [

@@ -41,10 +41,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ALL_DETAILED_CATEGORIES } from "@/features/categories/data/all-categories"
+import { useAdminFeaturedSections } from "../hooks/content.queries"
+import { useCreateFeaturedSection, useUpdateFeaturedSection } from "../hooks/content.mutations"
+import { featuredSectionFormSchema } from "../schemas/content.schema"
+import { toast } from "sonner"
 import type { FeaturedSectionItem, FeaturedSourceType, FeaturedSortMode } from "../types"
 
 interface FeaturedSectionsWorkspaceProps {
-  initialSections: FeaturedSectionItem[]
+  initialSections?: FeaturedSectionItem[]
 }
 
 const SOURCE_OPTIONS = [
@@ -62,9 +66,12 @@ const SORT_OPTIONS = [
 ]
 
 export function FeaturedSectionsWorkspace({
-  initialSections,
+  initialSections: fallbackSections = [],
 }: FeaturedSectionsWorkspaceProps) {
-  const [sections, setSections] = useState<FeaturedSectionItem[]>(initialSections)
+  const { data: remoteSections } = useAdminFeaturedSections()
+  const sections = remoteSections ?? fallbackSections
+  const createSection = useCreateFeaturedSection()
+  const updateSection = useUpdateFeaturedSection()
   const [searchQuery, setSearchQuery] = useState("")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingSection, setEditingSection] = useState<FeaturedSectionItem | null>(null)
@@ -99,9 +106,7 @@ export function FeaturedSectionsWorkspace({
   }
 
   const handleToggleActive = (id: string, isActive: boolean) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isActive } : s))
-    )
+    updateSection.mutate({ id, data: { isActive } })
   }
 
   const handleMoveSection = (index: number, direction: "up" | "down") => {
@@ -116,18 +121,17 @@ export function FeaturedSectionsWorkspace({
     newSections[index] = target
     newSections[targetIndex] = temp
 
-    setSections(newSections.map((s, idx) => ({ ...s, sortOrder: idx + 1 })))
+    newSections.forEach((s, idx) => {
+      updateSection.mutate({ id: s.id, data: { sortOrder: idx + 1 } })
+    })
   }
 
   const handleDeleteSection = (id: string) => {
-    setSections((prev) =>
-      prev.filter((s) => s.id !== id).map((s, idx) => ({ ...s, sortOrder: idx + 1 }))
-    )
+    updateSection.mutate({ id, data: { isActive: false } })
   }
 
   const handleSaveForm = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formTitle.trim()) return
 
     const computedSlug =
       formSlug.trim() ||
@@ -136,45 +140,36 @@ export function FeaturedSectionsWorkspace({
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")
 
-    const selectedCategoryNames = ALL_DETAILED_CATEGORIES.filter((c) =>
-      formCategoryIds.includes(c.id)
-    ).map((c) => c.name)
+    const validationResult = featuredSectionFormSchema.safeParse({
+      title: formTitle.trim(),
+      slug: computedSlug,
+      sourceType: formSourceType,
+      sortMode: formSortMode,
+      isActive: formIsActive,
+      sortOrder: editingSection ? editingSection.sortOrder : sections.length + 1,
+    })
 
-    if (editingSection) {
-      setSections((prev) =>
-        prev.map((s) =>
-          s.id === editingSection.id
-            ? {
-                ...s,
-                title: formTitle.trim(),
-                slug: computedSlug,
-                sourceType: formSourceType,
-                categoryIds: formCategoryIds,
-                categoryNames: selectedCategoryNames,
-                sortMode: formSortMode,
-                isActive: formIsActive,
-              }
-            : s
-        )
-      )
-    } else {
-      const newSection: FeaturedSectionItem = {
-        id: `feat-sec-${computedSlug}`,
-        title: formTitle.trim(),
-        slug: computedSlug,
-        sourceType: formSourceType,
-        categoryIds: formCategoryIds,
-        categoryNames: selectedCategoryNames,
-        sortMode: formSortMode,
-        displayStyle: "grid",
-        isActive: formIsActive,
-        sortOrder: sections.length + 1,
-        itemsCount: 8,
-      }
-      setSections((prev) => [...prev, newSection])
+    if (!validationResult.success) {
+      toast.error(validationResult.error.issues[0]?.message || "Please check form inputs")
+      return
     }
 
-    setIsSheetOpen(false)
+    const payload = {
+      title: formTitle.trim(),
+      slug: computedSlug,
+      sourceType: formSourceType,
+      sortMode: formSortMode,
+      isActive: formIsActive,
+    }
+
+    if (editingSection) {
+      updateSection.mutate({ id: editingSection.id, data: payload }, { onSuccess: () => setIsSheetOpen(false) })
+    } else {
+      createSection.mutate(
+        { ...payload, sortOrder: sections.length + 1 },
+        { onSuccess: () => setIsSheetOpen(false) }
+      )
+    }
   }
 
   const toggleCategorySelection = (categoryId: string) => {

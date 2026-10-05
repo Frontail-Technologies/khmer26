@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { StatusBadge } from "@/components/shared/status-badge"
+import { useUpdateSubscriptionPlan } from "../hooks/subscriptions.mutations"
 import type { SubscriptionPlan } from "../types"
 
 interface SubscriptionPlansTableProps {
@@ -30,7 +31,7 @@ interface SubscriptionPlansTableProps {
 export function SubscriptionPlansTable({
   initialPlans,
 }: SubscriptionPlansTableProps) {
-  const [plans, setPlans] = useState<SubscriptionPlan[]>(initialPlans)
+  const updatePlan = useUpdateSubscriptionPlan()
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
@@ -50,20 +51,22 @@ export function SubscriptionPlansTable({
 
   const handleSavePlan = () => {
     if (!editingPlan) return
-    setPlans((prev) =>
-      prev.map((p) =>
-        p.id === editingPlan.id
-          ? {
-              ...p,
-              name: formName,
-              maxListings: Number(formLimit),
-              price: Number(formPrice),
-              isActive: formActive,
-            }
-          : p
-      )
+    updatePlan.mutate(
+      {
+        id: editingPlan.id,
+        data: {
+          name: formName,
+          maxListings: Number(formLimit),
+          price: Number(formPrice),
+          isActive: formActive,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditDialogOpen(false)
+        },
+      }
     )
-    setEditDialogOpen(false)
   }
 
   return (
@@ -96,7 +99,7 @@ export function SubscriptionPlansTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {plans.map((plan) => (
+            {initialPlans.map((plan) => (
               <TableRow
                 key={plan.id}
                 className="transition-colors hover:bg-muted/25 border-b border-border/60 h-14"
@@ -156,7 +159,7 @@ export function SubscriptionPlansTable({
       </div>
 
       <div className="md:hidden divide-y divide-border/60">
-        {plans.map((plan) => (
+        {initialPlans.map((plan) => (
           <div key={plan.id} className="p-3.5 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -266,9 +269,10 @@ export function SubscriptionPlansTable({
               type="button"
               size="sm"
               onClick={handleSavePlan}
+              disabled={updatePlan.isPending}
               className="text-xs bg-primary text-primary-foreground font-semibold"
             >
-              Save Changes
+              {updatePlan.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

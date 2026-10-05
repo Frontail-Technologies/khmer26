@@ -15,6 +15,8 @@ import {
   getSelectOptionLabel,
   type SelectOption,
 } from "@/components/ui/select"
+import { useCreateBroadcast } from "../hooks/notifications.mutations"
+import type { NotificationAudience } from "../types"
 
 const AUDIENCE_OPTIONS: SelectOption[] = [
   { value: "all_users", label: "All Users" },
@@ -29,10 +31,33 @@ export function NotificationComposer() {
   const [targetUser, setTargetUser] = useState("")
   const [title, setTitle] = useState("")
   const [message, setMessage] = useState("")
+  const createBroadcast = useCreateBroadcast()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title.trim() || !message.trim()) return
+    if (audience === "specific_user" && !targetUser.trim()) return
+
+    createBroadcast.mutate(
+      {
+        title: title.trim(),
+        body: message.trim(),
+        audience: audience as NotificationAudience,
+        specificUserId: audience === "specific_user" ? targetUser.trim() : undefined,
+      },
+      {
+        onSuccess: () => {
+          setTitle("")
+          setMessage("")
+          setTargetUser("")
+        },
+      }
+    )
+  }
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl">
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-4 text-xs">
+      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         <Field className="gap-2">
           <FieldLabel className="text-xs font-semibold text-foreground">Audience</FieldLabel>
           <Select
@@ -57,9 +82,9 @@ export function NotificationComposer() {
 
         {audience === "specific_user" && (
           <Field className="gap-2">
-            <FieldLabel className="text-xs font-semibold text-foreground">Specific User ID or Username</FieldLabel>
+            <FieldLabel className="text-xs font-semibold text-foreground">Specific User ID</FieldLabel>
             <Input
-              placeholder="e.g. USR-1001 or sokhaseng"
+              placeholder="User account ID (UUID)"
               value={targetUser}
               onChange={(e) => setTargetUser(e.target.value)}
               className="h-9 text-xs"
@@ -91,16 +116,16 @@ export function NotificationComposer() {
         <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Info size={14} className="shrink-0 text-muted-foreground" />
-            <span>Notification service integration pending backend configuration.</span>
+            <span>Delivery is processed in bounded background batches, not instantly.</span>
           </div>
 
           <Button
-            type="button"
-            disabled
-            className="h-9 text-xs font-semibold shrink-0 opacity-60 cursor-not-allowed"
+            type="submit"
+            disabled={createBroadcast.isPending}
+            className="h-9 text-xs font-semibold shrink-0"
           >
             <PaperPlaneTilt size={14} className="mr-1.5" />
-            Send Notification
+            {createBroadcast.isPending ? "Sending..." : "Send Notification"}
           </Button>
         </div>
       </form>

@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { TrendUp, CaretRight } from "@phosphor-icons/react"
+import { CaretRight } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
 
 const TIME_RANGES = [
   { id: "12m", label: "This Year" },
@@ -13,23 +14,21 @@ const TIME_RANGES = [
   { id: "7d", label: "7 Days" },
 ]
 
-const MONTHLY_DATA = [
-  { month: "Jan", listings: 3200, height: "45%", revenue: "$32k" },
-  { month: "Feb", listings: 3800, height: "54%", revenue: "$38k" },
-  { month: "Mar", listings: 4100, height: "58%", revenue: "$41k" },
-  { month: "Apr", listings: 4600, height: "65%", revenue: "$46k" },
-  { month: "May", listings: 5200, height: "74%", revenue: "$52k" },
-  { month: "Jun", listings: 4900, height: "70%", revenue: "$49k" },
-  { month: "Jul", listings: 5800, height: "82%", revenue: "$58k" },
-  { month: "Aug", listings: 6400, height: "90%", revenue: "$64k" },
-  { month: "Sep", listings: 6100, height: "86%", revenue: "$61k" },
-  { month: "Oct", listings: 6900, height: "98%", revenue: "$69k" },
-  { month: "Nov", listings: 6700, height: "94%", revenue: "$67k" },
-  { month: "Dec", listings: 7100, height: "100%", revenue: "$71k" },
-]
+const formatCount = (value?: number) => (value ?? 0).toLocaleString()
+const formatMoney = (value?: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value ?? 0)
 
 export function AdminOverviewPanel() {
   const [activeRange, setActiveRange] = useState("12m")
+  const { data } = useAdminDashboard()
+  const listingStats = [
+    { label: "Active", value: data?.listings?.active ?? 0, tone: "bg-primary" },
+    { label: "Pending", value: data?.listings?.pendingReview ?? 0, tone: "bg-accent" },
+    { label: "Flagged", value: data?.listings?.flagged ?? 0, tone: "bg-destructive" },
+    { label: "Sold", value: data?.listings?.sold ?? 0, tone: "bg-success" },
+    { label: "Expired", value: data?.listings?.expired ?? 0, tone: "bg-muted-foreground" },
+  ]
+  const maxListingValue = Math.max(...listingStats.map((item) => item.value), 1)
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden flex flex-col justify-between h-full">
@@ -70,11 +69,10 @@ export function AdminOverviewPanel() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                48,290 Listings
+                {formatCount(data?.listings?.total)} Listings
               </span>
               <span className="inline-flex items-center gap-0.5 text-xs font-bold text-success">
-                <TrendUp size={12} weight="bold" />
-                <span>+12.4%</span>
+                <span>{formatMoney(data?.revenue?.last30Days)} 30d revenue</span>
               </span>
             </div>
           </div>
@@ -90,27 +88,27 @@ export function AdminOverviewPanel() {
 
         <div className="pt-1">
           <div className="h-40 sm:h-48 w-full flex items-end gap-1.5 sm:gap-2.5 pt-4 pb-2 border-b border-border/60">
-            {MONTHLY_DATA.map((item, index) => {
-              const isLatest = index === MONTHLY_DATA.length - 1
+            {listingStats.map((item, index) => {
+              const isLatest = index === 0
               return (
                 <div
-                  key={item.month}
+                  key={item.label}
                   className="flex-1 flex flex-col items-center h-full justify-end group/bar relative"
                 >
                   <div className="opacity-0 group-hover/bar:opacity-100 absolute -top-7 text-[10px] font-bold bg-foreground text-background px-1.5 py-0.5 rounded shadow-sm transition-opacity pointer-events-none whitespace-nowrap z-10">
-                    {item.revenue}
+                    {formatCount(item.value)}
                   </div>
                   <div
                     className={cn(
                       "w-full rounded-t-sm transition-all duration-300",
                       isLatest
                         ? "bg-primary shadow-xs"
-                        : "bg-primary/25 group-hover/bar:bg-primary/50 dark:bg-primary/30 dark:group-hover/bar:bg-primary/60"
+                        : `${item.tone} opacity-70 group-hover/bar:opacity-80`
                     )}
-                    style={{ height: item.height }}
+                    style={{ height: `${Math.max((item.value / maxListingValue) * 100, item.value > 0 ? 8 : 2)}%` }}
                   />
                   <span className="text-[10px] text-muted-foreground mt-2 font-semibold">
-                    {item.month}
+                    {item.label}
                   </span>
                 </div>
               )
@@ -121,14 +119,14 @@ export function AdminOverviewPanel() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-primary" />
-                <span className="font-medium text-foreground">Subscriptions</span>
+                <span className="font-medium text-foreground">Active</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-primary/30" />
-                <span className="font-medium text-foreground">Feature Ads</span>
+                <span className="size-2 rounded-full bg-accent" />
+                <span className="font-medium text-foreground">Pending</span>
               </div>
             </div>
-            <span className="font-medium text-xs">Avg 160 ads / day</span>
+            <span className="font-medium text-xs">{formatCount(data?.listings?.total)} total listings</span>
           </div>
         </div>
       </CardContent>

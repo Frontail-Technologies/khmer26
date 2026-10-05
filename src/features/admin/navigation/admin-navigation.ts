@@ -5,6 +5,7 @@ import {
   ListBullets,
   WarningCircle,
   SealCheck,
+  MapPin,
   Users,
   Star,
   Layout,
@@ -59,7 +60,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Listings",
         href: "/admin/listings",
         icon: ListBullets,
-        badge: 14,
         subItems: [
           {
             title: "All Listings",
@@ -79,8 +79,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Reports",
         href: "/admin/reports",
         icon: WarningCircle,
-        badge: 8,
-        badgeVariant: "destructive",
         subItems: [
           {
             title: "All Reports",
@@ -96,8 +94,11 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Verifications",
         href: "/admin/verifications",
         icon: SealCheck,
-        badge: 5,
-        badgeVariant: "warning",
+      },
+      {
+        title: "Locations",
+        href: "/admin/locations",
+        icon: MapPin,
       },
     ],
   },
@@ -142,6 +143,10 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
             title: "Safety Tips",
             href: "/admin/content/tips",
           },
+          {
+            title: "Static Pages",
+            href: "/admin/content/pages",
+          },
         ],
       },
     ],
@@ -180,8 +185,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Chat Management",
         href: "/admin/chats",
         icon: Chats,
-        badge: 3,
-        badgeVariant: "warning",
         subItems: [
           {
             title: "Chats",

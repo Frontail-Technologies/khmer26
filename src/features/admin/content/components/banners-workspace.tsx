@@ -6,7 +6,7 @@ import {
   Image as ImageIcon,
   Plus,
   PencilSimple,
-  Trash,
+  Archive,
   MagnifyingGlass,
   UploadSimple,
   X,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { AdminImageThumbnail } from "@/components/shared/admin-image-preview"
+import { formatAdminDate } from "@/lib/formatters/date"
 import { Field, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -42,10 +43,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAdminBanners } from "../hooks/content.queries"
+import { useCreateBanner, useUpdateBanner, useToggleBannerActive } from "../hooks/content.mutations"
+import { uploadMediaFile } from "@/lib/api/media"
+import { bannerFormSchema } from "../schemas/content.schema"
+import { toast } from "sonner"
 import type { AdminBannerItem, BannerPlacement, BannerDestinationType } from "../types"
 
 interface BannersWorkspaceProps {
-  initialBanners: AdminBannerItem[]
+  initialBanners?: AdminBannerItem[]
 }
 
 const PLACEMENT_OPTIONS = [
@@ -71,8 +77,12 @@ const STATUS_FILTER_OPTIONS = [
   { value: "inactive", label: "Inactive" },
 ]
 
-export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
-  const [banners, setBanners] = useState<AdminBannerItem[]>(initialBanners)
+export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: BannersWorkspaceProps) {
+  const { data: remoteBanners } = useAdminBanners()
+  const banners = remoteBanners ?? fallbackBanners
+  const createBanner = useCreateBanner()
+  const updateBanner = useUpdateBanner()
+  const toggleBannerActive = useToggleBannerActive()
   const [searchQuery, setSearchQuery] = useState("")
   const [placementFilter, setPlacementFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -82,6 +92,7 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
   const [formTitle, setFormTitle] = useState("")
   const [formPlacement, setFormPlacement] = useState<BannerPlacement>("homepage_hero")
   const [formImageUrl, setFormImageUrl] = useState("")
+  const [formImageMediaId, setFormImageMediaId] = useState<string | undefined>(undefined)
   const [formDestinationType, setFormDestinationType] = useState<BannerDestinationType>("category")
   const [formDestinationValue, setFormDestinationValue] = useState("")
   const [formDestinationLabel, setFormDestinationLabel] = useState("")
@@ -93,9 +104,10 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
 
   const openAddModal = () => {
     setEditingBanner(null)
-    setFormTitle("")
+    setFormTitle("Vehicles & Automotive Special")
     setFormPlacement("homepage_hero")
     setFormImageUrl("/images/categories/cars.jpg")
+    setFormImageMediaId(undefined)
     setFormDestinationType("category")
     setFormDestinationValue("/category/vehicles")
     setFormDestinationLabel("Vehicles & Automotive")
@@ -110,6 +122,7 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
     setFormTitle(b.title)
     setFormPlacement(b.placement)
     setFormImageUrl(b.imageUrl)
+    setFormImageMediaId(b.imageMediaId)
     setFormDestinationType(b.destinationType)
     setFormDestinationValue(b.destinationValue)
     setFormDestinationLabel(b.destinationLabel ?? "")
@@ -120,66 +133,75 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
   }
 
   const handleToggleActive = (id: string, isActive: boolean) => {
-    setBanners((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, isActive } : b))
-    )
+    toggleBannerActive.mutate({ id, isActive })
   }
 
-  const handleDeleteBanner = (id: string) => {
-    setBanners((prev) => prev.filter((b) => b.id !== id))
+  const handleDeactivateBanner = (id: string) => {
+    toggleBannerActive.mutate({ id, isActive: true })
   }
 
-  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       const previewUrl = URL.createObjectURL(file)
       setFormImageUrl(previewUrl)
+      try {
+        const uploaded = await uploadMediaFile(file, 'banner')
+        if (uploaded.mediaId) {
+          setFormImageMediaId(uploaded.mediaId)
+        }
+      } catch {
+        // Fallback to sending imageUrl directly
+      }
     }
   }
 
   const handleSaveForm = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formTitle.trim()) return
 
-    if (editingBanner) {
-      setBanners((prev) =>
-        prev.map((b) =>
-          b.id === editingBanner.id
-            ? {
-                ...b,
-                title: formTitle.trim(),
-                placement: formPlacement,
-                imageUrl: formImageUrl || "/images/categories/cars.jpg",
-                destinationType: formDestinationType,
-                destinationValue: formDestinationValue.trim(),
-                destinationLabel: formDestinationLabel.trim() || undefined,
-                startDate: formStartDate || undefined,
-                endDate: formEndDate || undefined,
-                isActive: formIsActive,
-              }
-            : b
-        )
-      )
-    } else {
-      const newBanner: AdminBannerItem = {
-        id: `BAN-${banners.length + 101}`,
-        title: formTitle.trim(),
-        placement: formPlacement,
-        imageUrl: formImageUrl || "/images/categories/cars.jpg",
-        destinationType: formDestinationType,
-        destinationValue: formDestinationValue.trim(),
-        destinationLabel: formDestinationLabel.trim() || undefined,
-        startDate: formStartDate || undefined,
-        endDate: formEndDate || undefined,
-        isActive: formIsActive,
-        sortOrder: banners.length + 1,
-        clicksCount: 0,
-        viewsCount: 0,
-      }
-      setBanners((prev) => [newBanner, ...prev])
+    const finalTitle = formTitle.trim() || formDestinationLabel.trim() || "Promotional Banner"
+
+    const validationResult = bannerFormSchema.safeParse({
+      title: finalTitle,
+      placement: formPlacement,
+      imageUrl: formImageUrl || "/images/categories/cars.jpg",
+      imageMediaId: formImageMediaId || "",
+      destinationType: formDestinationType,
+      destinationValue: formDestinationValue.trim(),
+      destinationLabel: formDestinationLabel.trim(),
+      isActive: formIsActive,
+      sortOrder: editingBanner ? editingBanner.sortOrder : banners.length + 1,
+    })
+
+    if (!validationResult.success) {
+      toast.error(validationResult.error.issues[0]?.message || "Please check form inputs")
+      return
     }
 
-    setIsSheetOpen(false)
+    const payload = {
+      title: finalTitle,
+      placement: formPlacement,
+      imageUrl: formImageUrl || "/images/categories/cars.jpg",
+      imageMediaId: formImageMediaId,
+      destinationType: formDestinationType,
+      destinationValue: formDestinationValue.trim() || undefined,
+      destinationLabel: formDestinationLabel.trim() || undefined,
+      startDate: formStartDate ? new Date(formStartDate).toISOString() : undefined,
+      endDate: formEndDate ? new Date(formEndDate).toISOString() : undefined,
+      isActive: formIsActive,
+    }
+
+    if (editingBanner) {
+      updateBanner.mutate(
+        { id: editingBanner.id, data: payload },
+        { onSuccess: () => setIsSheetOpen(false) }
+      )
+    } else {
+      createBanner.mutate(
+        { ...payload, sortOrder: banners.length + 1 },
+        { onSuccess: () => setIsSheetOpen(false) }
+      )
+    }
   }
 
   const filteredBanners = banners.filter((b) => {
@@ -309,8 +331,8 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
                           <span className="text-xs font-semibold text-foreground block truncate">
                             {b.title}
                           </span>
-                          <span className="text-[10px] font-mono text-muted-foreground block">
-                            {b.id}
+                          <span className="text-[10px] text-muted-foreground block capitalize">
+                            {b.placement.replace("_", " ")}
                           </span>
                         </div>
                       </div>
@@ -340,7 +362,7 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
                     <TableCell>
                       {b.startDate && b.endDate ? (
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {b.startDate} → {b.endDate}
+                          {formatAdminDate(b.startDate)} → {formatAdminDate(b.endDate)}
                         </span>
                       ) : (
                         <span className="text-xs text-muted-foreground">Always Active</span>
@@ -362,11 +384,12 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
                           type="button"
                           variant="ghost"
                           size="icon-xs"
-                          onClick={() => handleDeleteBanner(b.id)}
+                          onClick={() => handleDeactivateBanner(b.id)}
                           className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
-                          aria-label="Delete banner"
+                          aria-label="Deactivate banner"
+                          title="Deactivate banner"
                         >
-                          <Trash size={13} />
+                          <Archive size={13} />
                         </Button>
                       </div>
                     </TableCell>
@@ -449,7 +472,7 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
                     {formImageUrl ? (
                       <>
                         <Image
-                          src={formImageUrl}
+                          src={formImageUrl.startsWith("//") ? formImageUrl.replace(/^\/+/, "/") : formImageUrl}
                           alt="Banner preview"
                           fill
                           className="object-cover opacity-80 group-hover:opacity-40 transition-opacity"
@@ -605,3 +628,5 @@ export function BannersWorkspace({ initialBanners }: BannersWorkspaceProps) {
     </div>
   )
 }
+
+

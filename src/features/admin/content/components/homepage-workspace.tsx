@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -27,30 +27,47 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { ALL_DETAILED_CATEGORIES } from "@/features/categories/data/all-categories"
+import { useAdminCategories } from "@/features/admin/categories/hooks/categories.queries"
+import { useAdminHomepageConfig, useAdminHomepagePopularCategories } from "../hooks/content.queries"
+import { useUpdateHomepageConfig, useUpdateHomepagePopularCategories } from "../hooks/content.mutations"
 import type { HomepageSectionConfig, PopularCategoryItem } from "../types"
+import type { AdminCategoryItem } from "@/features/admin/categories/types"
 
 interface HomepageWorkspaceProps {
-  initialSections: HomepageSectionConfig[]
+  initialSections?: HomepageSectionConfig[]
   initialPopularCategories: PopularCategoryItem[]
 }
 
 export function HomepageWorkspace({
-  initialSections,
+  initialSections = [],
   initialPopularCategories,
 }: HomepageWorkspaceProps) {
-  const [sections, setSections] = useState<HomepageSectionConfig[]>(initialSections)
-  const [popularCategories, setPopularCategories] = useState<PopularCategoryItem[]>(
-    initialPopularCategories
-  )
+  const { data: remoteSections } = useAdminHomepageConfig()
+  const { data: categoryTree = [] } = useAdminCategories()
+  const { data: remotePopularCategories } = useAdminHomepagePopularCategories()
+  const [localSections, setLocalSections] = useState<HomepageSectionConfig[] | null>(null)
+  const sections = localSections ?? remoteSections ?? initialSections
+  const updateHomepageConfig = useUpdateHomepageConfig()
+  const updatePopularCategories = useUpdateHomepagePopularCategories()
+
+  const [localPopularCategories, setLocalPopularCategories] = useState<PopularCategoryItem[] | null>(null)
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false)
   const [searchCategoryQuery, setSearchCategoryQuery] = useState("")
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null)
 
-  const handleToggleSection = (id: string, isEnabled: boolean) => {
-    setSections((prev) =>
-      prev.map((sec) => (sec.id === id ? { ...sec, isEnabled } : sec))
+  const persistSections = (newSections: HomepageSectionConfig[]) => {
+    setLocalSections(newSections)
+    updateHomepageConfig.mutate(
+      newSections.map((sec) => ({
+        sectionKey: sec.id,
+        isEnabled: sec.isEnabled,
+        sortOrder: sec.sortOrder,
+      }))
     )
+  }
+
+  const handleToggleSection = (id: string, isEnabled: boolean) => {
+    persistSections(sections.map((sec) => (sec.id === id ? { ...sec, isEnabled } : sec)))
   }
 
   const handleMoveSection = (index: number, direction: "up" | "down") => {
@@ -65,7 +82,15 @@ export function HomepageWorkspace({
     newSections[index] = target
     newSections[targetIndex] = temp
 
-    setSections(newSections.map((sec, idx) => ({ ...sec, sortOrder: idx + 1 })))
+    persistSections(newSections.map((sec, idx) => ({ ...sec, sortOrder: idx + 1 })))
+  }
+
+  const persistPopularCategories = (newCategories: PopularCategoryItem[]) => {
+    const ordered = newCategories.map((cat, idx) => ({ ...cat, sortOrder: idx + 1 }))
+    setLocalPopularCategories(ordered)
+    updatePopularCategories.mutate(
+      ordered.map((cat) => ({ categoryId: cat.id, sortOrder: cat.sortOrder }))
+    )
   }
 
   const handleMoveCategory = (index: number, direction: "up" | "down") => {
@@ -80,38 +105,57 @@ export function HomepageWorkspace({
     newCats[index] = target
     newCats[targetIndex] = temp
 
-    setPopularCategories(newCats.map((cat, idx) => ({ ...cat, sortOrder: idx + 1 })))
+    persistPopularCategories(newCats)
   }
 
   const handleRemoveCategory = (id: string) => {
-    setPopularCategories((prev) =>
-      prev.filter((c) => c.id !== id).map((cat, idx) => ({ ...cat, sortOrder: idx + 1 }))
-    )
+    persistPopularCategories(popularCategories.filter((c) => c.id !== id))
   }
 
-  const allSelectableCategories = ALL_DETAILED_CATEGORIES.flatMap((root) => {
+  const allSelectableCategories = useMemo(() => categoryTree.flatMap((root: AdminCategoryItem) => {
     const rootItem = {
-      key: `root-${root.id}`,
+      key: root.id,
       id: root.id,
       name: root.name,
       slug: root.slug,
-      imageUrl: root.imageUrl,
+      imageUrl: root.imageUrl || "",
       parentCategoryName: undefined as string | undefined,
       listingCount: root.listingCount,
     }
 
     const subItems = root.subcategories.map((sub) => ({
-      key: `sub-${sub.id}`,
+      key: sub.id,
       id: sub.id,
       name: sub.name,
       slug: sub.slug,
-      imageUrl: root.imageUrl,
+      imageUrl: sub.imageUrl || root.imageUrl || "",
       parentCategoryName: root.name,
       listingCount: sub.listingCount,
     }))
 
     return [rootItem, ...subItems]
-  })
+  }), [categoryTree])
+
+  const selectableById = useMemo(
+    () => new Map(allSelectableCategories.map((cat) => [cat.id, cat])),
+    [allSelectableCategories]
+  )
+
+  const popularCategories = (localPopularCategories ?? remotePopularCategories ?? initialPopularCategories)
+    .map((cat) => {
+      const detail = selectableById.get(cat.id)
+      return detail
+        ? {
+            ...cat,
+            name: detail.name,
+            slug: detail.slug,
+            imageUrl: detail.imageUrl,
+            parentCategoryName: detail.parentCategoryName,
+            listingCount: detail.listingCount,
+          }
+        : cat
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder)
 
   const filteredSelectable = allSelectableCategories.filter((cat) => {
     if (!searchCategoryQuery.trim()) return true
@@ -134,7 +178,7 @@ export function HomepageWorkspace({
     }
 
     const newPopular: PopularCategoryItem = {
-      id: `pop-${chosen.slug}`,
+      id: chosen.id,
       name: chosen.name,
       slug: chosen.slug,
       imageUrl: chosen.imageUrl,
@@ -143,7 +187,7 @@ export function HomepageWorkspace({
       sortOrder: popularCategories.length + 1,
     }
 
-    setPopularCategories((prev) => [...prev, newPopular])
+    persistPopularCategories([...popularCategories, newPopular])
     setIsAddCategoryOpen(false)
     setSelectedCategoryKey(null)
     setSearchCategoryQuery("")
@@ -300,12 +344,18 @@ export function HomepageWorkspace({
                   className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-background/60 hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <AdminImageThumbnail
-                      src={cat.imageUrl}
-                      alt={cat.name}
-                      containerClassName="size-10 rounded-lg bg-muted/50 border border-border/40 shrink-0"
-                      sizes="40px"
-                    />
+                    {cat.imageUrl ? (
+                      <AdminImageThumbnail
+                        src={cat.imageUrl}
+                        alt={cat.name}
+                        containerClassName="size-10 rounded-lg bg-muted/50 border border-border/40 shrink-0"
+                        sizes="40px"
+                      />
+                    ) : (
+                      <div className="size-10 rounded-lg bg-muted/60 border border-border/40 shrink-0 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                        {cat.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <span className="text-xs font-semibold text-foreground block truncate">
                         {cat.name}
@@ -403,15 +453,21 @@ export function HomepageWorkspace({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="size-8 rounded overflow-hidden bg-muted relative shrink-0">
-                        <Image
-                          src={cat.imageUrl}
-                          alt={cat.name}
-                          fill
-                          sizes="32px"
-                          className="object-cover"
-                        />
-                      </div>
+                      {cat.imageUrl ? (
+                        <div className="size-8 rounded overflow-hidden bg-muted relative shrink-0">
+                          <Image
+                            src={cat.imageUrl}
+                            alt={cat.name}
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="size-8 rounded bg-muted relative shrink-0 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                          {cat.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <span className="text-xs font-medium block truncate">
                           {cat.name}

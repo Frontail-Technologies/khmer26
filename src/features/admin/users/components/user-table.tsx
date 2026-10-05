@@ -22,14 +22,17 @@ import {
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
-import { userColumns } from "../columns"
+import { createUserColumns } from "../columns"
 import { UserToolbar } from "./user-toolbar"
 import { UserMobileCards } from "./user-mobile-cards"
 import type { AdminUserListItem } from "../types"
 import { cn } from "@/lib/utils"
+import { useAdminUsers } from "../hooks/users.queries"
+import { useDeleteAdminUser } from "../hooks/users.mutations"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 
 interface UserTableProps {
-  initialData: AdminUserListItem[]
+  initialData?: AdminUserListItem[]
 }
 
 type AccountTabKey = "all" | "buyer" | "seller" | "business_dealer" | "restricted"
@@ -45,19 +48,24 @@ export function UserTable({ initialData }: UserTableProps) {
   const [statusFilter, setStatusFilter] = useState("all")
   const [verificationFilter, setVerificationFilter] = useState("all")
   const [provinceFilter, setProvinceFilter] = useState("all")
+  const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null)
+  const { data, isLoading } = useAdminUsers({ page: 1, limit: 100 })
+  const deleteUser = useDeleteAdminUser()
+  const users = useMemo(() => data?.items ?? initialData ?? [], [data?.items, initialData])
+  const columns = useMemo(() => createUserColumns(setDeleteTarget), [])
 
   const counts = useMemo(() => {
     return {
-      all: initialData.length,
-      buyer: initialData.filter((u) => u.accountType === "buyer").length,
-      seller: initialData.filter((u) => u.accountType === "seller" || u.accountType === "business" || u.accountType === "dealer").length,
-      business_dealer: initialData.filter((u) => u.accountType === "business" || u.accountType === "dealer").length,
-      restricted: initialData.filter((u) => u.status === "restricted" || u.status === "suspended").length,
+      all: users.length,
+      buyer: users.filter((u) => u.accountType === "buyer").length,
+      seller: users.filter((u) => u.accountType === "seller" || u.accountType === "business" || u.accountType === "dealer").length,
+      business_dealer: users.filter((u) => u.accountType === "business" || u.accountType === "dealer").length,
+      restricted: users.filter((u) => u.status === "restricted" || u.status === "suspended").length,
     }
-  }, [initialData])
+  }, [users])
 
   const filteredData = useMemo(() => {
-    return initialData.filter((user) => {
+    return users.filter((user) => {
       if (activeTab === "buyer" && user.accountType !== "buyer") {
         return false
       }
@@ -115,7 +123,7 @@ export function UserTable({ initialData }: UserTableProps) {
       return true
     })
   }, [
-    initialData,
+    users,
     activeTab,
     searchQuery,
     accountTypeFilter,
@@ -126,7 +134,7 @@ export function UserTable({ initialData }: UserTableProps) {
 
   const table = useReactTable({
     data: filteredData,
-    columns: userColumns,
+    columns,
     state: {
       sorting,
     },
@@ -217,7 +225,7 @@ export function UserTable({ initialData }: UserTableProps) {
         onProvinceChange={setProvinceFilter}
         onReset={handleReset}
         hasActiveFilters={hasActiveFilters}
-        totalCount={initialData.length}
+        totalCount={users.length}
         filteredCount={filteredData.length}
       />
 
@@ -263,9 +271,9 @@ export function UserTable({ initialData }: UserTableProps) {
                 ))
               ) : (
                 <DataTableEmpty
-                  colSpan={userColumns.length}
+                  colSpan={columns.length}
                   title="No accounts found"
-                  description="Try adjusting your search terms, account tabs, or active filters."
+                  description={isLoading ? "Fetching the latest user accounts." : "Try adjusting your search terms, account tabs, or active filters."}
                 />
               )}
             </TableBody>
@@ -279,6 +287,20 @@ export function UserTable({ initialData }: UserTableProps) {
       <div className="border-t border-border/60 bg-muted/10 p-2 sm:p-3">
         <DataTablePagination table={table} />
       </div>
+      <ConfirmationDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete Account"
+        description={`This will remove ${deleteTarget?.businessName || deleteTarget?.name || "this account"} from active admin views and prevent login.`}
+        confirmLabel="Delete Account"
+        variant="destructive"
+        isPending={deleteUser.isPending}
+        onConfirm={async () => {
+          if (!deleteTarget) return
+          await deleteUser.mutateAsync(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+      />
     </Card>
   )
 }

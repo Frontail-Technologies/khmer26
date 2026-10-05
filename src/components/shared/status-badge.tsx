@@ -8,8 +8,6 @@ export type StatusTone =
   | "success"
   | "warning"
   | "destructive"
-  | "accent"
-  | "primary"
 
 interface StatusBadgeProps {
   label: string
@@ -25,8 +23,6 @@ const TONE_CLASSES: Record<StatusTone, string> = {
   success: "bg-success/10 text-success border-success/20",
   warning: "bg-warning/10 text-warning border-warning/20",
   destructive: "bg-destructive/10 text-destructive border-destructive/20",
-  accent: "bg-accent/10 text-accent border-accent/20",
-  primary: "bg-primary text-primary-foreground border-primary",
 }
 
 export function StatusBadge({

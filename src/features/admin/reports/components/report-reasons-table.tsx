@@ -7,10 +7,12 @@ import {
   PencilSimple,
   Prohibit,
   CheckCircle,
+  Trash,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import {
   Table,
   TableBody,
@@ -21,10 +23,12 @@ import {
 } from "@/components/ui/table"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { ReportReasonDialog } from "./report-reason-dialog"
+import { useAdminReportReasons } from "../hooks/reports.queries"
+import { useCreateReportReason, useDeleteReportReason, useUpdateReportReason } from "../hooks/reports.mutations"
 import type { AdminReportReasonItem, AdminReportTargetType } from "../types"
 
 interface ReportReasonsTableProps {
-  initialData: AdminReportReasonItem[]
+  initialData?: AdminReportReasonItem[]
 }
 
 const TARGET_LABEL_MAP: Record<AdminReportTargetType, string> = {
@@ -34,11 +38,16 @@ const TARGET_LABEL_MAP: Record<AdminReportTargetType, string> = {
   chat: "Chats",
 }
 
-export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
-  const [reasons, setReasons] = useState<AdminReportReasonItem[]>(initialData)
+export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportReasonsTableProps) {
+  const { data } = useAdminReportReasons()
+  const reasons = data ?? fallbackData
+  const createReason = useCreateReportReason()
+  const updateReason = useUpdateReportReason()
+  const deleteReason = useDeleteReportReason()
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedReason, setSelectedReason] = useState<AdminReportReasonItem | null>(null)
+  const [reasonToDelete, setReasonToDelete] = useState<AdminReportReasonItem | null>(null)
 
   const filteredReasons = useMemo(() => {
     if (!searchQuery.trim()) return reasons
@@ -51,21 +60,25 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
   }, [reasons, searchQuery])
 
   const handleSaveReason = (saved: AdminReportReasonItem) => {
-    setReasons((prev) => {
-      const idx = prev.findIndex((r) => r.id === saved.id)
-      if (idx >= 0) {
-        const next = [...prev]
-        next[idx] = saved
-        return next
-      }
-      return [saved, ...prev]
-    })
+    if (selectedReason) {
+      updateReason.mutate({
+        id: selectedReason.id,
+        label: saved.label,
+        description: saved.description,
+        appliesTo: saved.appliesTo,
+        isActive: saved.isActive,
+      })
+    } else {
+      createReason.mutate({
+        label: saved.label,
+        description: saved.description,
+        appliesTo: saved.appliesTo,
+      })
+    }
   }
 
-  const handleToggleStatus = (id: string) => {
-    setReasons((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r))
-    )
+  const handleToggleStatus = (reason: AdminReportReasonItem) => {
+    updateReason.mutate({ id: reason.id, isActive: !reason.isActive })
   }
 
   const handleOpenAdd = () => {
@@ -76,6 +89,12 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
   const handleOpenEdit = (reason: AdminReportReasonItem) => {
     setSelectedReason(reason)
     setDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!reasonToDelete) return
+    await deleteReason.mutateAsync(reasonToDelete.id)
+    setReasonToDelete(null)
   }
 
   return (
@@ -180,7 +199,7 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
                         <Button
                           variant="ghost"
                           size="icon-xs"
-                          onClick={() => handleToggleStatus(reason.id)}
+                          onClick={() => handleToggleStatus(reason)}
                           className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
                           aria-label={reason.isActive ? "Disable reason" : "Enable reason"}
                         >
@@ -189,6 +208,15 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
                           ) : (
                             <CheckCircle size={14} className="text-primary" />
                           )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => setReasonToDelete(reason)}
+                          className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
+                          aria-label="Delete reason"
+                        >
+                          <Trash size={14} />
                         </Button>
                       </div>
                     </TableCell>
@@ -252,10 +280,19 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
                   <Button
                     variant="ghost"
                     size="xs"
-                    onClick={() => handleToggleStatus(reason.id)}
+                    onClick={() => handleToggleStatus(reason)}
                     className="h-7 px-2 text-[11px] cursor-pointer"
                   >
                     {reason.isActive ? "Disable" : "Enable"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => setReasonToDelete(reason)}
+                    className="h-7 px-2 text-[11px] text-destructive cursor-pointer"
+                  >
+                    <Trash size={12} className="mr-1" />
+                    Delete
                   </Button>
                 </div>
               </div>
@@ -274,6 +311,20 @@ export function ReportReasonsTable({ initialData }: ReportReasonsTableProps) {
         onOpenChange={setDialogOpen}
         reason={selectedReason}
         onSave={handleSaveReason}
+      />
+      <ConfirmationDialog
+        open={Boolean(reasonToDelete)}
+        onOpenChange={(open) => !open && setReasonToDelete(null)}
+        title="Delete report reason?"
+        description={
+          reasonToDelete
+            ? `This will disable "${reasonToDelete.label}" so users can no longer choose it. Historical reports will remain intact.`
+            : "This report reason will be disabled."
+        }
+        confirmLabel="Delete Reason"
+        variant="destructive"
+        isPending={deleteReason.isPending}
+        onConfirm={handleConfirmDelete}
       />
     </>
   )

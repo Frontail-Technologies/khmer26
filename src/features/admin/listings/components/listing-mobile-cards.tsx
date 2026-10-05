@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import Image from "next/image"
@@ -170,10 +170,8 @@ export function ListingMobileCards({
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/60">
-                    <div className="flex items-center gap-2 font-mono text-[10px]">
-                      <span className="font-semibold text-foreground">{listing.id}</span>
-                      <span>•</span>
-                      <span>{listing.createdAt}</span>
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <span>{listing.createdDate}</span>
                     </div>
 
                     <div className="flex items-center gap-2.5">
@@ -202,3 +200,5 @@ export function ListingMobileCards({
     </div>
   )
 }
+
+

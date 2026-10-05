@@ -23,6 +23,7 @@ import {
   type SelectOption,
 } from "@/components/ui/select"
 import type { AdminListing } from "../types"
+import { useRejectListing } from "../hooks/listings.mutations"
 
 interface RejectListingDialogProps {
   listing: AdminListing
@@ -50,15 +51,16 @@ export function RejectListingDialog({
 }: RejectListingDialogProps) {
   const [selectedReason, setSelectedReason] = useState(REJECTION_REASONS[0].value)
   const [customNote, setCustomNote] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const rejectListing = useRejectListing()
 
   const handleReject = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onRejectSuccess?.(selectedReason, customNote)
-      onOpenChange(false)
-    }, 400)
+    const reason = customNote.trim() ? `${selectedReason}: ${customNote.trim()}` : selectedReason
+    rejectListing.mutate({ id: listing.id, reason }, {
+      onSuccess: () => {
+        onRejectSuccess?.(selectedReason, customNote)
+        onOpenChange(false)
+      },
+    })
   }
 
   return (
@@ -72,7 +74,7 @@ export function RejectListingDialog({
             Reject Listing Submission
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Reject submission for <span className="font-semibold text-foreground">&ldquo;{listing.title}&rdquo;</span> (#{listing.id}).
+            Reject submission for <span className="font-semibold text-foreground">&ldquo;{listing.title}&rdquo;</span>.
           </DialogDescription>
         </DialogHeader>
 
@@ -131,11 +133,11 @@ export function RejectListingDialog({
           <Button
             type="button"
             size="sm"
-            disabled={isSubmitting}
+            disabled={rejectListing.isPending}
             onClick={handleReject}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5 rounded-lg cursor-pointer"
           >
-            {isSubmitting ? (
+            {rejectListing.isPending ? (
               <SpinnerGap size={14} className="animate-spin" />
             ) : (
               <XCircle size={15} weight="bold" />

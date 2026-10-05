@@ -43,6 +43,7 @@ export interface AdminBannerItem {
   title: string
   placement: BannerPlacement
   imageUrl: string
+  imageMediaId?: string
   mobileImageUrl?: string
   destinationType: BannerDestinationType
   destinationValue: string
@@ -63,5 +64,14 @@ export interface SafetyTipItem {
   context: SafetyTipContext
   isActive: boolean
   sortOrder: number
+}
+
+export interface StaticPageItem {
+  id: string
+  slug: string
+  title: string
+  content: string
+  isActive: boolean
+  updatedAt: string
 }
 

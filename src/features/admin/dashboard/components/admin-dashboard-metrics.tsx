@@ -1,22 +1,29 @@
+"use client"
+
 import Link from "next/link"
 import {
   Users,
   Crown,
   SealCheck,
-  Star,
+  ChatCircleDots,
   TrendUp,
   CaretRight,
-} from "@phosphor-icons/react/dist/ssr"
+} from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+
+const formatCount = (value?: number) => (value ?? 0).toLocaleString()
 
 export function AdminDashboardMetrics() {
+  const { data } = useAdminDashboard()
+
   const kpis = [
     {
       id: "all-users",
       label: "All Users",
-      value: "124,500",
-      change: "+18.2%",
+      value: formatCount(data?.users?.total),
+      change: `${formatCount(data?.users?.newLast7Days)} new in 7d`,
       trend: "up",
       icon: Users,
       color: "bg-primary/10 text-primary border-primary/20",
@@ -25,8 +32,8 @@ export function AdminDashboardMetrics() {
     {
       id: "subscriptions",
       label: "Subscriptions",
-      value: "917",
-      change: "+6.5%",
+      value: formatCount(data?.subscriptions?.active),
+      change: `${formatCount(data?.subscriptions?.expiringSoon)} expiring soon`,
       trend: "up",
       icon: Crown,
       color: "bg-accent/10 text-accent border-accent/20",
@@ -35,7 +42,7 @@ export function AdminDashboardMetrics() {
     {
       id: "pending-verifications",
       label: "Verifications",
-      value: "5",
+      value: formatCount(data?.sellers?.pendingVerification),
       change: "Action required",
       trend: "alert",
       icon: SealCheck,
@@ -44,14 +51,14 @@ export function AdminDashboardMetrics() {
       urgent: true,
     },
     {
-      id: "total-reviews",
-      label: "Total Reviews",
-      value: "3,420",
-      change: "4.9 Avg Star",
+      id: "messages-today",
+      label: "Messages Today",
+      value: formatCount(data?.chat?.messagesToday),
+      change: `${formatCount(data?.chat?.offersPending)} offers pending`,
       trend: "neutral",
-      icon: Star,
+      icon: ChatCircleDots,
       color: "bg-accent/10 text-accent border-accent/20",
-      href: "/admin/reviews",
+      href: "/admin/chats",
     },
   ]
 

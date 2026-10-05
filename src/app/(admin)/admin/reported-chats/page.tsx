@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { ReportedChatsWorkspace } from "@/features/admin/reported-chats/components/reported-chats-workspace"
-import { DEMO_REPORTED_CHATS } from "@/features/admin/reported-chats/data/demo-reported-chats"
 
 export const metadata: Metadata = {
   title: "Reported Chats",
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function AdminReportedChatsPage() {
-  return (
-    <ReportedChatsWorkspace
-      initialReports={DEMO_REPORTED_CHATS}
-    />
-  )
+  return <ReportedChatsWorkspace />
 }

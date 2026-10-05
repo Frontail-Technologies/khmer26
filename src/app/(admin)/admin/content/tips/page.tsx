@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { SafetyTipsWorkspace } from "@/features/admin/content/components/safety-tips-workspace"
-import { DEMO_SAFETY_TIPS } from "@/features/admin/content/data/demo-content-data"
 
 export const metadata: Metadata = {
   title: "Safety Tips",
@@ -8,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function AdminSafetyTipsPage() {
-  return <SafetyTipsWorkspace initialTips={DEMO_SAFETY_TIPS} />
+  return <SafetyTipsWorkspace />
 }

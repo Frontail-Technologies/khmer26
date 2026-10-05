@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,13 +11,9 @@ import {
 } from "@tanstack/react-table"
 import {
   MagnifyingGlass,
-  Plus,
   ShieldCheck,
-  UserPlus,
   UserGear,
   DotsThreeVertical,
-  UserMinus,
-  UserCheck,
 } from "@phosphor-icons/react"
 import {
   Table,
@@ -61,11 +57,13 @@ import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { createStaffColumns } from "../columns"
 import { RolePermissionsSheet } from "./role-permissions-sheet"
 import type { AdminStaffMember, RoleDefinition, AdminStaffRole } from "../types"
+import { useAdminPermissions, useAdminRoles, useAdminStaff } from "../hooks/roles.queries"
+import { useAssignStaffRole, useReplaceRolePermissions } from "../hooks/roles.mutations"
 import { cn } from "@/lib/utils"
 
 interface RolesWorkspaceProps {
-  initialStaff: AdminStaffMember[]
-  initialRoles: RoleDefinition[]
+  initialStaff?: AdminStaffMember[]
+  initialRoles?: RoleDefinition[]
 }
 
 type RolesTabKey = "staff" | "roles"
@@ -103,9 +101,14 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 }
 
 export function RolesWorkspace({
-  initialStaff,
-  initialRoles,
+  initialStaff = [],
+  initialRoles = [],
 }: RolesWorkspaceProps) {
+  const { data: remoteStaff } = useAdminStaff()
+  const { data: remoteRoles } = useAdminRoles()
+  const { data: permissionGroups = [] } = useAdminPermissions()
+  const assignStaffRole = useAssignStaffRole()
+  const replacePermissions = useReplaceRolePermissions()
   const [staffList, setStaffList] = useState<AdminStaffMember[]>(initialStaff)
   const [rolesList, setRolesList] = useState<RoleDefinition[]>(initialRoles)
   const [activeTab, setActiveTab] = useState<RolesTabKey>("staff")
@@ -118,37 +121,42 @@ export function RolesWorkspace({
   const [selectedRole, setSelectedRole] = useState<RoleDefinition | null>(null)
   const [permissionsSheetOpen, setPermissionsSheetOpen] = useState(false)
 
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
-  const [inviteName, setInviteName] = useState("")
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteRole, setInviteRole] = useState<AdminStaffRole>("admin")
-
   const [editRoleStaff, setEditRoleStaff] = useState<AdminStaffMember | null>(null)
   const [newStaffRole, setNewStaffRole] = useState<AdminStaffRole>("admin")
+
+  useEffect(() => {
+    if (remoteStaff) setStaffList(remoteStaff)
+  }, [remoteStaff])
+
+  useEffect(() => {
+    if (remoteRoles) setRolesList(remoteRoles)
+  }, [remoteRoles])
 
   const handleEditRole = useCallback((staff: AdminStaffMember) => {
     setEditRoleStaff(staff)
     setNewStaffRole(staff.role)
   }, [])
 
-  const handleToggleStatus = useCallback((staff: AdminStaffMember) => {
-    setStaffList((prev) =>
-      prev.map((s) =>
-        s.id === staff.id
-          ? { ...s, status: s.status === "active" ? "inactive" : "active" }
-          : s
-      )
-    )
-  }, [])
-
   const handleSaveStaffRole = () => {
     if (!editRoleStaff) return
-    setStaffList((prev) =>
-      prev.map((s) =>
-        s.id === editRoleStaff.id ? { ...s, role: newStaffRole } : s
+    const role = rolesList.find((r) => {
+      const normalized = r.name.toLowerCase()
+      return (
+        (newStaffRole === "super_admin" && normalized.includes("super")) ||
+        (newStaffRole === "moderator" && normalized.includes("moderator")) ||
+        (newStaffRole === "support" && normalized.includes("support")) ||
+        (newStaffRole === "admin" && normalized === "admin")
       )
+    })
+    if (!role) return
+    assignStaffRole.mutate(
+      { userId: editRoleStaff.id, roleId: role.id },
+      {
+        onSuccess: () => {
+          setEditRoleStaff(null)
+        },
+      }
     )
-    setEditRoleStaff(null)
   }
 
   const handleOpenPermissionsSheet = (role: RoleDefinition) => {
@@ -157,30 +165,7 @@ export function RolesWorkspace({
   }
 
   const handleSaveRolePermissions = (roleId: string, permissions: string[]) => {
-    setRolesList((prev) =>
-      prev.map((r) => (r.id === roleId ? { ...r, permissions } : r))
-    )
-  }
-
-  const handleInviteSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inviteName.trim() || !inviteEmail.trim()) return
-
-    const newMember: AdminStaffMember = {
-      id: `STF-${100 + staffList.length + 1}`,
-      name: inviteName.trim(),
-      email: inviteEmail.trim(),
-      role: inviteRole,
-      status: "active",
-      lastActiveAt: "Just now",
-      joinedAt: "Today",
-    }
-
-    setStaffList((prev) => [newMember, ...prev])
-    setInviteName("")
-    setInviteEmail("")
-    setInviteRole("admin")
-    setInviteDialogOpen(false)
+    replacePermissions.mutate({ roleId, permissionIds: permissions })
   }
 
   const filteredStaff = useMemo(() => {
@@ -206,9 +191,8 @@ export function RolesWorkspace({
   const columns = useMemo(() => {
     return createStaffColumns({
       onEditRole: handleEditRole,
-      onToggleStatus: handleToggleStatus,
     })
-  }, [handleEditRole, handleToggleStatus])
+  }, [handleEditRole])
 
   const table = useReactTable({
     data: filteredStaff,
@@ -279,7 +263,7 @@ export function RolesWorkspace({
                 />
                 <input
                   type="text"
-                  placeholder="Search staff name, email, or ID..."
+                  placeholder="Search staff name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
@@ -306,15 +290,6 @@ export function RolesWorkspace({
                   </SelectContent>
                 </Select>
 
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setInviteDialogOpen(true)}
-                  className="h-9 px-3 text-xs font-bold rounded-lg cursor-pointer"
-                >
-                  <Plus size={14} className="mr-1" weight="bold" />
-                  Invite Admin
-                </Button>
               </div>
             </div>
 
@@ -403,8 +378,6 @@ export function RolesWorkspace({
                               {staff.name}
                             </span>
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
-                              <span className="font-mono">{staff.id}</span>
-                              <span>•</span>
                               <span className="truncate">{staff.email}</span>
                             </div>
                           </div>
@@ -434,23 +407,6 @@ export function RolesWorkspace({
                                 <span>Edit Role</span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              {staff.status === "active" ? (
-                                <DropdownMenuItem
-                                  onClick={() => handleToggleStatus(staff)}
-                                  className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                                >
-                                  <UserMinus size={13} />
-                                  <span>Deactivate</span>
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem
-                                  onClick={() => handleToggleStatus(staff)}
-                                  className="flex items-center gap-2 cursor-pointer text-primary focus:text-primary"
-                                >
-                                  <UserCheck size={13} />
-                                  <span>Reactivate</span>
-                                </DropdownMenuItem>
-                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -470,7 +426,6 @@ export function RolesWorkspace({
                 })
               ) : (
                 <DataTableEmpty
-                  colSpan={1}
                   title="No staff members found"
                   description="Try clearing search or filter parameters."
                 />
@@ -484,7 +439,7 @@ export function RolesWorkspace({
         ) : (
           <div className="divide-y divide-border/60">
             {rolesList.map((role) => {
-              const roleConf = ROLE_CONFIG[role.id] || ROLE_CONFIG.support
+              const roleConf = ROLE_CONFIG[role.id as AdminStaffRole] || ROLE_CONFIG.support
               return (
                 <div
                   key={role.id}
@@ -531,95 +486,11 @@ export function RolesWorkspace({
       <RolePermissionsSheet
         role={selectedRole}
         open={permissionsSheetOpen}
+        permissionGroups={permissionGroups}
+        isSaving={replacePermissions.isPending}
         onOpenChange={setPermissionsSheetOpen}
         onSave={handleSaveRolePermissions}
       />
-
-      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
-          <form onSubmit={handleInviteSubmit}>
-            <DialogHeader className="space-y-1.5 text-left">
-              <div className="flex items-center gap-2 text-primary font-semibold">
-                <UserPlus size={20} />
-                <DialogTitle className="text-sm sm:text-base">
-                  Invite Administrator
-                </DialogTitle>
-              </div>
-              <DialogDescription className="text-xs text-muted-foreground pt-1 leading-relaxed">
-                Add an internal team member to the Khmer26 Admin Portal and assign their initial role.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-3.5 py-3 text-xs">
-              <Field>
-                <FieldLabel required>Full Name</FieldLabel>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Sothea Chan"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel required>Work Email Address</FieldLabel>
-                <input
-                  type="email"
-                  required
-                  placeholder="name@khmer26.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel required>Role & Access Level</FieldLabel>
-                <Select
-                  value={inviteRole}
-                  items={ROLE_OPTIONS.filter((o) => o.value !== "all")}
-                  onValueChange={(val) => setInviteRole((val as AdminStaffRole) ?? "admin")}
-                >
-                  <SelectTrigger className="h-9 text-xs w-full">
-                    <SelectValue placeholder="Select role">
-                      {(val) => getSelectOptionLabel(ROLE_OPTIONS, val, "Admin")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLE_OPTIONS.filter((o) => o.value !== "all").map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-
-            <DialogFooter className="flex flex-row gap-2 pt-2 sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setInviteDialogOpen(false)}
-                className="flex-1 sm:flex-initial h-9 px-4 text-xs font-semibold rounded-lg cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="default"
-                size="sm"
-                className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
-              >
-                Send Invite
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={Boolean(editRoleStaff)} onOpenChange={(open) => !open && setEditRoleStaff(null)}>
         <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">

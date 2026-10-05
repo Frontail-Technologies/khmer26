@@ -1,23 +1,31 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
-import { DEMO_ADMIN_BANNERS } from "@/features/admin/content/data/demo-content-data"
+import { useQuery } from "@tanstack/react-query"
+import { getPublicBanners, type PublicBannerItem } from "../api/banners.api"
 import { cn } from "@/lib/utils"
 
 interface HomepageBannerProps {
   className?: string
+  initialBanner?: PublicBannerItem | null
 }
 
-function resolveBannerDestination(type: string, value: string): string | null {
-  if (!value || type === "no_action") return null
+function resolveBannerDestination(type?: string | null, value?: string | null): string | null {
+  if (!value || !type || type === "no_action") return null
   if (type === "category") return `/search?category=${encodeURIComponent(value)}`
   if (type === "listing") return `/listing/${encodeURIComponent(value)}`
   return value
 }
 
-export function HomepageBanner({ className }: HomepageBannerProps) {
-  const banner = DEMO_ADMIN_BANNERS.find(
-    (b) => b.isActive && b.placement === "homepage_hero"
-  )
+export function HomepageBanner({ className, initialBanner }: HomepageBannerProps) {
+  const { data: banners = [] } = useQuery({
+    queryKey: ["public-banners", "homepage_hero"],
+    queryFn: () => getPublicBanners("homepage_hero"),
+    staleTime: 60 * 1000,
+  })
+
+  const banner = banners.find((b) => b.isActive) ?? initialBanner
 
   if (!banner) {
     return null
@@ -28,11 +36,13 @@ export function HomepageBanner({ className }: HomepageBannerProps) {
     banner.destinationValue
   )
 
+  const imageUrl = banner.imageUrl || "/images/categories/cars.jpg"
+
   const bannerContent = (
     <div className="relative w-full aspect-[21/6] sm:aspect-[21/5] md:aspect-[21/4] min-h-[90px] sm:min-h-[120px] rounded-xl sm:rounded-2xl overflow-hidden border border-border/70 bg-muted shadow-2xs group">
       <Image
-        src={banner.imageUrl}
-        alt={banner.title}
+        src={imageUrl}
+        alt={banner.title || "Marketplace Banner"}
         fill
         priority
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1400px"

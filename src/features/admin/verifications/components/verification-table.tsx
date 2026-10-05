@@ -21,13 +21,15 @@ import {
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
+import { VerificationSummaryMetrics } from "./verification-summary-metrics"
 import { VerificationToolbar } from "./verification-toolbar"
 import { VerificationMobileCards } from "./verification-mobile-cards"
 import { verificationColumns } from "../columns"
 import type { VerificationRequest } from "../types"
+import { useAdminVerifications } from "../hooks/verifications.queries"
 
 interface VerificationTableProps {
-  initialData: VerificationRequest[]
+  initialData?: VerificationRequest[]
 }
 
 export function VerificationTable({ initialData }: VerificationTableProps) {
@@ -37,9 +39,25 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
   const [statusFilter, setStatusFilter] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [sellerTypeFilter, setSellerTypeFilter] = useState("")
+  const { data, isLoading } = useAdminVerifications({ page: 1, limit: 100 })
+  const requests = useMemo(() => data?.items ?? initialData ?? [], [data?.items, initialData])
+
+  const metrics = useMemo(() => {
+    const pending = requests.filter((item) => item.status === "pending").length
+    const inReview = requests.filter((item) => item.status === "in_review").length
+    const approved = requests.filter((item) => item.status === "approved").length
+    const rejected = requests.filter((item) => item.status === "rejected").length
+    return {
+      pending,
+      inReview,
+      approved30d: approved,
+      rejected30d: rejected,
+      averageReviewMinutes: 0,
+    }
+  }, [requests])
 
   const filteredData = useMemo(() => {
-    return initialData.filter((item) => {
+    return requests.filter((item) => {
       if (statusFilter && item.status !== statusFilter) return false
       if (typeFilter && item.type !== typeFilter) return false
       if (sellerTypeFilter && item.seller.sellerType !== sellerTypeFilter) return false
@@ -53,7 +71,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
       }
       return true
     })
-  }, [initialData, searchQuery, statusFilter, typeFilter, sellerTypeFilter])
+  }, [requests, searchQuery, statusFilter, typeFilter, sellerTypeFilter])
 
   const table = useReactTable({
     data: filteredData,
@@ -84,6 +102,8 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
 
   return (
     <div className="space-y-3.5">
+      <VerificationSummaryMetrics stats={metrics} />
+
       <VerificationToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -95,7 +115,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
         onSellerTypeChange={setSellerTypeFilter}
         onReset={handleReset}
         hasActiveFilters={hasActiveFilters}
-        totalCount={initialData.length}
+        totalCount={requests.length}
         filteredCount={filteredData.length}
       />
 
@@ -142,8 +162,8 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
               ) : (
                 <DataTableEmpty
                   colSpan={verificationColumns.length}
-                  title="No verification requests found"
-                  description="Try adjusting your search terms or active filters."
+                  title={isLoading ? "Loading verification requests" : "No verification requests found"}
+                  description={isLoading ? "Fetching the latest seller verification queue." : "Try adjusting your search terms or active filters."}
                 />
               )}
             </TableBody>

@@ -138,7 +138,7 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
           />
           <input
             type="text"
-            placeholder="Search seller, business name, or ID..."
+            placeholder="Search seller or business name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-9 pl-9.5 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
@@ -271,8 +271,8 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
                     >
                       {sub.businessName || sub.sellerName}
                     </Link>
-                    <span className="font-mono text-[10px] text-muted-foreground block">
-                      {sub.sellerId}
+                    <span className="text-[10px] text-muted-foreground block">
+                      {sub.planName}
                     </span>
                   </div>
                   <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
@@ -334,7 +334,6 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
           })
         ) : (
           <DataTableEmpty
-            colSpan={1}
             title="No subscribers found"
             description="Try adjusting your search criteria or active filters."
           />

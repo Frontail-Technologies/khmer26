@@ -22,9 +22,9 @@ import {
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { DEMO_ADMIN_USER } from "../data/demo-admin-dashboard"
 import { getAdminRouteInfo } from "../navigation/admin-route-metadata"
 import { cn } from "@/lib/utils"
+import { useAdminAuth } from "@/hooks/use-admin-auth"
 
 interface AdminTopbarProps {
   className?: string
@@ -33,6 +33,9 @@ interface AdminTopbarProps {
 export function AdminTopbar({ className }: AdminTopbarProps) {
   const pathname = usePathname()
   const routeInfo = getAdminRouteInfo(pathname)
+  const { user, logout, isLoggingOut } = useAdminAuth()
+  const adminName = user?.email?.split("@")[0] || "Admin"
+  const adminEmail = user?.email || "Verified admin"
 
   return (
     <header
@@ -97,15 +100,15 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             aria-label="Admin menu"
           >
             <Avatar className="h-8 w-8 rounded-full border border-border/80 shadow-2xs">
-              <AvatarImage src={DEMO_ADMIN_USER.avatar} alt={DEMO_ADMIN_USER.name} />
+              <AvatarImage src="" alt={adminName} />
               <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
-                {DEMO_ADMIN_USER.name.slice(0, 2).toUpperCase()}
+                {adminName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <div className="hidden xl:flex flex-col min-w-0 pr-1 text-left">
               <span className="text-xs font-bold text-foreground truncate max-w-28 leading-tight">
-                {DEMO_ADMIN_USER.name}
+                {adminName}
               </span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase leading-tight tracking-wider">
                 Super Admin
@@ -118,11 +121,11 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
           <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-md">
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
-                <p className="text-xs font-bold text-foreground">{DEMO_ADMIN_USER.name}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{DEMO_ADMIN_USER.email}</p>
+                <p className="text-xs font-bold text-foreground">{adminName}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{adminEmail}</p>
                 <div className="pt-1">
                   <Badge variant="outline" className="text-[10px] font-semibold uppercase rounded-md">
-                    {DEMO_ADMIN_USER.role.replace("_", " ")}
+                    {user?.role || "admin"}
                   </Badge>
                 </div>
               </div>
@@ -151,16 +154,13 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             />
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              render={
-                <Link
-                  href="/admin/login"
-                  className="flex items-center gap-2 text-xs font-medium text-destructive w-full cursor-pointer"
-                >
-                  <SignOut size={15} />
-                  <span>Sign Out</span>
-                </Link>
-              }
-            />
+              onClick={() => void logout()}
+              disabled={isLoggingOut}
+              className="flex items-center gap-2 text-xs font-medium text-destructive w-full cursor-pointer"
+            >
+              <SignOut size={15} />
+              <span>{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

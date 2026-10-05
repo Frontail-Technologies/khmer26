@@ -37,10 +37,11 @@ import { DataTablePagination } from "@/components/data-table/data-table-paginati
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { createAuditColumns } from "../columns"
 import { AuditDetailSheet } from "./audit-detail-sheet"
+import { useAdminAuditLogs } from "../hooks/audit-log.queries"
 import type { AdminAuditEntry, AuditModule } from "../types"
 
 interface AuditTableProps {
-  initialEntries: AdminAuditEntry[]
+  initialEntries?: AdminAuditEntry[]
 }
 
 const MODULE_OPTIONS: SelectOption[] = [
@@ -66,8 +67,9 @@ const MODULE_LABELS: Record<AuditModule, string> = {
   roles: "Roles",
 }
 
-export function AuditTable({ initialEntries }: AuditTableProps) {
-  const [entries] = useState<AdminAuditEntry[]>(initialEntries)
+export function AuditTable({ initialEntries = [] }: AuditTableProps) {
+  const { data } = useAdminAuditLogs()
+  const entries = data?.items ?? initialEntries
   const [sorting, setSorting] = useState<SortingState>([
     { id: "timestamp", desc: true },
   ])
@@ -290,7 +292,6 @@ export function AuditTable({ initialEntries }: AuditTableProps) {
             ))
           ) : (
             <DataTableEmpty
-              colSpan={1}
               title="No audit events found"
               description="Try adjusting your search criteria or active module filter."
             />

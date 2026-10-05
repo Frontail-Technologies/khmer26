@@ -81,7 +81,9 @@ export function createPromotionColumns({
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <span className="font-mono text-[10px]">{item.listingId}</span>
                 <span>•</span>
-                <span className="font-semibold text-foreground">${item.listingPrice.toLocaleString()}</span>
+                <span className="font-semibold text-foreground">
+                  ${typeof item.listingPrice === 'number' ? item.listingPrice.toLocaleString() : (item.listingPrice ?? 0)}
+                </span>
               </div>
             </div>
           </div>

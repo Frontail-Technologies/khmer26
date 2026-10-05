@@ -21,6 +21,7 @@ import {
   SelectValue,
   getSelectOptionLabel,
 } from "@/components/ui/select"
+import { useDismissReport } from "../hooks/reports.mutations"
 import type { AdminReport } from "../types"
 
 interface DismissReportDialogProps {
@@ -44,9 +45,15 @@ export function DismissReportDialog({
 }: DismissReportDialogProps) {
   const [reason, setReason] = useState("no_violation")
   const [notes, setNotes] = useState("")
+  const dismissReport = useDismissReport()
 
+  const reasonLabel = DISMISS_REASONS.find((o) => o.value === reason)?.label
   const handleSubmit = () => {
-    onOpenChange(false)
+    const resolutionNote = [reasonLabel, notes.trim()].filter(Boolean).join(" — ")
+    dismissReport.mutate(
+      { id: report.id, notes: resolutionNote || undefined },
+      { onSuccess: () => onOpenChange(false) }
+    )
   }
 
   return (
@@ -113,6 +120,7 @@ export function DismissReportDialog({
             variant="secondary"
             size="sm"
             onClick={handleSubmit}
+            disabled={dismissReport.isPending}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
           >
             Confirm Dismissal

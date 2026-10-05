@@ -408,7 +408,6 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
             })
           ) : (
             <DataTableEmpty
-              colSpan={1}
               title="No promotions found"
               description="Try adjusting your search query or status tab."
             />

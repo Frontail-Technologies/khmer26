@@ -27,7 +27,8 @@ interface RejectVerificationDialogProps {
   request: VerificationRequest
   open: boolean
   onOpenChange: (open: boolean) => void
-  onRejectSuccess?: (reason: string, note?: string) => void
+  onReject: (reason: string, note?: string) => void
+  isSubmitting?: boolean
 }
 
 const REJECTION_REASONS = [
@@ -45,19 +46,14 @@ export function RejectVerificationDialog({
   request,
   open,
   onOpenChange,
-  onRejectSuccess,
+  onReject,
+  isSubmitting = false,
 }: RejectVerificationDialogProps) {
   const [selectedReason, setSelectedReason] = useState(REJECTION_REASONS[0])
   const [customNote, setCustomNote] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleReject = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onRejectSuccess?.(selectedReason, customNote)
-      onOpenChange(false)
-    }, 400)
+    onReject(selectedReason, customNote)
   }
 
   return (

@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AdminSidebar } from "./admin-sidebar"
 import { AdminTopbar } from "./admin-topbar"
+import { AdminGuard } from "./admin-guard"
 
 interface AdminShellProps {
   children: ReactNode
@@ -9,14 +10,16 @@ interface AdminShellProps {
 
 export function AdminShell({ children }: AdminShellProps) {
   return (
-    <SidebarProvider defaultOpen={true}>
-      <AdminSidebar />
-      <SidebarInset className="min-w-0">
-        <AdminTopbar />
-        <main className="min-w-0 flex-1 p-3.5 sm:p-4.5 lg:px-6 lg:py-4.5 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] max-w-[1480px] w-full mx-auto">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <AdminGuard>
+      <SidebarProvider defaultOpen={true}>
+        <AdminSidebar />
+        <SidebarInset className="min-w-0">
+          <AdminTopbar />
+          <main className="min-w-0 flex-1 p-3.5 sm:p-4.5 lg:px-6 lg:py-4.5 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] max-w-[1480px] w-full mx-auto">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </AdminGuard>
   )
 }

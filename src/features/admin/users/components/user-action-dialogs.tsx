@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ShieldWarning, Lock, ArrowCounterClockwise, Info } from "@phosphor-icons/react"
+import { ShieldWarning, ArrowCounterClockwise, Info } from "@phosphor-icons/react"
 import {
   Dialog,
   DialogContent,
@@ -17,21 +17,23 @@ import type { AdminUserDetail } from "../types"
 
 interface UserActionDialogsProps {
   user: AdminUserDetail
-  actionType: "restrict" | "suspend" | "restore" | null
+  actionType: "suspend" | "restore" | null
   onClose: () => void
+  onConfirm: (reason?: string) => void
+  isPending?: boolean
 }
 
 export function UserActionDialogs({
   user,
   actionType,
   onClose,
+  onConfirm,
+  isPending = false,
 }: UserActionDialogsProps) {
   const [reason, setReason] = useState("")
 
   const getTitle = () => {
     switch (actionType) {
-      case "restrict":
-        return `Restrict Account: ${user.name}`
       case "suspend":
         return `Suspend Account: ${user.name}`
       case "restore":
@@ -43,8 +45,6 @@ export function UserActionDialogs({
 
   const getDescription = () => {
     switch (actionType) {
-      case "restrict":
-        return "Apply marketplace restrictions such as disabling new listing creation or hiding contact info."
       case "suspend":
         return "Temporarily or permanently disable access to all marketplace features and delist active items."
       case "restore":
@@ -59,7 +59,6 @@ export function UserActionDialogs({
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
         <DialogHeader className="space-y-1.5 text-left">
           <div className="flex items-center gap-2 text-foreground font-semibold">
-            {actionType === "restrict" && <Lock size={20} className="text-accent" />}
             {actionType === "suspend" && <ShieldWarning size={20} className="text-destructive" />}
             {actionType === "restore" && <ArrowCounterClockwise size={20} className="text-primary" />}
             <DialogTitle className="text-sm sm:text-base">{getTitle()}</DialogTitle>
@@ -94,6 +93,7 @@ export function UserActionDialogs({
             variant="outline"
             size="sm"
             onClick={onClose}
+            disabled={isPending}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-semibold rounded-lg cursor-pointer"
           >
             Cancel
@@ -102,10 +102,11 @@ export function UserActionDialogs({
             type="button"
             variant={actionType === "suspend" ? "destructive" : "default"}
             size="sm"
-            onClick={onClose}
+            onClick={() => onConfirm(reason)}
+            disabled={isPending || (actionType === "suspend" && !reason.trim())}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
           >
-            Confirm Action
+            {isPending ? "Saving..." : "Confirm Action"}
           </Button>
         </DialogFooter>
       </DialogContent>

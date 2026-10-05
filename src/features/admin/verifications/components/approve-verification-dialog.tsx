@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { CheckCircle, ShieldCheck, SpinnerGap } from "@phosphor-icons/react"
 import {
   Dialog,
@@ -17,26 +16,17 @@ interface ApproveVerificationDialogProps {
   request: VerificationRequest
   open: boolean
   onOpenChange: (open: boolean) => void
-  onApproveSuccess?: () => void
+  onApprove: () => void
+  isSubmitting?: boolean
 }
 
 export function ApproveVerificationDialog({
   request,
   open,
   onOpenChange,
-  onApproveSuccess,
+  onApprove,
+  isSubmitting = false,
 }: ApproveVerificationDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleApprove = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onApproveSuccess?.()
-      onOpenChange(false)
-    }, 400)
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
@@ -87,7 +77,7 @@ export function ApproveVerificationDialog({
             type="button"
             size="sm"
             disabled={isSubmitting}
-            onClick={handleApprove}
+            onClick={onApprove}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 rounded-lg cursor-pointer"
           >
             {isSubmitting ? (

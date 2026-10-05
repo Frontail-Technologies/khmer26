@@ -23,31 +23,15 @@ import {
 } from "@/components/ui/select"
 import type { AdminUserDetail } from "../types"
 
-const PROVINCE_OPTIONS = [
-  { value: "Phnom Penh", label: "Phnom Penh" },
-  { value: "Siem Reap", label: "Siem Reap" },
-  { value: "Battambang", label: "Battambang" },
-  { value: "Kandal", label: "Kandal" },
-  { value: "Preah Sihanouk", label: "Preah Sihanouk" },
-  { value: "Kampot", label: "Kampot" },
-  { value: "Kampong Cham", label: "Kampong Cham" },
-  { value: "Banteay Meanchey", label: "Banteay Meanchey" },
-  { value: "Takeo", label: "Takeo" },
-  { value: "Prey Veng", label: "Prey Veng" },
-  { value: "Svay Rieng", label: "Svay Rieng" },
-  { value: "Kampong Speu", label: "Kampong Speu" },
-  { value: "Kampong Thom", label: "Kampong Thom" },
-  { value: "Pursat", label: "Pursat" },
-  { value: "Koh Kong", label: "Koh Kong" },
-  { value: "Kratie", label: "Kratie" },
-  { value: "Mondulkiri", label: "Mondulkiri" },
-  { value: "Ratanakiri", label: "Ratanakiri" },
-  { value: "Stung Treng", label: "Stung Treng" },
-  { value: "Preah Vihear", label: "Preah Vihear" },
-  { value: "Oddar Meanchey", label: "Oddar Meanchey" },
-  { value: "Kep", label: "Kep" },
-  { value: "Pailin", label: "Pailin" },
-  { value: "Tboung Khmum", label: "Tboung Khmum" },
+const SELLER_TYPE_OPTIONS = [
+  { value: "individual", label: "Individual" },
+  { value: "business", label: "Business" },
+  { value: "dealer", label: "Dealer" },
+]
+
+const ROLE_OPTIONS = [
+  { value: "user", label: "Standard User" },
+  { value: "admin", label: "Administrator" },
 ]
 
 interface EditUserSheetProps {
@@ -68,65 +52,39 @@ function EditUserForm({
 }) {
   const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
 
-  const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
-  const [phone, setPhone] = useState(user.phone)
-  const [province, setProvince] = useState(user.province)
-  const [location, setLocation] = useState(user.location)
-  const [address, setAddress] = useState(user.address ?? "")
+  const [role, setRole] = useState<"user" | "admin">(user.role || "user")
   const [bio, setBio] = useState(user.bio ?? "")
   const [businessName, setBusinessName] = useState(user.businessName ?? "")
-  const [registeredBusinessNumber, setRegisteredBusinessNumber] = useState(
-    user.registeredBusinessNumber ?? ""
+  const [sellerType, setSellerType] = useState<"individual" | "business" | "dealer">(
+    user.accountType === "dealer" ? "dealer" : user.accountType === "business" ? "business" : "individual"
   )
 
   const isDirty =
-    name !== user.name ||
     email !== user.email ||
-    phone !== user.phone ||
-    province !== user.province ||
-    location !== user.location ||
-    address !== (user.address ?? "") ||
+    role !== (user.role || "user") ||
     bio !== (user.bio ?? "") ||
     businessName !== (user.businessName ?? "") ||
-    registeredBusinessNumber !== (user.registeredBusinessNumber ?? "")
+    sellerType !== (user.accountType === "dealer" ? "dealer" : user.accountType === "business" ? "business" : "individual")
 
-  const isValid = name.trim().length > 0 && (!email || email.includes("@"))
+  const isValid = (!email || email.includes("@")) && (!isSeller || businessName.trim().length > 0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!isValid || !isDirty) return
 
     onSave({
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      province,
-      location: location.trim() || province,
-      address: address.trim() || undefined,
+      email: email.trim() || undefined,
+      role,
       bio: bio.trim() || undefined,
       businessName: isSeller && businessName.trim() ? businessName.trim() : undefined,
-      registeredBusinessNumber:
-        isSeller && registeredBusinessNumber.trim()
-          ? registeredBusinessNumber.trim()
-          : undefined,
+      accountType: sellerType === "individual" ? "seller" : sellerType,
     })
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
       <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-        <Field>
-          <FieldLabel required>Full Name</FieldLabel>
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="User display name"
-            className="h-9 text-xs"
-            required
-          />
-        </Field>
-
         {isSeller && (
           <Field>
             <FieldLabel>Business / Store Name</FieldLabel>
@@ -139,46 +97,31 @@ function EditUserForm({
           </Field>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field>
-            <FieldLabel>Email</FieldLabel>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              className="h-9 text-xs"
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel>Phone</FieldLabel>
-            <Input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+855 12 345 678"
-              className="h-9 text-xs"
-            />
-          </Field>
-        </div>
+        <Field>
+          <FieldLabel>Email</FieldLabel>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            className="h-9 text-xs"
+          />
+        </Field>
 
         <Field>
-          <FieldLabel>Province</FieldLabel>
+          <FieldLabel>System Role</FieldLabel>
           <Select
-            value={province}
-            onValueChange={(val) => {
-              if (val) setProvince(val)
-            }}
-            items={PROVINCE_OPTIONS}
+            value={role}
+            onValueChange={(val) => setRole((val as "user" | "admin") ?? "user")}
+            items={ROLE_OPTIONS}
           >
             <SelectTrigger className="h-9 text-xs">
               <SelectValue>
-                {getSelectOptionLabel(PROVINCE_OPTIONS, province, "Select province")}
+                {getSelectOptionLabel(ROLE_OPTIONS, role, "Standard User")}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="max-h-56">
-              {PROVINCE_OPTIONS.map((opt) => (
+            <SelectContent>
+              {ROLE_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
                 </SelectItem>
@@ -187,35 +130,27 @@ function EditUserForm({
           </Select>
         </Field>
 
-        <Field>
-          <FieldLabel>Location / Area</FieldLabel>
-          <Input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="District, Khan, or City Area"
-            className="h-9 text-xs"
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel>Street Address</FieldLabel>
-          <Input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Street address / House number"
-            className="h-9 text-xs"
-          />
-        </Field>
-
         {isSeller && (
           <Field>
-            <FieldLabel>Business Registration No.</FieldLabel>
-            <Input
-              value={registeredBusinessNumber}
-              onChange={(e) => setRegisteredBusinessNumber(e.target.value)}
-              placeholder="MOC / Tax registration number"
-              className="h-9 text-xs"
-            />
+            <FieldLabel>Seller Type</FieldLabel>
+            <Select
+              value={sellerType}
+              onValueChange={(val) => setSellerType((val as "individual" | "business" | "dealer") ?? "individual")}
+              items={SELLER_TYPE_OPTIONS}
+            >
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue>
+                  {getSelectOptionLabel(SELLER_TYPE_OPTIONS, sellerType, "Individual")}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {SELLER_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
         )}
 
@@ -271,7 +206,7 @@ export function EditUserSheet({
             Edit Account
           </SheetTitle>
           <SheetDescription className="text-xs text-muted-foreground">
-            Update account information for {user.name} ({user.id})
+            Update account information for {user.name}
           </SheetDescription>
         </SheetHeader>
 

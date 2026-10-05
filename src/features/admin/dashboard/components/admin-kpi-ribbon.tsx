@@ -1,45 +1,53 @@
+"use client"
+
 import {
   SquaresFour,
-  Sparkle,
+  Flag,
   CheckCircle,
   Hourglass,
   Handshake,
-} from "@phosphor-icons/react/dist/ssr"
+} from "@phosphor-icons/react"
 import { AdminMetricGroup, type AdminMetricItemProps } from "@/features/admin/components/admin-metric-group"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+
+const formatCount = (value?: number) => (value ?? 0).toLocaleString()
 
 export function AdminKpiRibbon() {
+  const { data } = useAdminDashboard()
+  const listings = data?.listings
+
   const metrics: AdminMetricItemProps[] = [
     {
       label: "Total Listings",
-      value: "48,290",
+      value: formatCount(listings?.total),
       subtext: "Cumulative volume",
       icon: <SquaresFour size={16} weight="bold" />,
       tone: "primary",
     },
     {
-      label: "Featured Listings",
-      value: "1,280",
-      subtext: "Promoted campaigns",
-      icon: <Sparkle size={16} weight="bold" />,
-      tone: "accent",
+      label: "Flagged Listings",
+      value: formatCount(listings?.flagged),
+      subtext: "Needs moderation",
+      icon: <Flag size={16} weight="bold" />,
+      tone: "destructive",
     },
     {
       label: "Active Listings",
-      value: "42,850",
+      value: formatCount(listings?.active),
       subtext: "Live on marketplace",
       icon: <CheckCircle size={16} weight="bold" />,
       tone: "success",
     },
     {
       label: "Expired Listings",
-      value: "4,160",
+      value: formatCount(listings?.expired),
       subtext: "Awaiting renewal",
       icon: <Hourglass size={16} weight="bold" />,
       tone: "warning",
     },
     {
       label: "Sold Listings",
-      value: "1,940",
+      value: formatCount(listings?.sold),
       subtext: "Closed transactions",
       icon: <Handshake size={16} weight="bold" />,
       tone: "neutral",

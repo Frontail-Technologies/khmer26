@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { DotsThreeVertical, UserGear, UserMinus, UserCheck } from "@phosphor-icons/react"
+import { DotsThreeVertical, UserGear } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -42,12 +41,10 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 
 interface StaffColumnOptions {
   onEditRole: (staff: AdminStaffMember) => void
-  onToggleStatus: (staff: AdminStaffMember) => void
 }
 
 export function createStaffColumns({
   onEditRole,
-  onToggleStatus,
 }: StaffColumnOptions): ColumnDef<AdminStaffMember>[] {
   return [
     {
@@ -77,8 +74,6 @@ export function createStaffColumns({
                 {staff.name}
               </span>
               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
-                <span className="font-mono">{staff.id}</span>
-                <span>•</span>
                 <span className="truncate">{staff.email}</span>
               </div>
             </div>
@@ -159,24 +154,6 @@ export function createStaffColumns({
                   <UserGear size={13} />
                   <span>Edit Role</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {staff.status === "active" ? (
-                  <DropdownMenuItem
-                    onClick={() => onToggleStatus(staff)}
-                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                  >
-                    <UserMinus size={13} />
-                    <span>Deactivate</span>
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() => onToggleStatus(staff)}
-                    className="flex items-center gap-2 cursor-pointer text-primary focus:text-primary"
-                  >
-                    <UserCheck size={13} />
-                    <span>Reactivate</span>
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

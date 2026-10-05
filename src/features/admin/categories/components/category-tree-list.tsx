@@ -16,13 +16,16 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CreateCategoryDialog } from "./create-category-dialog"
+import { useAdminCategories } from "../hooks/categories.queries"
 import type { AdminCategoryItem } from "../types"
 
 interface CategoryTreeListProps {
-  categories: AdminCategoryItem[]
+  categories?: AdminCategoryItem[]
 }
 
-export function CategoryTreeList({ categories }: CategoryTreeListProps) {
+export function CategoryTreeList({ categories: fallbackCategories = [] }: CategoryTreeListProps) {
+  const { data } = useAdminCategories()
+  const categories = data ?? fallbackCategories
   const [search, setSearch] = useState("")
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -305,7 +308,7 @@ export function CategoryTreeList({ categories }: CategoryTreeListProps) {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                render={<Link href={`/admin/listing-fields?category=${sub.slug}`} />}
+                                render={<Link href={`/admin/listing-fields?category=${sub.id}`} />}
                                 className="h-6 px-2 text-[10px] font-bold text-primary hover:bg-primary/10 rounded-md"
                               >
                                 <Sliders size={11} weight="bold" className="mr-1" />

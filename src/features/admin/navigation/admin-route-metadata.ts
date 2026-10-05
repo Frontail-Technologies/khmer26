@@ -92,6 +92,14 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
     title: "Featured Content",
     subtitle: "Select and prioritize sponsored listings and categories.",
   },
+  "/admin/content/tips": {
+    title: "Safety Tips",
+    subtitle: "Manage buyer and seller safety guidelines shown across the marketplace.",
+  },
+  "/admin/content/pages": {
+    title: "Static Pages",
+    subtitle: "Manage legal and informational pages like Terms of Service and Privacy Policy.",
+  },
 }
 
 export function getAdminRouteInfo(pathname: string): AdminRouteInfo {

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import {
   Star,
@@ -12,7 +11,6 @@ import {
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -20,6 +18,9 @@ import type { AdminUserDetail } from "../types"
 
 interface UserDetailsPanelProps {
   user: AdminUserDetail
+  onStatusChange: (active: boolean) => void
+  isStatusUpdating?: boolean
+  canManageStatus?: boolean
 }
 
 const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
@@ -46,20 +47,14 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   )
 }
 
-export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
-  const [adminNote, setAdminNote] = useState("")
-  const [isNoteSaved, setIsNoteSaved] = useState(false)
-  const [isActive, setIsActive] = useState(user.status === "active")
-  const [allowPosting, setAllowPosting] = useState(user.status === "active")
-
+export function UserDetailsPanel({
+  user,
+  onStatusChange,
+  isStatusUpdating = false,
+  canManageStatus = true,
+}: UserDetailsPanelProps) {
   const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
   const verifConf = VERIFICATION_CONFIG[user.verificationStatus] || { label: user.verificationStatus, tone: "neutral" as StatusTone }
-
-  const handleSaveNote = () => {
-    if (!adminNote.trim()) return
-    setIsNoteSaved(true)
-    setTimeout(() => setIsNoteSaved(false), 2000)
-  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -71,6 +66,7 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InfoRow label="Full Name" value={user.name} />
+              <InfoRow label="System Role" value={user.role === "admin" ? "Administrator" : "Standard User"} />
               {user.businessName && <InfoRow label="Business Name" value={user.businessName} />}
               <InfoRow label="Email" value={user.email} />
               <InfoRow label="Phone" value={user.phone} />
@@ -91,6 +87,92 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
               </div>
             )}
           </div>
+
+          {user.subscription && (
+            <>
+              <Separator className="bg-border/60" />
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                    Subscription
+                  </h2>
+                  <StatusBadge
+                    label={user.subscription.status === "active" ? "Active" : user.subscription.status}
+                    tone={user.subscription.status === "active" ? "success" : "neutral"}
+                    size="sm"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Plan</span>
+                    <span className="font-bold text-foreground">{user.subscription.planName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Started</span>
+                    <span className="font-medium text-foreground">
+                      {new Date(user.subscription.startedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Expires</span>
+                    <span className="font-medium text-foreground">
+                      {user.subscription.expiresAt ? new Date(user.subscription.expiresAt).toLocaleDateString() : "Never"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {user.verification && (
+            <>
+              <Separator className="bg-border/60" />
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                    Identity Verification
+                  </h2>
+                  <StatusBadge
+                    label={user.verification.status}
+                    tone={
+                      user.verification.status === "approved"
+                        ? "success"
+                        : user.verification.status === "rejected"
+                        ? "destructive"
+                        : "warning"
+                    }
+                    size="sm"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-0.5">Application Type</span>
+                    <span className="capitalize font-semibold text-foreground">{user.verification.type}</span>
+                  </div>
+                  {user.verification.legalName && (
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block mb-0.5">Legal Name</span>
+                      <span className="font-semibold text-foreground">{user.verification.legalName}</span>
+                    </div>
+                  )}
+                  {user.verification.reviewedAt && (
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block mb-0.5">Reviewed Date</span>
+                      <span className="font-medium text-foreground">
+                        {new Date(user.verification.reviewedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {user.verification.rejectionReason && (
+                  <div className="mt-3 p-2.5 rounded-lg bg-destructive/10 text-destructive text-xs">
+                    <span className="font-bold block mb-0.5">Rejection Reason:</span>
+                    <span>{user.verification.rejectionReason}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           {isSeller && (
             <>
@@ -213,33 +295,6 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
               </div>
             </>
           )}
-
-          <Separator className="bg-border/60" />
-
-          <div>
-            <h2 className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">
-              Internal Notes
-            </h2>
-            <div className="space-y-3">
-              <Textarea
-                placeholder="Add internal moderator note for this account..."
-                value={adminNote}
-                onChange={(e) => setAdminNote(e.target.value)}
-                rows={3}
-                className="text-xs resize-none"
-              />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={handleSaveNote}
-                  className="h-8 text-xs font-semibold cursor-pointer"
-                  disabled={!adminNote.trim()}
-                >
-                  {isNoteSaved ? "Note Saved" : "Save Note"}
-                </Button>
-              </div>
-            </div>
-          </div>
         </Card>
       </div>
 
@@ -256,25 +311,12 @@ export function UserDetailsPanel({ user }: UserDetailsPanelProps) {
                 <span className="text-[11px] text-muted-foreground">Allow login and access</span>
               </div>
               <Switch
-                checked={isActive}
-                onCheckedChange={setIsActive}
+                checked={user.status === "active"}
+                onCheckedChange={onStatusChange}
+                disabled={isStatusUpdating || !canManageStatus}
                 aria-label="Toggle active account"
               />
             </div>
-
-            {isSeller && (
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-xs font-medium text-foreground block">Allow Posting</span>
-                  <span className="text-[11px] text-muted-foreground">Can submit listings</span>
-                </div>
-                <Switch
-                  checked={allowPosting}
-                  onCheckedChange={setAllowPosting}
-                  aria-label="Toggle allow posting"
-                />
-              </div>
-            )}
 
             <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/40">
               <div>

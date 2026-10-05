@@ -90,3 +90,12 @@ export interface VerificationMetrics {
   inReviewCount: number
   avgReviewTime: string
 }
+
+export interface VerificationStats {
+  pending: number
+  inReview: number
+  approved30d: number
+  rejected30d: number
+  averageReviewMinutes: number
+}
+

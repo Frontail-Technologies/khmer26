@@ -5,7 +5,7 @@ import {
   Clock,
 } from "@phosphor-icons/react/dist/ssr"
 import { AdminMetricGroup, type AdminMetricItemProps } from "@/features/admin/components/admin-metric-group"
-import type { VerificationStats } from "../data/demo-verification-stats"
+import type { VerificationStats } from "../types"
 
 interface VerificationSummaryMetricsProps {
   stats: VerificationStats

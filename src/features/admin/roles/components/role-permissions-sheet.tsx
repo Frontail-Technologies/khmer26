@@ -15,12 +15,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DEMO_PERMISSION_GROUPS } from "../data/demo-roles-data"
-import type { RoleDefinition } from "../types"
+import type { PermissionModuleGroup, RoleDefinition } from "../types"
 
 interface RolePermissionsSheetProps {
   role: RoleDefinition | null
   open: boolean
+  permissionGroups: PermissionModuleGroup[]
+  isSaving?: boolean
   onOpenChange: (open: boolean) => void
   onSave: (roleId: string, permissions: string[]) => void
 }
@@ -28,6 +29,8 @@ interface RolePermissionsSheetProps {
 export function RolePermissionsSheet({
   role,
   open,
+  permissionGroups,
+  isSaving = false,
   onOpenChange,
   onSave,
 }: RolePermissionsSheetProps) {
@@ -38,6 +41,8 @@ export function RolePermissionsSheet({
       <RolePermissionsContent
         key={role.id}
         role={role}
+        permissionGroups={permissionGroups}
+        isSaving={isSaving}
         onClose={() => onOpenChange(false)}
         onSave={onSave}
       />
@@ -47,16 +52,20 @@ export function RolePermissionsSheet({
 
 function RolePermissionsContent({
   role,
+  permissionGroups,
+  isSaving,
   onClose,
   onSave,
 }: {
   role: RoleDefinition
+  permissionGroups: PermissionModuleGroup[]
+  isSaving: boolean
   onClose: () => void
   onSave: (roleId: string, permissions: string[]) => void
 }) {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>(role.permissions)
 
-  const isSuperAdmin = role.id === "super_admin"
+  const isSuperAdmin = Boolean(role.isSystem)
 
   const togglePermission = (permId: string) => {
     if (isSuperAdmin) return
@@ -67,7 +76,7 @@ function RolePermissionsContent({
 
   const toggleGroup = (groupId: string) => {
     if (isSuperAdmin) return
-    const group = DEMO_PERMISSION_GROUPS.find((g) => g.id === groupId)
+    const group = permissionGroups.find((g) => g.id === groupId)
     if (!group) return
     const groupPermIds = group.permissions.map((p) => p.id)
     const allSelected = groupPermIds.every((id) => selectedPermissions.includes(id))
@@ -114,7 +123,7 @@ function RolePermissionsContent({
       )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {DEMO_PERMISSION_GROUPS.map((group) => {
+        {permissionGroups.map((group) => {
           const groupPermIds = group.permissions.map((p) => p.id)
           const selectedCount = groupPermIds.filter((id) => selectedPermissions.includes(id)).length
           const isAllGroupSelected = groupPermIds.length > 0 && selectedCount === groupPermIds.length
@@ -193,10 +202,11 @@ function RolePermissionsContent({
             variant="default"
             size="sm"
             onClick={handleSave}
+            disabled={isSaving}
             className="text-xs font-bold cursor-pointer"
           >
             <Check size={14} className="mr-1.5" />
-            Save Permissions
+            {isSaving ? "Saving..." : "Save Permissions"}
           </Button>
         )}
       </div>

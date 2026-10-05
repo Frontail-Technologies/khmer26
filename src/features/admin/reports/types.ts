@@ -76,3 +76,26 @@ export interface AdminReportReasonItem {
   isActive: boolean
   createdAt?: string
 }
+
+export interface RawReportRow {
+  report: {
+    id: string
+    reporterUserId: string | null
+    targetType: string
+    listingId: string | null
+    userId: string | null
+    sellerProfileId: string | null
+    conversationId: string | null
+    messageId: string | null
+    reasonId: string
+    details: string | null
+    status: string
+    resolvedAt: string | null
+    createdAt: string
+    updatedAt: string
+  }
+  reason?: {
+    id: string
+    label: string
+  } | null
+}

@@ -214,7 +214,6 @@ export function NotificationHistoryTable({
           })
         ) : (
           <DataTableEmpty
-            colSpan={1}
             title="No notification records found"
             description="Try adjusting your search criteria."
           />

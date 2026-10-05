@@ -21,7 +21,10 @@ interface AssignedFieldsListProps {
   parentCategoryName: string
   assignments: { assignment: CategoryFieldAssignment; field: ListingField }[]
   allFields: ListingField[]
-  onUpdateAssignments: (items: { assignment: CategoryFieldAssignment; field: ListingField }[]) => void
+  onReorder: (items: { assignment: CategoryFieldAssignment; field: ListingField }[]) => void
+  onToggleActive: (assignmentId: string, field: ListingField) => void
+  onRemove: (assignmentId: string) => void
+  onAssign: (field: ListingField, options: { required: boolean; filterable: boolean; sortOrder: number }) => void
 }
 
 export function AssignedFieldsList({
@@ -30,7 +33,10 @@ export function AssignedFieldsList({
   parentCategoryName,
   assignments,
   allFields,
-  onUpdateAssignments,
+  onReorder,
+  onToggleActive,
+  onRemove,
+  onAssign,
 }: AssignedFieldsListProps) {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -69,7 +75,7 @@ export function AssignedFieldsList({
       item.assignment.sortOrder = idx + 1
     })
 
-    onUpdateAssignments(newItems)
+    onReorder(newItems)
     setDraggedIndex(null)
     setDragOverIndex(null)
   }
@@ -88,7 +94,7 @@ export function AssignedFieldsList({
     newItems.forEach((item, idx) => {
       item.assignment.sortOrder = idx + 1
     })
-    onUpdateAssignments(newItems)
+    onReorder(newItems)
   }
 
   const handleMoveDown = (index: number) => {
@@ -100,27 +106,16 @@ export function AssignedFieldsList({
     newItems.forEach((item, idx) => {
       item.assignment.sortOrder = idx + 1
     })
-    onUpdateAssignments(newItems)
+    onReorder(newItems)
   }
 
   const handleToggleActive = (index: number) => {
-    const newItems = [...assignments]
-    newItems[index].assignment.active = !newItems[index].assignment.active
-    onUpdateAssignments(newItems)
+    const { assignment, field } = assignments[index]
+    onToggleActive(assignment.id, field)
   }
 
   const handleRemove = (index: number) => {
-    const newItems = assignments.filter((_, idx) => idx !== index)
-    newItems.forEach((item, idx) => {
-      item.assignment.sortOrder = idx + 1
-    })
-    onUpdateAssignments(newItems)
-  }
-
-  const handleAssignNew = (newAssignment: CategoryFieldAssignment) => {
-    const fieldDef = allFields.find((f) => f.id === newAssignment.fieldId)
-    if (!fieldDef) return
-    onUpdateAssignments([...assignments, { assignment: newAssignment, field: fieldDef }])
+    onRemove(assignments[index].assignment.id)
   }
 
   return (
@@ -302,7 +297,7 @@ export function AssignedFieldsList({
         categoryId={categoryId}
         availableFields={allFields}
         assignedFieldIds={assignments.map((a) => a.field.id)}
-        onAssign={handleAssignNew}
+        onAssign={onAssign}
       />
     </div>
   )

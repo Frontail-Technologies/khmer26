@@ -1,11 +1,14 @@
+"use client"
+
 import Link from "next/link"
-import { ChatCircleDots, ArrowRight } from "@phosphor-icons/react/dist/ssr"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { ArrowRight, ChatCircleDots } from "@phosphor-icons/react"
 import { Badge } from "@/components/ui/badge"
-import { DEMO_REPORTED_CHATS } from "@/features/admin/reported-chats/data/demo-reported-chats"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAdminChatReports } from "@/features/admin/reported-chats/hooks/chat-reports.queries"
 
 export function AdminReportedChatsCard() {
-  const recentChats = DEMO_REPORTED_CHATS.slice(0, 4)
+  const { data } = useAdminChatReports({ page: 1, limit: 4, status: "open" })
+  const recentChats = data?.items ?? []
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
@@ -29,9 +32,9 @@ export function AdminReportedChatsCard() {
       </CardHeader>
 
       <CardContent className="p-0 divide-y divide-border/60 flex-1">
-        {recentChats.map((c) => (
+        {recentChats.map((chat) => (
           <div
-            key={c.id}
+            key={chat.id}
             className="p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors"
           >
             <div className="flex items-start gap-3 min-w-0">
@@ -42,28 +45,28 @@ export function AdminReportedChatsCard() {
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-foreground truncate">
-                    {c.participantA.name} <span className="text-muted-foreground font-normal">↔</span> {c.participantB.name}
+                    {chat.participantA.name} <span className="text-muted-foreground font-normal">to</span> {chat.participantB.name}
                   </span>
                   <Badge
                     variant="outline"
                     className="text-[9px] px-1.5 py-0 font-medium h-4 rounded border-destructive/30 text-destructive bg-destructive/5"
                   >
-                    {c.reason}
+                    {chat.reason}
                   </Badge>
                 </div>
 
                 <p className="text-[11px] text-muted-foreground truncate italic">
-                  &ldquo;{c.reportedMessageText}&rdquo;
+                  &ldquo;{chat.reportedMessageText}&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="text-right shrink-0">
               <span className="text-[10px] text-muted-foreground block font-medium">
-                {c.createdAt.split(",")[0] || "Recent"}
+                {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(chat.createdAt))}
               </span>
               <Link
-                href="/admin/reported-chats"
+                href={`/admin/reported-chats?search=${encodeURIComponent(chat.id)}`}
                 className="text-xs font-bold text-primary hover:underline mt-0.5 inline-block"
               >
                 View Thread

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
@@ -126,8 +126,6 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
               <TooltipContent>{listing.title}</TooltipContent>
             </Tooltip>
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="font-mono font-medium text-foreground">{listing.id}</span>
-              <span>•</span>
               <span className="capitalize">{listing.condition}</span>
               {listing.reports.length > 0 && (
                 <>
@@ -268,10 +266,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
     cell: ({ row }) => (
       <div className="space-y-0.5">
         <span className="text-xs font-medium text-foreground block whitespace-nowrap">
-          {row.original.createdAt}
-        </span>
-        <span className="text-[10px] text-muted-foreground block whitespace-nowrap">
-          {row.original.createdDate.split(",")[0]}
+          {row.original.createdDate}
         </span>
       </div>
     ),
@@ -386,3 +381,5 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
     enableSorting: false,
   },
 ]
+
+

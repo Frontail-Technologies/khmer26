@@ -38,11 +38,13 @@ import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { createReportedChatColumns } from "../columns"
 import { ReportedChatDetailSheet } from "./reported-chat-detail-sheet"
+import { useAdminChatReports } from "../hooks/chat-reports.queries"
+import { useUpdateChatReportStatus } from "../hooks/chat-reports.mutations"
 import type { ReportedChatRecord, ReportedChatStatus } from "../types"
 import { cn } from "@/lib/utils"
 
 interface ReportedChatsWorkspaceProps {
-  initialReports: ReportedChatRecord[]
+  initialReports?: ReportedChatRecord[]
 }
 
 const REASON_OPTIONS: SelectOption[] = [
@@ -61,9 +63,11 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 type TabStatusKey = "all" | "open" | "resolved" | "dismissed"
 
 export function ReportedChatsWorkspace({
-  initialReports,
+  initialReports: fallbackReports = [],
 }: ReportedChatsWorkspaceProps) {
-  const [reports, setReports] = useState<ReportedChatRecord[]>(initialReports)
+  const { data } = useAdminChatReports({ page: 1, limit: 100 })
+  const reports = data?.items ?? fallbackReports
+  const updateStatus = useUpdateChatReportStatus()
   const [activeTab, setActiveTab] = useState<TabStatusKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
@@ -79,9 +83,9 @@ export function ReportedChatsWorkspace({
   }
 
   const handleStatusChange = (id: string, newStatus: ReportedChatStatus) => {
-    setReports((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-    )
+    if (newStatus === "resolved" || newStatus === "dismissed") {
+      updateStatus.mutate({ id, status: newStatus })
+    }
   }
 
   const columns = useMemo(() => {
@@ -348,7 +352,6 @@ export function ReportedChatsWorkspace({
             })
           ) : (
             <DataTableEmpty
-              colSpan={1}
               title="No reported chats found"
               description="Try adjusting your search criteria or active tab."
             />

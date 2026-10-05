@@ -40,9 +40,10 @@ import { createPaymentColumns } from "../columns"
 import { PaymentDetailSheet } from "./payment-detail-sheet"
 import type { AdminPaymentTransaction } from "../types"
 import { cn } from "@/lib/utils"
+import { useAdminPayments } from "../hooks/payments.queries"
 
 interface PaymentTableProps {
-  initialPayments: AdminPaymentTransaction[]
+  initialPayments?: AdminPaymentTransaction[]
 }
 
 const STATUS_OPTIONS: SelectOption[] = [
@@ -60,7 +61,9 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 
 type PaymentTabKey = "all" | "subscription" | "promotion"
 
-export function PaymentTable({ initialPayments }: PaymentTableProps) {
+export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
+  const { data } = useAdminPayments()
+  const payments = data?.items ?? initialPayments
   const [activeTab, setActiveTab] = useState<PaymentTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
@@ -81,14 +84,14 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
 
   const counts = useMemo(() => {
     return {
-      all: initialPayments.length,
-      subscription: initialPayments.filter((p) => p.purpose === "subscription").length,
-      promotion: initialPayments.filter((p) => p.purpose === "promotion").length,
+      all: payments.length,
+      subscription: payments.filter((p) => p.purpose === "subscription").length,
+      promotion: payments.filter((p) => p.purpose === "promotion").length,
     }
-  }, [initialPayments])
+  }, [payments])
 
   const filteredData = useMemo(() => {
-    return initialPayments.filter((tx) => {
+    return payments.filter((tx) => {
       if (activeTab !== "all" && tx.purpose !== activeTab) {
         return false
       }
@@ -112,7 +115,7 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
 
       return true
     })
-  }, [initialPayments, activeTab, searchQuery, statusFilter])
+  }, [payments, activeTab, searchQuery, statusFilter])
 
   const table = useReactTable({
     data: filteredData,
@@ -347,7 +350,6 @@ export function PaymentTable({ initialPayments }: PaymentTableProps) {
             })
           ) : (
             <DataTableEmpty
-              colSpan={1}
               title="No payment transactions found"
               description="Try adjusting your search criteria or active filters."
             />

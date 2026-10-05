@@ -8,7 +8,6 @@ import {
   User,
   Storefront,
   CalendarBlank,
-  Chats,
   CheckCircle,
   XCircle,
   ArrowSquareOut,
@@ -28,6 +27,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
+import { useAdminChatReportContext } from "../hooks/chat-reports.queries"
+import { normalizeChatMessages } from "../api/chat-reports.api"
 import type { ReportedChatRecord } from "../types"
 import { cn } from "@/lib/utils"
 
@@ -52,6 +53,7 @@ export function ReportedChatDetailSheet({
 }: ReportedChatDetailSheetProps) {
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false)
   const [dismissDialogOpen, setDismissDialogOpen] = useState(false)
+  const { data: context } = useAdminChatReportContext(report?.id ?? "", open)
 
   if (!report) return null
 
@@ -59,6 +61,12 @@ export function ReportedChatDetailSheet({
     label: report.status,
     tone: "neutral" as StatusTone,
   }
+
+  const messages = context ? normalizeChatMessages(context) : report.messages
+  const participants = context?.conversation.participants ?? []
+  const reportedParticipant = participants.find((p) => p.userId !== report.reporterId)
+  const reportedUserName = reportedParticipant?.shopName || report.reportedUserName
+  const reportedUserId = reportedParticipant?.userId || report.reportedUserId
 
   const handleConfirmResolve = () => {
     onStatusChange(report.id, "resolved")
@@ -111,8 +119,13 @@ export function ReportedChatDetailSheet({
               Conversation Context
             </span>
             <div className="p-3 rounded-xl bg-muted/20 border border-border/70 space-y-2.5 max-h-[260px] overflow-y-auto">
-              {report.messages.map((msg) => {
-                const isReportedUser = msg.senderId === report.reportedUserId
+              {messages.length === 0 && (
+                <p className="text-[11px] text-muted-foreground text-center py-4">
+                  Loading conversation context...
+                </p>
+              )}
+              {messages.map((msg) => {
+                const isReportedUser = msg.senderId === reportedUserId
 
                 return (
                   <div
@@ -166,8 +179,8 @@ export function ReportedChatDetailSheet({
                 </div>
                 <div className="p-2 rounded-lg bg-destructive/10 border border-destructive/20 space-y-1">
                   <span className="text-[10px] font-bold text-destructive block">Reported User</span>
-                  <span className="font-semibold text-foreground block truncate">{report.reportedUserName}</span>
-                  <span className="font-mono text-[9px] text-muted-foreground">{report.reportedUserId}</span>
+                  <span className="font-semibold text-foreground block truncate">{reportedUserName}</span>
+                  <span className="font-mono text-[9px] text-muted-foreground">{reportedUserId}</span>
                 </div>
               </div>
             </div>
@@ -225,24 +238,14 @@ export function ReportedChatDetailSheet({
             </div>
 
             <div className="pt-2 flex flex-col gap-2">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   className="text-xs"
+                  disabled={!reportedUserId}
                   render={
-                    <Link href={`/admin/chats?user=${report.reportedUserId}&conversation=${report.conversationId}`}>
-                      <Chats size={13} className="mr-1" />
-                      View Full Chat
-                    </Link>
-                  }
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  render={
-                    <Link href={`/admin/users/${report.reportedUserId}`}>
+                    <Link href={`/admin/users/${reportedUserId}`}>
                       <User size={13} className="mr-1" />
                       User Profile
                     </Link>

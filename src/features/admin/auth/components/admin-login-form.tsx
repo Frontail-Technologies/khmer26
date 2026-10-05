@@ -11,36 +11,43 @@ import {
   ShieldCheck,
   ArrowSquareOut,
   SpinnerGap,
+  Key,
 } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useAdminAuth } from "@/hooks/use-admin-auth"
 
 export function AdminLoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { login, isLoggingIn } = useAdminAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFillDemoAdmin = () => {
+    setEmail("admin@khmer26.com")
+    setPassword("Admin@Khmer26!")
+    setErrorMessage(null)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage(null)
 
     if (!email || !password) {
-      setErrorMessage("Please enter your admin email and password.")
+      setErrorMessage("Please enter your email and password.")
       return
     }
 
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      setErrorMessage("Admin authentication requires server verification. Connect backend credentials.")
-    }, 600)
+    try {
+      await login({ email, password })
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Invalid credentials.")
+    }
   }
 
   return (
@@ -58,16 +65,10 @@ export function AdminLoginForm() {
                 style={{ width: "auto" }}
                 className="h-6 w-auto object-contain"
               />
-              <Badge
-                variant="secondary"
-                className="h-4.5 px-1.5 text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/20"
-              >
-                Admin
-              </Badge>
             </Link>
           </div>
           <CardTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-            Admin Portal
+            Sign In
           </CardTitle>
           <CardDescription className="text-xs text-muted-foreground mt-0.5">
             Sign in to manage the marketplace, review listings, and oversee moderation.
@@ -75,6 +76,25 @@ export function AdminLoginForm() {
         </CardHeader>
 
         <CardContent className="p-5 sm:p-7 space-y-4">
+          <div className="flex items-center justify-between p-2.5 rounded-lg border border-primary/20 bg-primary/5 text-xs text-foreground">
+            <div className="flex items-center gap-2">
+              <Key size={16} className="text-primary shrink-0" weight="bold" />
+              <div>
+                <p className="font-semibold text-[11px] text-foreground">Demo Account</p>
+                <p className="text-[10px] text-muted-foreground">admin@khmer26.com</p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleFillDemoAdmin}
+              className="h-7 px-2.5 text-[11px] font-medium border-primary/30 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+            >
+              Fill Credentials
+            </Button>
+          </div>
+
           {errorMessage && (
             <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium leading-relaxed">
               {errorMessage}
@@ -83,14 +103,14 @@ export function AdminLoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Field className="gap-2">
-              <FieldLabel htmlFor="admin-email">Admin Email</FieldLabel>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <div className="relative">
                 <EnvelopeSimple
                   size={16}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                 />
                 <Input
-                  id="admin-email"
+                  id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="admin@khmer26.com"
@@ -104,7 +124,7 @@ export function AdminLoginForm() {
 
             <Field className="gap-2">
               <div className="flex items-center justify-between">
-                <FieldLabel htmlFor="admin-password">Password</FieldLabel>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
                 <span className="text-[10px] text-muted-foreground">
                   Internal accounts only
                 </span>
@@ -115,7 +135,7 @@ export function AdminLoginForm() {
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                 />
                 <Input
-                  id="admin-password"
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="••••••••••••"
@@ -147,10 +167,10 @@ export function AdminLoginForm() {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoggingIn}
               className="w-full h-10 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-xs sm:text-sm rounded-md shadow-xs cursor-pointer transition-colors mt-1"
             >
-              {isLoading ? (
+              {isLoggingIn ? (
                 <span className="flex items-center justify-center gap-2">
                   <SpinnerGap size={16} className="animate-spin" />
                   <span>Verifying credentials...</span>
@@ -158,7 +178,7 @@ export function AdminLoginForm() {
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   <ShieldCheck size={16} weight="bold" />
-                  <span>Sign In to Admin</span>
+                  <span>Sign In</span>
                 </span>
               )}
             </Button>

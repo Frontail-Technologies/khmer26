@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   CheckCircle,
   XCircle,
@@ -10,10 +11,22 @@ import {
   ArrowSquareOut,
   Flag,
   WarningCircle,
+  ArrowClockwise,
+  PencilSimple,
 } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -27,6 +40,11 @@ import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { ApproveListingDialog } from "./approve-listing-dialog"
 import { RejectListingDialog } from "./reject-listing-dialog"
 import { RemoveListingDialog } from "./remove-listing-dialog"
+import {
+  useRestoreListing,
+  useDeleteListing,
+  useUpdateListing,
+} from "../hooks/listings.mutations"
 import type { AdminListing, AdminListingStatus } from "../types"
 
 interface ListingModerationPanelProps {
@@ -57,26 +75,78 @@ const STATUS_LABEL_MAP: Record<AdminListingStatus, string> = {
 
 const MODERATOR_OPTIONS: SelectOption[] = [
   { value: "unassigned", label: "Unassigned" },
-  { value: "Dara Sok", label: "Dara Sok — Super Admin" },
-  { value: "Channary Meas", label: "Channary Meas — Moderator" },
-  { value: "Vannak Lim", label: "Vannak Lim — Moderator" },
+  { value: "Dara Sok", label: "Dara Sok - Super Admin" },
+  { value: "Channary Meas", label: "Channary Meas - Moderator" },
+  { value: "Vannak Lim", label: "Vannak Lim - Moderator" },
 ]
 
 export function ListingModerationPanel({ listing }: ListingModerationPanelProps) {
+  const router = useRouter()
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [assignedAdmin, setAssignedAdmin] = useState(listing.assignedTo || "unassigned")
 
+  // Edit fields
+  const [editTitle, setEditTitle] = useState(listing.title)
+  const [editPrice, setEditPrice] = useState(String(listing.price || ""))
+  const [editCurrency, setEditCurrency] = useState<'USD' | 'KHR'>(listing.currency || 'USD')
+  const [editDescription, setEditDescription] = useState(listing.description || "")
+
+  const restoreMutation = useRestoreListing()
+  const deleteMutation = useDeleteListing()
+  const updateMutation = useUpdateListing()
+
   const isPublic = listing.status === "active" && Boolean(listing.slug)
+
+  const handleRestore = async () => {
+    await restoreMutation.mutateAsync(listing.id)
+  }
+
+  const handleDelete = async () => {
+    await deleteMutation.mutateAsync(listing.id)
+    setDeleteDialogOpen(false)
+    router.push("/admin/listings")
+  }
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await updateMutation.mutateAsync({
+      id: listing.id,
+      data: {
+        title: editTitle.trim(),
+        price: editPrice ? Number(editPrice) : null,
+        currency: editCurrency,
+        description: editDescription.trim(),
+      },
+    })
+    setEditDialogOpen(false)
+  }
 
   return (
     <>
       <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden space-y-0 lg:sticky lg:top-20">
-        <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60">
+        <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 flex flex-row items-center justify-between">
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Moderation Decision
           </CardTitle>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => {
+              setEditTitle(listing.title)
+              setEditPrice(String(listing.price || ""))
+              setEditCurrency(listing.currency || 'USD')
+              setEditDescription(listing.description || "")
+              setEditDialogOpen(true)
+            }}
+            className="text-xs h-7 gap-1 font-semibold text-muted-foreground hover:text-foreground"
+          >
+            <PencilSimple size={13} />
+            <span>Edit</span>
+          </Button>
         </CardHeader>
 
         <CardContent className="p-4 sm:p-5 space-y-4">
@@ -88,11 +158,6 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
                 tone={STATUS_TONE_MAP[listing.status]}
                 size="sm"
               />
-            </div>
-
-            <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
-              <span className="text-muted-foreground">Listing ID</span>
-              <span className="font-mono font-bold text-foreground">{listing.id}</span>
             </div>
 
             <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
@@ -191,6 +256,18 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
               </Button>
             )}
 
+            {(listing.status === "rejected" || listing.status === "removed") && (
+              <Button
+                variant="outline"
+                disabled={restoreMutation.isPending}
+                onClick={() => void handleRestore()}
+                className="w-full h-9 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg gap-1.5 cursor-pointer"
+              >
+                <ArrowClockwise size={15} className={restoreMutation.isPending ? "animate-spin" : ""} />
+                <span>{restoreMutation.isPending ? "Restoring..." : "Restore Listing"}</span>
+              </Button>
+            )}
+
             {(listing.status === "active" || listing.status === "flagged") && (
               <Button
                 variant="ghost"
@@ -201,6 +278,15 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
                 <span>Remove Listing</span>
               </Button>
             )}
+
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="w-full h-9 text-xs font-semibold text-destructive hover:bg-destructive/10 rounded-lg gap-1.5 cursor-pointer"
+            >
+              <Trash size={14} />
+              <span>Delete Permanently</span>
+            </Button>
 
             {isPublic && (
               <Button
@@ -271,6 +357,128 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
         open={removeDialogOpen}
         onOpenChange={setRemoveDialogOpen}
       />
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-destructive">
+              Delete Listing Permanently
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Are you sure you want to permanently delete &ldquo;{listing.title}&rdquo;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deleteMutation.isPending}
+              onClick={() => void handleDelete()}
+              className="text-xs font-semibold"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Confirm Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-foreground">
+              Edit Listing Information
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Update listing title, price, currency, or description.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="space-y-4 py-2">
+            <Field>
+              <FieldLabel>Title</FieldLabel>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                required
+                className="h-9 text-xs"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field>
+                <FieldLabel>Price</FieldLabel>
+                <Input
+                  type="number"
+                  step="any"
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="h-9 text-xs"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Currency</FieldLabel>
+                <Select
+                  value={editCurrency}
+                  onValueChange={(val) => setEditCurrency((val as 'USD' | 'KHR') || 'USD')}
+                  items={[
+                    { value: 'USD', label: 'USD ($)' },
+                    { value: 'KHR', label: 'KHR (៛)' },
+                  ]}
+                >
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD" className="text-xs">USD ($)</SelectItem>
+                    <SelectItem value="KHR" className="text-xs">KHR (៛)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+
+            <Field>
+              <FieldLabel>Description</FieldLabel>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={4}
+                className="text-xs resize-none"
+              />
+            </Field>
+
+            <DialogFooter className="gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditDialogOpen(false)}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={updateMutation.isPending || !editTitle.trim()}
+                className="text-xs font-semibold"
+              >
+                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
+

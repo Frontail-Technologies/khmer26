@@ -86,6 +86,15 @@ interface AdminImageThumbnailProps {
   sizes?: string
 }
 
+function sanitizeImageSrc(url?: string | null): string {
+  if (!url) return "/images/categories/cars.jpg"
+  const trimmed = url.trim()
+  if (trimmed.startsWith("//")) {
+    return trimmed.replace(/^\/+/, "/")
+  }
+  return trimmed
+}
+
 export function AdminImageThumbnail({
   src,
   alt,
@@ -97,6 +106,7 @@ export function AdminImageThumbnail({
   sizes = "48px",
 }: AdminImageThumbnailProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const safeSrc = sanitizeImageSrc(src)
 
   return (
     <>
@@ -114,7 +124,7 @@ export function AdminImageThumbnail({
       >
         {fill ? (
           <Image
-            src={src}
+            src={safeSrc}
             alt={alt}
             fill
             sizes={sizes}
@@ -125,7 +135,7 @@ export function AdminImageThumbnail({
           />
         ) : (
           <Image
-            src={src}
+            src={safeSrc}
             alt={alt}
             width={width ?? 48}
             height={height ?? 48}
@@ -140,7 +150,7 @@ export function AdminImageThumbnail({
       <AdminImagePreviewDialog
         open={isPreviewOpen}
         onOpenChange={setIsPreviewOpen}
-        src={src}
+        src={safeSrc}
         alt={alt}
       />
     </>

@@ -22,6 +22,7 @@ import {
   getSelectOptionLabel,
 } from "@/components/ui/select"
 import { CategoryImageUploader } from "./category-image-uploader"
+import { useCreateCategory } from "../hooks/categories.mutations"
 import type { AdminCategoryItem } from "../types"
 
 interface CreateCategoryDialogProps {
@@ -44,6 +45,7 @@ export function CreateCategoryDialog({
   const [imageUrl, setImageUrl] = useState<string | undefined>()
   const [sortOrder, setSortOrder] = useState("1")
   const [isActive, setIsActive] = useState("active")
+  const createCategory = useCreateCategory()
 
   const parentOptions = [
     { value: "none", label: "None (Root Category)" },
@@ -80,7 +82,18 @@ export function CreateCategoryDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    handleClose()
+    if (!name.trim() || !slug.trim()) return
+    createCategory.mutate(
+      {
+        nameEn: name.trim(),
+        nameKm: description.trim() || null,
+        slug: slug.trim(),
+        parentId: parentId === "none" ? null : parentId,
+        displayOrder: Number(sortOrder) || undefined,
+        isActive: isActive === "active",
+      },
+      { onSuccess: handleClose }
+    )
   }
 
   return (
@@ -209,6 +222,7 @@ export function CreateCategoryDialog({
             <Button
               type="submit"
               size="sm"
+              disabled={createCategory.isPending}
               className="h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
             >
               Create Category

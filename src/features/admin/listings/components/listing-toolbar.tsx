@@ -23,7 +23,6 @@ import {
   SheetTrigger,
   SheetFooter,
 } from "@/components/ui/sheet"
-import { ADMIN_CATEGORY_FILTER_OPTIONS } from "@/features/admin/categories/data/demo-admin-categories"
 
 interface ListingToolbarProps {
   searchQuery: string
@@ -36,27 +35,24 @@ interface ListingToolbarProps {
   onProvinceChange: (value: string) => void
   onReset: () => void
   hasActiveFilters: boolean
-  totalCount: number
-  filteredCount: number
+  sortOrder?: "newest" | "oldest" | "price_asc" | "price_desc"
+  onSortOrderChange?: (value: "newest" | "oldest" | "price_asc" | "price_desc") => void
+  categoryOptions: { value: string; label: string }[]
+  provinceOptions: { value: string; label: string }[]
 }
 
-const CATEGORY_OPTIONS = ADMIN_CATEGORY_FILTER_OPTIONS
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+]
 
 const SELLER_TYPE_OPTIONS = [
   { value: "all", label: "All Seller Types" },
   { value: "individual", label: "Individual" },
   { value: "business", label: "Business" },
   { value: "dealer", label: "Dealer" },
-]
-
-const PROVINCE_OPTIONS = [
-  { value: "all", label: "All Provinces" },
-  { value: "Phnom Penh", label: "Phnom Penh" },
-  { value: "Siem Reap", label: "Siem Reap" },
-  { value: "Battambang", label: "Battambang" },
-  { value: "Kandal", label: "Kandal" },
-  { value: "Preah Sihanouk", label: "Preah Sihanouk" },
-  { value: "Kampot", label: "Kampot" },
 ]
 
 export function ListingToolbar({
@@ -70,8 +66,14 @@ export function ListingToolbar({
   onProvinceChange,
   onReset,
   hasActiveFilters,
+  sortOrder = "newest",
+  onSortOrderChange,
+  categoryOptions,
+  provinceOptions,
 }: ListingToolbarProps) {
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  const categories = [{ value: "all", label: "All Categories" }, ...categoryOptions]
+  const provinces = [{ value: "all", label: "All Provinces" }, ...provinceOptions]
 
   return (
     <div className="p-3.5 sm:p-4 border-b border-border/60 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-muted/10">
@@ -92,17 +94,17 @@ export function ListingToolbar({
       <div className="hidden lg:flex items-center gap-2 flex-wrap">
         <div className="w-44">
           <Select
-            items={CATEGORY_OPTIONS}
+            items={categories}
             value={categoryFilter || "all"}
             onValueChange={(val) => onCategoryChange(val === "all" ? "" : (val ?? ""))}
           >
             <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
               <SelectValue placeholder="All Categories">
-                {(val) => getSelectOptionLabel(CATEGORY_OPTIONS, val, "All Categories")}
+                {(val) => getSelectOptionLabel(categories, val, "All Categories")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent side="bottom" align="start">
-              {CATEGORY_OPTIONS.map((opt) => (
+              {categories.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
                 </SelectItem>
@@ -134,17 +136,38 @@ export function ListingToolbar({
 
         <div className="w-40">
           <Select
-            items={PROVINCE_OPTIONS}
+            items={provinces}
             value={provinceFilter || "all"}
             onValueChange={(val) => onProvinceChange(val === "all" ? "" : (val ?? ""))}
           >
             <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
               <SelectValue placeholder="All Provinces">
-                {(val) => getSelectOptionLabel(PROVINCE_OPTIONS, val, "All Provinces")}
+                {(val) => getSelectOptionLabel(provinces, val, "All Provinces")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent side="bottom" align="start">
-              {PROVINCE_OPTIONS.map((opt) => (
+              {provinces.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-40">
+          <Select
+            items={SORT_OPTIONS}
+            value={sortOrder}
+            onValueChange={(val) => onSortOrderChange?.(val as "newest" | "oldest" | "price_asc" | "price_desc")}
+          >
+            <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
+              <SelectValue placeholder="Sort By">
+                {(val) => getSelectOptionLabel(SORT_OPTIONS, val, "Newest First")}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent side="bottom" align="start">
+              {SORT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value} className="text-xs">
                   {opt.label}
                 </SelectItem>
@@ -189,17 +212,17 @@ export function ListingToolbar({
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Category</label>
                 <Select
-                  items={CATEGORY_OPTIONS}
+                  items={categories}
                   value={categoryFilter || "all"}
                   onValueChange={(val) => onCategoryChange(val === "all" ? "" : (val ?? ""))}
                 >
                   <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-lg">
                     <SelectValue placeholder="All Categories">
-                      {(val) => getSelectOptionLabel(CATEGORY_OPTIONS, val, "All Categories")}
+                      {(val) => getSelectOptionLabel(categories, val, "All Categories")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent side="bottom">
-                    {CATEGORY_OPTIONS.map((opt) => (
+                    {categories.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value} className="text-xs">
                         {opt.label}
                       </SelectItem>
@@ -233,17 +256,17 @@ export function ListingToolbar({
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Province</label>
                 <Select
-                  items={PROVINCE_OPTIONS}
+                  items={provinces}
                   value={provinceFilter || "all"}
                   onValueChange={(val) => onProvinceChange(val === "all" ? "" : (val ?? ""))}
                 >
                   <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-lg">
                     <SelectValue placeholder="All Provinces">
-                      {(val) => getSelectOptionLabel(PROVINCE_OPTIONS, val, "All Provinces")}
+                      {(val) => getSelectOptionLabel(provinces, val, "All Provinces")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent side="bottom">
-                    {PROVINCE_OPTIONS.map((opt) => (
+                    {provinces.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value} className="text-xs">
                         {opt.label}
                       </SelectItem>

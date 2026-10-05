@@ -16,6 +16,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAdminUsers } from "@/features/admin/users/hooks/users.queries"
+import { useAdminChatConversations, useAdminChatConversationMessages } from "../hooks/chats.queries"
 import type {
   AdminChatParticipant,
   AdminChatConversation,
@@ -23,22 +25,29 @@ import type {
 import { cn } from "@/lib/utils"
 
 interface AdminChatsWorkspaceProps {
-  users: AdminChatParticipant[]
-  conversations: AdminChatConversation[]
+  users?: AdminChatParticipant[]
+  conversations?: AdminChatConversation[]
   initialUserId?: string
   initialConversationId?: string
 }
 
 export function AdminChatsWorkspace({
-  users,
-  conversations,
+  users: fallbackUsers = [],
   initialUserId,
   initialConversationId,
 }: AdminChatsWorkspaceProps) {
   const [userSearch, setUserSearch] = useState("")
-  const [selectedUserId, setSelectedUserId] = useState<string>(
-    initialUserId || users[0]?.id || ""
-  )
+  const { data: usersData } = useAdminUsers({ search: userSearch, page: 1, limit: 50 })
+  const users: AdminChatParticipant[] = (usersData?.items ?? fallbackUsers).map((u) => ({
+    id: u.id,
+    name: u.name,
+    businessName: u.businessName,
+    phone: u.phone,
+    email: u.email,
+    accountType: u.accountType,
+  }))
+
+  const [selectedUserId, setSelectedUserId] = useState<string>(initialUserId || "")
   const [conversationSearch, setConversationSearch] = useState("")
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
     initialConversationId || ""
@@ -49,48 +58,72 @@ export function AdminChatsWorkspace({
 
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
-  const filteredUsers = useMemo(() => {
-    if (!userSearch.trim()) return users
-    const q = userSearch.toLowerCase().trim()
-    return users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        (u.businessName && u.businessName.toLowerCase().includes(q)) ||
-        u.id.toLowerCase().includes(q) ||
-        u.phone.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q)
-    )
-  }, [users, userSearch])
+  const filteredUsers = users
 
   const selectedUser = useMemo(() => {
-    return users.find((u) => u.id === selectedUserId) || users[0] || null
+    return users.find((u) => u.id === selectedUserId) || null
   }, [users, selectedUserId])
 
-  const userConversations = useMemo(() => {
-    if (!selectedUser) return []
-    const allForUser = conversations.filter(
-      (c) => c.participantA.id === selectedUser.id || c.participantB.id === selectedUser.id
-    )
+  const { data: fetchedConversations } = useAdminChatConversations(selectedUserId, selectedUser)
 
+  const userConversations = useMemo(() => {
+    const allForUser = fetchedConversations ?? []
     if (!conversationSearch.trim()) return allForUser
     const q = conversationSearch.toLowerCase().trim()
     return allForUser.filter((c) => {
-      const other = c.participantA.id === selectedUser.id ? c.participantB : c.participantA
+      const other = c.participantA.id === selectedUser?.id ? c.participantB : c.participantA
       return (
         other.name.toLowerCase().includes(q) ||
         (c.listing && c.listing.title.toLowerCase().includes(q)) ||
         c.lastMessage.toLowerCase().includes(q)
       )
     })
-  }, [conversations, selectedUser, conversationSearch])
+  }, [fetchedConversations, selectedUser, conversationSearch])
 
-  const selectedConversation = useMemo(() => {
+  const selectedConversationSummary = useMemo(() => {
     if (selectedConversationId) {
       const found = userConversations.find((c) => c.id === selectedConversationId)
       if (found) return found
     }
     return userConversations[0] || null
   }, [userConversations, selectedConversationId])
+
+  const activeConversationId = selectedConversationSummary?.id ?? selectedConversationId
+  const { data: messageData } = useAdminChatConversationMessages(
+    activeConversationId,
+    Boolean(activeConversationId)
+  )
+
+  const selectedConversation: AdminChatConversation | null = useMemo(() => {
+    if (!selectedConversationSummary && selectedConversationId && messageData) {
+      const participants = messageData.participants.map((participant) => ({
+        id: participant.id,
+        name: participant.shopName || `User ${participant.id.slice(0, 8)}`,
+        businessName: participant.shopName || undefined,
+        phone: "",
+        email: "",
+        accountType: participant.shopName ? ("seller" as const) : ("buyer" as const),
+      }))
+      const participantA = participants[0]
+      const participantB = participants[1]
+      if (!participantA || !participantB) return null
+
+      return {
+        id: selectedConversationId,
+        participantA,
+        participantB,
+        listing: messageData.listing,
+        messages: messageData.messages,
+        lastMessage: messageData.messages.at(-1)?.text ?? "(no messages yet)",
+        lastMessageAt: messageData.messages.at(-1)?.createdAt ?? "",
+      }
+    }
+    if (!selectedConversationSummary) return null
+    return {
+      ...selectedConversationSummary,
+      messages: messageData?.messages ?? [],
+    }
+  }, [selectedConversationSummary, selectedConversationId, messageData])
 
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -110,11 +143,14 @@ export function AdminChatsWorkspace({
   }
 
   const otherParticipant = useMemo(() => {
-    if (!selectedConversation || !selectedUser) return null
-    return selectedConversation.participantA.id === selectedUser.id
+    if (!selectedConversation) return null
+    const activeUser = selectedUser ?? selectedConversation.participantA
+    return selectedConversation.participantA.id === activeUser.id
       ? selectedConversation.participantB
       : selectedConversation.participantA
   }, [selectedConversation, selectedUser])
+
+  const activeUser = selectedUser ?? selectedConversation?.participantA ?? null
 
   return (
     <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs h-[calc(100dvh-7.5rem-env(safe-area-inset-bottom,0px))] min-h-[500px] flex flex-col">
@@ -133,7 +169,7 @@ export function AdminChatsWorkspace({
               />
               <input
                 type="text"
-                placeholder="Search name, ID, phone..."
+                placeholder="Search name, phone, or email..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 className="w-full h-8.5 pl-8.5 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
@@ -166,9 +202,6 @@ export function AdminChatsWorkspace({
                       <div className="flex items-center justify-between gap-1">
                         <span className="font-semibold text-xs text-foreground truncate">
                           {user.name}
-                        </span>
-                        <span className="font-mono text-[10px] text-muted-foreground shrink-0">
-                          {user.id}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-muted-foreground">
@@ -336,7 +369,7 @@ export function AdminChatsWorkspace({
                         {otherParticipant.name}
                       </h3>
                       <span className="font-mono text-[10px] text-muted-foreground block">
-                        {selectedUser?.name} ↔ {otherParticipant.name}
+                        {activeUser?.name} ↔ {otherParticipant.name}
                       </span>
                     </div>
                   </div>
@@ -413,7 +446,7 @@ export function AdminChatsWorkspace({
                 className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 bg-muted/5"
               >
                 {selectedConversation.messages.map((msg) => {
-                  const isFromSelectedUser = msg.senderId === selectedUser?.id
+                  const isFromSelectedUser = msg.senderId === activeUser?.id
 
                   return (
                     <div

@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Folder,
   Plus,
   Sliders,
   ArrowRight,
+  Trash,
 } from "@phosphor-icons/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,9 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { CategoryImageUploader } from "./category-image-uploader"
 import { CreateCategoryDialog } from "./create-category-dialog"
-import { getAssignedFieldsForCategory } from "@/features/admin/listing-fields/data/demo-listing-fields"
+import { useAdminCategoryFields } from "../hooks/categories.queries"
+import { useUpdateCategory, useDeleteCategory } from "../hooks/categories.mutations"
 import type { AdminCategoryItem, AdminSubcategoryItem } from "../types"
 
 interface CategoryDetailWorkspaceProps {
@@ -39,25 +43,51 @@ export function CategoryDetailWorkspace({
   parentCategory,
   allRootCategories,
 }: CategoryDetailWorkspaceProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<"general" | "subcategories">("general")
-  const [name, setName] = useState(category.name)
-  const [slug, setSlug] = useState(category.slug)
-  const [parentId, setParentId] = useState(parentCategory?.id ?? "none")
-  const [sortOrder, setSortOrder] = useState(String(category.sortOrder || 1))
-  const [isActive, setIsActive] = useState(category.isActive)
-  const [description, setDescription] = useState(
-    "description" in category ? category.description : ""
+  const [name, setName] = useState(category.nameEn ?? category.name)
+  const [nameKm, setNameKm] = useState(
+    category.nameKm ?? ("description" in category ? category.description : "") ?? ""
   )
+  const [slug, setSlug] = useState(category.slug)
+  const [parentId, setParentId] = useState(category.parentId ?? parentCategory?.id ?? "none")
+  const [sortOrder, setSortOrder] = useState(String(category.sortOrder ?? 0))
+  const [isActive, setIsActive] = useState(category.isActive)
   const [imageUrl, setImageUrl] = useState<string | undefined>(category.imageUrl)
   const [isAddSubOpen, setIsAddSubOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+  useEffect(() => {
+    setName(category.nameEn ?? category.name)
+    setNameKm(category.nameKm ?? ("description" in category ? category.description : "") ?? "")
+    setSlug(category.slug)
+    setParentId(category.parentId ?? parentCategory?.id ?? "none")
+    setSortOrder(String(category.sortOrder ?? 0))
+    setIsActive(category.isActive)
+    setImageUrl(category.imageUrl)
+  }, [category, parentCategory])
 
   const isRoot = !parentCategory && "subcategories" in category
   const subcategoriesList: AdminSubcategoryItem[] = "subcategories" in category ? category.subcategories || [] : []
 
-  const assignedFields = getAssignedFieldsForCategory(category.slug || category.id)
+  const { data: remoteAssignedFields } = useAdminCategoryFields(category.id)
+  const assignedFields = remoteAssignedFields ?? []
+  const updateCategory = useUpdateCategory()
+  const deleteCategory = useDeleteCategory()
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
+    updateCategory.mutate({
+      id: category.id,
+      data: {
+        nameEn: name.trim(),
+        nameKm: nameKm.trim() || null,
+        slug: slug.trim(),
+        parentId: parentId === "none" ? null : parentId,
+        displayOrder: Number(sortOrder) >= 0 ? Number(sortOrder) : 0,
+        isActive,
+      },
+    })
   }
 
   return (
@@ -110,13 +140,22 @@ export function CategoryDetailWorkspace({
             <Button
               variant="outline"
               size="sm"
-              render={<Link href={`/admin/listing-fields?category=${category.slug}`} />}
+              render={<Link href={`/admin/listing-fields?category=${category.id}`} />}
               className="h-9 px-3 text-xs font-bold gap-1.5 rounded-lg"
             >
               <Sliders size={14} weight="bold" />
               <span>Manage Listing Fields</span>
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            className="h-9 px-3 text-xs font-bold gap-1.5 rounded-lg text-destructive hover:bg-destructive/10 hover:border-destructive/30"
+          >
+            <Trash size={14} weight="bold" />
+            <span>Delete</span>
+          </Button>
         </div>
       </div>
 
@@ -160,16 +199,30 @@ export function CategoryDetailWorkspace({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field>
-                      <FieldLabel required>Category Name</FieldLabel>
+                      <FieldLabel required>Category Name (English)</FieldLabel>
                       <Input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Vehicles"
                         required
                         className="h-9.5 text-xs rounded-lg"
                       />
                     </Field>
 
+                    <Field>
+                      <FieldLabel>Category Name (Khmer)</FieldLabel>
+                      <Input
+                        type="text"
+                        value={nameKm}
+                        onChange={(e) => setNameKm(e.target.value)}
+                        placeholder="e.g. យានយន្ត"
+                        className="h-9.5 text-xs rounded-lg"
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel required>URL Slug</FieldLabel>
                       <Input
@@ -180,10 +233,8 @@ export function CategoryDetailWorkspace({
                         className="h-9.5 text-xs font-mono rounded-lg"
                       />
                     </Field>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Field className="sm:col-span-1">
+                    <Field>
                       <FieldLabel>Parent Category</FieldLabel>
                       <Select
                         items={[
@@ -218,19 +269,21 @@ export function CategoryDetailWorkspace({
                         </SelectContent>
                       </Select>
                     </Field>
+                  </div>
 
-                    <Field className="sm:col-span-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field>
                       <FieldLabel>Sort Order</FieldLabel>
                       <Input
                         type="number"
-                        min={1}
+                        min={0}
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
                         className="h-9.5 text-xs rounded-lg"
                       />
                     </Field>
 
-                    <Field className="sm:col-span-1">
+                    <Field>
                       <FieldLabel>Status</FieldLabel>
                       <Select
                         items={[
@@ -257,21 +310,11 @@ export function CategoryDetailWorkspace({
                     </Field>
                   </div>
 
-                  <Field>
-                    <FieldLabel>Description</FieldLabel>
-                    <Textarea
-                      rows={3}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Category summary for directory and SEO..."
-                      className="text-xs rounded-lg resize-none min-h-20"
-                    />
-                  </Field>
-
                   <div className="pt-2 flex justify-end">
                     <Button
                       type="submit"
                       size="sm"
+                      disabled={updateCategory.isPending}
                       className="h-9 px-4 text-xs font-bold rounded-lg cursor-pointer"
                     >
                       Save Changes
@@ -392,7 +435,6 @@ export function CategoryDetailWorkspace({
 
                   <div className="space-y-1.5">
                     {subcategoriesList.map((sub) => {
-                      const count = getAssignedFieldsForCategory(sub.slug || sub.id).length
                       return (
                         <div
                           key={sub.id}
@@ -401,10 +443,10 @@ export function CategoryDetailWorkspace({
                           <span className="font-semibold text-foreground truncate">{sub.name}</span>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-[11px] text-muted-foreground">
-                              {count} {count === 1 ? "field" : "fields"}
+                              Fields
                             </span>
                             <Link
-                              href={`/admin/listing-fields?category=${sub.slug}`}
+                              href={`/admin/listing-fields?category=${sub.id}`}
                               className="text-primary hover:underline text-[11px] font-bold"
                             >
                               Configure
@@ -445,7 +487,7 @@ export function CategoryDetailWorkspace({
                   <Button
                     variant="outline"
                     size="sm"
-                    render={<Link href={`/admin/listing-fields?category=${category.slug || category.id}`} />}
+                    render={<Link href={`/admin/listing-fields?category=${category.id}`} />}
                     className="w-full h-8 text-xs font-bold rounded-lg gap-1.5 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                   >
                     <span>Manage Listing Fields</span>
@@ -463,6 +505,25 @@ export function CategoryDetailWorkspace({
         onOpenChange={setIsAddSubOpen}
         parentCategories={allRootCategories}
         defaultParentId={category.id}
+      />
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title={`Delete Category "${category.name}"`}
+        description="Are you sure you want to delete this category? This action cannot be undone. Categories with active listings or subcategories cannot be deleted."
+        confirmLabel="Delete Category"
+        variant="destructive"
+        isPending={deleteCategory.isPending}
+        onConfirm={async () => {
+          try {
+            await deleteCategory.mutateAsync(category.id)
+            setIsDeleteDialogOpen(false)
+            router.push('/admin/categories')
+          } catch {
+            // Error is handled and toasted by mutation onError, dialog stays open for retry/review
+          }
+        }}
       />
     </div>
   )

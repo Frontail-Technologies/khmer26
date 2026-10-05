@@ -14,7 +14,6 @@ import {
 } from "@tanstack/react-table"
 import {
   CheckCircle,
-  UserGear,
   X,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
@@ -35,14 +34,15 @@ import { ListingMobileCards } from "./listing-mobile-cards"
 import { listingColumns } from "../columns"
 import type { AdminListing } from "../types"
 import { cn } from "@/lib/utils"
-
-interface ListingTableProps {
-  initialData: AdminListing[]
-}
+import { useAdminListings } from "../hooks/listings.queries"
+import { useApproveListing } from "../hooks/listings.mutations"
+import { useAdminCategories } from "@/features/admin/categories/hooks/categories.queries"
+import { useAdminProvinces } from "@/features/admin/locations/hooks/locations.queries"
+import { toast } from "sonner"
 
 type ListingTabKey = "all" | "active" | "pending" | "flagged" | "rejected" | "sold" | "expired"
 
-export function ListingTable({ initialData }: ListingTableProps) {
+export function ListingTable() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<ListingTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([])
@@ -51,14 +51,35 @@ export function ListingTable({ initialData }: ListingTableProps) {
   const [categoryFilter, setCategoryFilter] = useState("")
   const [sellerTypeFilter, setSellerTypeFilter] = useState("")
   const [provinceFilter, setProvinceFilter] = useState("")
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "price_asc" | "price_desc">("newest")
   const [mobileSort, setMobileSort] = useState("newest")
+  const { data, isLoading } = useAdminListings({ page: 1, limit: 100, sort: sortOrder })
+  const approveListing = useApproveListing()
+  const { data: categories = [] } = useAdminCategories()
+  const { data: provinces = [] } = useAdminProvinces()
+  const initialData: AdminListing[] = useMemo(() => data?.items ?? [], [data?.items])
+  const categoryOptions = useMemo(
+    () =>
+      categories.flatMap((category) => [
+        { value: category.id, label: category.name },
+        ...category.subcategories.map((subcategory) => ({
+          value: subcategory.id,
+          label: `${category.name} / ${subcategory.name}`,
+        })),
+      ]),
+    [categories]
+  )
+  const provinceOptions = useMemo(
+    () => provinces.map((province) => ({ value: province.name, label: province.name })),
+    [provinces]
+  )
 
   const counts = useMemo(() => {
     return {
       all: initialData.length,
       active: initialData.filter((i) => i.status === "active").length,
-      pending: 14,
-      flagged: 8,
+      pending: initialData.filter((i) => i.status === "pending").length,
+      flagged: initialData.filter((i) => i.status === "flagged").length,
       rejected: initialData.filter((i) => i.status === "rejected").length,
       sold: initialData.filter((i) => i.status === "sold").length,
       expired: initialData.filter((i) => i.status === "expired").length,
@@ -122,6 +143,11 @@ export function ListingTable({ initialData }: ListingTableProps) {
   })
 
   const selectedCount = Object.keys(rowSelection).length
+  const selectedRows = table?.getSelectedRowModel().rows ?? []
+  const selectedListings = selectedRows.map((row) => row.original)
+  const approvableSelectedListings = selectedListings.filter((listing) =>
+    ["pending", "flagged", "rejected"].includes(listing.status)
+  )
 
   const handleMobileSortChange = (val: string) => {
     setMobileSort(val)
@@ -148,6 +174,16 @@ export function ListingTable({ initialData }: ListingTableProps) {
     setCategoryFilter("")
     setSellerTypeFilter("")
     setProvinceFilter("")
+  }
+
+  const handleApproveSelected = async () => {
+    if (approvableSelectedListings.length === 0) {
+      toast.info("Select pending, flagged, or rejected listings to approve.")
+      return
+    }
+
+    await Promise.all(approvableSelectedListings.map((listing) => approveListing.mutateAsync(listing.id)))
+    setRowSelection({})
   }
 
   const tabs: { key: ListingTabKey; label: string; count?: number; urgent?: boolean; warning?: boolean }[] = [
@@ -216,8 +252,10 @@ export function ListingTable({ initialData }: ListingTableProps) {
         onProvinceChange={setProvinceFilter}
         onReset={handleReset}
         hasActiveFilters={hasActiveFilters}
-        totalCount={initialData.length}
-        filteredCount={filteredData.length}
+        sortOrder={sortOrder}
+        onSortOrderChange={setSortOrder}
+        categoryOptions={categoryOptions}
+        provinceOptions={provinceOptions}
       />
 
       {selectedCount > 0 && (
@@ -234,23 +272,11 @@ export function ListingTable({ initialData }: ListingTableProps) {
               size="sm"
               variant="outline"
               className="h-7 text-xs gap-1.5 rounded-lg border-success/30 text-success hover:bg-success/10 cursor-pointer"
-              onClick={() => {
-                setRowSelection({})
-              }}
+              onClick={handleApproveSelected}
+              disabled={approveListing.isPending}
             >
               <CheckCircle size={14} weight="bold" />
-              <span>Approve Selected</span>
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs gap-1.5 rounded-lg border-primary/30 text-primary hover:bg-primary/10 cursor-pointer"
-              onClick={() => {
-                setRowSelection({})
-              }}
-            >
-              <UserGear size={14} weight="bold" />
-              <span>Assign Moderator</span>
+              <span>{approveListing.isPending ? "Approving" : "Approve Selected"}</span>
             </Button>
             <Button
               size="icon-xs"
@@ -308,8 +334,8 @@ export function ListingTable({ initialData }: ListingTableProps) {
               ) : (
                 <DataTableEmpty
                   colSpan={listingColumns.length}
-                  title="No listings found"
-                  description="Try adjusting your search terms, status tabs, or active filters."
+                  title={isLoading ? "Loading listings" : "No listings found"}
+                  description={isLoading ? "Fetching the latest admin listing queue." : "Try adjusting your search terms, status tabs, or active filters."}
                 />
               )}
             </TableBody>

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { MagnifyingGlass } from "@phosphor-icons/react"
-import type { ListingField, CategoryFieldAssignment } from "@/features/admin/categories/types"
+import type { ListingField } from "@/features/admin/categories/types"
 
 interface AssignFieldDialogProps {
   open: boolean
@@ -22,14 +22,13 @@ interface AssignFieldDialogProps {
   categoryId: string
   availableFields: ListingField[]
   assignedFieldIds: string[]
-  onAssign: (assignment: CategoryFieldAssignment) => void
+  onAssign: (field: ListingField, options: { required: boolean; filterable: boolean; sortOrder: number }) => void
 }
 
 export function AssignFieldDialog({
   open,
   onOpenChange,
   categoryName,
-  categoryId,
   availableFields,
   assignedFieldIds,
   onAssign,
@@ -63,13 +62,9 @@ export function AssignFieldDialog({
 
   const handleConfirm = () => {
     if (!selectedField) return
-    onAssign({
-      id: `a-${Date.now()}`,
-      categoryId,
-      fieldId: selectedField.id,
+    onAssign(selectedField, {
       required,
       filterable,
-      active,
       sortOrder: assignedFieldIds.length + 1,
     })
     handleClose()

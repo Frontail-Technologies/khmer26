@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { CheckCircle, ShieldCheck, SpinnerGap } from "@phosphor-icons/react"
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import type { AdminListing } from "../types"
+import { useApproveListing } from "../hooks/listings.mutations"
 
 interface ApproveListingDialogProps {
   listing: AdminListing
@@ -26,15 +26,15 @@ export function ApproveListingDialog({
   onOpenChange,
   onApproveSuccess,
 }: ApproveListingDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const approveListing = useApproveListing()
 
   const handleApprove = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onApproveSuccess?.()
-      onOpenChange(false)
-    }, 400)
+    approveListing.mutate(listing.id, {
+      onSuccess: () => {
+        onApproveSuccess?.()
+        onOpenChange(false)
+      },
+    })
   }
 
   return (
@@ -54,10 +54,6 @@ export function ApproveListingDialog({
 
         <div className="space-y-4 py-2 text-xs">
           <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Listing ID</span>
-              <span className="font-mono font-bold text-foreground">{listing.id}</span>
-            </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Category</span>
               <span className="font-medium text-foreground">{listing.categoryName}</span>
@@ -91,11 +87,11 @@ export function ApproveListingDialog({
           <Button
             type="button"
             size="sm"
-            disabled={isSubmitting}
+            disabled={approveListing.isPending}
             onClick={handleApprove}
             className="flex-1 sm:flex-initial h-9 px-4 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 rounded-lg cursor-pointer"
           >
-            {isSubmitting ? (
+            {approveListing.isPending ? (
               <SpinnerGap size={14} className="animate-spin" />
             ) : (
               <CheckCircle size={15} weight="bold" />

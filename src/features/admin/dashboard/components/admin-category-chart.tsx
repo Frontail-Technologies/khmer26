@@ -1,14 +1,27 @@
+"use client"
+
 import Link from "next/link"
-import { CaretRight } from "@phosphor-icons/react/dist/ssr"
+import { CaretRight } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { DEMO_CATEGORY_DISTRIBUTION } from "../../data/demo-admin-dashboard"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+
+const formatCount = (value?: number) => (value ?? 0).toLocaleString()
 
 export function AdminCategoryChart() {
+  const { data } = useAdminDashboard()
+  const totalActiveListings = data?.listings?.active ?? 0
+  const categories = (data?.topCategories ?? []).slice(0, 4).map((cat) => ({
+    id: cat.categoryId,
+    name: cat.nameEn,
+    count: cat.activeListings,
+    percent: totalActiveListings > 0 ? Math.round((cat.activeListings / totalActiveListings) * 100) : 0,
+  }))
+  const listingTotal = Math.max(data?.listings?.total ?? 0, 1)
   const statusSummary = [
-    { label: "Active", count: "48,290", percent: 84, color: "bg-primary" },
-    { label: "Pending", count: "42", percent: 6, color: "bg-accent" },
-    { label: "Reported", count: "8", percent: 2, color: "bg-destructive" },
-    { label: "Expired", count: "1,204", percent: 8, color: "bg-muted-foreground" },
+    { label: "Active", count: data?.listings?.active ?? 0, percent: ((data?.listings?.active ?? 0) / listingTotal) * 100, color: "bg-primary" },
+    { label: "Pending", count: data?.listings?.pendingReview ?? 0, percent: ((data?.listings?.pendingReview ?? 0) / listingTotal) * 100, color: "bg-accent" },
+    { label: "Flagged", count: data?.listings?.flagged ?? 0, percent: ((data?.listings?.flagged ?? 0) / listingTotal) * 100, color: "bg-destructive" },
+    { label: "Expired", count: data?.listings?.expired ?? 0, percent: ((data?.listings?.expired ?? 0) / listingTotal) * 100, color: "bg-muted-foreground" },
   ]
 
   return (
@@ -31,12 +44,12 @@ export function AdminCategoryChart() {
 
       <CardContent className="p-5 sm:p-6 space-y-5 flex-1 flex flex-col justify-between">
         <div className="space-y-3.5">
-          {DEMO_CATEGORY_DISTRIBUTION.slice(0, 4).map((cat) => (
-            <div key={cat.name} className="space-y-1.5">
+          {categories.map((cat, index) => (
+            <div key={cat.id || `${cat.name}-${index}`} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="text-foreground">{cat.name}</span>
                 <span className="text-muted-foreground font-medium text-[11px]">
-                  {cat.count.toLocaleString()} ({cat.percent}%)
+                  {formatCount(cat.count)} ({cat.percent}%)
                 </span>
               </div>
               <div className="h-2 w-full rounded-full bg-muted/60 overflow-hidden">
@@ -59,7 +72,7 @@ export function AdminCategoryChart() {
                 key={s.label}
                 className={s.color}
                 style={{ width: `${s.percent}%` }}
-                title={`${s.label}: ${s.count}`}
+                title={`${s.label}: ${formatCount(s.count)}`}
               />
             ))}
           </div>
@@ -69,7 +82,7 @@ export function AdminCategoryChart() {
               <div key={s.label} className="flex items-center gap-2 text-xs">
                 <span className={`size-2 rounded-full ${s.color} shrink-0`} />
                 <span className="text-muted-foreground">{s.label}:</span>
-                <span className="font-bold text-foreground">{s.count}</span>
+                <span className="font-bold text-foreground">{formatCount(s.count)}</span>
               </div>
             ))}
           </div>

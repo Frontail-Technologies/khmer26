@@ -44,8 +44,7 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
             {sub.businessName || sub.sellerName}
           </Link>
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="font-mono text-[10px]">{sub.sellerId}</span>
-            {sub.businessName && <span>• {sub.sellerName}</span>}
+            <span>{sub.businessName ? sub.sellerName : sub.planName}</span>
           </div>
         </div>
       )

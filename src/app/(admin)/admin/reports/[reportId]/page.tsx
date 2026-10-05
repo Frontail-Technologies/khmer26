@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { ReportDetailView } from "@/features/admin/reports/components/report-detail-view"
-import { DEMO_ADMIN_REPORTS } from "@/features/admin/reports/data/demo-admin-reports"
+import { ReportDetailLoader } from "@/features/admin/reports/components/report-detail-loader"
 
 interface AdminReportDetailPageProps {
   params: Promise<{ reportId: string }>
@@ -22,13 +20,5 @@ export default async function AdminReportDetailPage({
 }: AdminReportDetailPageProps) {
   const { reportId } = await params
 
-  const report =
-    DEMO_ADMIN_REPORTS.find((r) => r.id.toLowerCase() === reportId.toLowerCase()) ||
-    DEMO_ADMIN_REPORTS[0]
-
-  if (!report) {
-    notFound()
-  }
-
-  return <ReportDetailView report={report} />
+  return <ReportDetailLoader reportId={reportId} />
 }
