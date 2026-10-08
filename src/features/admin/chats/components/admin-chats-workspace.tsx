@@ -24,6 +24,19 @@ import type {
 } from "../types"
 import { cn } from "@/lib/utils"
 
+function fmtTime(iso: string) {
+  if (!iso) return ""
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  const now = new Date()
+  const todayStr = now.toDateString()
+  const yestStr = new Date(now.getTime() - 86400000).toDateString()
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  if (d.toDateString() === todayStr) return time
+  if (d.toDateString() === yestStr) return `Yesterday`
+  return d.toLocaleDateString([], { month: "short", day: "numeric" })
+}
+
 interface AdminChatsWorkspaceProps {
   users?: AdminChatParticipant[]
   conversations?: AdminChatConversation[]
@@ -301,7 +314,7 @@ export function AdminChatsWorkspace({
                           {other.name}
                         </span>
                         <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {conv.lastMessageAt.split(",")[1]?.trim() || conv.lastMessageAt}
+                          {fmtTime(conv.lastMessageAt)}
                         </span>
                       </div>
 
@@ -459,7 +472,7 @@ export function AdminChatsWorkspace({
                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground px-1 pb-0.5">
                         <span className="font-semibold">{msg.senderName}</span>
                         <span>•</span>
-                        <span>{msg.createdAt}</span>
+                        <span>{fmtTime(msg.createdAt)}</span>
                       </div>
 
                       <div

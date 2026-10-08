@@ -143,10 +143,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
             title: "Safety Tips",
             href: "/admin/content/tips",
           },
-          {
-            title: "Static Pages",
-            href: "/admin/content/pages",
-          },
         ],
       },
     ],
@@ -156,7 +152,7 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     label: "Monetization",
     items: [
       {
-        title: "Promotions",
+        title: "Ads",
         href: "/admin/promotions",
         icon: Megaphone,
       },
@@ -211,16 +207,6 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
         title: "Settings",
         href: "/admin/settings",
         icon: Gear,
-        subItems: [
-          {
-            title: "General",
-            href: "/admin/settings?section=general",
-          },
-          {
-            title: "Marketplace",
-            href: "/admin/settings?section=marketplace",
-          },
-        ],
       },
       {
         title: "Audit Log",

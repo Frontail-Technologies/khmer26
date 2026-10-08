@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type { ListingCard as ListingCardType } from "@/types"
+import type { ListingCardData } from "@/types"
 import { ArrowRight } from "@phosphor-icons/react"
 import Link from "next/link"
 import type { ReactNode } from "react"
@@ -15,7 +15,7 @@ interface ListingSectionProps {
   description?: string
   icon?: ReactNode
   viewAllHref?: string
-  listings: ListingCardType[]
+  listings: ListingCardData[]
   featured?: boolean
   className?: string
   showViewToggle?: boolean

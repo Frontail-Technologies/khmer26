@@ -44,19 +44,6 @@ export const safetyTipFormSchema = z.object({
   sortOrder: z.number().int(),
 });
 
-export const staticPageFormSchema = z.object({
-  slug: z
-    .string()
-    .trim()
-    .min(1, 'Slug is required')
-    .max(120)
-    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
-  title: z.string().trim().min(1, 'Title is required').max(200),
-  content: z.string().trim().min(1, 'Page content is required'),
-  isActive: z.boolean(),
-});
-
 export type BannerFormValues = z.infer<typeof bannerFormSchema>;
 export type FeaturedSectionFormValues = z.infer<typeof featuredSectionFormSchema>;
 export type SafetyTipFormValues = z.infer<typeof safetyTipFormSchema>;
-export type StaticPageFormValues = z.infer<typeof staticPageFormSchema>;

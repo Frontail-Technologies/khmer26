@@ -7,41 +7,25 @@ import {
   CaretRight,
   ArrowsOutSimple,
   Images,
-  ShareNetwork,
-  Check,
+  ImageSquare,
   X,
 } from "@phosphor-icons/react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
-import { FavoriteButton } from "@/features/listings/components/favorite-button"
-import type { ListingImage } from "@/types"
+import type { GalleryImage } from "@/features/listings/lib/listing-detail-format"
 
 interface ListingGalleryProps {
-  images: ListingImage[]
+  images: GalleryImage[]
   title: string
-  listingId?: string
-  isFavorited?: boolean
 }
 
-export function ListingGallery({
-  images,
-  title,
-  listingId,
-  isFavorited,
-}: ListingGalleryProps) {
+export function ListingGallery({ images, title }: ListingGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [copied, setCopied] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
-  const activeImage = images[activeIndex] || {
-    id: "fallback",
-    url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=85",
-    alt: title,
-    isPrimary: true,
-  }
-
+  const activeImage = images[activeIndex] ?? null
   const handlePrev = useCallback(() => {
     setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }, [images.length])
@@ -70,26 +54,6 @@ export function ListingGallery({
     touchEndX.current = null
   }
 
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({
-          title,
-          url: window.location.href,
-        })
-      } else {
-        await navigator.clipboard.writeText(window.location.href)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }
-    } catch {
-      await navigator.clipboard.writeText(window.location.href)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isFullscreen) return
@@ -104,50 +68,53 @@ export function ListingGallery({
   return (
     <div className="space-y-3">
       <div
-        onClick={() => setIsFullscreen(true)}
+        role="group"
+        aria-roledescription="carousel"
+        aria-label={`${title} photos`}
+        tabIndex={images.length > 1 ? 0 : -1}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") {
+            e.preventDefault()
+            handlePrev()
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault()
+            handleNext()
+          } else if (e.key === "Enter" && images.length > 0) {
+            setIsFullscreen(true)
+          }
+        }}
+        onClick={() => images.length > 0 && setIsFullscreen(true)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden rounded-2xl border border-border/80 bg-muted select-none group cursor-zoom-in shadow-2xs"
+        className={cn("relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden rounded-2xl border border-border/80 bg-muted select-none group shadow-2xs focus-visible:outline-2 focus-visible:outline-primary", images.length > 0 && "cursor-zoom-in")}
       >
-        <Image
-          src={activeImage.url}
-          alt={activeImage.alt || title}
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
-          className="object-cover transition-transform duration-300 group-hover:scale-102"
-        />
+        {activeImage ? (
+          <Image
+            src={activeImage.url}
+            alt={activeImage.alt || title}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
+            className="object-cover transition-transform duration-300 group-hover:scale-102"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/60">
+            <ImageSquare size={56} weight="light" aria-hidden="true" />
+            <span className="text-xs font-medium">No photos available</span>
+          </div>
+        )}
 
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-foreground shadow-xs pointer-events-none">
-          <Images size={14} weight="bold" />
-          <span>
-            {activeIndex + 1} / {images.length}
-          </span>
-        </div>
+        {images.length > 0 && (
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-foreground shadow-xs pointer-events-none">
+            <Images size={14} weight="bold" />
+            <span>
+              {activeIndex + 1} / {images.length}
+            </span>
+          </div>
+        )}
 
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
-          {listingId && (
-            <FavoriteButton
-              listingId={listingId}
-              initialFavorited={isFavorited}
-              className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-md shadow-xs hover:bg-background"
-            />
-          )}
-
-          <button
-            type="button"
-            onClick={handleShare}
-            aria-label="Share listing"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-md shadow-xs hover:bg-background transition-transform active:scale-95 cursor-pointer"
-          >
-            {copied ? (
-              <Check size={18} weight="bold" className="text-primary" />
-            ) : (
-              <ShareNetwork size={18} weight="bold" />
-            )}
-          </button>
-
           <button
             type="button"
             onClick={(e) => {
@@ -250,14 +217,16 @@ export function ListingGallery({
 
             <div className="relative flex-1 w-full my-2 flex items-center justify-center min-h-0">
               <div className="relative w-full h-full max-h-[82vh] flex items-center justify-center">
-                <Image
-                  src={activeImage.url}
-                  alt={activeImage.alt || title}
-                  fill
-                  priority
-                  sizes="100vw"
-                  className="object-contain"
-                />
+                {activeImage && (
+                  <Image
+                    src={activeImage.url}
+                    alt={activeImage.alt || title}
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-contain"
+                  />
+                )}
               </div>
 
               {images.length > 1 && (

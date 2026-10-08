@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminKeys } from '@/lib/query/keys';
-import { deleteAdminUser, updateAdminUser, updateUserStatus } from '../api/users.api';
+import { deleteAdminUser, updateAdminUser, updateUserStatus, resetAdminUserPassword } from '../api/users.api';
 import { toast } from 'sonner';
 
 export function useUpdateUserStatus() {
@@ -51,6 +51,19 @@ export function useDeleteAdminUser() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to delete user';
+      toast.error(msg);
+    },
+  });
+}
+
+export function useResetUserPassword() {
+  return useMutation({
+    mutationFn: resetAdminUserPassword,
+    onSuccess: () => {
+      toast.success('Password reset email sent to user');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to send password reset email';
       toast.error(msg);
     },
   });

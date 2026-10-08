@@ -21,7 +21,7 @@ export function ListingViewToggle({
       role="group"
       aria-label="Listing view mode"
       className={cn(
-        "inline-flex items-center rounded-lg border border-border/80 bg-muted/40 p-0.5 gap-0.5 shrink-0",
+        "inline-flex items-center rounded-lg bg-muted/40 p-0.5 gap-0.5 shrink-0",
         className
       )}
     >
@@ -33,7 +33,7 @@ export function ListingViewToggle({
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center rounded-md text-xs transition-all cursor-pointer",
           viewMode === "grid"
-            ? "bg-background text-foreground shadow-2xs font-semibold"
+            ? "bg-primary text-primary-foreground shadow-xs"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
@@ -48,7 +48,7 @@ export function ListingViewToggle({
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center rounded-md text-xs transition-all cursor-pointer",
           viewMode === "list"
-            ? "bg-background text-foreground shadow-2xs font-semibold"
+            ? "bg-primary text-primary-foreground shadow-xs"
             : "text-muted-foreground hover:text-foreground"
         )}
       >

@@ -2,6 +2,7 @@ export type { Category, CategoryPath, CategoryPathSegment } from "./category"
 export type {
   Listing,
   ListingCard,
+  ListingCardData,
   ListingCondition,
   ListingDetail,
   ListingImage,

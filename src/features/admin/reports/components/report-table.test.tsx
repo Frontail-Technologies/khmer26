@@ -64,13 +64,13 @@ describe('<ReportTable />', () => {
     expect(screen.getAllByText('Suspicious iPhone 14 Pro Max')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Suspicious Seller Profile')[0]).toBeInTheDocument();
 
-    const openTab = screen.getByRole('button', { name: /open/i });
+    const openTab = screen.getByRole('tab', { name: /open/i });
     fireEvent.click(openTab);
 
     expect(screen.getAllByText('Suspicious iPhone 14 Pro Max')[0]).toBeInTheDocument();
     expect(screen.queryAllByText('Suspicious Seller Profile')).toHaveLength(0);
 
-    const resolvedTab = screen.getByRole('button', { name: /resolved/i });
+    const resolvedTab = screen.getByRole('tab', { name: /resolved/i });
     fireEvent.click(resolvedTab);
 
     expect(screen.getAllByText('Suspicious Seller Profile')[0]).toBeInTheDocument();

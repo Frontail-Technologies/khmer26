@@ -8,6 +8,7 @@ export interface AdminStaffMember {
   email: string
   avatarUrl?: string
   role: AdminStaffRole
+  roleId?: string
   status: AdminStaffStatus
   lastActiveAt: string
   joinedAt: string

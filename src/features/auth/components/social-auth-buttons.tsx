@@ -1,6 +1,51 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
+import { SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
+import { useGoogleAuth, useTelegramAuth, friendlyAuthError } from "../hooks/use-auth"
+import type { TelegramAuthPayload } from "../api/auth.api"
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (cfg: {
+            client_id: string
+            callback: (res: { credential: string }) => void
+            auto_select?: boolean
+            ux_mode?: "popup" | "redirect"
+          }) => void
+          renderButton: (
+            parent: HTMLElement,
+            opts: {
+              type?: "standard" | "icon"
+              theme?: "outline" | "filled_blue" | "filled_black"
+              size?: "large" | "medium" | "small"
+              text?: "signin_with" | "signup_with" | "continue_with" | "signin"
+              width?: number
+            }
+          ) => void
+        }
+      }
+    }
+    Telegram?: {
+      Login: {
+        auth: (
+          opts: { bot_id: number; request_access?: boolean | string; lang?: string },
+          callback: (data: TelegramAuthPayload | false) => void
+        ) => void
+      }
+    }
+    onTelegramAuth?: (data: TelegramAuthPayload) => void
+  }
+}
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""
+const TELEGRAM_BOT_ID = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID
+  ? Number(process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID)
+  : 0
 
 function GoogleIcon() {
   return (
@@ -33,30 +78,224 @@ function TelegramIcon() {
   )
 }
 
-export function SocialAuthButtons() {
-  const handleGoogleAuth = () => {}
-  const handleTelegramAuth = () => {}
+function useGsiLoaded() {
+  const [loaded, setLoaded] = useState(false)
+  const initialized = useRef(false)
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return
+
+    if (typeof window !== "undefined" && window.google?.accounts?.id) {
+      setTimeout(() => setLoaded(true), 0)
+      return
+    }
+
+    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
+      const poll = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(poll)
+          setLoaded(true)
+        }
+      }, 100)
+      return () => clearInterval(poll)
+    }
+
+    const script = document.createElement("script")
+    script.src = "https://accounts.google.com/gsi/client"
+    script.async = true
+    script.defer = true
+    script.onload = () => setLoaded(true)
+    document.head.appendChild(script)
+  }, [])
+
+  return { loaded, initialized }
+}
+
+function useTelegramLoaded() {
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!TELEGRAM_BOT_ID) return
+
+    if (typeof window !== "undefined" && window.Telegram?.Login) {
+      setTimeout(() => setLoaded(true), 0)
+      return
+    }
+
+    if (document.querySelector('script[src*="telegram-widget.js"]')) {
+      const poll = setInterval(() => {
+        if (window.Telegram?.Login) {
+          clearInterval(poll)
+          setLoaded(true)
+        }
+      }, 100)
+      return () => clearInterval(poll)
+    }
+
+    const script = document.createElement("script")
+    script.src = "https://telegram.org/js/telegram-widget.js?22"
+    script.async = true
+    script.onload = () => setLoaded(true)
+    document.body.appendChild(script)
+  }, [])
+
+  return loaded
+}
+
+const GOOGLE_BUTTON_NATIVE_HEIGHT = 40
+
+export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}) {
+  const [googleError, setGoogleError] = useState<string | null>(null)
+  const [telegramError, setTelegramError] = useState<string | null>(null)
+  const googleSlotRef = useRef<HTMLDivElement>(null)
+  const googleWrapRef = useRef<HTMLDivElement>(null)
+
+  const googleAuth = useGoogleAuth()
+  const telegramAuth = useTelegramAuth()
+  const { loaded: gsiLoaded } = useGsiLoaded()
+  const telegramLoaded = useTelegramLoaded()
+
+  const onCredentialRef = useRef<(credential: string) => void>(() => {})
+  useEffect(() => {
+    onCredentialRef.current = (credential: string) => {
+      setGoogleError(null)
+      googleAuth.mutate(credential, {
+        onSuccess: () => onSuccess?.(),
+        onError: (err) => setGoogleError(friendlyAuthError(err)),
+      })
+    }
+  })
+
+  // Google renders its own click-to-open popup account chooser; we overlay it
+  // invisibly on our styled button. Popup close/cancel fires no callback, so no error is shown.
+  useEffect(() => {
+    const slot = googleSlotRef.current
+    const wrap = googleWrapRef.current
+    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !slot || !wrap || !window.google?.accounts?.id) return
+
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      ux_mode: "popup",
+      auto_select: false,
+      callback: (response) => onCredentialRef.current(response.credential),
+    })
+
+    const render = () => {
+      const width = Math.round(wrap.clientWidth)
+      slot.innerHTML = ""
+      window.google!.accounts.id.renderButton(slot, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        width,
+      })
+      slot.style.transform = `scaleY(${wrap.clientHeight / GOOGLE_BUTTON_NATIVE_HEIGHT})`
+    }
+    render()
+
+    const observer = new ResizeObserver(render)
+    observer.observe(wrap)
+    return () => observer.disconnect()
+  }, [gsiLoaded])
+
+  const handleGoogleFallbackClick = () => {
+    if (!GOOGLE_CLIENT_ID) {
+      setGoogleError("Google sign-in is not configured.")
+      return
+    }
+    if (!gsiLoaded) {
+      setGoogleError("Google sign-in is loading. Please try again.")
+    }
+  }
+
+  const handleTelegramAuth = () => {
+    if (!TELEGRAM_BOT_ID) {
+      setTelegramError("Telegram sign-in is not configured.")
+      return
+    }
+    if (!telegramLoaded || !window.Telegram?.Login) {
+      setTelegramError("Telegram sign-in is loading. Please try again.")
+      return
+    }
+    setTelegramError(null)
+    window.Telegram.Login.auth(
+      { bot_id: TELEGRAM_BOT_ID, request_access: "write" },
+      (data) => {
+        if (!data) {
+          setTelegramError("Telegram sign-in was cancelled.")
+          return
+        }
+        telegramAuth.mutate(data, {
+          onSuccess: () => onSuccess?.(),
+          onError: (err) => setTelegramError(friendlyAuthError(err)),
+        })
+      }
+    )
+  }
+
+  const googlePending = googleAuth.isPending
+  const telegramPending = telegramAuth.isPending
 
   return (
     <div className="space-y-2.5">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogleAuth}
-        className="w-full h-11 sm:h-12 border-border/90 bg-card text-foreground hover:bg-muted font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
-      >
-        <GoogleIcon />
-        <span>Continue with Google</span>
-      </Button>
+      <div className="space-y-1">
+        <div ref={googleWrapRef} className="group relative mx-auto h-11 w-full max-w-100 sm:h-12">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleFallbackClick}
+            disabled={googlePending}
+            className="w-full h-full border-border/90 bg-card text-foreground group-hover:bg-muted font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
+          >
+            {googlePending ? (
+              <span className="flex items-center gap-2">
+                <SpinnerGap size={18} className="animate-spin" />
+                <span>Signing in...</span>
+              </span>
+            ) : (
+              <>
+                <GoogleIcon />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </Button>
+          <div
+            ref={googleSlotRef}
+            aria-hidden="true"
+            className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-lg opacity-0 ${
+              googlePending ? "pointer-events-none" : ""
+            }`}
+          />
+        </div>
+        {googleError && (
+          <p className="text-xs text-destructive text-center">{googleError}</p>
+        )}
+      </div>
 
-      <Button
-        type="button"
-        onClick={handleTelegramAuth}
-        className="w-full h-11 sm:h-12 bg-[#229ED9] text-white hover:bg-[#1C8ACB] font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
-      >
-        <TelegramIcon />
-        <span>Continue with Telegram</span>
-      </Button>
+      <div className="space-y-1">
+        <Button
+          type="button"
+          onClick={handleTelegramAuth}
+          disabled={telegramPending}
+          className="w-full h-11 sm:h-12 bg-[#229ED9] text-white hover:bg-[#1C8ACB] font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
+        >
+          {telegramPending ? (
+            <span className="flex items-center gap-2">
+              <SpinnerGap size={18} className="animate-spin" />
+              <span>Signing in...</span>
+            </span>
+          ) : (
+            <>
+              <TelegramIcon />
+              <span>Continue with Telegram</span>
+            </>
+          )}
+        </Button>
+        {telegramError && (
+          <p className="text-xs text-destructive text-center">{telegramError}</p>
+        )}
+      </div>
     </div>
   )
 }

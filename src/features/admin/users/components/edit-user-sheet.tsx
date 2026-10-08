@@ -113,11 +113,10 @@ function EditUserForm({
           <Select
             value={role}
             onValueChange={(val) => setRole((val as "user" | "admin") ?? "user")}
-            items={ROLE_OPTIONS}
           >
             <SelectTrigger className="h-9 text-xs">
               <SelectValue>
-                {getSelectOptionLabel(ROLE_OPTIONS, role, "Standard User")}
+                {(val: string) => getSelectOptionLabel(ROLE_OPTIONS, val, "Standard User")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -136,11 +135,10 @@ function EditUserForm({
             <Select
               value={sellerType}
               onValueChange={(val) => setSellerType((val as "individual" | "business" | "dealer") ?? "individual")}
-              items={SELLER_TYPE_OPTIONS}
             >
               <SelectTrigger className="h-9 text-xs">
                 <SelectValue>
-                  {getSelectOptionLabel(SELLER_TYPE_OPTIONS, sellerType, "Individual")}
+                  {(val: string) => getSelectOptionLabel(SELLER_TYPE_OPTIONS, val, "Individual")}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>

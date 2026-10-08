@@ -54,6 +54,10 @@ export async function deactivateAdminPromotionPackage(id: string) {
   return apiClient.post(`/admin/promotions/packages/${id}/deactivate`);
 }
 
+export async function deleteAdminPromotionPackage(id: string) {
+  return apiClient.delete(`/admin/promotions/packages/${id}`);
+}
+
 interface RawActivePromotionRow {
   promotion: { id: string; listingId: string; startedAt: string; expiresAt: string };
   package: { promotionType: PromotionType; durationDays: number };

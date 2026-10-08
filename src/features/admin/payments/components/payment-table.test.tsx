@@ -66,7 +66,7 @@ describe('<PaymentTable />', () => {
   it('filters transactions by subscription and promotion tabs', () => {
     renderWithProviders(<PaymentTable initialPayments={mockPayments} />);
 
-    const promoTab = screen.getByRole('button', { name: /promotions/i });
+    const promoTab = screen.getByRole('tab', { name: /promotions/i });
     fireEvent.click(promoTab);
 
     expect(screen.getAllByText('Heng Piseth')[0]).toBeInTheDocument();

@@ -12,6 +12,8 @@ import {
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { DragReorderList } from "@/components/shared/drag-reorder-list"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
@@ -40,9 +42,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { ALL_DETAILED_CATEGORIES } from "@/features/categories/data/all-categories"
 import { useAdminFeaturedSections } from "../hooks/content.queries"
-import { useCreateFeaturedSection, useUpdateFeaturedSection } from "../hooks/content.mutations"
+import {
+  useCreateFeaturedSection,
+  useUpdateFeaturedSection,
+  useDeleteFeaturedSection,
+} from "../hooks/content.mutations"
 import { featuredSectionFormSchema } from "../schemas/content.schema"
 import { toast } from "sonner"
 import type { FeaturedSectionItem, FeaturedSourceType, FeaturedSortMode } from "../types"
@@ -72,9 +79,11 @@ export function FeaturedSectionsWorkspace({
   const sections = remoteSections ?? fallbackSections
   const createSection = useCreateFeaturedSection()
   const updateSection = useUpdateFeaturedSection()
+  const deleteSection = useDeleteFeaturedSection()
   const [searchQuery, setSearchQuery] = useState("")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingSection, setEditingSection] = useState<FeaturedSectionItem | null>(null)
+  const [sectionToDelete, setSectionToDelete] = useState<FeaturedSectionItem | null>(null)
 
   const [formTitle, setFormTitle] = useState("")
   const [formSlug, setFormSlug] = useState("")
@@ -109,6 +118,12 @@ export function FeaturedSectionsWorkspace({
     updateSection.mutate({ id, data: { isActive } })
   }
 
+  const persistReorderedSections = (newSections: FeaturedSectionItem[]) => {
+    newSections.forEach((s, idx) => {
+      updateSection.mutate({ id: s.id, data: { sortOrder: idx + 1 } })
+    })
+  }
+
   const handleMoveSection = (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1
     if (targetIndex < 0 || targetIndex >= sections.length) return
@@ -121,13 +136,14 @@ export function FeaturedSectionsWorkspace({
     newSections[index] = target
     newSections[targetIndex] = temp
 
-    newSections.forEach((s, idx) => {
-      updateSection.mutate({ id: s.id, data: { sortOrder: idx + 1 } })
-    })
+    persistReorderedSections(newSections)
   }
 
-  const handleDeleteSection = (id: string) => {
-    updateSection.mutate({ id, data: { isActive: false } })
+  const handleDeleteSection = () => {
+    if (!sectionToDelete) return
+    deleteSection.mutate(sectionToDelete.id, {
+      onSuccess: () => setSectionToDelete(null),
+    })
   }
 
   const handleSaveForm = (e: React.FormEvent) => {
@@ -248,13 +264,20 @@ export function FeaturedSectionsWorkspace({
             </TableHeader>
             <TableBody>
               {filteredSections.length > 0 ? (
-                filteredSections.map((sec, idx) => {
+                <DragReorderList
+                  as="fragment"
+                  itemAs="tr"
+                  items={filteredSections}
+                  getId={(sec) => sec.id}
+                  onReorder={(newSections) => persistReorderedSections(newSections)}
+                  itemClassName="border-b border-border/50 hover:bg-muted/20"
+                  renderItem={(sec, idx, { isDragging, isDropTarget }) => {
                   const isFirst = idx === 0
                   const isLast = idx === filteredSections.length - 1
 
                   return (
-                    <TableRow key={sec.id} className="border-b border-border/50 hover:bg-muted/20">
-                      <TableCell className="text-xs font-mono text-muted-foreground">
+                    <>
+                      <TableCell className={cn("text-xs font-mono text-muted-foreground", isDragging && "opacity-40", isDropTarget && "bg-primary/5")}>
                         {idx + 1}
                       </TableCell>
                       <TableCell className="min-w-44">
@@ -341,7 +364,7 @@ export function FeaturedSectionsWorkspace({
                             type="button"
                             variant="ghost"
                             size="icon-xs"
-                            onClick={() => handleDeleteSection(sec.id)}
+                            onClick={() => setSectionToDelete(sec)}
                             className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
                             aria-label="Delete section"
                           >
@@ -349,9 +372,10 @@ export function FeaturedSectionsWorkspace({
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
+                    </>
                   )
-                })
+                  }}
+                />
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center text-xs text-muted-foreground">
@@ -512,6 +536,19 @@ export function FeaturedSectionsWorkspace({
           </form>
         </SheetContent>
       </Sheet>
+
+      <ConfirmationDialog
+        open={Boolean(sectionToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setSectionToDelete(null)
+        }}
+        title="Delete featured section?"
+        description={`This will permanently remove "${sectionToDelete?.title ?? "this section"}" from homepage content management.`}
+        confirmLabel="Delete Section"
+        variant="destructive"
+        isPending={deleteSection.isPending}
+        onConfirm={handleDeleteSection}
+      />
     </div>
   )
 }

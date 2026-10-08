@@ -2,16 +2,9 @@
 
 import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
-import { DotsThreeVertical, Eye, Storefront } from "@phosphor-icons/react"
+import { Eye, Storefront } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { SubscriberRecord } from "./types"
 
@@ -129,45 +122,21 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
     cell: ({ row }) => {
       const sub = row.original
       return (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7 text-muted-foreground hover:text-foreground"
-                  aria-label="Subscription actions"
-                >
-                  <DotsThreeVertical size={16} weight="bold" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={`/admin/users/${sub.sellerId}`}
-                    className="flex items-center gap-2 cursor-pointer w-full"
-                  >
-                    <Eye size={13} />
-                    <span>View Account</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={`/admin/listings?search=${encodeURIComponent(sub.sellerName)}`}
-                    className="flex items-center gap-2 cursor-pointer w-full"
-                  >
-                    <Storefront size={13} />
-                    <span>View Listings</span>
-                  </Link>
-                }
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+          <Link
+            href={`/admin/users/${sub.sellerId}`}
+            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="View seller account"
+          >
+            <Eye size={14} />
+          </Link>
+          <Link
+            href={`/admin/listings?search=${encodeURIComponent(sub.sellerName)}`}
+            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="View seller listings"
+          >
+            <Storefront size={14} />
+          </Link>
         </div>
       )
     },

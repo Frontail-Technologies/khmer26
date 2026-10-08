@@ -148,10 +148,9 @@ export default function NotFound() {
           </span>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[
-              { label: "Vehicles", href: "/category/vehicles" },
-              { label: "Properties", href: "/category/properties" },
-              { label: "Electronics", href: "/category/electronics" },
+              { label: "All Categories", href: "/categories" },
               { label: "Search Ads", href: "/search" },
+              { label: "Post an Ad", href: "/post-ad" },
             ].map((link) => (
               <Link
                 key={link.href}

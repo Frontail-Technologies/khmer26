@@ -97,11 +97,7 @@ export function createAuditColumns({
             <span className="font-medium text-xs text-foreground block truncate">
               {entry.targetName}
             </span>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <span>{entry.targetType}</span>
-              <span>•</span>
-              <span className="font-mono">{entry.targetId}</span>
-            </div>
+            <span className="text-[10px] text-muted-foreground capitalize">{entry.targetType}</span>
           </div>
         )
       },

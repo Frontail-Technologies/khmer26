@@ -95,6 +95,20 @@ export interface ListingCard {
   sellerType?: "individual" | "dealer"
 }
 
+/** Minimum fields the shared listing cards render. Backend summaries and richer demo data both satisfy it. */
+export type ListingCardData = Pick<
+  ListingCard,
+  "id" | "slug" | "title" | "price" | "currency" | "location" | "createdAt"
+> &
+  Partial<
+    Pick<
+      ListingCard,
+      "primaryImage" | "isFavorited" | "featured" | "urgent" | "verified" | "negotiable" | "metadata"
+    >
+  > & {
+    priceOnRequest?: boolean
+  }
+
 export interface ListingSeller {
   id: string
   slug: string

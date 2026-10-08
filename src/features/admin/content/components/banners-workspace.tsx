@@ -6,7 +6,7 @@ import {
   Image as ImageIcon,
   Plus,
   PencilSimple,
-  Archive,
+  Trash,
   MagnifyingGlass,
   UploadSimple,
   X,
@@ -43,8 +43,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { useAdminBanners } from "../hooks/content.queries"
-import { useCreateBanner, useUpdateBanner, useToggleBannerActive } from "../hooks/content.mutations"
+import {
+  useCreateBanner,
+  useUpdateBanner,
+  useToggleBannerActive,
+  useDeleteBanner,
+} from "../hooks/content.mutations"
 import { uploadMediaFile } from "@/lib/api/media"
 import { bannerFormSchema } from "../schemas/content.schema"
 import { toast } from "sonner"
@@ -83,11 +89,13 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
   const createBanner = useCreateBanner()
   const updateBanner = useUpdateBanner()
   const toggleBannerActive = useToggleBannerActive()
+  const deleteBanner = useDeleteBanner()
   const [searchQuery, setSearchQuery] = useState("")
   const [placementFilter, setPlacementFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingBanner, setEditingBanner] = useState<AdminBannerItem | null>(null)
+  const [bannerToDelete, setBannerToDelete] = useState<AdminBannerItem | null>(null)
 
   const [formTitle, setFormTitle] = useState("")
   const [formPlacement, setFormPlacement] = useState<BannerPlacement>("homepage_hero")
@@ -104,13 +112,13 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
 
   const openAddModal = () => {
     setEditingBanner(null)
-    setFormTitle("Vehicles & Automotive Special")
+    setFormTitle("")
     setFormPlacement("homepage_hero")
-    setFormImageUrl("/images/categories/cars.jpg")
+    setFormImageUrl("")
     setFormImageMediaId(undefined)
-    setFormDestinationType("category")
-    setFormDestinationValue("/category/vehicles")
-    setFormDestinationLabel("Vehicles & Automotive")
+    setFormDestinationType("no_action")
+    setFormDestinationValue("")
+    setFormDestinationLabel("")
     setFormStartDate("")
     setFormEndDate("")
     setFormIsActive(true)
@@ -136,8 +144,11 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
     toggleBannerActive.mutate({ id, isActive })
   }
 
-  const handleDeactivateBanner = (id: string) => {
-    toggleBannerActive.mutate({ id, isActive: true })
+  const handleDeleteBanner = () => {
+    if (!bannerToDelete) return
+    deleteBanner.mutate(bannerToDelete.id, {
+      onSuccess: () => setBannerToDelete(null),
+    })
   }
 
   const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +175,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
     const validationResult = bannerFormSchema.safeParse({
       title: finalTitle,
       placement: formPlacement,
-      imageUrl: formImageUrl || "/images/categories/cars.jpg",
+      imageUrl: formImageUrl,
       imageMediaId: formImageMediaId || "",
       destinationType: formDestinationType,
       destinationValue: formDestinationValue.trim(),
@@ -181,7 +192,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
     const payload = {
       title: finalTitle,
       placement: formPlacement,
-      imageUrl: formImageUrl || "/images/categories/cars.jpg",
+      imageUrl: formImageUrl,
       imageMediaId: formImageMediaId,
       destinationType: formDestinationType,
       destinationValue: formDestinationValue.trim() || undefined,
@@ -264,11 +275,10 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
               onValueChange={(val) => {
                 if (val) setPlacementFilter(val)
               }}
-              items={PLACEMENT_OPTIONS}
             >
               <SelectTrigger className="w-44 h-8.5 text-xs">
                 <SelectValue>
-                  {getSelectOptionLabel(PLACEMENT_OPTIONS, placementFilter, "Placement")}
+                  {(val: string) => getSelectOptionLabel(PLACEMENT_OPTIONS, val, "All Placements")}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -285,11 +295,10 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
               onValueChange={(val) => {
                 if (val) setStatusFilter(val)
               }}
-              items={STATUS_FILTER_OPTIONS}
             >
               <SelectTrigger className="w-32 h-8.5 text-xs">
                 <SelectValue>
-                  {getSelectOptionLabel(STATUS_FILTER_OPTIONS, statusFilter, "Status")}
+                  {(val: string) => getSelectOptionLabel(STATUS_FILTER_OPTIONS, val, "All Statuses")}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -362,7 +371,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                     <TableCell>
                       {b.startDate && b.endDate ? (
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {formatAdminDate(b.startDate)} → {formatAdminDate(b.endDate)}
+                          {formatAdminDate(b.startDate)} to {formatAdminDate(b.endDate)}
                         </span>
                       ) : (
                         <span className="text-xs text-muted-foreground">Always Active</span>
@@ -384,12 +393,12 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                           type="button"
                           variant="ghost"
                           size="icon-xs"
-                          onClick={() => handleDeactivateBanner(b.id)}
+                          onClick={() => setBannerToDelete(b)}
                           className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
-                          aria-label="Deactivate banner"
-                          title="Deactivate banner"
+                          aria-label="Delete banner"
+                          title="Delete banner"
                         >
-                          <Archive size={13} />
+                          <Trash size={13} />
                         </Button>
                       </div>
                     </TableCell>
@@ -441,11 +450,10 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                   onValueChange={(val) => {
                     if (val) setFormPlacement(val as BannerPlacement)
                   }}
-                  items={PLACEMENT_FORM_OPTIONS}
                 >
                   <SelectTrigger className="h-9 text-xs">
                     <SelectValue>
-                      {getSelectOptionLabel(PLACEMENT_FORM_OPTIONS, formPlacement, "Placement")}
+                      {(val: string) => getSelectOptionLabel(PLACEMENT_FORM_OPTIONS, val, "Select placement")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -521,11 +529,10 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                   onValueChange={(val) => {
                     if (val) setFormDestinationType(val as BannerDestinationType)
                   }}
-                  items={DESTINATION_OPTIONS}
                 >
                   <SelectTrigger className="h-9 text-xs">
                     <SelectValue>
-                      {getSelectOptionLabel(DESTINATION_OPTIONS, formDestinationType, "Type")}
+                      {(val: string) => getSelectOptionLabel(DESTINATION_OPTIONS, val, "Select type")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -625,6 +632,19 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
           </form>
         </SheetContent>
       </Sheet>
+
+      <ConfirmationDialog
+        open={Boolean(bannerToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setBannerToDelete(null)
+        }}
+        title="Delete banner?"
+        description={`This will permanently remove "${bannerToDelete?.title ?? "this banner"}" from admin and live banner placements.`}
+        confirmLabel="Delete Banner"
+        variant="destructive"
+        isPending={deleteBanner.isPending}
+        onConfirm={handleDeleteBanner}
+      />
     </div>
   )
 }

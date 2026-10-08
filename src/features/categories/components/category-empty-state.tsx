@@ -3,16 +3,10 @@ import { ArrowLeft, SquaresFour, Plus } from "@phosphor-icons/react/dist/ssr"
 import { buttonVariants } from "@/components/ui/button"
 
 interface CategoryEmptyStateProps {
-  rootCategoryName: string
-  rootCategorySlug: string
-  isRoot: boolean
+  parent?: { name: string; href: string }
 }
 
-export function CategoryEmptyState({
-  rootCategoryName,
-  rootCategorySlug,
-  isRoot,
-}: CategoryEmptyStateProps) {
+export function CategoryEmptyState({ parent }: CategoryEmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-border/80 bg-card py-12 sm:py-16 px-6 text-center shadow-2xs">
       <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-muted/60 mb-4 text-muted-foreground/80">
@@ -28,9 +22,9 @@ export function CategoryEmptyState({
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-        {!isRoot && (
+        {parent && (
           <Link
-            href={`/category/${rootCategorySlug}`}
+            href={parent.href}
             className={buttonVariants({
               variant: "outline",
               size: "sm",
@@ -38,7 +32,7 @@ export function CategoryEmptyState({
             })}
           >
             <ArrowLeft size={14} />
-            <span>View {rootCategoryName}</span>
+            <span>View {parent.name}</span>
           </Link>
         )}
 
@@ -55,7 +49,7 @@ export function CategoryEmptyState({
         </Link>
 
         <Link
-          href="/post"
+          href="/post-ad"
           className={buttonVariants({
             variant: "default",
             size: "sm",

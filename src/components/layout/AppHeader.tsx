@@ -22,18 +22,32 @@ import {
 } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { shouldShowAppHeader } from "@/lib/constants/route-policy"
 import { SearchBar } from "./SearchBar"
 import { LanguageSelector } from "./LanguageSelector"
 import { ThemeToggle } from "./ThemeToggle"
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user"
+import { useLogout } from "@/features/auth/hooks/use-auth"
 
 export function AppHeader() {
   const pathname = usePathname()
-  const isLoggedIn = false
+  const { user, isAuthenticated } = useCurrentUser()
+  const logout = useLogout()
+  // The mobile search bar is open only for the page it was opened on, so it closes on navigation.
+  const [mobileSearchPath, setMobileSearchPath] = useState<string | null>(null)
+  const mobileSearchOpen = mobileSearchPath === pathname
 
   if (!shouldShowAppHeader(pathname)) {
     return null
+  }
+
+  const displayName = user?.email?.split("@")[0] ?? "Account"
+  const initials = displayName.slice(0, 2).toUpperCase()
+
+  const handleSignOut = () => {
+    logout.mutate()
   }
 
   return (
@@ -55,7 +69,7 @@ export function AppHeader() {
           />
         </Link>
 
-        <div className="hidden flex-1 items-center justify-center px-2 md:flex">
+        <div className="hidden min-w-0 flex-1 items-center justify-center px-2 md:flex">
           <SearchBar className="max-w-2xl" />
         </div>
 
@@ -73,18 +87,18 @@ export function AppHeader() {
 
           <Separator orientation="vertical" className="mx-1 h-5" />
 
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full"
                 aria-label="Account menu"
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs">U</AvatarFallback>
+                  <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs truncate">{user?.email ?? "My Account"}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {ACCOUNT_NAV.slice(0, 5).map((item) => (
                   <DropdownMenuItem key={item.href}>
@@ -94,8 +108,12 @@ export function AppHeader() {
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  Sign Out
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={handleSignOut}
+                  disabled={logout.isPending}
+                >
+                  {logout.isPending ? "Signing out..." : "Sign Out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -132,13 +150,15 @@ export function AppHeader() {
           <LanguageSelector />
           <ThemeToggle />
 
-          <Link
-            href="/search"
+          <button
+            type="button"
             aria-label="Search"
+            aria-expanded={mobileSearchOpen}
+            onClick={() => setMobileSearchPath(mobileSearchOpen ? null : pathname)}
             className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted"
           >
             <MagnifyingGlass size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
-          </Link>
+          </button>
 
           <Sheet>
             <SheetTrigger
@@ -171,28 +191,53 @@ export function AppHeader() {
                   </Link>
                 ))}
                 <Separator className="my-2" />
-                <Link
-                  href="/login"
-                  className="flex items-center px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/register"
-                  className="flex items-center px-4 py-2.5 text-sm font-semibold text-primary hover:bg-muted"
-                >
-                  Create an account
-                </Link>
-                <Separator className="my-2" />
-                {ACCOUNT_NAV.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {isAuthenticated ? (
+                  <>
+                    {ACCOUNT_NAV.slice(0, 5).map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="flex items-center px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                    <Separator className="my-2" />
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      disabled={logout.isPending}
+                      className="flex items-center px-4 py-2.5 text-sm font-semibold text-destructive hover:bg-muted text-left w-full disabled:opacity-50"
+                    >
+                      {logout.isPending ? "Signing out..." : "Sign Out"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="flex items-center px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="flex items-center px-4 py-2.5 text-sm font-semibold text-primary hover:bg-muted"
+                    >
+                      Create an account
+                    </Link>
+                    <Separator className="my-2" />
+                    {ACCOUNT_NAV.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="flex items-center px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </>
+                )}
                 <Separator className="my-2" />
                 <div className="px-4 pt-2">
                   <Button
@@ -210,6 +255,12 @@ export function AppHeader() {
           </Sheet>
         </div>
       </div>
+
+      {mobileSearchOpen && (
+        <div className="border-t border-border px-3 py-2 sm:px-4 md:hidden">
+          <SearchBar />
+        </div>
+      )}
     </header>
   )
 }

@@ -91,6 +91,32 @@ export interface AdminDashboardData {
     createdAt: string;
     actorEmail: string | null;
   }>;
+  recentOpenReports?: Array<{
+    report: {
+      id: string;
+      reporterUserId: string | null;
+      targetType: string;
+      listingId: string | null;
+      userId: string | null;
+      sellerProfileId: string | null;
+      conversationId: string | null;
+      details: string | null;
+      status: string;
+      createdAt: string;
+    };
+    reason: { id: string; label: string } | null;
+  }>;
+  recentOpenChatReports?: Array<{
+    report: {
+      id: string;
+      reporterUserId: string | null;
+      conversationId: string | null;
+      details: string | null;
+      status: string;
+      createdAt: string;
+    };
+    reason: { id: string; label: string } | null;
+  }>;
 }
 
 export async function getAdminDashboard(): Promise<AdminDashboardData> {

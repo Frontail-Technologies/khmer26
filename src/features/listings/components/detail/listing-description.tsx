@@ -1,60 +1,53 @@
 "use client"
 
 import { useState } from "react"
-import { Article, CaretDown, CaretUp } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CaretDown, CaretUp } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 
 interface ListingDescriptionProps {
-  description: string
+  description: string | null
 }
 
+/** Plain text only: line breaks are preserved and nothing is interpreted as HTML. */
 export function ListingDescription({ description }: ListingDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const isLong = description.length > 400
+  const text = description?.trim()
 
-  const paragraphs = description.split("\n\n").filter(Boolean)
+  if (!text) return null
+
+  const isLong = text.length > 700 || text.split("\n").length > 14
 
   return (
-    <Card size="sm">
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Article size={18} className="text-primary shrink-0" />
-        <CardTitle className="text-base sm:text-lg font-bold text-foreground">
-          Description
-        </CardTitle>
-      </CardHeader>
+    <section aria-label="Description" className="space-y-2.5">
+      <h2 className="text-sm sm:text-base font-bold text-foreground">Description</h2>
+      <p
+        className={`wrap-break-word whitespace-pre-line text-sm leading-relaxed text-foreground/90 sm:text-[15px] ${
+          !isExpanded && isLong ? "line-clamp-10" : ""
+        }`}
+      >
+        {text}
+      </p>
 
-      <CardContent className="space-y-3">
-        <div
-          className={`space-y-2.5 text-xs sm:text-sm text-foreground/90 leading-relaxed font-normal ${
-            !isExpanded && isLong ? "line-clamp-6" : ""
-          }`}
+      {isLong && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="h-8 gap-1 px-2 text-xs font-semibold text-primary"
         >
-          {paragraphs.map((para, i) => (
-            <p key={i} className="whitespace-pre-line">
-              {para}
-            </p>
-          ))}
-        </div>
-
-        {isLong && (
-          <div className="pt-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded((prev) => !prev)}
-              className="h-8 text-xs font-semibold text-primary hover:text-primary/80 p-0 gap-1"
-            >
-              <span>{isExpanded ? "Show Less" : "Read Full Description"}</span>
-              {isExpanded ? (
-                <CaretUp size={14} weight="bold" />
-              ) : (
-                <CaretDown size={14} weight="bold" />
-              )}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          {isExpanded ? (
+            <>
+              <span>Show less</span>
+              <CaretUp size={14} weight="bold" />
+            </>
+          ) : (
+            <>
+              <span>Read more</span>
+              <CaretDown size={14} weight="bold" />
+            </>
+          )}
+        </Button>
+      )}
+    </section>
   )
 }

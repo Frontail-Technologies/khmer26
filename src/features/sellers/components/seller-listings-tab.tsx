@@ -1,222 +1,117 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import {
-  MagnifyingGlass,
-  X,
-  Funnel,
-  SortAscending,
-  Storefront,
-} from "@phosphor-icons/react"
-import { Input } from "@/components/ui/input"
+import { Storefront } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { EmptyState } from "@/components/shared/EmptyState"
 import { ListingGrid } from "@/features/listings/components/listing-grid"
 import { ListingListRow } from "@/features/listings/components/listing-list-row"
 import { ListingViewToggle } from "@/features/listings/components/listing-view-toggle"
 import { useListingViewMode } from "@/features/listings/hooks/use-listing-view-mode"
-import { EmptyState } from "@/components/shared/EmptyState"
-import type { ListingCard as ListingCardType } from "@/types"
+import { toListingCardData } from "@/features/listings/lib/to-listing-card-data"
+import type { PublicListing } from "@/features/listings/api/listings.api"
+import type { Page } from "../api/sellers.api"
+import { pluralize } from "../lib/seller-format"
 
 interface SellerListingsTabProps {
-  initialListings: ListingCardType[]
   sellerName: string
+  pages: Array<Page<PublicListing>> | undefined
+  isPending: boolean
+  isError: boolean
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  onLoadMore: () => void
+  onRetry: () => void
 }
 
-type SortOption = "newest" | "price-asc" | "price-desc"
-
 export function SellerListingsTab({
-  initialListings,
   sellerName,
+  pages,
+  isPending,
+  isError,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+  onRetry,
 }: SellerListingsTabProps) {
   const [viewMode, setViewMode] = useListingViewMode()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortBy, setSortBy] = useState<SortOption>("newest")
-  const [visibleCount, setVisibleCount] = useState(8)
 
-  const categories = useMemo(() => {
-    const set = new Set<string>()
-    initialListings.forEach((item) => {
-      if (item.categoryPath && item.categoryPath.length > 0) {
-        const topCat = item.categoryPath[0]
-        if (topCat) {
-          set.add(topCat.charAt(0).toUpperCase() + topCat.slice(1))
-        }
-      }
-    })
-    return ["All", ...Array.from(set)]
-  }, [initialListings])
+  if (isPending) {
+    return (
+      <div
+        aria-busy="true"
+        aria-label="Loading listings"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3"
+      >
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-4/5 w-full rounded-xl" />
+        ))}
+      </div>
+    )
+  }
 
-  const filteredListings = useMemo(() => {
-    return initialListings
-      .filter((item) => {
-        const matchesSearch =
-          !searchQuery.trim() ||
-          item.title.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          item.location.label.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  if (isError && !pages) {
+    return (
+      <EmptyState
+        icon={<Storefront size={32} aria-hidden="true" />}
+        title="Couldn't load listings"
+        description="Please check your connection and try again."
+        action={{ label: "Try again", onClick: onRetry }}
+      />
+    )
+  }
 
-        const matchesCategory =
-          selectedCategory === "all" ||
-          item.categoryPath.some(
-            (c) => c.toLowerCase() === selectedCategory.toLowerCase()
-          )
+  const items = (pages ?? []).flatMap((p) => p.items)
+  const total = pages?.[0]?.pagination.total ?? 0
 
-        return matchesSearch && matchesCategory
-      })
-      .sort((a, b) => {
-        if (sortBy === "price-asc") return a.price - b.price
-        if (sortBy === "price-desc") return b.price - a.price
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      })
-  }, [initialListings, searchQuery, selectedCategory, sortBy])
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        icon={<Storefront size={32} aria-hidden="true" />}
+        title="No active listings"
+        description={`${sellerName} has no active listings at the moment.`}
+      />
+    )
+  }
 
-  const displayedListings = filteredListings.slice(0, visibleCount)
-  const hasMore = visibleCount < filteredListings.length
+  const cards = items.map(toListingCardData)
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border border-border/80 bg-card shadow-2xs">
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <Input
-            type="text"
-            placeholder={`Search ${sellerName}'s listings...`}
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              setVisibleCount(8)
-            }}
-            className="h-10 pl-9 pr-8 text-xs sm:text-sm bg-muted/30"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Funnel size={16} className="text-muted-foreground shrink-0" />
-            <div className="flex gap-1">
-              {categories.map((cat) => {
-                const isSelected =
-                  (cat === "All" && selectedCategory === "all") ||
-                  selectedCategory.toLowerCase() === cat.toLowerCase()
-
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(cat === "All" ? "all" : cat)
-                      setVisibleCount(8)
-                    }}
-                    className={`h-8 px-3 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0 ml-auto md:ml-2">
-            <Select
-              value={sortBy}
-              onValueChange={(val) => val && setSortBy(val as SortOption)}
-            >
-              <SelectTrigger
-                aria-label="Sort listings"
-                className="h-9 px-3 text-xs font-semibold rounded-xl bg-background border-border/80 text-foreground gap-2 min-w-36.25"
-              >
-                <div className="flex items-center gap-1.5">
-                  <SortAscending size={15} className="text-primary shrink-0" />
-                  <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent side="bottom" align="end">
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <ListingViewToggle viewMode={viewMode} onChange={setViewMode} />
-          </div>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
+        <span>
+          Showing {items.length} of {pluralize(total, "active listing")}
+        </span>
+        <ListingViewToggle viewMode={viewMode} onChange={setViewMode} />
       </div>
 
-      {displayedListings.length > 0 ? (
-        <>
-          <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-            <span>
-              Showing {displayedListings.length} of {filteredListings.length} active listings
-            </span>
-          </div>
-
-          {viewMode === "grid" ? (
-            <ListingGrid listings={displayedListings} />
-          ) : (
-            <div className="space-y-2.5 sm:space-y-3">
-              {displayedListings.map((listing) => (
-                <ListingListRow key={listing.id} listing={listing} />
-              ))}
-            </div>
-          )}
-
-          {hasMore && (
-            <div className="flex justify-center pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setVisibleCount((prev) => prev + 8)}
-                className="h-10 px-6 text-xs sm:text-sm font-semibold rounded-lg border-border hover:bg-muted"
-              >
-                Load More Listings
-              </Button>
-            </div>
-          )}
-        </>
+      {viewMode === "grid" ? (
+        <ListingGrid listings={cards} />
       ) : (
-        <EmptyState
-          icon={<Storefront size={32} aria-hidden="true" />}
-          title="No listings found"
-          description={
-            searchQuery || selectedCategory !== "all"
-              ? "No items match your search or filter criteria. Try clearing the filter."
-              : `${sellerName} has no active listings at this moment.`
-          }
-          action={
-            searchQuery || selectedCategory !== "all"
-              ? {
-                  label: "Clear Filters",
-                  onClick: () => {
-                    setSearchQuery("")
-                    setSelectedCategory("all")
-                  },
-                }
-              : undefined
-          }
-        />
+        <div className="space-y-2.5 sm:space-y-3">
+          {cards.map((listing) => (
+            <ListingListRow key={listing.id} listing={listing} />
+          ))}
+        </div>
+      )}
+
+      {isError && (
+        <p role="alert" className="text-center text-xs font-medium text-destructive">
+          Couldn&apos;t load more listings.
+        </p>
+      )}
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="outline"
+            onClick={onLoadMore}
+            disabled={isFetchingNextPage}
+            className="h-10 px-6 text-xs sm:text-sm font-semibold rounded-lg border-border hover:bg-muted"
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more listings"}
+          </Button>
+        </div>
       )}
     </div>
   )

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { User, SpinnerGap } from "@phosphor-icons/react"
+import { EnvelopeSimple, SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -13,20 +13,23 @@ import { PasswordField } from "./password-field"
 import { AuthDivider } from "./auth-divider"
 import { SocialAuthButtons } from "./social-auth-buttons"
 import { loginSchema, type LoginFormData } from "../schemas/login-schema"
+import { useLogin, friendlyAuthError } from "../hooks/use-auth"
 
 export function LoginForm() {
   const [formData, setFormData] = useState<LoginFormData>({
-    identifier: "",
+    email: "",
     password: "",
   })
   const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const login = useLogin()
 
   const handleChange = (field: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
+    if (apiError) setApiError(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,42 +49,43 @@ export function LoginForm() {
     }
 
     setErrors({})
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 600)
+    setApiError(null)
+    login.mutate(
+      { email: result.data.email, password: result.data.password },
+      { onError: (err) => setApiError(friendlyAuthError(err)) }
+    )
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <div className="space-y-1.5">
         <label
-          htmlFor="identifier"
+          htmlFor="email"
           className="block text-xs sm:text-sm font-semibold text-foreground"
         >
-          Email or Phone Number <span className="text-destructive">*</span>
+          Email Address <span className="text-destructive">*</span>
         </label>
 
-        <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.identifier}>
+        <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.email}>
           <InputGroupAddon align="inline-start">
-            <User size={18} className="text-muted-foreground" />
+            <EnvelopeSimple size={18} className="text-muted-foreground" />
           </InputGroupAddon>
 
           <InputGroupInput
-            id="identifier"
-            name="identifier"
-            type="text"
-            value={formData.identifier}
-            onChange={(e) => handleChange("identifier", e.target.value)}
-            placeholder="Enter your email or phone number"
-            autoComplete="username"
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+            placeholder="Enter your email address"
+            autoComplete="email"
             className="text-xs sm:text-sm text-foreground placeholder:text-muted-foreground"
           />
         </InputGroup>
 
-        {errors.identifier && (
+        {errors.email && (
           <p className="text-xs font-medium text-destructive mt-1">
-            {errors.identifier}
+            {errors.email}
           </p>
         )}
       </div>
@@ -105,13 +109,19 @@ export function LoginForm() {
         </Link>
       </div>
 
+      {apiError && (
+        <p className="text-xs font-medium text-destructive text-center -mt-1">
+          {apiError}
+        </p>
+      )}
+
       <div className="pt-2">
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={login.isPending}
           className="w-full h-11 sm:h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-sm sm:text-base rounded-lg shadow-sm cursor-pointer transition-colors"
         >
-          {isLoading ? (
+          {login.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
               <span>Signing in...</span>

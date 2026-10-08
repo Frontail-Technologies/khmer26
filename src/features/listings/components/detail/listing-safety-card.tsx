@@ -3,45 +3,38 @@ import { ShieldCheck, CheckCircle, ArrowRight } from "@phosphor-icons/react/dist
 import { Card, CardContent } from "@/components/ui/card"
 
 const SAFETY_TIPS = [
-  "Meet the seller in a public, well-lit place",
-  "Inspect and test the item carefully before paying",
-  "Never send advance deposits or wire transfers to unknown individuals",
-  "Report any suspicious or misleading listing immediately",
+  "Meet in a public, well-lit place",
+  "Inspect and test the item before paying",
+  "Never send advance deposits to strangers",
+  "Report suspicious listings",
 ]
 
+/** Approved static product copy; there is no public safety-tips endpoint for listings yet. */
 export function ListingSafetyCard() {
   return (
     <Card size="sm" className="bg-primary/5 ring-primary/20">
-      <CardContent className="pt-(--card-spacing) space-y-3">
-        <div className="flex items-center gap-2 text-primary">
-          <ShieldCheck size={20} weight="fill" />
-          <h3 className="text-sm sm:text-base font-bold text-foreground">
-            Buy with confidence
-          </h3>
+      <CardContent className="pt-(--card-spacing) space-y-2">
+        <div className="flex items-center gap-2">
+          <ShieldCheck size={18} weight="fill" className="text-primary" />
+          <h3 className="text-sm font-bold text-foreground">Buy with confidence</h3>
         </div>
 
-        <ul className="space-y-1.5 text-xs text-muted-foreground">
-          {SAFETY_TIPS.map((tip, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <CheckCircle
-                size={14}
-                weight="fill"
-                className="text-primary shrink-0 mt-0.5"
-              />
+        <ul className="space-y-1 text-[11px] text-muted-foreground sm:text-xs">
+          {SAFETY_TIPS.map((tip) => (
+            <li key={tip} className="flex items-start gap-1.5">
+              <CheckCircle size={13} weight="fill" className="mt-0.5 shrink-0 text-primary" />
               <span>{tip}</span>
             </li>
           ))}
         </ul>
 
-        <div className="pt-1 border-t border-primary/10">
-          <Link
-            href="/safety"
-            className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline transition-colors"
-          >
-            <span>View Safety Tips</span>
-            <ArrowRight size={12} weight="bold" />
-          </Link>
-        </div>
+        <Link
+          href="/posting-rules"
+          className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+        >
+          <span>View Safety Tips</span>
+          <ArrowRight size={12} weight="bold" />
+        </Link>
       </CardContent>
     </Card>
   )

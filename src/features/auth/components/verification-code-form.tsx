@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { ArrowRight, SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,21 +9,36 @@ import {
   verificationCodeSchema,
   type VerificationCodeFormData,
 } from "../schemas/verification-code-schema"
+import {
+  useVerifyResetOtp,
+  useForgotPassword,
+  getAuthPendingEmail,
+  friendlyAuthError,
+} from "../hooks/use-auth"
+
+const RESEND_COOLDOWN_SEC = 60
 
 export function VerificationCodeForm() {
-  const router = useRouter()
-  const [formData, setFormData] = useState<VerificationCodeFormData>({
-    code: "",
-  })
+  const [formData, setFormData] = useState<VerificationCodeFormData>({ code: "" })
   const [errors, setErrors] = useState<Partial<Record<keyof VerificationCodeFormData, string>>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState(RESEND_COOLDOWN_SEC)
+  const [email] = useState(() => (typeof window !== "undefined" ? getAuthPendingEmail() : ""))
+
+  const verifyOtp = useVerifyResetOtp()
+  const resend = useForgotPassword()
+
+  useEffect(() => {
+    if (countdown <= 0) return
+    const id = setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(id)
+  }, [countdown])
 
   const handleChange = (val: string) => {
     const cleaned = val.replace(/\D/g, "").slice(0, 6)
     setFormData({ code: cleaned })
-    if (errors.code) {
-      setErrors({})
-    }
+    if (errors.code) setErrors({})
+    if (apiError) setApiError(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,18 +46,30 @@ export function VerificationCodeForm() {
     const result = verificationCodeSchema.safeParse(formData)
 
     if (!result.success) {
-      const message = result.error.issues[0]?.message ?? "Please enter the 6-digit code"
-      setErrors({ code: message })
+      setErrors({ code: result.error.issues[0]?.message ?? "Please enter the 6-digit code" })
+      return
+    }
+
+    if (!email) {
+      setApiError("Session expired. Please restart the password recovery process.")
       return
     }
 
     setErrors({})
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/reset-password")
-    }, 400)
+    setApiError(null)
+    verifyOtp.mutate(
+      { email, otp: result.data.code },
+      { onError: (err) => setApiError(friendlyAuthError(err)) }
+    )
   }
+
+  const handleResend = useCallback(() => {
+    if (!email || countdown > 0 || resend.isPending) return
+    resend.mutate(email, {
+      onSuccess: () => setCountdown(RESEND_COOLDOWN_SEC),
+      onError: (err) => setApiError(friendlyAuthError(err)),
+    })
+  }, [email, countdown, resend])
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
@@ -77,15 +103,21 @@ export function VerificationCodeForm() {
             {errors.code}
           </p>
         )}
+
+        {apiError && (
+          <p className="text-xs font-medium text-destructive text-center mt-1">
+            {apiError}
+          </p>
+        )}
       </div>
 
       <div className="pt-2">
         <Button
           type="submit"
-          disabled={isLoading || formData.code.length < 6}
+          disabled={verifyOtp.isPending || formData.code.length < 6}
           className="w-full h-11 sm:h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-sm sm:text-base rounded-lg shadow-sm cursor-pointer transition-colors"
         >
-          {isLoading ? (
+          {verifyOtp.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
               <span>Verifying...</span>
@@ -102,12 +134,20 @@ export function VerificationCodeForm() {
       <div className="flex flex-col items-center gap-2 pt-3 text-xs sm:text-sm text-muted-foreground text-center">
         <div className="flex items-center gap-1.5">
           <span>Didn&apos;t receive a code?</span>
-          <button
-            type="button"
-            className="font-bold text-primary hover:underline cursor-pointer focus:outline-none"
-          >
-            Resend code in 00:45
-          </button>
+          {countdown > 0 ? (
+            <span className="font-bold text-muted-foreground">
+              Resend in {countdown}s
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resend.isPending}
+              className="font-bold text-primary hover:underline cursor-pointer focus:outline-none disabled:opacity-50"
+            >
+              {resend.isPending ? "Sending..." : "Resend code"}
+            </button>
+          )}
         </div>
 
         <div>
@@ -115,7 +155,7 @@ export function VerificationCodeForm() {
             href="/forgot-password"
             className="font-medium text-muted-foreground hover:text-foreground transition-colors hover:underline"
           >
-            Change email or phone number
+            Change email address
           </Link>
         </div>
       </div>

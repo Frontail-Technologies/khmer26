@@ -2,19 +2,11 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import { DotsThreeVertical, IdentificationCard, Buildings, UserCircle } from "@phosphor-icons/react"
+import { IdentificationCard, Buildings, UserCircle, Eye, ArrowSquareOut } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { VerificationRequest, VerificationStatus } from "./types"
 
 const STATUS_TONE_MAP: Record<VerificationStatus, StatusTone> = {
@@ -194,57 +186,24 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
   {
     id: "actions",
     cell: ({ row }) => (
-      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Verification actions"
-              >
-                <DotsThreeVertical size={16} weight="bold" />
-              </Button>
-            }
-          />
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem
-              render={
-                <Link
-                  href={`/admin/verifications/${row.original.id}`}
-                  className="flex items-center gap-2 w-full text-xs font-medium"
-                >
-                  <span>Review Request</span>
-                </Link>
-              }
-            />
-            {row.original.seller.slug && (
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={`/seller/${row.original.seller.slug}`}
-                    target="_blank"
-                    className="flex items-center gap-2 w-full text-xs font-medium text-muted-foreground"
-                  >
-                    <span>View Public Seller</span>
-                  </Link>
-                }
-              />
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              render={
-                <Link
-                  href={`/admin/verifications/${row.original.id}`}
-                  className="flex items-center gap-2 w-full text-xs font-medium text-primary"
-                >
-                  <span>Inspect Documents</span>
-                </Link>
-              }
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+        <Link
+          href={`/admin/verifications/${row.original.id}`}
+          className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+          aria-label="Review verification request"
+        >
+          <Eye size={14} />
+        </Link>
+        {row.original.seller.slug && (
+          <Link
+            href={`/seller/${row.original.seller.slug}`}
+            target="_blank"
+            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="View public seller profile"
+          >
+            <ArrowSquareOut size={13} />
+          </Link>
+        )}
       </div>
     ),
     enableSorting: false,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -13,10 +13,10 @@ import {
   Trash,
 } from "@phosphor-icons/react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Field, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -56,16 +56,6 @@ export function CategoryDetailWorkspace({
   const [imageUrl, setImageUrl] = useState<string | undefined>(category.imageUrl)
   const [isAddSubOpen, setIsAddSubOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
-  useEffect(() => {
-    setName(category.nameEn ?? category.name)
-    setNameKm(category.nameKm ?? ("description" in category ? category.description : "") ?? "")
-    setSlug(category.slug)
-    setParentId(category.parentId ?? parentCategory?.id ?? "none")
-    setSortOrder(String(category.sortOrder ?? 0))
-    setIsActive(category.isActive)
-    setImageUrl(category.imageUrl)
-  }, [category, parentCategory])
 
   const isRoot = !parentCategory && "subcategories" in category
   const subcategoriesList: AdminSubcategoryItem[] = "subcategories" in category ? category.subcategories || [] : []
@@ -162,31 +152,16 @@ export function CategoryDetailWorkspace({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-8 space-y-5">
           <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden">
-            <div className="p-1 bg-muted/20 border-b border-border/60 flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setActiveTab("general")}
-                className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === "general"
-                    ? "bg-card text-foreground shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                General Settings
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("subcategories")}
-                className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  activeTab === "subcategories"
-                    ? "bg-card text-foreground shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Subcategories ({subcategoriesList.length})
-              </button>
-            </div>
+            <Tabs
+              value={activeTab}
+              onValueChange={(val) => val && setActiveTab(val as "general" | "subcategories")}
+              className="px-1 bg-muted/20 border-b border-border/60"
+            >
+              <TabsList variant="line">
+                <TabsTrigger value="general">General Settings</TabsTrigger>
+                <TabsTrigger value="subcategories">Subcategories ({subcategoriesList.length})</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             <CardContent className="p-4 sm:p-6">
               {activeTab === "general" ? (

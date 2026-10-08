@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { Eye } from "@phosphor-icons/react"
+import { Eye, PencilSimple, Trash } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,10 +24,14 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 
 interface NotificationColumnOptions {
   onViewDetails: (record: NotificationRecord) => void
+  onEdit?: (record: NotificationRecord) => void
+  onDelete?: (record: NotificationRecord) => void
 }
 
 export function createNotificationColumns({
   onViewDetails,
+  onEdit,
+  onDelete,
 }: NotificationColumnOptions): ColumnDef<NotificationRecord>[] {
   return [
     {
@@ -91,7 +95,7 @@ export function createNotificationColumns({
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="icon-xs"
@@ -101,6 +105,28 @@ export function createNotificationColumns({
           >
             <Eye size={14} />
           </Button>
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onEdit(row.original)}
+              className="size-7 text-muted-foreground hover:text-foreground"
+              aria-label="Edit notification"
+            >
+              <PencilSimple size={13} />
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onDelete(row.original)}
+              className="size-7 text-destructive hover:bg-destructive/10"
+              aria-label="Delete notification"
+            >
+              <Trash size={13} />
+            </Button>
+          )}
         </div>
       ),
       enableSorting: false,

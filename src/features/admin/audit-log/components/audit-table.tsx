@@ -75,6 +75,9 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
   ])
   const [searchQuery, setSearchQuery] = useState("")
   const [moduleFilter, setModuleFilter] = useState("all")
+  const [actionFilter, setActionFilter] = useState("")
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
   const [selectedEntry, setSelectedEntry] = useState<AdminAuditEntry | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -84,9 +87,21 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
   }, [])
 
   const filteredData = useMemo(() => {
+    const fromMs = dateFrom ? new Date(dateFrom).getTime() : null
+    const toMs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null
+
     return entries.filter((item) => {
-      if (moduleFilter !== "all" && item.module !== moduleFilter) {
-        return false
+      if (moduleFilter !== "all" && item.module !== moduleFilter) return false
+
+      if (actionFilter.trim()) {
+        if (!item.action.toLowerCase().includes(actionFilter.toLowerCase().trim())) return false
+      }
+
+      if (fromMs !== null || toMs !== null) {
+        const itemMs = item.rawTimestamp ? new Date(item.rawTimestamp).getTime() : null
+        if (itemMs === null) return false
+        if (fromMs !== null && itemMs < fromMs) return false
+        if (toMs !== null && itemMs > toMs) return false
       }
 
       if (searchQuery.trim()) {
@@ -94,23 +109,12 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
         const matchesAction = item.action.toLowerCase().includes(q)
         const matchesActor = item.actorName.toLowerCase().includes(q)
         const matchesTarget = item.targetName.toLowerCase().includes(q)
-        const matchesTargetId = item.targetId.toLowerCase().includes(q)
-        const matchesId = item.id.toLowerCase().includes(q)
-
-        if (
-          !matchesAction &&
-          !matchesActor &&
-          !matchesTarget &&
-          !matchesTargetId &&
-          !matchesId
-        ) {
-          return false
-        }
+        if (!matchesAction && !matchesActor && !matchesTarget) return false
       }
 
       return true
     })
-  }, [entries, moduleFilter, searchQuery])
+  }, [entries, moduleFilter, actionFilter, dateFrom, dateTo, searchQuery])
 
   const columns = useMemo(() => {
     return createAuditColumns({ onViewDetails: handleViewDetails })
@@ -133,11 +137,14 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
     },
   })
 
-  const hasActiveFilters = Boolean(searchQuery) || moduleFilter !== "all"
+  const hasActiveFilters = Boolean(searchQuery) || moduleFilter !== "all" || Boolean(actionFilter) || Boolean(dateFrom) || Boolean(dateTo)
 
   const handleReset = () => {
     setSearchQuery("")
     setModuleFilter("all")
+    setActionFilter("")
+    setDateFrom("")
+    setDateTo("")
   }
 
   return (
@@ -177,6 +184,32 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
                 ))}
               </SelectContent>
             </Select>
+
+            <input
+              type="text"
+              placeholder="Filter by action..."
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36 shrink-0"
+            />
+
+            <div className="flex items-center gap-1 shrink-0">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="h-9 px-2 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36"
+                aria-label="Date from"
+              />
+              <span className="text-xs text-muted-foreground">–</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="h-9 px-2 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36"
+                aria-label="Date to"
+              />
+            </div>
 
             {hasActiveFilters && (
               <Button

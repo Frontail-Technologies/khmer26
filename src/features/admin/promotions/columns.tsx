@@ -3,16 +3,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import type { ColumnDef } from "@tanstack/react-table"
-import { DotsThreeVertical, Eye, ArrowSquareOut, StopCircle, Sparkle, Star, Lightning } from "@phosphor-icons/react"
+import { Eye, ArrowSquareOut, StopCircle, Sparkle, Star, Lightning } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { ActivePromotionItem, PromotionType } from "./types"
 
@@ -168,50 +162,34 @@ export function createPromotionColumns({
       cell: ({ row }) => {
         const item = row.original
         return (
-          <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className="size-7 text-muted-foreground hover:text-foreground"
-                    aria-label="Promotion actions"
-                  >
-                    <DotsThreeVertical size={16} weight="bold" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-44 text-xs">
-                <DropdownMenuItem
-                  onClick={() => onViewDetails(item)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <Eye size={13} />
-                  <span>Promotion Details</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/listings/${item.listingId}`}
-                      className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                      <ArrowSquareOut size={13} />
-                      <span>View Listing</span>
-                    </Link>
-                  }
-                />
-                {item.status === "active" && (
-                  <DropdownMenuItem
-                    onClick={() => onEndPromotion(item.id)}
-                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-                  >
-                    <StopCircle size={13} />
-                    <span>End Promotion</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="size-7 text-muted-foreground hover:text-foreground"
+              aria-label="View promotion details"
+              onClick={() => onViewDetails(item)}
+            >
+              <Eye size={14} />
+            </Button>
+            <Link
+              href={`/admin/listings/${item.listingId}`}
+              className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+              aria-label="View listing"
+            >
+              <ArrowSquareOut size={13} />
+            </Link>
+            {item.status === "active" && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="size-7 text-destructive hover:bg-destructive/10"
+                aria-label="End promotion"
+                onClick={() => onEndPromotion(item.id)}
+              >
+                <StopCircle size={13} />
+              </Button>
+            )}
           </div>
         )
       },

@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api/client';
 import type { ReportedChatRecord, ReportedChatStatus, ReportedChatMessage } from '../types';
 
-interface RawChatReportRow {
+export interface RawChatReportRow {
   report: {
     id: string;
     reporterUserId: string | null;
@@ -23,7 +23,7 @@ export interface ChatReportsQueryParams {
   [key: string]: string | number | undefined;
 }
 
-function normalizeChatReport(row: RawChatReportRow): ReportedChatRecord {
+export function normalizeChatReport(row: RawChatReportRow): ReportedChatRecord {
   const r = row.report;
   return {
     id: r.id,

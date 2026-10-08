@@ -9,7 +9,7 @@ export function CategoryPostAdCta() {
         <div className="max-w-2xl space-y-2">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
             <Sparkle size={14} weight="fill" />
-            <span>Join 50,000+ Active Sellers</span>
+            <span>Sell on Khmer26</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground tracking-tight">

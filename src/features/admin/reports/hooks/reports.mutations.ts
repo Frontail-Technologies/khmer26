@@ -82,10 +82,10 @@ export function useDeleteReportReason() {
     mutationFn: deleteAdminReportReason,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.reports.reasons() });
-      toast.success('Report reason disabled');
+      toast.success('Report reason deleted');
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Failed to disable report reason';
+      const msg = err instanceof Error ? err.message : 'Failed to delete report reason';
       toast.error(msg);
     },
   });

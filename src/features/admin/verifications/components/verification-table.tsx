@@ -11,6 +11,9 @@ import {
   useReactTable,
   type SortingState,
 } from "@tanstack/react-table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -21,7 +24,6 @@ import {
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
-import { VerificationSummaryMetrics } from "./verification-summary-metrics"
 import { VerificationToolbar } from "./verification-toolbar"
 import { VerificationMobileCards } from "./verification-mobile-cards"
 import { verificationColumns } from "../columns"
@@ -34,6 +36,7 @@ interface VerificationTableProps {
 
 export function VerificationTable({ initialData }: VerificationTableProps) {
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState("all")
   const [sorting, setSorting] = useState<SortingState>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
@@ -41,20 +44,6 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
   const [sellerTypeFilter, setSellerTypeFilter] = useState("")
   const { data, isLoading } = useAdminVerifications({ page: 1, limit: 100 })
   const requests = useMemo(() => data?.items ?? initialData ?? [], [data?.items, initialData])
-
-  const metrics = useMemo(() => {
-    const pending = requests.filter((item) => item.status === "pending").length
-    const inReview = requests.filter((item) => item.status === "in_review").length
-    const approved = requests.filter((item) => item.status === "approved").length
-    const rejected = requests.filter((item) => item.status === "rejected").length
-    return {
-      pending,
-      inReview,
-      approved30d: approved,
-      rejected30d: rejected,
-      averageReviewMinutes: 0,
-    }
-  }, [requests])
 
   const filteredData = useMemo(() => {
     return requests.filter((item) => {
@@ -93,7 +82,21 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
 
   const hasActiveFilters = Boolean(searchQuery || statusFilter || typeFilter || sellerTypeFilter)
 
+  const tabs = [
+    { key: "all", label: "All Requests", count: requests.length },
+    { key: "pending", label: "Pending Review", count: requests.filter((item) => item.status === "pending").length },
+    { key: "in_review", label: "In Review", count: requests.filter((item) => item.status === "in_review").length },
+    { key: "approved", label: "Approved", count: requests.filter((item) => item.status === "approved").length },
+    { key: "rejected", label: "Rejected", count: requests.filter((item) => item.status === "rejected").length },
+  ]
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    setStatusFilter(value === "all" ? "" : value)
+  }
+
   const handleReset = () => {
+    setActiveTab("all")
     setSearchQuery("")
     setStatusFilter("")
     setTypeFilter("")
@@ -101,25 +104,48 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
   }
 
   return (
-    <div className="space-y-3.5">
-      <VerificationSummaryMetrics stats={metrics} />
+    <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden flex flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => value && handleTabChange(value)}
+        className="border-b border-border/60 bg-card px-3 sm:px-4 overflow-x-auto no-scrollbar"
+      >
+        <TabsList variant="line">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
+              <span>{tab.label}</span>
+              <Badge
+                variant="outline"
+                className="px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
+              >
+                {tab.count}
+              </Badge>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      <VerificationToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        typeFilter={typeFilter}
-        onTypeChange={setTypeFilter}
-        sellerTypeFilter={sellerTypeFilter}
-        onSellerTypeChange={setSellerTypeFilter}
-        onReset={handleReset}
-        hasActiveFilters={hasActiveFilters}
-        totalCount={requests.length}
-        filteredCount={filteredData.length}
-      />
+      <div className="px-3 sm:px-4 pt-3.5">
+        <VerificationToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusChange={(value) => {
+            setStatusFilter(value)
+            setActiveTab(value || "all")
+          }}
+          typeFilter={typeFilter}
+          onTypeChange={setTypeFilter}
+          sellerTypeFilter={sellerTypeFilter}
+          onSellerTypeChange={setSellerTypeFilter}
+          onReset={handleReset}
+          hasActiveFilters={hasActiveFilters}
+          totalCount={requests.length}
+          filteredCount={filteredData.length}
+        />
+      </div>
 
-      <div className="hidden md:block min-w-0 rounded-xl bg-card overflow-hidden shadow-2xs">
+      <div className="hidden md:block flex-1 min-w-0 mt-3.5">
         <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -170,11 +196,13 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
         </Table>
       </div>
 
-      <div className="block md:hidden">
+      <div className="block md:hidden p-3.5">
         <VerificationMobileCards data={filteredData} />
       </div>
 
-      <DataTablePagination table={table} />
-    </div>
+      <div className="border-t border-border/60 bg-muted/10 p-2 sm:p-3">
+        <DataTablePagination table={table} />
+      </div>
+    </Card>
   )
 }

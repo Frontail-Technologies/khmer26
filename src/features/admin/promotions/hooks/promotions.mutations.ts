@@ -5,6 +5,7 @@ import {
   updateAdminPromotionPackage,
   activateAdminPromotionPackage,
   deactivateAdminPromotionPackage,
+  deleteAdminPromotionPackage,
 } from '../api/promotions.api';
 import { toast } from 'sonner';
 
@@ -34,6 +35,21 @@ export function useUpdatePromotionPackage() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to update package';
+      toast.error(msg);
+    },
+  });
+}
+
+export function useDeletePromotionPackage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminPromotionPackage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.promotions.all });
+      toast.success('Package deleted');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete package';
       toast.error(msg);
     },
   });

@@ -1,3 +1,59 @@
+export const authKeys = {
+  all: ['auth'] as const,
+  session: () => [...authKeys.all, 'session'] as const,
+  user: () => [...authKeys.all, 'user'] as const,
+};
+
+export const marketplaceKeys = {
+  all: ['marketplace'] as const,
+  home: () => [...marketplaceKeys.all, 'home'] as const,
+
+  categories: {
+    all: ['marketplace', 'categories'] as const,
+    tree: () => [...marketplaceKeys.categories.all, 'tree'] as const,
+    detail: (idOrSlug: string) => [...marketplaceKeys.categories.all, 'detail', idOrSlug] as const,
+    fields: (idOrSlug: string) => [...marketplaceKeys.categories.all, 'fields', idOrSlug] as const,
+  },
+
+  search: {
+    all: ['marketplace', 'search'] as const,
+    results: (params: Record<string, unknown>) =>
+      [...marketplaceKeys.search.all, 'results', params] as const,
+    suggestions: (params: { q: string; category?: string }) =>
+      [...marketplaceKeys.search.all, 'suggestions', params] as const,
+  },
+
+  listings: {
+    all: ['marketplace', 'listings'] as const,
+    detail: (id: string) => [...marketplaceKeys.listings.all, 'detail', id] as const,
+    similar: (id: string) => [...marketplaceKeys.listings.all, 'similar', id] as const,
+    bySeller: (sellerId: string) => [...marketplaceKeys.listings.all, 'seller', sellerId] as const,
+  },
+
+  sellers: {
+    all: ['marketplace', 'sellers'] as const,
+    detail: (id: string) => [...marketplaceKeys.sellers.all, 'detail', id] as const,
+    listings: (id: string, params?: Record<string, unknown>) =>
+      [...marketplaceKeys.sellers.all, 'listings', id, params ?? {}] as const,
+    reviews: (id: string, params?: Record<string, unknown>) =>
+      [...marketplaceKeys.sellers.all, 'reviews', id, params ?? {}] as const,
+  },
+
+  reports: {
+    reasons: (targetType: string) =>
+      ['marketplace', 'reports', 'reasons', targetType] as const,
+  },
+
+  locations: {
+    all: ['marketplace', 'locations'] as const,
+    provinces: () => [...marketplaceKeys.locations.all, 'provinces'] as const,
+    districts: (provinceId: number) =>
+      [...marketplaceKeys.locations.all, 'districts', provinceId] as const,
+    communes: (districtId: number) =>
+      [...marketplaceKeys.locations.all, 'communes', districtId] as const,
+  },
+};
+
 export const adminKeys = {
   all: ['admin'] as const,
 
@@ -208,13 +264,5 @@ export const adminKeys = {
     banners: () => [...adminKeys.all, 'banners'] as const,
     featuredSections: () => [...adminKeys.all, 'featured-sections'] as const,
     safetyTips: () => [...adminKeys.all, 'safety-tips'] as const,
-    staticPages: () => [...adminKeys.all, 'static-pages'] as const,
-    staticPage: (slug: string) => [...adminKeys.all, 'static-pages', slug] as const,
   },
-  contentHome: () => [...adminKeys.all, 'content', 'home'] as const,
-  banners: () => [...adminKeys.all, 'banners'] as const,
-  featuredSections: () => [...adminKeys.all, 'featured-sections'] as const,
-  safetyTips: () => [...adminKeys.all, 'safety-tips'] as const,
-  staticPages: () => [...adminKeys.all, 'static-pages'] as const,
-  staticPage: (slug: string) => [...adminKeys.all, 'static-pages', slug] as const,
 };

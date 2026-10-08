@@ -115,7 +115,7 @@ describe('<ListingTable />', () => {
   it('filters listings by status tab', () => {
     renderWithProviders(<ListingTable />);
 
-    const pendingTab = screen.getByRole('button', { name: /pending review/i });
+    const pendingTab = screen.getByRole('tab', { name: /pending review/i });
     fireEvent.click(pendingTab);
 
     expect(screen.getAllByText('iPhone 13 128GB Midnight')[0]).toBeInTheDocument();

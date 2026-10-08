@@ -1,116 +1,98 @@
-import Image from "next/image"
-import {
-  ShieldCheck,
-  MapPin,
-  CalendarBlank,
-} from "@phosphor-icons/react/dist/ssr"
+import { ShieldCheck, CalendarBlank, Star, Storefront } from "@phosphor-icons/react/dist/ssr"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { getMediaUrl } from "@/lib/media/get-media-url"
+import { formatMemberSince, sellerTypeLabel } from "@/features/listings/lib/listing-detail-format"
+import type { SellerProfile } from "../api/sellers.api"
+import { pluralize, sellerInitials } from "../lib/seller-format"
 import { SellerActions } from "./seller-actions"
-import type { SellerProfileDetail } from "../types"
 
 interface SellerProfileHeaderProps {
-  seller: SellerProfileDetail
+  seller: SellerProfile
+  /** First public listing id: the existing chat backend can only start from a listing. */
+  contactListingId: string | null
+  isOwnProfile: boolean
 }
 
-export function SellerProfileHeader({ seller }: SellerProfileHeaderProps) {
-  const initials = seller.name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
+export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: SellerProfileHeaderProps) {
+  const avatarUrl = getMediaUrl(seller.avatarR2Key)
+  const memberSince = formatMemberSince(seller.joinedAt)
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
-      <div className="relative h-36 sm:h-52 md:h-64 w-full overflow-hidden bg-muted">
-        {seller.coverImage ? (
-          <Image
-            src={seller.coverImage}
-            alt={`${seller.name} cover`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-linear-to-r from-primary/15 via-primary/5 to-muted" />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
-      </div>
+      <div className="h-28 sm:h-40 md:h-48 w-full bg-linear-to-r from-primary/15 via-primary/5 to-muted" />
 
       <div className="px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 min-w-0">
             <div className="-mt-10 sm:-mt-14 shrink-0">
               <Avatar
-                size="lg"
                 className="h-20 w-20 sm:h-28 sm:w-28 rounded-2xl border-4 border-card shadow-md bg-card"
               >
-                {seller.avatar && (
-                  <AvatarImage
-                    src={seller.avatar}
-                    alt={seller.name}
-                    className="object-cover rounded-xl"
-                  />
+                {avatarUrl && (
+                  <AvatarImage src={avatarUrl} alt={seller.shopName} className="object-cover rounded-xl" />
                 )}
                 <AvatarFallback className="font-black text-xl sm:text-2xl bg-primary/10 text-primary rounded-xl">
-                  {initials}
+                  {sellerInitials(seller.shopName)}
                 </AvatarFallback>
               </Avatar>
             </div>
 
-            <div className="pt-1 sm:pt-2 pb-1 space-y-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight leading-tight">
-                  {seller.name}
+            <div className="pt-1 sm:pt-2 pb-1 space-y-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                <h1 className="text-lg sm:text-2xl font-black text-foreground tracking-tight leading-tight wrap-anywhere">
+                  {seller.shopName}
                 </h1>
-                {seller.verified && (
+                {seller.isVerified && (
                   <ShieldCheck
                     size={20}
                     weight="fill"
                     className="text-primary shrink-0"
-                    aria-label="Verified Seller"
+                    aria-label="Verified seller"
                   />
                 )}
               </div>
 
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                <span className="font-medium text-foreground/80">
-                  @{seller.username}
-                </span>
-
                 <Badge
                   variant="secondary"
                   className="text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5"
                 >
-                  {seller.sellerType}
+                  {sellerTypeLabel(seller.sellerType)}
                 </Badge>
+                {seller.isVerified && <span className="font-semibold text-primary">Verified</span>}
               </div>
             </div>
           </div>
 
-          <div className="pt-2 sm:pt-0 sm:pb-1">
-            <SellerActions seller={seller} />
+          <div className="sm:pb-1 shrink-0">
+            <SellerActions seller={seller} contactListingId={contactListingId} isOwnProfile={isOwnProfile} />
           </div>
         </div>
 
+        {seller.bio?.trim() && (
+          <p className="mt-4 text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-line wrap-anywhere">
+            {seller.bio.trim()}
+          </p>
+        )}
+
         <div className="flex flex-wrap items-center gap-y-2 gap-x-4 pt-4 mt-4 border-t border-border/60 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <MapPin size={15} className="text-primary shrink-0" />
-            <span>{seller.location}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <CalendarBlank size={15} className="text-muted-foreground shrink-0" />
-            <span>Member since {seller.joinedAt}</span>
-          </div>
-
-          {seller.responseRate && (
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
-              <span>{seller.responseRate} Response Rate</span>
-            </div>
+          {memberSince && (
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarBlank size={15} className="shrink-0" />
+              Member since {memberSince}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5">
+            <Storefront size={15} className="text-primary shrink-0" />
+            {pluralize(seller.listingCount, "active listing")}
+          </span>
+          {seller.rating && (
+            <span className="inline-flex items-center gap-1.5">
+              <Star size={15} weight="fill" className="text-accent shrink-0" />
+              <span className="font-semibold text-foreground">{seller.rating.average.toFixed(1)}</span>
+              <span>({pluralize(seller.rating.count, "review")})</span>
+            </span>
           )}
         </div>
       </div>

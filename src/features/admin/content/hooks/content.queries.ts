@@ -6,7 +6,6 @@ import {
   getAdminBanners,
   getAdminFeaturedSections,
   getAdminSafetyTips,
-  getAdminStaticPages,
 } from '../api/content.api';
 
 export function useAdminHomepageConfig() {
@@ -41,12 +40,5 @@ export function useAdminSafetyTips() {
   return useQuery({
     queryKey: adminKeys.content.safetyTips(),
     queryFn: getAdminSafetyTips,
-  });
-}
-
-export function useAdminStaticPages() {
-  return useQuery({
-    queryKey: adminKeys.content.staticPages(),
-    queryFn: getAdminStaticPages,
   });
 }

@@ -65,9 +65,7 @@ export async function getAdminChatConversations(
           : undefined,
         messages: [],
         lastMessage: r.lastMessage?.body || '(no messages yet)',
-        lastMessageAt: r.lastMessage?.createdAt
-          ? new Date(r.lastMessage.createdAt).toLocaleString()
-          : new Date(r.conversation!.updatedAt).toLocaleString(),
+        lastMessageAt: r.lastMessage?.createdAt ?? r.conversation!.updatedAt,
       };
     });
 }
@@ -94,7 +92,7 @@ export async function getAdminChatConversationMessages(conversationId: string): 
     senderId: m.senderUserId,
     senderName: nameByUserId.get(m.senderUserId) || `User ${m.senderUserId.slice(0, 8)}`,
     text: m.body,
-    createdAt: new Date(m.createdAt).toLocaleString(),
+    createdAt: m.createdAt,
   }));
 
   return {

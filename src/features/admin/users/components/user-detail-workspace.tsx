@@ -10,14 +10,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { UserIdentityCard } from "./user-identity-card"
 import { UserDetailsPanel } from "./user-details-panel"
 import { UserActionDialogs } from "./user-action-dialogs"
 import { EditUserSheet } from "./edit-user-sheet"
 import type { AdminUserDetail } from "../types"
 import { useAdminUserDetail } from "../hooks/users.queries"
-import { useDeleteAdminUser, useUpdateAdminUser, useUpdateUserStatus } from "../hooks/users.mutations"
+import { useDeleteAdminUser, useUpdateAdminUser, useUpdateUserStatus, useResetUserPassword } from "../hooks/users.mutations"
 import { useAdminAuth } from "@/hooks/use-admin-auth"
 
 interface UserDetailWorkspaceProps {
@@ -34,9 +37,11 @@ export function UserDetailWorkspace({ userId, initialUser }: UserDetailWorkspace
   const [actionType, setActionType] = useState<"suspend" | "restore" | null>(null)
   const [editOpen, setEditOpen] = useState(() => searchParams.get("edit") === "1")
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false)
   const updateStatus = useUpdateUserStatus()
   const updateUser = useUpdateAdminUser()
   const deleteUser = useDeleteAdminUser()
+  const resetPassword = useResetUserPassword()
   const user = data ?? localUser
   const canManageStatus = currentAdmin?.id !== user?.id
 
@@ -113,12 +118,47 @@ export function UserDetailWorkspace({ userId, initialUser }: UserDetailWorkspace
         onDelete={() => setDeleteOpen(true)}
         canManageStatus={canManageStatus}
       />
-      <UserDetailsPanel
-        user={user}
-        onStatusChange={(active) => void updateUserStatus(active)}
-        isStatusUpdating={updateStatus.isPending}
-        canManageStatus={canManageStatus}
-      />
+
+      <Tabs defaultValue="overview" className="space-y-0">
+        <div className="border-b border-border/60 bg-card rounded-t-xl px-3 sm:px-4 overflow-x-auto no-scrollbar shadow-2xs">
+          <TabsList variant="line">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="overview" className="mt-0">
+          <UserDetailsPanel
+            user={user}
+            onStatusChange={(active) => void updateUserStatus(active)}
+            isStatusUpdating={updateStatus.isPending}
+            canManageStatus={canManageStatus}
+          />
+        </TabsContent>
+
+        <TabsContent value="security" className="mt-0">
+          <Card className="bg-card border-0 shadow-2xs rounded-b-xl p-5 space-y-5">
+            <div>
+              <h2 className="text-xs font-bold text-foreground uppercase tracking-wider mb-1">
+                Password Reset
+              </h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                Send a password reset email to this user. They will receive an OTP to set a new password.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setResetPasswordOpen(true)}
+                disabled={!canManageStatus}
+                className="text-xs font-semibold cursor-pointer"
+              >
+                Send Password Reset Email
+              </Button>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
       <UserActionDialogs
         user={user}
         actionType={actionType}
@@ -163,6 +203,18 @@ export function UserDetailWorkspace({ userId, initialUser }: UserDetailWorkspace
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmationDialog
+        open={resetPasswordOpen}
+        onOpenChange={setResetPasswordOpen}
+        title="Send password reset?"
+        description={`This will send a password reset email to ${user.email}. They can use it to set a new password.`}
+        confirmLabel="Send Reset Email"
+        variant="default"
+        isPending={resetPassword.isPending}
+        onConfirm={() => {
+          resetPassword.mutate(user.id, { onSuccess: () => setResetPasswordOpen(false) })
+        }}
+      />
     </div>
   )
 }

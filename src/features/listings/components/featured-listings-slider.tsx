@@ -3,12 +3,12 @@
 import { useRef, useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { ArrowRight, CaretLeft, CaretRight, Sparkle } from "@phosphor-icons/react"
-import type { ListingCard as ListingCardType } from "@/types"
+import type { ListingCardData } from "@/types"
 import { ListingCard } from "./listing-card"
 import { cn } from "@/lib/utils"
 
 interface FeaturedListingsSliderProps {
-  listings: ListingCardType[]
+  listings: ListingCardData[]
   title?: string
   viewAllHref?: string
   className?: string

@@ -28,6 +28,7 @@ export function normalizeAuditLog(raw: Record<string, unknown>): AdminAuditEntry
   return {
     id: String(raw.id),
     timestamp: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—',
+    rawTimestamp: (raw.createdAt as string) || undefined,
     actorName: (actor?.fullName || actor?.username || (typeof actor?.email === 'string' ? actor.email.split('@')[0] : 'System Admin')) as string,
     actorRole: 'Admin',
     action: (raw.action as string) || 'admin.action',

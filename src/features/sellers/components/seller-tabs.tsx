@@ -1,29 +1,29 @@
 "use client"
 
-import { useState } from "react"
-import { Storefront, Info, Star } from "@phosphor-icons/react"
+import { Storefront, Star } from "@phosphor-icons/react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  useSellerListingsInfinite,
+  useSellerReviewsInfinite,
+} from "../api/sellers.queries"
+import type { SellerProfile } from "../api/sellers.api"
 import { SellerListingsTab } from "./seller-listings-tab"
-import { SellerAboutTab } from "./seller-about-tab"
 import { SellerReviewsTab } from "./seller-reviews-tab"
-import type { SellerProfileDetail, SellerReview } from "../types"
-import type { ListingCard } from "@/types"
+
+const countPill =
+  "ml-0.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground"
 
 interface SellerTabsProps {
-  seller: SellerProfileDetail
-  listings: ListingCard[]
-  reviews: SellerReview[]
+  seller: SellerProfile
+  isOwnProfile: boolean
 }
 
-export function SellerTabs({ seller, listings, reviews }: SellerTabsProps) {
-  const [activeTab, setActiveTab] = useState<string>("listings")
+export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
+  const listings = useSellerListingsInfinite(seller.id)
+  const reviews = useSellerReviewsInfinite(seller.id)
 
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={(val) => setActiveTab(val as string)}
-      className="space-y-6"
-    >
+    <Tabs defaultValue="listings" className="space-y-6">
       <div className="flex items-center">
         <TabsList className="h-10 sm:h-11 p-1 bg-muted/60 border border-border/60 rounded-xl gap-1 w-full sm:w-auto justify-start">
           <TabsTrigger
@@ -32,17 +32,7 @@ export function SellerTabs({ seller, listings, reviews }: SellerTabsProps) {
           >
             <Storefront size={16} weight="bold" />
             <span>Listings</span>
-            <span className="ml-0.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
-              {listings.length}
-            </span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="about"
-            className="h-8 sm:h-9 px-3 text-xs sm:text-sm font-bold gap-2 rounded-lg cursor-pointer"
-          >
-            <Info size={16} weight="bold" />
-            <span>About</span>
+            <span className={countPill}>{seller.listingCount}</span>
           </TabsTrigger>
 
           <TabsTrigger
@@ -51,26 +41,36 @@ export function SellerTabs({ seller, listings, reviews }: SellerTabsProps) {
           >
             <Star size={16} weight="bold" />
             <span>Reviews</span>
-            <span className="ml-0.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
-              {reviews.length}
-            </span>
+            <span className={countPill}>{seller.rating?.count ?? 0}</span>
           </TabsTrigger>
         </TabsList>
       </div>
 
       <TabsContent value="listings" className="focus-visible:outline-none">
         <SellerListingsTab
-          initialListings={listings}
-          sellerName={seller.name}
+          sellerName={seller.shopName}
+          pages={listings.data?.pages}
+          isPending={listings.isPending}
+          isError={listings.isError}
+          hasNextPage={listings.hasNextPage}
+          isFetchingNextPage={listings.isFetchingNextPage}
+          onLoadMore={() => listings.fetchNextPage()}
+          onRetry={() => listings.refetch()}
         />
       </TabsContent>
 
-      <TabsContent value="about" className="focus-visible:outline-none">
-        <SellerAboutTab seller={seller} />
-      </TabsContent>
-
       <TabsContent value="reviews" className="focus-visible:outline-none">
-        <SellerReviewsTab seller={seller} reviews={reviews} />
+        <SellerReviewsTab
+          seller={seller}
+          isOwnProfile={isOwnProfile}
+          pages={reviews.data?.pages}
+          isPending={reviews.isPending}
+          isError={reviews.isError}
+          hasNextPage={reviews.hasNextPage}
+          isFetchingNextPage={reviews.isFetchingNextPage}
+          onLoadMore={() => reviews.fetchNextPage()}
+          onRetry={() => reviews.refetch()}
+        />
       </TabsContent>
     </Tabs>
   )

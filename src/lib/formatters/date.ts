@@ -61,3 +61,19 @@ export function formatRelativeTime(dateString: string): string {
     return dateString
   }
 }
+
+/** Compact age such as "38m", "5h", "1d", "3w", "2mo", "1y". */
+export function formatCompactRelativeTime(dateString: string): string {
+  const date = parseDate(dateString)
+  if (!date) return "—"
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60000)
+  if (minutes < 1) return "now"
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d`
+  if (days < 30) return `${Math.floor(days / 7)}w`
+  if (days < 365) return `${Math.floor(days / 30)}mo`
+  return `${Math.floor(days / 365)}y`
+}

@@ -1,5 +1,6 @@
 ﻿"use client"
 
+import { useMemo } from "react"
 import { MagnifyingGlass, ArrowCounterClockwise } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +11,7 @@ import {
   SelectValue,
   getSelectOptionLabel,
 } from "@/components/ui/select"
+import { useAdminProvinces } from "@/features/admin/locations/hooks/locations.queries"
 
 interface UserToolbarProps {
   searchQuery: string
@@ -51,16 +53,6 @@ const VERIFICATION_OPTIONS = [
   { value: "unverified", label: "Unverified" },
 ]
 
-const PROVINCE_OPTIONS = [
-  { value: "all", label: "All Provinces" },
-  { value: "Phnom Penh", label: "Phnom Penh" },
-  { value: "Siem Reap", label: "Siem Reap" },
-  { value: "Battambang", label: "Battambang" },
-  { value: "Kandal", label: "Kandal" },
-  { value: "Preah Sihanouk", label: "Preah Sihanouk" },
-  { value: "Kampot", label: "Kampot" },
-]
-
 export function UserToolbar({
   searchQuery,
   onSearchChange,
@@ -77,6 +69,15 @@ export function UserToolbar({
   filteredCount,
   totalCount,
 }: UserToolbarProps) {
+  const { data: provinces = [] } = useAdminProvinces()
+  const PROVINCE_OPTIONS = useMemo(
+    () => [
+      { value: "all", label: "All Provinces" },
+      ...provinces.map((p) => ({ value: p.name, label: p.name })),
+    ],
+    [provinces]
+  )
+
   return (
     <div className="px-3.5 sm:px-4 py-3 border-b border-border/60 flex flex-col gap-2.5">
       <div className="flex flex-col sm:flex-row gap-2">

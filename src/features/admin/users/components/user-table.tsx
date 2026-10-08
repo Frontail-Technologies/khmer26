@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -174,22 +175,16 @@ export function UserTable({ initialData }: UserTableProps) {
 
   return (
     <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden flex flex-col">
-      <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-1.5 min-w-max">
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => val && setActiveTab(val as AccountTabKey)}
+        className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
+      >
+        <TabsList variant="line">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key
             return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={cn(
-                  "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
-                  isActive
-                    ? "bg-card text-foreground border-primary shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                )}
-              >
+              <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <Badge
@@ -206,11 +201,11 @@ export function UserTable({ initialData }: UserTableProps) {
                     {tab.count}
                   </Badge>
                 )}
-              </button>
+              </TabsTrigger>
             )
           })}
-        </div>
-      </div>
+        </TabsList>
+      </Tabs>
 
       <UserToolbar
         searchQuery={searchQuery}

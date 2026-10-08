@@ -1,79 +1,54 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { Container } from "@/components/layout/Container"
-import { resolveCategoryFromSlugs } from "@/features/categories/lib/category-taxonomy"
-import { CategoryPageHeader } from "@/features/categories/components/category-page-header"
-import { SubcategoryDiscovery } from "@/features/categories/components/subcategory-discovery"
-import { CategorySiblingNav } from "@/features/categories/components/category-sibling-nav"
-import { CategoryResultsShell } from "@/features/categories/components/category-results-shell"
-import { ALL_MARKETPLACE_LISTINGS } from "@/features/search/data/all-marketplace-listings"
+import { lookupCategoryBySlug } from "@/features/categories/api/categories.server"
+import {
+  CategoryPageContent,
+  CategoryPageSkeleton,
+} from "@/features/categories/components/category-page-content"
 
 interface CategoryPageProps {
   params: Promise<{ slug: string[] }>
 }
 
-export async function generateMetadata({
-  params,
-}: CategoryPageProps): Promise<Metadata> {
-  const { slug } = await params
-  const taxonomy = resolveCategoryFromSlugs(slug)
+function lastSegment(slug: string[]): string {
+  const last = slug[slug.length - 1] ?? ""
+  try {
+    return decodeURIComponent(last)
+  } catch {
+    return last
+  }
+}
 
-  if (!taxonomy) {
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const lookup = await lookupCategoryBySlug(lastSegment(slug))
+
+  if (lookup.status !== "found") {
     return {
       title: "Category in Cambodia — Khmer26",
       description: "Browse verified classified listings in Cambodia on Khmer26.",
     }
   }
 
-  const { title, rootCategory, isRoot } = taxonomy
-  const pageTitle = isRoot
-    ? `${rootCategory.name} in Cambodia — Khmer26`
-    : `${title} — ${rootCategory.name} in Cambodia — Khmer26`
-
-  const description = isRoot
-    ? rootCategory.description
-    : `Find verified ${title} listings in ${rootCategory.name} from trusted sellers across Cambodia on Khmer26.`
-
-  return {
-    title: pageTitle,
-    description,
-    openGraph: {
-      title: pageTitle,
-      description,
-      type: "website",
-    },
-  }
+  const title = `${lookup.nameEn} in Cambodia — Khmer26`
+  const description = `Find verified ${lookup.nameEn} listings from trusted sellers across Cambodia on Khmer26.`
+  return { title, description, openGraph: { title, description, type: "website" } }
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params
-  const taxonomy = resolveCategoryFromSlugs(slug)
 
-  if (!taxonomy) {
+  if ((await lookupCategoryBySlug(lastSegment(slug))).status === "not-found") {
     notFound()
   }
 
   return (
     <Container className="py-2 pb-14">
-      <CategoryPageHeader
-        taxonomy={taxonomy}
-        totalCount={
-          taxonomy.currentSubcategory
-            ? taxonomy.currentSubcategory.listingCount
-            : taxonomy.rootCategory.listingCount
-        }
-      />
-
-      {taxonomy.isRoot ? (
-        <SubcategoryDiscovery taxonomy={taxonomy} />
-      ) : (
-        <CategorySiblingNav taxonomy={taxonomy} />
-      )}
-
-      <CategoryResultsShell
-        taxonomy={taxonomy}
-        initialListings={ALL_MARKETPLACE_LISTINGS}
-      />
+      <Suspense fallback={<CategoryPageSkeleton />}>
+        <CategoryPageContent segments={slug} />
+      </Suspense>
     </Container>
   )
 }

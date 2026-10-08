@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Sliders, BookBookmark } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
@@ -187,33 +188,22 @@ export function ListingFieldsWorkspace() {
     <div className="space-y-4">
       <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden">
         <div className="p-3.5 sm:p-4 bg-muted/20 border-b border-border/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-background rounded-lg border border-border/60 self-start">
-            <button
-              type="button"
-              onClick={() => setActiveTab("assigned")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                activeTab === "assigned"
-                  ? "bg-primary text-primary-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Sliders size={13} weight="bold" />
-              <span>Assigned Fields</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("library")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                activeTab === "library"
-                  ? "bg-primary text-primary-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <BookBookmark size={13} weight="bold" />
-              <span>Field Library ({fields.length})</span>
-            </button>
-          </div>
+          <Tabs
+            value={activeTab}
+            onValueChange={(val) => val && setActiveTab(val as "assigned" | "library")}
+            className="self-start"
+          >
+            <TabsList variant="line">
+              <TabsTrigger value="assigned" className="gap-1.5">
+                <Sliders size={13} weight="bold" />
+                <span>Assigned Fields</span>
+              </TabsTrigger>
+              <TabsTrigger value="library" className="gap-1.5">
+                <BookBookmark size={13} weight="bold" />
+                <span>Field Library ({fields.length})</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {activeTab === "assigned" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">

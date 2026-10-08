@@ -20,7 +20,7 @@ export interface AdminUserListItem {
   verificationStatus: AdminVerificationState
   status: AdminAccountStatus
   reportsCount: number
-  lastActiveAt: string
+  lastActiveAt?: string
   rating?: number
   reviewsCount?: number
 }

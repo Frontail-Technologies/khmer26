@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { User, SpinnerGap, ArrowRight } from "@phosphor-icons/react"
+import { EnvelopeSimple, SpinnerGap, ArrowRight } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -14,20 +13,18 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordFormData,
 } from "../schemas/forgot-password-schema"
+import { useForgotPassword, friendlyAuthError, clearResetToken } from "../hooks/use-auth"
 
 export function ForgotPasswordForm() {
-  const router = useRouter()
-  const [formData, setFormData] = useState<ForgotPasswordFormData>({
-    identifier: "",
-  })
+  const [formData, setFormData] = useState<ForgotPasswordFormData>({ email: "" })
   const [errors, setErrors] = useState<Partial<Record<keyof ForgotPasswordFormData, string>>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const forgot = useForgotPassword()
 
   const handleChange = (value: string) => {
-    setFormData({ identifier: value })
-    if (errors.identifier) {
-      setErrors({})
-    }
+    setFormData({ email: value })
+    if (errors.email) setErrors({})
+    if (apiError) setApiError(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,49 +32,54 @@ export function ForgotPasswordForm() {
     const result = forgotPasswordSchema.safeParse(formData)
 
     if (!result.success) {
-      const message = result.error.issues[0]?.message ?? "Please enter your email or phone number"
-      setErrors({ identifier: message })
+      setErrors({ email: result.error.issues[0]?.message ?? "Please enter your email address" })
       return
     }
 
     setErrors({})
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/forgot-password/verify")
-    }, 400)
+    setApiError(null)
+    clearResetToken()
+    forgot.mutate(result.data.email, {
+      onError: (err) => setApiError(friendlyAuthError(err)),
+    })
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <div className="space-y-1.5">
         <label
-          htmlFor="identifier"
+          htmlFor="email"
           className="block text-xs sm:text-sm font-semibold text-foreground"
         >
-          Email or Phone Number <span className="text-destructive">*</span>
+          Email Address <span className="text-destructive">*</span>
         </label>
 
-        <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.identifier}>
+        <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.email}>
           <InputGroupAddon align="inline-start">
-            <User size={18} className="text-muted-foreground" />
+            <EnvelopeSimple size={18} className="text-muted-foreground" />
           </InputGroupAddon>
 
           <InputGroupInput
-            id="identifier"
-            name="identifier"
-            type="text"
-            value={formData.identifier}
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder="Enter your email or phone number"
-            autoComplete="username"
+            placeholder="Enter your email address"
+            autoComplete="email"
             className="text-xs sm:text-sm text-foreground placeholder:text-muted-foreground"
           />
         </InputGroup>
 
-        {errors.identifier && (
+        {errors.email && (
           <p className="text-xs font-medium text-destructive mt-1">
-            {errors.identifier}
+            {errors.email}
+          </p>
+        )}
+
+        {apiError && (
+          <p className="text-xs font-medium text-destructive mt-1">
+            {apiError}
           </p>
         )}
       </div>
@@ -85,10 +87,10 @@ export function ForgotPasswordForm() {
       <div className="pt-2">
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={forgot.isPending}
           className="w-full h-11 sm:h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-sm sm:text-base rounded-lg shadow-sm cursor-pointer transition-colors"
         >
-          {isLoading ? (
+          {forgot.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
               <span>Sending code...</span>

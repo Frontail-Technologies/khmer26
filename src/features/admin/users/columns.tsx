@@ -3,28 +3,15 @@
 import Link from "next/link"
 import type { ColumnDef } from "@tanstack/react-table"
 import {
-  DotsThreeVertical,
   Eye,
   PencilSimple,
-  WarningOctagon,
-  ListBullets,
-  Lock,
-  ShieldWarning,
-  CheckCircle,
-  Phone,
   Trash,
+  WarningOctagon,
 } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { AdminUserListItem } from "./types"
 
@@ -170,120 +157,34 @@ export function createUserColumns(onDelete?: (user: AdminUserListItem) => void):
     id: "actions",
     cell: ({ row }) => {
       const user = row.original
-      const isSeller = user.accountType === "seller" || user.accountType === "business" || user.accountType === "dealer"
-      const isActive = user.status === "active"
 
       return (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                  aria-label="Account actions"
-                >
-                  <DotsThreeVertical size={16} weight="bold" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                render={
-                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
-                    <Eye size={14} />
-                    <span>View Account</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
-                    <PencilSimple size={14} />
-                    <span>Edit Account</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link href={`/admin/users/${user.id}?edit=1`} className="flex items-center gap-2 cursor-pointer w-full">
-                    <Phone size={14} />
-                    <span>Edit Contact Info</span>
-                  </Link>
-                }
-              />
-              {isSeller && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/listings?search=${encodeURIComponent(user.name)}`}
-                      className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                      <ListBullets size={14} />
-                      <span>View Listings</span>
-                    </Link>
-                  }
-                />
-              )}
-              {user.reportsCount > 0 && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/reports?search=${encodeURIComponent(user.name)}`}
-                      className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                      <WarningOctagon size={14} />
-                      <span>View Reports ({user.reportsCount})</span>
-                    </Link>
-                  }
-                />
-              )}
-              <DropdownMenuSeparator />
-              {isActive && (
-                <DropdownMenuItem
-                  render={
-                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-accent">
-                      <Lock size={14} />
-                      <span>Restrict Account</span>
-                    </Link>
-                  }
-                />
-              )}
-              {user.status === "suspended" ? (
-                <DropdownMenuItem
-                  render={
-                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-primary">
-                      <CheckCircle size={14} />
-                      <span>Restore Account</span>
-                    </Link>
-                  }
-                />
-              ) : (
-                <DropdownMenuItem
-                  render={
-                    <Link href={`/admin/users/${user.id}`} className="flex items-center gap-2 cursor-pointer w-full text-destructive">
-                      <ShieldWarning size={14} />
-                      <span>Suspend Account</span>
-                    </Link>
-                  }
-                />
-              )}
-              {onDelete && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => onDelete(user)}
-                    className="flex items-center gap-2 cursor-pointer w-full"
-                  >
-                    <Trash size={14} />
-                    <span>Delete Account</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+          <Link
+            href={`/admin/users/${user.id}`}
+            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="View account"
+          >
+            <Eye size={14} />
+          </Link>
+          <Link
+            href={`/admin/users/${user.id}?edit=1`}
+            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            aria-label="Edit account"
+          >
+            <PencilSimple size={13} />
+          </Link>
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="size-7 text-destructive hover:bg-destructive/10"
+              aria-label="Delete account"
+              onClick={() => onDelete(user)}
+            >
+              <Trash size={13} />
+            </Button>
+          )}
         </div>
       )
     },

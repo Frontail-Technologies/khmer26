@@ -80,7 +80,14 @@ export async function getAdminHomepageConfig(): Promise<HomepageSectionConfig[]>
 }
 
 export async function updateAdminHomepageConfig(
-  sections: { sectionKey: string; title?: string; isEnabled?: boolean; sortOrder?: number; itemCount?: number }[]
+  sections: {
+    sectionKey: string;
+    title?: string;
+    subtitle?: string | null;
+    isEnabled?: boolean;
+    sortOrder?: number;
+    itemCount?: number;
+  }[]
 ) {
   return apiClient.patch('/admin/content/home', { sections });
 }
@@ -167,6 +174,10 @@ export async function deactivateAdminBanner(id: string) {
   return apiClient.post(`/admin/content/banners/${id}/deactivate`);
 }
 
+export async function deleteAdminBanner(id: string) {
+  return apiClient.delete(`/admin/content/banners/${id}`);
+}
+
 export async function getAdminFeaturedSections(): Promise<FeaturedSectionItem[]> {
   const res = await apiClient.get<{ sections: BackendFeaturedSectionDto[] }>('/admin/content/featured-sections');
   const sections = res.data?.sections || [];
@@ -214,6 +225,10 @@ export async function updateAdminFeaturedSection(
   return apiClient.patch(`/admin/content/featured-sections/${id}`, data);
 }
 
+export async function deleteAdminFeaturedSection(id: string) {
+  return apiClient.delete(`/admin/content/featured-sections/${id}`);
+}
+
 export async function getAdminSafetyTips(): Promise<SafetyTipItem[]> {
   const res = await apiClient.get<{ tips: BackendSafetyTipDto[] }>('/admin/content/safety-tips');
   const tips = res.data?.tips || [];
@@ -242,32 +257,7 @@ export async function updateAdminSafetyTip(
   return apiClient.patch(`/admin/content/safety-tips/${id}`, data);
 }
 
-export interface BackendStaticPageDto {
-  id: string;
-  slug: string;
-  title: string;
-  content: string;
-  isActive: boolean;
-  updatedAt: string;
+export async function deleteAdminSafetyTip(id: string) {
+  return apiClient.delete(`/admin/content/safety-tips/${id}`);
 }
 
-export async function getAdminStaticPages(): Promise<BackendStaticPageDto[]> {
-  const res = await apiClient.get<{ pages: BackendStaticPageDto[] }>('/admin/content/pages');
-  return res.data?.pages || [];
-}
-
-export async function createAdminStaticPage(data: {
-  slug: string;
-  title: string;
-  content: string;
-  isActive?: boolean;
-}) {
-  return apiClient.post('/admin/content/pages', data);
-}
-
-export async function updateAdminStaticPage(
-  slug: string,
-  data: Partial<{ title: string; content: string; isActive: boolean }>
-) {
-  return apiClient.patch(`/admin/content/pages/${slug}`, data);
-}

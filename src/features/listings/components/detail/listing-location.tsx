@@ -1,63 +1,62 @@
-import { MapPin, NavigationArrow } from "@phosphor-icons/react/dist/ssr"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { ListingLocation as ListingLocationType } from "@/types"
+"use client"
+
+import { useState } from "react"
+import { MapPin } from "@phosphor-icons/react"
+import type { ListingDetail } from "../../api/listing-detail.api"
+import { formatLocation } from "../../lib/listing-detail-format"
+import { ListingMap } from "./listing-map"
 
 interface ListingLocationProps {
-  location: ListingLocationType
+  location: ListingDetail["location"]
 }
 
+const PRIVACY_NOTE = "Exact location is shared by the seller after contact."
+
+/**
+ * Shows a real map of the approximate area when the backend resolved one (commune, district or
+ * province centre). Without coordinates, or if the map cannot start, it shows the text location only.
+ */
 export function ListingLocation({ location }: ListingLocationProps) {
-  const displayLocation = location.label || `${location.district ? `${location.district}, ` : ""}${location.province}, Cambodia`
+  const [mapFailed, setMapFailed] = useState(false)
+  const name = formatLocation(location)
+  const map = location.map
 
-  return (
-    <Card size="sm">
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <MapPin size={18} className="text-primary shrink-0" />
-          <CardTitle className="text-base sm:text-lg font-bold text-foreground">
-            Location
-          </CardTitle>
-        </div>
-        <span className="text-xs font-semibold text-primary">
-          {location.province}
-        </span>
-      </CardHeader>
-
-      <CardContent className="space-y-3">
-        <div className="relative aspect-21/9 sm:aspect-3/1 w-full overflow-hidden rounded-lg border border-border/70 bg-muted/50 flex flex-col items-center justify-center p-4 text-center">
-          <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(var(--foreground)_1px,transparent_1px)] bg-size-[16px_16px]" />
-          
-          <div className="relative z-10 flex flex-col items-center space-y-1.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md animate-bounce">
-              <MapPin size={22} weight="fill" />
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-foreground">
-              {displayLocation}
-            </span>
-            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <NavigationArrow size={12} weight="fill" />
-              Approximate area
-            </span>
+  if (!map || mapFailed) {
+    return (
+      <section aria-label="Location" className="space-y-2.5">
+        <h2 className="text-sm sm:text-base font-bold text-foreground">Location</h2>
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <MapPin size={17} weight="fill" />
+          </span>
+          <div className="min-w-0">
+            <p className="wrap-break-word text-sm font-semibold text-foreground">{name}</p>
+            <p className="text-xs text-muted-foreground">{PRIVACY_NOTE}</p>
           </div>
         </div>
+      </section>
+    )
+  }
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
-          <p className="text-xs text-muted-foreground flex-1">
-            Exact address and landmarks are shared directly upon contacting the seller.
-          </p>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${location.label || location.province}, Cambodia`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline shrink-0"
-          >
-            <NavigationArrow size={14} weight="bold" />
-            <span>View on Map</span>
-          </a>
-        </div>
-      </CardContent>
-    </Card>
+  return (
+    <section aria-label="Location" className="space-y-2.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-sm sm:text-base font-bold text-foreground">Location</h2>
+        <span className="min-w-0 truncate text-xs font-semibold text-primary">{name}</span>
+      </div>
+
+      <ListingMap
+        latitude={map.latitude}
+        longitude={map.longitude}
+        precision={map.precision}
+        label={name}
+        onUnavailable={() => setMapFailed(true)}
+      />
+
+      <div>
+        <p className="text-xs font-semibold text-foreground">Approximate area</p>
+        <p className="text-xs text-muted-foreground">{PRIVACY_NOTE}</p>
+      </div>
+    </section>
   )
 }

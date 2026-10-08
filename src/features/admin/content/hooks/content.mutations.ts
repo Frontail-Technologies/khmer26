@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminKeys } from '@/lib/query/keys';
+import { adminKeys, marketplaceKeys } from '@/lib/query/keys';
 import {
   updateAdminHomepageConfig,
   updateAdminHomepagePopularCategories,
@@ -7,12 +7,13 @@ import {
   updateAdminBanner,
   activateAdminBanner,
   deactivateAdminBanner,
+  deleteAdminBanner,
   createAdminFeaturedSection,
   updateAdminFeaturedSection,
+  deleteAdminFeaturedSection,
   createAdminSafetyTip,
   updateAdminSafetyTip,
-  createAdminStaticPage,
-  updateAdminStaticPage,
+  deleteAdminSafetyTip,
 } from '../api/content.api';
 import { toast } from 'sonner';
 
@@ -52,7 +53,7 @@ export function useCreateBanner() {
     mutationFn: createAdminBanner,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.banners() });
-      queryClient.invalidateQueries({ queryKey: ["public-banners"] });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Banner created successfully');
     },
     onError: (err: unknown) => {
@@ -69,7 +70,7 @@ export function useUpdateBanner() {
       updateAdminBanner(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.banners() });
-      queryClient.invalidateQueries({ queryKey: ["public-banners"] });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Banner updated');
     },
     onError: (err: unknown) => {
@@ -86,11 +87,27 @@ export function useToggleBannerActive() {
       isActive ? deactivateAdminBanner(id) : activateAdminBanner(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.banners() });
-      queryClient.invalidateQueries({ queryKey: ["public-banners"] });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Banner status updated');
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to toggle banner';
+      toast.error(msg);
+    },
+  });
+}
+
+export function useDeleteBanner() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminBanner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.banners() });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
+      toast.success('Banner deleted');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete banner';
       toast.error(msg);
     },
   });
@@ -127,6 +144,21 @@ export function useUpdateFeaturedSection() {
   });
 }
 
+export function useDeleteFeaturedSection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminFeaturedSection,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.featuredSections() });
+      toast.success('Featured section deleted');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete featured section';
+      toast.error(msg);
+    },
+  });
+}
+
 export function useCreateSafetyTip() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -158,34 +190,18 @@ export function useUpdateSafetyTip() {
   });
 }
 
-export function useCreateStaticPage() {
+export function useDeleteSafetyTip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createAdminStaticPage,
+    mutationFn: deleteAdminSafetyTip,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.content.staticPages() });
-      toast.success('Page created');
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.safetyTips() });
+      toast.success('Safety tip deleted');
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Failed to create page';
+      const msg = err instanceof Error ? err.message : 'Failed to delete safety tip';
       toast.error(msg);
     },
   });
 }
 
-export function useUpdateStaticPage() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ slug, data }: { slug: string; data: Parameters<typeof updateAdminStaticPage>[1] }) =>
-      updateAdminStaticPage(slug, data),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.content.staticPages() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.content.staticPage(variables.slug) });
-      toast.success('Page updated');
-    },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Failed to update page';
-      toast.error(msg);
-    },
-  });
-}

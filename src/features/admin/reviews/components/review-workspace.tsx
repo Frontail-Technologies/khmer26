@@ -58,7 +58,7 @@ import { StatusBadge } from "@/components/shared/status-badge"
 import { createReviewColumns } from "../columns"
 import { ReviewDetailSheet } from "./review-detail-sheet"
 import type { AdminReview } from "../types"
-import { cn } from "@/lib/utils"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAdminReviews } from "../hooks/reviews.queries"
 import { useUpdateReviewStatus } from "../hooks/reviews.mutations"
 
@@ -246,39 +246,25 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
-        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 min-w-max">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={cn(
-                    "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
-                    isActive
-                      ? "bg-card text-foreground border-primary shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                  )}
+        <Tabs
+          value={activeTab}
+          onValueChange={(val) => val && setActiveTab(val as ReviewTabKey)}
+          className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
+        >
+          <TabsList variant="line">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
+                <span>{tab.label}</span>
+                <Badge
+                  variant="outline"
+                  className="px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
                 >
-                  <span>{tab.label}</span>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
-                      isActive
-                        ? "bg-muted text-foreground border-border"
-                        : "bg-background/80 text-muted-foreground border-border/60"
-                    )}
-                  >
-                    {tab.count}
-                  </Badge>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+                  {tab.count}
+                </Badge>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[240px]">

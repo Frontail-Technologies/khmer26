@@ -318,8 +318,8 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
         title="Delete report reason?"
         description={
           reasonToDelete
-            ? `This will disable "${reasonToDelete.label}" so users can no longer choose it. Historical reports will remain intact.`
-            : "This report reason will be disabled."
+            ? `"${reasonToDelete.label}" will be permanently removed. Historical reports that used this reason will remain intact.`
+            : "This report reason will be permanently removed."
         }
         confirmLabel="Delete Reason"
         variant="destructive"

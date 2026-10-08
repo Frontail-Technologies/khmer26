@@ -11,6 +11,7 @@ export type AuditModule =
 export interface AdminAuditEntry {
   id: string
   timestamp: string
+  rawTimestamp?: string
   actorName: string
   actorRole: string
   action: string

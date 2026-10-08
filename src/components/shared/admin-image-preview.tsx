@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { X } from "@phosphor-icons/react"
+import { X, Image as ImageIcon } from "@phosphor-icons/react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -87,7 +87,7 @@ interface AdminImageThumbnailProps {
 }
 
 function sanitizeImageSrc(url?: string | null): string {
-  if (!url) return "/images/categories/cars.jpg"
+  if (!url) return ""
   const trimmed = url.trim()
   if (trimmed.startsWith("//")) {
     return trimmed.replace(/^\/+/, "/")
@@ -114,36 +114,43 @@ export function AdminImageThumbnail({
         type="button"
         onClick={(e) => {
           e.stopPropagation()
-          setIsPreviewOpen(true)
+          if (safeSrc) setIsPreviewOpen(true)
         }}
         className={cn(
-          "relative overflow-hidden group cursor-zoom-in text-left focus:outline-none focus:ring-1 focus:ring-primary rounded-lg",
+          "relative overflow-hidden group text-left focus:outline-none focus:ring-1 focus:ring-primary rounded-lg",
+          safeSrc ? "cursor-zoom-in" : "cursor-default",
           containerClassName
         )}
-        aria-label={`View enlarged preview of ${alt}`}
+        aria-label={safeSrc ? `View enlarged preview of ${alt}` : "No image"}
       >
-        {fill ? (
-          <Image
-            src={safeSrc}
-            alt={alt}
-            fill
-            sizes={sizes}
-            className={cn(
-              "object-cover transition-transform duration-150 group-hover:scale-105",
-              className
-            )}
-          />
+        {safeSrc ? (
+          fill ? (
+            <Image
+              src={safeSrc}
+              alt={alt}
+              fill
+              sizes={sizes}
+              className={cn(
+                "object-cover transition-transform duration-150 group-hover:scale-105",
+                className
+              )}
+            />
+          ) : (
+            <Image
+              src={safeSrc}
+              alt={alt}
+              width={width ?? 48}
+              height={height ?? 48}
+              className={cn(
+                "object-cover transition-transform duration-150 group-hover:scale-105",
+                className
+              )}
+            />
+          )
         ) : (
-          <Image
-            src={safeSrc}
-            alt={alt}
-            width={width ?? 48}
-            height={height ?? 48}
-            className={cn(
-              "object-cover transition-transform duration-150 group-hover:scale-105",
-              className
-            )}
-          />
+          <div className="w-full h-full flex items-center justify-center bg-muted/60 text-muted-foreground">
+            <ImageIcon size={16} weight="duotone" />
+          </div>
         )}
       </button>
 

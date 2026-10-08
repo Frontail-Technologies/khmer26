@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Check, FloppyDisk } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { Separator } from "@/components/ui/separator"
 import {
   Select,
   SelectContent,
@@ -18,13 +18,10 @@ import {
 import type { PlatformSettings, GeneralSettings, MarketplaceSettings } from "../types"
 import { useAdminSettings } from "../hooks/settings.queries"
 import { useUpdateAdminSettings } from "../hooks/settings.mutations"
-import { cn } from "@/lib/utils"
 
 interface SettingsWorkspaceProps {
   initialSettings?: PlatformSettings
 }
-
-type SettingsTabKey = "general" | "marketplace"
 
 const EMPTY_SETTINGS: PlatformSettings = {
   general: { marketplaceName: "", supportEmail: "", supportPhone: "", primaryLanguage: "en", timezone: "Asia/Phnom_Penh" },
@@ -55,23 +52,12 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
   const { data: remoteSettings } = useAdminSettings()
   const updateSettings = useUpdateAdminSettings()
   const settings = remoteSettings ?? initialSettings
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const sectionParam = searchParams.get("section")
-  const activeTab: SettingsTabKey = sectionParam === "marketplace" ? "marketplace" : "general"
 
   const [generalDraft, setGeneralDraft] = useState<GeneralSettings | null>(null)
   const [marketplaceDraft, setMarketplaceDraft] = useState<MarketplaceSettings | null>(null)
   const [savedSuccess, setSavedSuccess] = useState(false)
   const general = generalDraft ?? settings?.general ?? EMPTY_SETTINGS.general
   const marketplace = marketplaceDraft ?? settings?.marketplace ?? EMPTY_SETTINGS.marketplace
-
-  const handleTabChange = (key: SettingsTabKey) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("section", key)
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-  }
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,42 +76,14 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
     )
   }
 
-  const tabs: { key: SettingsTabKey; label: string }[] = [
-    { key: "general", label: "General" },
-    { key: "marketplace", label: "Marketplace" },
-  ]
-
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
-        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 min-w-max">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => handleTabChange(tab.key)}
-                  className={cn(
-                    "relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
-                    isActive
-                      ? "bg-card text-foreground border-primary shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                  )}
-                >
-                  <span>{tab.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
         <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-6 max-w-2xl">
-          {activeTab === "general" ? (
-            <div className="space-y-4 text-xs">
-              <Field>
-                <FieldLabel required>Marketplace Name</FieldLabel>
+          <div className="space-y-4 text-xs">
+            <h2 className="text-sm font-bold text-foreground">General</h2>
+            <Field>
+              <FieldLabel required>Marketplace Name</FieldLabel>
                 <input
                   type="text"
                   required
@@ -221,7 +179,11 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                 </Field>
               </div>
             </div>
-          ) : (
+
+          <Separator className="bg-border/60" />
+
+          <div className="space-y-4 text-xs">
+            <h2 className="text-sm font-bold text-foreground">Marketplace</h2>
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field>
@@ -319,7 +281,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                 />
               </div>
             </div>
-          )}
+          </div>
 
           <div className="flex items-center gap-3 pt-4 border-t border-border/60">
             <Button

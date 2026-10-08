@@ -1,108 +1,128 @@
 "use client"
 
-import type { FilterState } from "@/features/search/types"
 import { X } from "@phosphor-icons/react"
+import type { CategoryField } from "@/features/categories/api/categories.api"
+import { useCommunes, useDistricts, useProvinces } from "@/features/locations/api/locations.queries"
+import { applyLocationChange, type SearchFilters } from "../lib/search-filters"
 
 interface ActiveFilterChipsProps {
-  filters: FilterState
-  onRemoveFilter: (key: keyof FilterState, value?: string) => void
+  filters: SearchFilters
+  onChange: (next: SearchFilters) => void
   onClearAll: () => void
+  definitions?: CategoryField[]
+  /** Search page only: on a category page the category is the page itself, not a removable filter. */
+  categoryChipLabel?: string
+}
+
+interface Chip {
+  key: string
+  label: string
+  onRemove: () => void
+}
+
+function fieldChipLabel(definition: CategoryField, value: string): string {
+  const { field } = definition
+  switch (field.fieldType) {
+    case "select":
+      return `${field.labelEn}: ${field.options.find((o) => o.value === value)?.labelEn ?? value}`
+    case "boolean":
+      return value === "true" ? field.labelEn : `${field.labelEn}: No`
+    default:
+      return `${field.labelEn}: ${value}`
+  }
 }
 
 export function ActiveFilterChips({
   filters,
-  onRemoveFilter,
+  onChange,
   onClearAll,
+  definitions,
+  categoryChipLabel,
 }: ActiveFilterChipsProps) {
-  const chips: Array<{ label: string; onRemove: () => void }> = []
+  const provinces = useProvinces()
+  const districts = useDistricts(filters.provinceId)
+  const communes = useCommunes(filters.districtId)
 
-  if (filters.category) {
+  const chips: Chip[] = []
+
+  if (filters.q) {
     chips.push({
-      label: `Category: ${filters.category}`,
-      onRemove: () => onRemoveFilter("category"),
+      key: "q",
+      label: `Keyword: ${filters.q}`,
+      onRemove: () => onChange({ ...filters, q: undefined }),
     })
   }
 
-  if (filters.location) {
+  if (categoryChipLabel && filters.category) {
     chips.push({
-      label: filters.location,
-      onRemove: () => onRemoveFilter("location"),
+      key: "category",
+      label: `Category: ${categoryChipLabel}`,
+      onRemove: () => onChange({ ...filters, category: undefined, fields: {} }),
     })
   }
 
-  filters.brands.forEach((b) => {
+  if (filters.provinceId !== undefined) {
     chips.push({
-      label: b,
-      onRemove: () => onRemoveFilter("brands", b),
+      key: "province",
+      label: provinces.data?.find((p) => p.id === filters.provinceId)?.nameEn ?? "Province",
+      onRemove: () => onChange(applyLocationChange(filters, { provinceId: null })),
     })
-  })
+  }
+  if (filters.districtId !== undefined) {
+    chips.push({
+      key: "district",
+      label: districts.data?.find((d) => d.id === filters.districtId)?.nameEn ?? "District",
+      onRemove: () => onChange(applyLocationChange(filters, { districtId: null })),
+    })
+  }
+  if (filters.communeId !== undefined) {
+    chips.push({
+      key: "commune",
+      label: communes.data?.find((c) => c.id === filters.communeId)?.nameEn ?? "Commune",
+      onRemove: () => onChange(applyLocationChange(filters, { communeId: null })),
+    })
+  }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-    const min = filters.minPrice !== undefined ? `$${filters.minPrice.toLocaleString()}` : "$0"
-    const max = filters.maxPrice !== undefined ? `$${filters.maxPrice.toLocaleString()}` : "Any"
+    const min = filters.minPrice !== undefined ? filters.minPrice.toLocaleString() : "0"
+    const max = filters.maxPrice !== undefined ? filters.maxPrice.toLocaleString() : "Any"
     chips.push({
-      label: `${min} – ${max}`,
-      onRemove: () => {
-        onRemoveFilter("minPrice")
-        onRemoveFilter("maxPrice")
-      },
+      key: "price",
+      label: `${min} – ${max}${filters.currency ? ` ${filters.currency}` : ""}`,
+      onRemove: () =>
+        onChange({ ...filters, minPrice: undefined, maxPrice: undefined, currency: undefined }),
+    })
+  } else if (filters.currency) {
+    chips.push({
+      key: "currency",
+      label: filters.currency,
+      onRemove: () => onChange({ ...filters, currency: undefined }),
     })
   }
 
-  if (filters.yearFrom !== undefined || filters.yearTo !== undefined) {
-    const from = filters.yearFrom ?? "Any"
-    const to = filters.yearTo ?? "Present"
-    chips.push({
-      label: `Year: ${from}–${to}`,
-      onRemove: () => {
-        onRemoveFilter("yearFrom")
-        onRemoveFilter("yearTo")
-      },
-    })
-  }
-
-  filters.conditions.forEach((c) => {
-    chips.push({
-      label: c.replace("_", " "),
-      onRemove: () => onRemoveFilter("conditions", c),
-    })
-  })
-
-  filters.fuels.forEach((f) => {
-    chips.push({
-      label: f,
-      onRemove: () => onRemoveFilter("fuels", f),
-    })
-  })
-
-  filters.transmissions.forEach((t) => {
-    chips.push({
-      label: t,
-      onRemove: () => onRemoveFilter("transmissions", t),
-    })
-  })
-
-  filters.sellerTypes.forEach((s) => {
-    chips.push({
-      label: s === "dealer" ? "Dealer" : "Individual",
-      onRemove: () => onRemoveFilter("sellerTypes", s),
-    })
-  })
-
-  if (filters.verifiedOnly) {
-    chips.push({
-      label: "Verified Only",
-      onRemove: () => onRemoveFilter("verifiedOnly"),
-    })
+  if (definitions) {
+    for (const [name, value] of Object.entries(filters.fields)) {
+      const definition = definitions.find((d) => d.field.name === name)
+      if (!definition) continue
+      chips.push({
+        key: `field-${name}`,
+        label: fieldChipLabel(definition, value),
+        onRemove: () => {
+          const fields = { ...filters.fields }
+          delete fields[name]
+          onChange({ ...filters, fields })
+        },
+      })
+    }
   }
 
   if (chips.length === 0) return null
 
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar">
-      {chips.map((chip, index) => (
+      {chips.map((chip) => (
         <span
-          key={`${chip.label}-${index}`}
+          key={chip.key}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary shadow-2xs transition-colors hover:bg-primary/15"
         >
           <span>{chip.label}</span>

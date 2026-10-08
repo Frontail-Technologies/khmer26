@@ -4,11 +4,27 @@ import Link from "next/link"
 import { ArrowRight, ChatCircleDots } from "@phosphor-icons/react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAdminChatReports } from "@/features/admin/reported-chats/hooks/chat-reports.queries"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+import { normalizeChatReport } from "@/features/admin/reported-chats/api/chat-reports.api"
 
 export function AdminReportedChatsCard() {
-  const { data } = useAdminChatReports({ page: 1, limit: 4, status: "open" })
-  const recentChats = data?.items ?? []
+  const { data } = useAdminDashboard()
+  const recentChats = (data?.recentOpenChatReports ?? []).map((row) =>
+    normalizeChatReport({
+      report: {
+        id: row.report.id,
+        reporterUserId: row.report.reporterUserId,
+        conversationId: row.report.conversationId,
+        messageId: null,
+        reasonId: row.reason?.id ?? "",
+        details: row.report.details,
+        status: row.report.status,
+        resolvedAt: null,
+        createdAt: row.report.createdAt,
+      },
+      reason: row.reason,
+    })
+  )
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">

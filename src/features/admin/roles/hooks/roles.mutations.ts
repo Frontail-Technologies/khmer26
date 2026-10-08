@@ -3,7 +3,9 @@ import { adminKeys } from '@/lib/query/keys';
 import {
   createAdminRole,
   updateAdminRole,
+  deleteAdminRole,
   assignStaffRole,
+  removeStaffRole,
   replaceRolePermissions,
 } from '../api/roles.api';
 import { toast } from 'sonner';
@@ -34,6 +36,37 @@ export function useUpdateRole() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to update role';
+      toast.error(msg);
+    },
+  });
+}
+
+export function useDeleteRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.roles.all });
+      toast.success('Role deleted');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to delete role';
+      toast.error(msg);
+    },
+  });
+}
+
+export function useRemoveStaffRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, roleId }: { userId: string; roleId: string }) =>
+      removeStaffRole(userId, roleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.roles.staff() });
+      toast.success('Staff member removed');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Failed to remove staff member';
       toast.error(msg);
     },
   });

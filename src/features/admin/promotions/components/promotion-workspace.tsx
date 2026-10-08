@@ -1,6 +1,8 @@
 "use client"
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PromotionTable } from "./promotion-table"
+import { PackageCatalog } from "./package-catalog"
 import { useAdminActivePromotions } from "../hooks/promotions.queries"
 import type { ActivePromotionItem } from "../types"
 
@@ -15,8 +17,19 @@ export function PromotionWorkspace({
   const activePromotions = data?.items ?? fallbackPromotions
 
   return (
-    <div className="space-y-4">
-      <PromotionTable initialPromotions={activePromotions} />
-    </div>
+    <Tabs defaultValue="active" className="space-y-4">
+      <TabsList variant="line">
+        <TabsTrigger value="active">Active Ads</TabsTrigger>
+        <TabsTrigger value="packages">Packages</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="active">
+        <PromotionTable initialPromotions={activePromotions} />
+      </TabsContent>
+
+      <TabsContent value="packages">
+        <PackageCatalog />
+      </TabsContent>
+    </Tabs>
   )
 }

@@ -2,20 +2,23 @@
 
 import Link from "next/link"
 import { ArrowRight, Clock } from "@phosphor-icons/react"
-import type { ListingCard as ListingCardType } from "@/types"
+import type { ListingCardData } from "@/types"
 import { ListingGrid } from "./listing-grid"
 import { ListingListRow } from "./listing-list-row"
+import { SellPromoCard } from "./sell-promo-card"
 import { ListingViewToggle } from "./listing-view-toggle"
 import { useListingViewMode } from "../hooks/use-listing-view-mode"
 import { cn } from "@/lib/utils"
 
 interface LatestListingsSectionProps {
-  listings: ListingCardType[]
+  listings: ListingCardData[]
+  title?: string
   className?: string
 }
 
 export function LatestListingsSection({
   listings,
+  title = "Latest Listings",
   className,
 }: LatestListingsSectionProps) {
   const [viewMode, setViewMode] = useListingViewMode()
@@ -28,7 +31,7 @@ export function LatestListingsSection({
             <Clock size={18} weight="bold" />
           </span>
           <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground truncate">
-            Latest Listings
+            {title}
           </h2>
         </div>
 
@@ -58,7 +61,7 @@ export function LatestListingsSection({
           </Link>
         </div>
       ) : viewMode === "grid" ? (
-        <ListingGrid listings={listings} />
+        <ListingGrid listings={listings} leadingItem={<SellPromoCard />} />
       ) : (
         <div className="space-y-2.5 sm:space-y-3">
           {listings.map((listing) => (

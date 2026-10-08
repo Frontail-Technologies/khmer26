@@ -1,0 +1,80 @@
+import type { ListingDetail } from "../api/listing-detail.api"
+
+export function makeDetail(overrides: Partial<ListingDetail> = {}): ListingDetail {
+  return {
+    id: "52bb0b3f-4272-43a6-baa4-76bacc1d13c0",
+    title: "Toyota Prius 2018 - Hybrid",
+    description: "Single owner.\n\nFull service history.",
+    price: "17500.00",
+    currency: "USD",
+    status: "active",
+    createdAt: new Date(Date.now() - 3 * 3600_000).toISOString(),
+    updatedAt: new Date().toISOString(),
+    expiresAt: null,
+    category: {
+      id: "c-hybrid",
+      nameEn: "Hybrid",
+      nameKm: null,
+      slug: "hybrid",
+      breadcrumb: [
+        { id: "c-v", nameEn: "Vehicles", nameKm: null, slug: "vehicles" },
+        { id: "c-c", nameEn: "Cars", nameKm: null, slug: "cars" },
+        { id: "c-t", nameEn: "Toyota", nameKm: null, slug: "toyota" },
+        { id: "c-hybrid", nameEn: "Hybrid", nameKm: null, slug: "hybrid" },
+      ],
+    },
+    location: {
+      province: { id: 1, nameEn: "Phnom Penh", nameKm: null },
+      district: { id: 101, nameEn: "Chamkarmon", nameKm: null },
+      commune: null,
+      map: { latitude: 11.537307, longitude: 104.920877, precision: "district" },
+    },
+    media: [
+      { id: "m2", r2Key: "listings/b.jpg", mimeType: "image/jpeg", displayOrder: 1 },
+      { id: "m1", r2Key: "listings/a.jpg", mimeType: "image/jpeg", displayOrder: 0 },
+    ],
+    specs: [
+      {
+        fieldId: "f1",
+        name: "transmission",
+        labelEn: "Transmission",
+        labelKm: null,
+        fieldType: "select",
+        displayOrder: 1,
+        value: "automatic",
+        valueLabelEn: "Automatic",
+      },
+      {
+        fieldId: "f2",
+        name: "year",
+        labelEn: "Year",
+        labelKm: null,
+        fieldType: "number",
+        displayOrder: 2,
+        value: 2018,
+      },
+      {
+        fieldId: "f3",
+        name: "is_hybrid",
+        labelEn: "Hybrid",
+        labelKm: null,
+        fieldType: "boolean",
+        displayOrder: 3,
+        value: true,
+      },
+    ],
+    seller: {
+      id: "s1",
+      shopName: "Angkor Auto & Bikes",
+      sellerType: "dealer",
+      avatarR2Key: "avatars/s1.png",
+      joinedAt: "2026-03-05T00:00:00.000Z",
+      isVerified: false,
+      rating: null,
+    },
+    isFavorited: false,
+    isOwner: false,
+    views: 42,
+    ...overrides,
+  }
+}

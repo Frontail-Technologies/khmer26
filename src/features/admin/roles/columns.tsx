@@ -1,17 +1,11 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { DotsThreeVertical, UserGear } from "@phosphor-icons/react"
+import { UserGear, Trash } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { AdminStaffMember, AdminStaffRole } from "./types"
 
@@ -41,10 +35,12 @@ const STATUS_CONFIG: Record<string, { label: string; tone: StatusTone }> = {
 
 interface StaffColumnOptions {
   onEditRole: (staff: AdminStaffMember) => void
+  onDeleteStaff: (staff: AdminStaffMember) => void
 }
 
 export function createStaffColumns({
   onEditRole,
+  onDeleteStaff,
 }: StaffColumnOptions): ColumnDef<AdminStaffMember>[] {
   return [
     {
@@ -132,30 +128,25 @@ export function createStaffColumns({
       cell: ({ row }) => {
         const staff = row.original
         return (
-          <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className="size-7 text-muted-foreground hover:text-foreground"
-                    aria-label="Staff actions"
-                  >
-                    <DotsThreeVertical size={16} weight="bold" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-40 text-xs">
-                <DropdownMenuItem
-                  onClick={() => onEditRole(staff)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <UserGear size={13} />
-                  <span>Edit Role</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="size-7 text-muted-foreground hover:text-foreground"
+              aria-label="Edit role"
+              onClick={() => onEditRole(staff)}
+            >
+              <UserGear size={14} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="size-7 text-destructive hover:bg-destructive/10"
+              aria-label="Remove staff member"
+              onClick={() => onDeleteStaff(staff)}
+            >
+              <Trash size={13} />
+            </Button>
           </div>
         )
       },

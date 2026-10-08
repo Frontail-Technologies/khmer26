@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { SortOption } from "@/features/search/types"
+import { SORT_LABELS, SORT_VALUES, type SortValue } from "../lib/search-filters"
 import { ArrowsDownUp, Check, Funnel } from "@phosphor-icons/react"
 import {
   ListingViewToggle,
@@ -14,20 +14,13 @@ import {
 } from "@/features/listings/components/listing-view-toggle"
 
 interface ResultsToolbarProps {
-  totalResults: number
-  sortBy: SortOption
-  onSortChange: (sort: SortOption) => void
+  totalResults?: number
+  sortBy: SortValue
+  onSortChange: (sort: SortValue) => void
   onOpenMobileFilters?: () => void
   activeFilterCount?: number
   viewMode?: ListingViewMode
   onViewModeChange?: (mode: ListingViewMode) => void
-}
-
-const SORT_LABELS: Record<SortOption, string> = {
-  recommended: "Recommended",
-  newest: "Newest",
-  price_asc: "Price: Low to High",
-  price_desc: "Price: High to Low",
 }
 
 export function ResultsToolbar({
@@ -42,7 +35,9 @@ export function ResultsToolbar({
   return (
     <div className="flex items-center justify-between gap-2 rounded-xl border border-border/80 bg-card px-3 sm:px-3.5 py-2 sm:py-2.5 shadow-2xs mb-3">
       <div className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5 min-w-0">
-        <span className="text-foreground font-bold">{totalResults}</span>
+        <span className="text-foreground font-bold">
+          {totalResults === undefined ? "—" : totalResults.toLocaleString()}
+        </span>
         <span className="text-muted-foreground font-normal truncate">
           results found
         </span>
@@ -79,7 +74,7 @@ export function ResultsToolbar({
             <span className="sm:hidden">Sort</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 p-1.5 shadow-xl">
-            {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
+            {SORT_VALUES.map((key) => (
               <DropdownMenuItem
                 key={key}
                 onClick={() => onSortChange(key)}

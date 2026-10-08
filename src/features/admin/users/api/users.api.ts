@@ -32,7 +32,7 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
       : 'active';
   const sellerProfile = u.sellerProfile as Record<string, unknown> | undefined;
   const province = u.province as Record<string, unknown> | string | undefined;
-  const provinceName = typeof province === 'object' ? (province?.nameEn as string) : typeof province === 'string' ? province : 'Phnom Penh';
+  const provinceName = typeof province === 'object' ? (province?.nameEn as string) : typeof province === 'string' ? province : '';
 
   const verification = u.verification as Record<string, unknown> | undefined;
   const verificationStatus: AdminVerificationState =
@@ -59,8 +59,8 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
     role: (u.role as 'user' | 'admin') || 'user',
     accountType,
     businessName: (sellerProfile?.shopName || u.shopName) as string | undefined,
-    location: provinceName || 'Phnom Penh',
-    province: provinceName || 'Phnom Penh',
+    location: provinceName || '',
+    province: provinceName || '',
     listingsCount: Number(
       u.listingCount ??
       u.listingsCount ??
@@ -70,14 +70,14 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
     ),
     joinedAt: u.createdAt
       ? new Date(u.createdAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '2026',
+      : '',
     verificationStatus,
     status,
     reportsCount: Number(u.reportCount ?? u.reportsCount ?? 0),
     lastActiveAt: u.lastActiveAt
       ? new Date(u.lastActiveAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : 'Active recently',
-    rating: Number(u.rating || 5),
+      : undefined,
+    rating: Number(u.rating || 0),
     reviewsCount: Number(u.reviewsCount || 0),
   };
 }
@@ -123,7 +123,7 @@ export function normalizeUserDetail(u: Record<string, unknown>): AdminUserDetail
     address: u.address as string | undefined,
     activeListingsCount: Number(u.activeListingsCount ?? base.listingsCount),
     soldListingsCount: Number(u.soldListingsCount || 0),
-    totalSalesVolume: (u.totalSalesVolume as string) || '$0',
+    totalSalesVolume: (u.totalSalesVolume as string) || undefined,
     verifiedAt: rawVerif?.reviewedAt
       ? new Date(rawVerif.reviewedAt as string).toLocaleDateString()
       : u.verifiedAt
@@ -239,4 +239,8 @@ export async function updateAdminUser(
 
 export function deleteAdminUser(id: string) {
   return apiClient.delete(`/admin/users/${id}`);
+}
+
+export function resetAdminUserPassword(id: string) {
+  return apiClient.post(`/admin/users/${id}/reset-password`, {});
 }

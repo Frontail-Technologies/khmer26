@@ -1,209 +1,172 @@
 "use client"
 
-import { useState } from "react"
-import { Star, ShieldCheck, ChatText } from "@phosphor-icons/react"
+import { Star, ChatText } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/shared/EmptyState"
-import type { SellerReview, SellerProfileDetail } from "../types"
+import type { Page, SellerProfile, SellerReview } from "../api/sellers.api"
+import { distributionPercent, formatReviewDate, pluralize, sellerInitials } from "../lib/seller-format"
+import { SellerReviewForm } from "./seller-review-form"
 
 interface SellerReviewsTabProps {
-  seller: SellerProfileDetail
-  reviews: SellerReview[]
+  seller: SellerProfile
+  isOwnProfile: boolean
+  pages: Array<Page<SellerReview>> | undefined
+  isPending: boolean
+  isError: boolean
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  onLoadMore: () => void
+  onRetry: () => void
 }
 
-export function SellerReviewsTab({ seller, reviews }: SellerReviewsTabProps) {
-  const [filterRating, setFilterRating] = useState<number | "all">("all")
+function Stars({ value, size }: { value: number; size: number }) {
+  return (
+    <span className="flex items-center gap-0.5 text-accent" aria-hidden="true">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star key={s} size={size} weight={s <= Math.round(value) ? "fill" : "regular"} />
+      ))}
+    </span>
+  )
+}
 
-  const distribution = [
-    { stars: 5, percentage: 85, count: Math.round(seller.reviewCount * 0.85) },
-    { stars: 4, percentage: 11, count: Math.round(seller.reviewCount * 0.11) },
-    { stars: 3, percentage: 3, count: Math.round(seller.reviewCount * 0.03) },
-    { stars: 2, percentage: 1, count: Math.round(seller.reviewCount * 0.01) },
-    { stars: 1, percentage: 0, count: 0 },
-  ]
-
-  const filteredReviews = reviews.filter((rev) => {
-    if (filterRating === "all") return true
-    return rev.rating === filterRating
-  })
+export function SellerReviewsTab({
+  seller,
+  isOwnProfile,
+  pages,
+  isPending,
+  isError,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+  onRetry,
+}: SellerReviewsTabProps) {
+  const rating = seller.rating
+  const reviews = (pages ?? []).flatMap((p) => p.items)
 
   return (
-    <div className="space-y-6">
-      <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-6 shadow-xs">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle className="text-base sm:text-lg font-bold text-foreground">
-            Customer Feedback & Ratings
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-xl bg-muted/30 border border-border/60 text-center">
-              <span className="text-4xl sm:text-5xl font-black text-foreground">
-                {seller.rating.toFixed(1)}
-              </span>
-
-              <div className="flex items-center gap-1 my-2 text-accent">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star
-                    key={s}
-                    size={20}
-                    weight={s <= Math.round(seller.rating) ? "fill" : "regular"}
-                  />
-                ))}
+    <div className="space-y-5">
+      {rating ? (
+        <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-6 shadow-xs">
+          <CardHeader className="p-0 pb-4">
+            <CardTitle className="text-base sm:text-lg font-bold text-foreground">Ratings</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-xl bg-muted/30 border border-border/60 text-center">
+                <span className="text-4xl sm:text-5xl font-black text-foreground">
+                  {rating.average.toFixed(1)}
+                </span>
+                <div className="my-2">
+                  <Stars value={rating.average} size={20} />
+                </div>
+                <span className="text-xs text-muted-foreground font-medium">
+                  Based on {pluralize(rating.count, "review")}
+                </span>
               </div>
 
-              <span className="text-xs text-muted-foreground font-medium">
-                Based on {seller.reviewCount} verified reviews
-              </span>
-            </div>
-
-            <div className="md:col-span-8 space-y-2">
-              {distribution.map((dist) => (
-                <div key={dist.stars} className="flex items-center gap-2 text-xs">
-                  <span className="w-6 font-semibold text-foreground text-right shrink-0">
-                    {dist.stars}★
-                  </span>
-                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full bg-accent rounded-full transition-all duration-300"
-                      style={{ width: `${dist.percentage}%` }}
-                    />
-                  </div>
-                  <span className="w-10 text-right text-muted-foreground shrink-0">
-                    {dist.percentage}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setFilterRating("all")}
-          className={`h-8 px-3 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-            filterRating === "all"
-              ? "bg-primary text-primary-foreground shadow-xs"
-              : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-        >
-          All Reviews ({reviews.length})
-        </button>
-
-        {[5, 4, 3].map((stars) => {
-          const count = reviews.filter((r) => r.rating === stars).length
-          if (count === 0 && filterRating !== stars) return null
-
-          return (
-            <button
-              key={stars}
-              type="button"
-              onClick={() => setFilterRating(stars)}
-              className={`h-8 px-3 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-                filterRating === stars
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {stars} Stars ({count})
-            </button>
-          )
-        })}
-      </div>
-
-      {filteredReviews.length > 0 ? (
-        <div className="space-y-3">
-          {filteredReviews.map((review) => {
-            const initials = review.authorName
-              .split(" ")
-              .map((w) => w[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()
-
-            return (
-              <Card
-                key={review.id}
-                className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-2xs transition-colors hover:border-primary/30"
-              >
-                <CardContent className="p-0 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar size="default" className="h-10 w-10 border border-border/70">
-                        {review.authorAvatar && (
-                          <AvatarImage
-                            src={review.authorAvatar}
-                            alt={review.authorName}
-                          />
-                        )}
-                        <AvatarFallback className="font-bold text-xs bg-primary/10 text-primary">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs sm:text-sm font-bold text-foreground">
-                            {review.authorName}
-                          </span>
-                          {review.verifiedUser && (
-                            <ShieldCheck
-                              size={15}
-                              weight="fill"
-                              className="text-primary shrink-0"
-                              aria-label="Verified User"
-                            />
-                          )}
-                        </div>
-
-                        <span className="text-[11px] text-muted-foreground">
-                          {review.date}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-0.5 text-accent shrink-0">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          size={14}
-                          weight={s <= review.rating ? "fill" : "regular"}
+              <div className="md:col-span-8 space-y-2">
+                {([5, 4, 3, 2, 1] as const).map((stars) => {
+                  const count = rating.distribution[stars]
+                  const percent = distributionPercent(count, rating.count)
+                  return (
+                    <div key={stars} className="flex items-center gap-2 text-xs">
+                      <span className="w-6 font-semibold text-foreground text-right shrink-0">{stars}★</span>
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-accent rounded-full"
+                          style={{ width: `${percent}%` }}
                         />
-                      ))}
+                      </div>
+                      <span className="w-8 text-right text-muted-foreground shrink-0">{count}</span>
                     </div>
-                  </div>
+                  )
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
-                  <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-normal">
-                    {review.comment}
-                  </p>
+      <SellerReviewForm sellerId={seller.id} isOwnProfile={isOwnProfile} />
 
-                  {review.listingTitle && (
-                    <div className="pt-2 border-t border-border/50 text-[11px] text-muted-foreground flex items-center gap-1">
-                      <span>Item:</span>
-                      <span className="font-medium text-foreground truncate">
-                        {review.listingTitle}
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
+      {isPending ? (
+        <div aria-busy="true" aria-label="Loading reviews" className="space-y-3">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
         </div>
-      ) : (
+      ) : isError && !pages ? (
         <EmptyState
           icon={<ChatText size={32} aria-hidden="true" />}
-          title="No reviews match your filter"
-          description="Try selecting another star rating or viewing all reviews."
-          action={{
-            label: "View All Reviews",
-            onClick: () => setFilterRating("all"),
-          }}
+          title="Couldn't load reviews"
+          description="Please check your connection and try again."
+          action={{ label: "Try again", onClick: onRetry }}
         />
+      ) : reviews.length === 0 ? (
+        <EmptyState
+          icon={<ChatText size={32} aria-hidden="true" />}
+          title="No reviews yet"
+          description={`${seller.shopName} hasn't received any reviews yet.`}
+        />
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((review) => (
+            <Card
+              key={review.id}
+              className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-2xs"
+            >
+              <CardContent className="p-0 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar size="default" className="h-10 w-10 border border-border/70">
+                      <AvatarFallback className="font-bold text-xs bg-primary/10 text-primary">
+                        {sellerInitials(review.reviewer.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <span className="block truncate text-xs sm:text-sm font-bold text-foreground">
+                        {review.reviewer.name}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatReviewDate(review.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="shrink-0" role="img" aria-label={`${review.rating} out of 5 stars`}>
+                    <Stars value={review.rating} size={14} />
+                  </div>
+                </div>
+
+                {review.comment?.trim() && (
+                  <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-line wrap-anywhere">
+                    {review.comment.trim()}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+
+          {isError && (
+            <p role="alert" className="text-center text-xs font-medium text-destructive">
+              Couldn&apos;t load more reviews.
+            </p>
+          )}
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={onLoadMore}
+                disabled={isFetchingNextPage}
+                className="h-10 px-6 text-xs sm:text-sm font-semibold rounded-lg border-border hover:bg-muted"
+              >
+                {isFetchingNextPage ? "Loading…" : "Load more reviews"}
+              </Button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

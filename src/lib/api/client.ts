@@ -30,6 +30,12 @@ export interface ApiResponse<T> {
     total: number;
     totalPages: number;
   };
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
   error?: ApiErrorPayload;
 }
 
@@ -120,6 +126,9 @@ async function refreshAuthSession(): Promise<boolean> {
 
     if (!res.ok) {
       clearStoredCsrfToken();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:refresh-failed'));
+      }
       return false;
     }
 
@@ -221,11 +230,20 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
         clearStoredCsrfToken();
       }
 
-      if (
-        res.status === 401 &&
-        authRefreshAllowed(endpoint) &&
-        ['AUTHENTICATION_REQUIRED', 'SESSION_EXPIRED'].includes(errorPayload.code)
-      ) {
+      // The backend's UnauthorizedError always reports the coarse `UNAUTHORIZED`
+      // code at the top level; the finer-grained reason (AUTHENTICATION_REQUIRED /
+      // SESSION_EXPIRED) only ever lands in `error.details.code`. Check both so an
+      // expired access token actually triggers the refresh-and-retry flow.
+      const detailCode =
+        errorPayload.details && typeof errorPayload.details === 'object'
+          ? (errorPayload.details as { code?: string }).code
+          : undefined;
+      const isAuthExpiry =
+        errorPayload.code === 'UNAUTHORIZED' ||
+        ['AUTHENTICATION_REQUIRED', 'SESSION_EXPIRED'].includes(errorPayload.code) ||
+        (detailCode !== undefined && ['AUTHENTICATION_REQUIRED', 'SESSION_EXPIRED'].includes(detailCode));
+
+      if (res.status === 401 && authRefreshAllowed(endpoint) && isAuthExpiry) {
         const refreshed = await refreshAuthSession();
         if (refreshed) {
           res = await fetch(url, await buildRequestConfig());

@@ -89,6 +89,7 @@ export async function getAdminStaff(): Promise<AdminStaffMember[]> {
     name: s.email?.split('@')[0] || 'Staff Member',
     email: s.email || '',
     role: toStaffRole(s.roles[0]?.roleName || s.role),
+    roleId: s.roles[0]?.roleId,
     status: 'active',
     lastActiveAt: 'Active recently',
     joinedAt: s.roles[0]?.assignedAt ? new Date(s.roles[0].assignedAt).toLocaleDateString() : 'Unknown',
@@ -101,6 +102,10 @@ export async function createAdminRole(data: { name: string; description?: string
 
 export async function updateAdminRole(id: string, data: { name?: string; description?: string }) {
   return apiClient.patch(`/admin/roles/${id}`, data);
+}
+
+export async function deleteAdminRole(id: string) {
+  return apiClient.delete(`/admin/roles/${id}`);
 }
 
 export async function replaceRolePermissions(roleId: string, permissionIds: string[]) {

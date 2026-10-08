@@ -48,3 +48,11 @@ export async function createAdminBroadcast(data: {
 }) {
   return apiClient.post('/admin/notifications/broadcasts', data);
 }
+
+export async function updateAdminBroadcast(id: string, data: { title?: string; body?: string }) {
+  return apiClient.patch(`/admin/notifications/broadcasts/${id}`, data);
+}
+
+export async function deleteAdminBroadcast(id: string) {
+  return apiClient.delete(`/admin/notifications/broadcasts/${id}`);
+}

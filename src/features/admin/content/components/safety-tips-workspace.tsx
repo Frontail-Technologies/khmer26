@@ -12,6 +12,8 @@ import {
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { DragReorderList } from "@/components/shared/drag-reorder-list"
+import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
@@ -40,8 +42,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { useAdminSafetyTips } from "../hooks/content.queries"
-import { useCreateSafetyTip, useUpdateSafetyTip } from "../hooks/content.mutations"
+import {
+  useCreateSafetyTip,
+  useUpdateSafetyTip,
+  useDeleteSafetyTip,
+} from "../hooks/content.mutations"
 import { safetyTipFormSchema } from "../schemas/content.schema"
 import { toast } from "sonner"
 import type { SafetyTipItem, SafetyTipContext } from "../types"
@@ -61,9 +68,11 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
   const tips = remoteTips ?? fallbackTips
   const createTip = useCreateSafetyTip()
   const updateTip = useUpdateSafetyTip()
+  const deleteTip = useDeleteSafetyTip()
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingTip, setEditingTip] = useState<SafetyTipItem | null>(null)
+  const [tipToDelete, setTipToDelete] = useState<SafetyTipItem | null>(null)
 
   const [formTip, setFormTip] = useState("")
   const [formContext, setFormContext] = useState<SafetyTipContext>("listing_detail")
@@ -89,6 +98,12 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
     updateTip.mutate({ id, data: { isActive } })
   }
 
+  const persistReorderedTips = (newTips: SafetyTipItem[]) => {
+    newTips.forEach((t, idx) => {
+      updateTip.mutate({ id: t.id, data: { sortOrder: idx + 1 } })
+    })
+  }
+
   const handleMoveTip = (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1
     if (targetIndex < 0 || targetIndex >= tips.length) return
@@ -101,13 +116,14 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
     newTips[index] = target
     newTips[targetIndex] = temp
 
-    newTips.forEach((t, idx) => {
-      updateTip.mutate({ id: t.id, data: { sortOrder: idx + 1 } })
-    })
+    persistReorderedTips(newTips)
   }
 
-  const handleDeleteTip = (id: string) => {
-    updateTip.mutate({ id, data: { isActive: false } })
+  const handleDeleteTip = () => {
+    if (!tipToDelete) return
+    deleteTip.mutate(tipToDelete.id, {
+      onSuccess: () => setTipToDelete(null),
+    })
   }
 
   const handleSaveForm = (e: React.FormEvent) => {
@@ -199,13 +215,20 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
             </TableHeader>
             <TableBody>
               {filteredTips.length > 0 ? (
-                filteredTips.map((t, idx) => {
+                <DragReorderList
+                  as="fragment"
+                  itemAs="tr"
+                  items={filteredTips}
+                  getId={(t) => t.id}
+                  onReorder={persistReorderedTips}
+                  itemClassName="border-b border-border/50 hover:bg-muted/20"
+                  renderItem={(t, idx, { isDragging, isDropTarget }) => {
                   const isFirst = idx === 0
                   const isLast = idx === filteredTips.length - 1
 
                   return (
-                    <TableRow key={t.id} className="border-b border-border/50 hover:bg-muted/20">
-                      <TableCell className="text-center">
+                    <>
+                      <TableCell className={cn("text-center", isDragging && "opacity-40", isDropTarget && "bg-primary/5")}>
                         <div className="flex items-center justify-center gap-0.5">
                           <Button
                             type="button"
@@ -264,7 +287,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
                             type="button"
                             variant="ghost"
                             size="icon-xs"
-                            onClick={() => handleDeleteTip(t.id)}
+                            onClick={() => setTipToDelete(t)}
                             className="size-7 text-destructive hover:bg-destructive/10 cursor-pointer"
                             aria-label="Delete tip"
                           >
@@ -272,9 +295,10 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
+                    </>
                   )
-                })
+                  }}
+                />
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center text-xs text-muted-foreground">
@@ -369,6 +393,19 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        open={Boolean(tipToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setTipToDelete(null)
+        }}
+        title="Delete safety tip?"
+        description="This will permanently remove this safety tip from admin and live marketplace safety placements."
+        confirmLabel="Delete Tip"
+        variant="destructive"
+        isPending={deleteTip.isPending}
+        onConfirm={handleDeleteTip}
+      />
     </div>
   )
 }

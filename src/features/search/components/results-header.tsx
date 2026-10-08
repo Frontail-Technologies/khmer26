@@ -1,11 +1,12 @@
-import type { BreadcrumbItem as BreadcrumbItemType } from "@/features/search/types"
-import { CaretRight, CarProfile, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr"
+import type { BreadcrumbItem as BreadcrumbItemType } from "../types"
+import { CaretRight, SquaresFour, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr"
 import Link from "next/link"
+import { formatAdCount } from "../lib/format-count"
 
 interface ResultsHeaderProps {
   title: string
   description?: string
-  totalCount: number
+  totalCount?: number
   breadcrumbs: BreadcrumbItemType[]
 }
 
@@ -50,16 +51,18 @@ export function ResultsHeader({
           {isSearch ? (
             <MagnifyingGlass size={19} weight="bold" />
           ) : (
-            <CarProfile size={21} weight="fill" />
+            <SquaresFour size={21} weight="fill" />
           )}
         </div>
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-wrap">
           <h1 className="text-base sm:text-lg md:text-xl font-black tracking-tight text-foreground truncate">
             {title}
           </h1>
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-primary">
-            {totalCount.toLocaleString()} ads
-          </span>
+          {totalCount !== undefined && (
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-primary">
+              {formatAdCount(totalCount)}
+            </span>
+          )}
         </div>
       </div>
     </div>

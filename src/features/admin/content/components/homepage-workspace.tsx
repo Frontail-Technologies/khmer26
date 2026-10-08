@@ -12,12 +12,25 @@ import {
   MagnifyingGlass,
   Check,
   House,
+  DotsSixVertical,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
+import { DragReorderList } from "@/components/shared/drag-reorder-list"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import { Field, FieldLabel } from "@/components/ui/field"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  getSelectOptionLabel,
+} from "@/components/ui/select"
 import { AdminImageThumbnail } from "@/components/shared/admin-image-preview"
 import {
   Dialog,
@@ -38,6 +51,15 @@ interface HomepageWorkspaceProps {
   initialPopularCategories: PopularCategoryItem[]
 }
 
+const SECTION_TYPE_OPTIONS: { value: HomepageSectionConfig["type"]; label: string }[] = [
+  { value: "hero_slider", label: "Hero Slider" },
+  { value: "categories_grid", label: "Categories Grid" },
+  { value: "featured_listings", label: "Featured Listings" },
+  { value: "location_browser", label: "Location Browser" },
+  { value: "trust_banner", label: "Trust Banner" },
+  { value: "recent_listings", label: "Recent Listings" },
+]
+
 export function HomepageWorkspace({
   initialSections = [],
   initialPopularCategories,
@@ -55,11 +77,18 @@ export function HomepageWorkspace({
   const [searchCategoryQuery, setSearchCategoryQuery] = useState("")
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null)
 
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false)
+  const [newSectionType, setNewSectionType] = useState<HomepageSectionConfig["type"]>("hero_slider")
+  const [newSectionTitle, setNewSectionTitle] = useState("")
+  const [newSectionSubtitle, setNewSectionSubtitle] = useState("")
+
   const persistSections = (newSections: HomepageSectionConfig[]) => {
     setLocalSections(newSections)
     updateHomepageConfig.mutate(
       newSections.map((sec) => ({
         sectionKey: sec.id,
+        title: sec.title,
+        subtitle: sec.subtitle,
         isEnabled: sec.isEnabled,
         sortOrder: sec.sortOrder,
       }))
@@ -68,6 +97,35 @@ export function HomepageWorkspace({
 
   const handleToggleSection = (id: string, isEnabled: boolean) => {
     persistSections(sections.map((sec) => (sec.id === id ? { ...sec, isEnabled } : sec)))
+  }
+
+  const availableSectionTypes = SECTION_TYPE_OPTIONS.filter(
+    (opt) => !sections.some((sec) => sec.id === opt.value)
+  )
+
+  const openAddSectionModal = () => {
+    const firstAvailable = availableSectionTypes[0]
+    setNewSectionType(firstAvailable?.value ?? "hero_slider")
+    setNewSectionTitle(firstAvailable?.label ?? "")
+    setNewSectionSubtitle("")
+    setIsAddSectionOpen(true)
+  }
+
+  const handleConfirmAddSection = () => {
+    if (!newSectionTitle.trim()) return
+    if (sections.some((sec) => sec.id === newSectionType)) return
+
+    const newSection: HomepageSectionConfig = {
+      id: newSectionType,
+      title: newSectionTitle.trim(),
+      subtitle: newSectionSubtitle.trim() || undefined,
+      type: newSectionType,
+      isEnabled: true,
+      sortOrder: sections.length + 1,
+    }
+
+    persistSections([...sections, newSection])
+    setIsAddSectionOpen(false)
   }
 
   const handleMoveSection = (index: number, direction: "up" | "down") => {
@@ -227,26 +285,47 @@ export function HomepageWorkspace({
 
       <Card className="bg-card border-0 shadow-2xs rounded-xl p-5 space-y-6">
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
               Homepage Sections
             </h2>
-            <span className="text-xs text-muted-foreground">
-              {sections.filter((s) => s.isEnabled).length} of {sections.length} active
-            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {sections.filter((s) => s.isEnabled).length} of {sections.length} active
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={openAddSectionModal}
+                disabled={availableSectionTypes.length === 0}
+                className="h-7 px-2.5 text-[11px] font-semibold gap-1 cursor-pointer"
+              >
+                <Plus size={12} weight="bold" />
+                <span>Add Section</span>
+              </Button>
+            </div>
           </div>
 
-          <div className="divide-y divide-border/50 border border-border/60 rounded-xl overflow-hidden bg-background/50">
-            {sections.map((section, idx) => {
+          <DragReorderList
+            items={sections}
+            getId={(section) => section.id}
+            onReorder={(newSections) => persistSections(newSections.map((sec, idx) => ({ ...sec, sortOrder: idx + 1 })))}
+            className="divide-y divide-border/50 border border-border/60 rounded-xl overflow-hidden bg-background/50"
+            itemClassName="bg-background/50"
+            renderItem={(section, idx, { isDragging, isDropTarget }) => {
               const isFirst = idx === 0
               const isLast = idx === sections.length - 1
 
               return (
                 <div
-                  key={section.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/30 transition-colors"
+                  className={cn(
+                    "flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
+                    isDragging && "opacity-40",
+                    isDropTarget && "ring-2 ring-primary/30 bg-primary/5"
+                  )}
                 >
                   <div className="flex items-center gap-3 min-w-0">
+                    <DotsSixVertical size={14} className="text-muted-foreground shrink-0 cursor-grab" />
                     <div className="flex items-center gap-1 shrink-0">
                       <Button
                         type="button"
@@ -302,8 +381,8 @@ export function HomepageWorkspace({
                   </div>
                 </div>
               )
-            })}
-          </div>
+            }}
+          />
         </div>
 
         <Separator className="bg-border/60" />
@@ -333,15 +412,22 @@ export function HomepageWorkspace({
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {popularCategories.map((cat, idx) => {
+          <DragReorderList
+            items={popularCategories}
+            getId={(cat) => cat.id}
+            onReorder={persistPopularCategories}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+            renderItem={(cat, idx, { isDragging, isDropTarget }) => {
               const isFirst = idx === 0
               const isLast = idx === popularCategories.length - 1
 
               return (
                 <div
-                  key={cat.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-background/60 hover:bg-muted/20 transition-colors"
+                  className={cn(
+                    "flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-background/60 hover:bg-muted/20 transition-colors",
+                    isDragging && "opacity-40",
+                    isDropTarget && "ring-2 ring-primary/30 bg-primary/5"
+                  )}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     {cat.imageUrl ? (
@@ -402,8 +488,8 @@ export function HomepageWorkspace({
                   </div>
                 </div>
               )
-            })}
-          </div>
+            }}
+          />
         </div>
       </Card>
 
@@ -509,6 +595,92 @@ export function HomepageWorkspace({
               className="text-xs font-semibold cursor-pointer"
             >
               Add Category
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddSectionOpen} onOpenChange={setIsAddSectionOpen}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-card">
+          <DialogHeader className="p-4 sm:p-5 border-b border-border/60">
+            <DialogTitle className="text-sm font-bold text-foreground">
+              Add Homepage Section
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Add a new section block to the homepage layout.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-4 sm:p-5 space-y-4">
+            <Field>
+              <FieldLabel required>Section Type</FieldLabel>
+              <Select
+                value={newSectionType}
+                items={availableSectionTypes}
+                onValueChange={(val) => {
+                  if (!val) return
+                  const typed = val as HomepageSectionConfig["type"]
+                  setNewSectionType(typed)
+                  const opt = SECTION_TYPE_OPTIONS.find((o) => o.value === typed)
+                  if (opt && (!newSectionTitle.trim() || SECTION_TYPE_OPTIONS.some((o) => o.label === newSectionTitle))) {
+                    setNewSectionTitle(opt.label)
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 text-xs w-full">
+                  <SelectValue>
+                    {(val) => getSelectOptionLabel(availableSectionTypes, val, "Select section type")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSectionTypes.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field>
+              <FieldLabel required>Section Title</FieldLabel>
+              <Input
+                value={newSectionTitle}
+                onChange={(e) => setNewSectionTitle(e.target.value)}
+                placeholder="e.g. Featured Listings"
+                className="h-9 text-xs"
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel>Subtitle</FieldLabel>
+              <Input
+                value={newSectionSubtitle}
+                onChange={(e) => setNewSectionSubtitle(e.target.value)}
+                placeholder="Optional short description"
+                className="h-9 text-xs"
+              />
+            </Field>
+          </div>
+
+          <DialogFooter className="p-4 border-t border-border/60 bg-muted/20 flex flex-row items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddSectionOpen(false)}
+              className="text-xs cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={!newSectionTitle.trim()}
+              onClick={handleConfirmAddSection}
+              className="text-xs font-semibold cursor-pointer"
+            >
+              Add Section
             </Button>
           </DialogFooter>
         </DialogContent>

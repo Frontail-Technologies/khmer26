@@ -5,11 +5,12 @@ import { Warning, ArrowRight } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/shared/status-badge"
-import { useAdminReports } from "@/features/admin/reports/hooks/reports.queries"
+import { useAdminDashboard } from "../hooks/dashboard.queries"
+import { normalizeReport } from "@/features/admin/reports/api/reports.api"
 
 export function AdminRecentReportsCard() {
-  const { data } = useAdminReports({ page: 1, limit: 4, status: "open" })
-  const recentReports = data?.items ?? []
+  const { data } = useAdminDashboard()
+  const recentReports = (data?.recentOpenReports ?? []).map(normalizeReport)
 
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">

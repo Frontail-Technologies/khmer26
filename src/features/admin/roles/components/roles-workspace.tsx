@@ -13,7 +13,9 @@ import {
   MagnifyingGlass,
   ShieldCheck,
   UserGear,
-  DotsThreeVertical,
+  Plus,
+  PencilSimple,
+  Trash,
 } from "@phosphor-icons/react"
 import {
   Table,
@@ -24,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -43,22 +46,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { createStaffColumns } from "../columns"
 import { RolePermissionsSheet } from "./role-permissions-sheet"
 import type { AdminStaffMember, RoleDefinition, AdminStaffRole } from "../types"
 import { useAdminPermissions, useAdminRoles, useAdminStaff } from "../hooks/roles.queries"
-import { useAssignStaffRole, useReplaceRolePermissions } from "../hooks/roles.mutations"
+import { useAssignStaffRole, useCreateRole, useDeleteRole, useRemoveStaffRole, useReplaceRolePermissions, useUpdateRole } from "../hooks/roles.mutations"
 import { cn } from "@/lib/utils"
 
 interface RolesWorkspaceProps {
@@ -108,7 +105,11 @@ export function RolesWorkspace({
   const { data: remoteRoles } = useAdminRoles()
   const { data: permissionGroups = [] } = useAdminPermissions()
   const assignStaffRole = useAssignStaffRole()
+  const removeStaffRole = useRemoveStaffRole()
   const replacePermissions = useReplaceRolePermissions()
+  const createRole = useCreateRole()
+  const updateRole = useUpdateRole()
+  const deleteRole = useDeleteRole()
   const [staffList, setStaffList] = useState<AdminStaffMember[]>(initialStaff)
   const [rolesList, setRolesList] = useState<RoleDefinition[]>(initialRoles)
   const [activeTab, setActiveTab] = useState<RolesTabKey>("staff")
@@ -122,7 +123,15 @@ export function RolesWorkspace({
   const [permissionsSheetOpen, setPermissionsSheetOpen] = useState(false)
 
   const [editRoleStaff, setEditRoleStaff] = useState<AdminStaffMember | null>(null)
-  const [newStaffRole, setNewStaffRole] = useState<AdminStaffRole>("admin")
+  const [newStaffRoleId, setNewStaffRoleId] = useState<string>("")
+  const [deleteStaffTarget, setDeleteStaffTarget] = useState<AdminStaffMember | null>(null)
+  const [createRoleOpen, setCreateRoleOpen] = useState(false)
+  const [newRoleName, setNewRoleName] = useState("")
+  const [newRoleDesc, setNewRoleDesc] = useState("")
+  const [editingRole, setEditingRole] = useState<RoleDefinition | null>(null)
+  const [editRoleName, setEditRoleName] = useState("")
+  const [editRoleDesc, setEditRoleDesc] = useState("")
+  const [deleteRoleTarget, setDeleteRoleTarget] = useState<RoleDefinition | null>(null)
 
   useEffect(() => {
     if (remoteStaff) setStaffList(remoteStaff)
@@ -134,28 +143,14 @@ export function RolesWorkspace({
 
   const handleEditRole = useCallback((staff: AdminStaffMember) => {
     setEditRoleStaff(staff)
-    setNewStaffRole(staff.role)
-  }, [])
+    setNewStaffRoleId(staff.roleId ?? rolesList[0]?.id ?? "")
+  }, [rolesList])
 
   const handleSaveStaffRole = () => {
-    if (!editRoleStaff) return
-    const role = rolesList.find((r) => {
-      const normalized = r.name.toLowerCase()
-      return (
-        (newStaffRole === "super_admin" && normalized.includes("super")) ||
-        (newStaffRole === "moderator" && normalized.includes("moderator")) ||
-        (newStaffRole === "support" && normalized.includes("support")) ||
-        (newStaffRole === "admin" && normalized === "admin")
-      )
-    })
-    if (!role) return
+    if (!editRoleStaff || !newStaffRoleId) return
     assignStaffRole.mutate(
-      { userId: editRoleStaff.id, roleId: role.id },
-      {
-        onSuccess: () => {
-          setEditRoleStaff(null)
-        },
-      }
+      { userId: editRoleStaff.id, roleId: newStaffRoleId },
+      { onSuccess: () => setEditRoleStaff(null) }
     )
   }
 
@@ -191,6 +186,7 @@ export function RolesWorkspace({
   const columns = useMemo(() => {
     return createStaffColumns({
       onEditRole: handleEditRole,
+      onDeleteStaff: setDeleteStaffTarget,
     })
   }, [handleEditRole])
 
@@ -219,22 +215,16 @@ export function RolesWorkspace({
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
-        <div className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 min-w-max">
+        <Tabs
+          value={activeTab}
+          onValueChange={(val) => val && setActiveTab(val as RolesTabKey)}
+          className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
+        >
+          <TabsList variant="line">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key
               return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={cn(
-                    "relative flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer border-b-2 border-transparent",
-                    isActive
-                      ? "bg-card text-foreground border-primary shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                  )}
-                >
+                <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
                   <span>{tab.label}</span>
                   <Badge
                     variant="outline"
@@ -247,11 +237,11 @@ export function RolesWorkspace({
                   >
                     {tab.count}
                   </Badge>
-                </button>
+                </TabsTrigger>
               )
             })}
-          </div>
-        </div>
+          </TabsList>
+        </Tabs>
 
         {activeTab === "staff" ? (
           <>
@@ -385,30 +375,26 @@ export function RolesWorkspace({
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              render={
-                                <Button
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  className="size-7 text-muted-foreground hover:text-foreground"
-                                  aria-label="Staff actions"
-                                >
-                                  <DotsThreeVertical size={16} weight="bold" />
-                                </Button>
-                              }
-                            />
-                            <DropdownMenuContent align="end" className="w-40 text-xs">
-                              <DropdownMenuItem
-                                onClick={() => handleEditRole(staff)}
-                                className="flex items-center gap-2 cursor-pointer"
-                              >
-                                <UserGear size={13} />
-                                <span>Edit Role</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="size-7 text-muted-foreground hover:text-foreground"
+                              aria-label="Edit role"
+                              onClick={() => handleEditRole(staff)}
+                            >
+                              <UserGear size={14} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="size-7 text-destructive hover:bg-destructive/10"
+                              aria-label="Remove staff member"
+                              onClick={() => setDeleteStaffTarget(staff)}
+                            >
+                              <Trash size={13} />
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
@@ -437,6 +423,17 @@ export function RolesWorkspace({
             </div>
           </>
         ) : (
+          <>
+          <div className="p-3 sm:p-4 border-b border-border/60 flex items-center justify-end">
+            <Button
+              size="sm"
+              className="text-xs font-semibold gap-1.5"
+              onClick={() => { setNewRoleName(""); setNewRoleDesc(""); setCreateRoleOpen(true) }}
+            >
+              <Plus size={13} />
+              New Role
+            </Button>
+          </div>
           <div className="divide-y divide-border/60">
             {rolesList.map((role) => {
               const roleConf = ROLE_CONFIG[role.id as AdminStaffRole] || ROLE_CONFIG.support
@@ -475,11 +472,38 @@ export function RolesWorkspace({
                       <ShieldCheck size={14} className="mr-1.5 text-primary" />
                       {role.isSystem ? "View Permissions" : "Edit Permissions"}
                     </Button>
+                    {!role.isSystem && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="size-7 text-muted-foreground hover:text-foreground"
+                          aria-label="Edit role"
+                          onClick={() => {
+                            setEditingRole(role)
+                            setEditRoleName(role.name)
+                            setEditRoleDesc(role.description ?? "")
+                          }}
+                        >
+                          <PencilSimple size={13} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="size-7 text-destructive hover:bg-destructive/10"
+                          aria-label="Delete role"
+                          onClick={() => setDeleteRoleTarget(role)}
+                        >
+                          <Trash size={13} />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               )
             })}
           </div>
+          </>
         )}
       </div>
 
@@ -510,19 +534,18 @@ export function RolesWorkspace({
             <Field>
               <FieldLabel required>Role Assignment</FieldLabel>
               <Select
-                value={newStaffRole}
-                items={ROLE_OPTIONS.filter((o) => o.value !== "all")}
-                onValueChange={(val) => setNewStaffRole((val as AdminStaffRole) ?? "admin")}
+                value={newStaffRoleId}
+                onValueChange={(val) => setNewStaffRoleId(val ?? "")}
               >
                 <SelectTrigger className="h-9 text-xs w-full">
                   <SelectValue placeholder="Select role">
-                    {(val) => getSelectOptionLabel(ROLE_OPTIONS, val, "Admin")}
+                    {(val) => rolesList.find((r) => r.id === val)?.name ?? "Select role"}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLE_OPTIONS.filter((o) => o.value !== "all").map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                      {opt.label}
+                  {rolesList.map((r) => (
+                    <SelectItem key={r.id} value={r.id} className="text-xs">
+                      {r.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -550,6 +573,138 @@ export function RolesWorkspace({
               Save Role
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(editingRole)} onOpenChange={(open) => { if (!open) setEditingRole(null) }}>
+        <DialogContent className="sm:max-w-sm p-0 overflow-hidden bg-card">
+          <DialogHeader className="p-4 sm:p-5 border-b border-border/60">
+            <DialogTitle className="text-sm font-bold">Edit Role</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Update the name or description for this role.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="space-y-3.5 p-4 sm:p-5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!editingRole) return
+              updateRole.mutate(
+                { id: editingRole.id, data: { name: editRoleName.trim(), description: editRoleDesc.trim() || undefined } },
+                { onSuccess: () => setEditingRole(null) }
+              )
+            }}
+          >
+            <Field>
+              <FieldLabel required>Role Name</FieldLabel>
+              <input
+                type="text"
+                value={editRoleName}
+                onChange={(e) => setEditRoleName(e.target.value)}
+                required
+                className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Description</FieldLabel>
+              <input
+                type="text"
+                value={editRoleDesc}
+                onChange={(e) => setEditRoleDesc(e.target.value)}
+                className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </Field>
+            <DialogFooter className="pt-4 border-t border-border/60 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 py-3 bg-muted/20 flex flex-row items-center justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setEditingRole(null)} className="text-xs cursor-pointer">
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={!editRoleName.trim() || updateRole.isPending} className="text-xs font-semibold cursor-pointer">
+                {updateRole.isPending ? "Saving…" : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmationDialog
+        open={Boolean(deleteStaffTarget)}
+        onOpenChange={(open) => { if (!open) setDeleteStaffTarget(null) }}
+        title="Remove staff member?"
+        description={`${deleteStaffTarget?.name ?? "This staff member"} will lose their admin role assignment and panel access.`}
+        confirmLabel="Remove Staff"
+        variant="destructive"
+        isPending={removeStaffRole.isPending}
+        onConfirm={() => {
+          if (!deleteStaffTarget?.roleId) return
+          removeStaffRole.mutate(
+            { userId: deleteStaffTarget.id, roleId: deleteStaffTarget.roleId },
+            { onSuccess: () => setDeleteStaffTarget(null) }
+          )
+        }}
+      />
+
+      <ConfirmationDialog
+        open={Boolean(deleteRoleTarget)}
+        onOpenChange={(open) => { if (!open) setDeleteRoleTarget(null) }}
+        title="Delete role?"
+        description={`"${deleteRoleTarget?.name ?? "This role"}" will be permanently removed. Staff members with this role will lose it.`}
+        confirmLabel="Delete Role"
+        variant="destructive"
+        isPending={deleteRole.isPending}
+        onConfirm={() => {
+          if (!deleteRoleTarget) return
+          deleteRole.mutate(deleteRoleTarget.id, { onSuccess: () => setDeleteRoleTarget(null) })
+        }}
+      />
+
+      <Dialog open={createRoleOpen} onOpenChange={(open) => { if (!open) setCreateRoleOpen(false) }}>
+        <DialogContent className="sm:max-w-sm p-0 overflow-hidden bg-card">
+          <DialogHeader className="p-4 sm:p-5 border-b border-border/60">
+            <DialogTitle className="text-sm font-bold">New Role</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Create a custom role. Assign permissions to it from the Roles list.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            className="space-y-3.5 p-4 sm:p-5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              createRole.mutate(
+                { name: newRoleName.trim(), description: newRoleDesc.trim() || undefined },
+                { onSuccess: () => setCreateRoleOpen(false) }
+              )
+            }}
+          >
+            <Field>
+              <FieldLabel required>Role Name</FieldLabel>
+              <input
+                type="text"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+                placeholder="e.g. Content Manager"
+                required
+                className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Description</FieldLabel>
+              <input
+                type="text"
+                value={newRoleDesc}
+                onChange={(e) => setNewRoleDesc(e.target.value)}
+                placeholder="Optional — what this role is for"
+                className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </Field>
+            <DialogFooter className="pt-4 border-t border-border/60 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 py-3 bg-muted/20 flex flex-row items-center justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreateRoleOpen(false)} className="text-xs cursor-pointer">
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={!newRoleName.trim() || createRole.isPending} className="text-xs font-semibold cursor-pointer">
+                {createRole.isPending ? "Creating…" : "Create Role"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

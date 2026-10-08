@@ -26,9 +26,10 @@ interface LocationWorkspaceProps {
 }
 
 export function LocationWorkspace({ stats: initialStats, provinces: initialProvinces = [] }: LocationWorkspaceProps) {
-  const { data: remoteProvinces } = useAdminProvinces()
-  const provinces = remoteProvinces || initialProvinces
+  const { data: remoteProvinces, isLoading: provincesLoading } = useAdminProvinces()
+  const provinces = remoteProvinces ?? initialProvinces
   const createProvince = useCreateAdminProvince()
+  const [createError, setCreateError] = useState<string | null>(null)
 
   const [selectedId, setSelectedId] = useState<string>(provinces[0]?.id ?? "")
   const [addProvinceOpen, setAddProvinceOpen] = useState(false)
@@ -37,7 +38,8 @@ export function LocationWorkspace({ stats: initialStats, provinces: initialProvi
 
   const activeId = selectedId || provinces[0]?.id || ""
   const selectedProvince = provinces.find((p) => p.id === activeId) ?? provinces[0] ?? null
-  const nextProvinceId = Math.max(0, ...provinces.map((p) => Number(p.id) || 0)) + 1
+  const existingIds = new Set((remoteProvinces ?? []).map((p) => Number(p.id)))
+  const nextProvinceId = Math.max(0, ...Array.from(existingIds)) + 1
 
   const totalDistricts = provinces.reduce((acc, p) => acc + (p.districts?.length || 0), 0)
   const totalSangkats = provinces.reduce((acc, p) => acc + (p.sangkatsCount || 0), 0)
@@ -75,19 +77,24 @@ export function LocationWorkspace({ stats: initialStats, provinces: initialProvi
   ]
 
   const handleCreateProvince = async () => {
-    if (!provinceName.trim()) return
+    if (!provinceName.trim() || provincesLoading) return
+    setCreateError(null)
     const createdId = nextProvinceId
-    await createProvince.mutateAsync({
-      id: createdId,
-      nameEn: provinceName.trim(),
-      nameKm: provinceNameKm.trim() || provinceName.trim(),
-      slug: slugify(provinceName) || `province-${createdId}`,
-      isActive: true,
-    })
-    setSelectedId(String(createdId))
-    setProvinceName("")
-    setProvinceNameKm("")
-    setAddProvinceOpen(false)
+    try {
+      await createProvince.mutateAsync({
+        id: createdId,
+        nameEn: provinceName.trim(),
+        nameKm: provinceNameKm.trim() || provinceName.trim(),
+        slug: slugify(provinceName) || `province-${createdId}`,
+        isActive: true,
+      })
+      setSelectedId(String(createdId))
+      setProvinceName("")
+      setProvinceNameKm("")
+      setAddProvinceOpen(false)
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Failed to create province. The suggested ID may already be in use — refresh and try again.")
+    }
   }
 
   return (
@@ -118,12 +125,22 @@ export function LocationWorkspace({ stats: initialStats, provinces: initialProvi
         </div>
       </div>
 
-      <Dialog open={addProvinceOpen} onOpenChange={setAddProvinceOpen}>
+      <Dialog
+        open={addProvinceOpen}
+        onOpenChange={(open) => {
+          setAddProvinceOpen(open)
+          if (open) setCreateError(null)
+        }}
+      >
         <DialogContent className="sm:max-w-md p-5 rounded-xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Add Province</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
+            <Field>
+              <FieldLabel>Province Code</FieldLabel>
+              <Input value={provincesLoading ? "Loading..." : String(nextProvinceId)} disabled className="h-9 text-xs font-mono" />
+            </Field>
             <Field>
               <FieldLabel required>Province Name</FieldLabel>
               <Input value={provinceName} onChange={(e) => setProvinceName(e.target.value)} className="h-9 text-xs" />
@@ -132,12 +149,20 @@ export function LocationWorkspace({ stats: initialStats, provinces: initialProvi
               <FieldLabel>Name Khmer</FieldLabel>
               <Input value={provinceNameKm} onChange={(e) => setProvinceNameKm(e.target.value)} className="h-9 text-xs" />
             </Field>
+            {createError && (
+              <p className="text-xs text-destructive">{createError}</p>
+            )}
           </div>
           <DialogFooter className="flex-row justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => setAddProvinceOpen(false)} className="text-xs">
               Cancel
             </Button>
-            <Button size="sm" onClick={handleCreateProvince} disabled={!provinceName.trim() || createProvince.isPending} className="text-xs">
+            <Button
+              size="sm"
+              onClick={handleCreateProvince}
+              disabled={!provinceName.trim() || provincesLoading || createProvince.isPending}
+              className="text-xs"
+            >
               {createProvince.isPending ? "Creating..." : "Create Province"}
             </Button>
           </DialogFooter>
