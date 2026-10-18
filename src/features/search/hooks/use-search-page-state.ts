@@ -12,6 +12,7 @@ import {
   type SearchFilters,
 } from "../lib/search-filters"
 import { useListingSearch } from "./use-listing-search"
+import { useTopAds } from "./use-top-ads"
 
 interface Options {
   /** Category supplied by the route (category pages). It is not stored in the query string. */
@@ -60,6 +61,7 @@ export function useSearchPageState({ fixedCategory }: Options = {}) {
       currency: filters.currency,
       sort: filters.sort,
       fields: effectiveFields,
+      excludeFeatured: true,
     },
     fieldsSettled
   )
@@ -87,7 +89,10 @@ export function useSearchPageState({ fixedCategory }: Options = {}) {
 
   const pages = search.data?.pages
   const items = useMemo(() => pages?.flatMap((p) => p.items) ?? [], [pages])
-  const total = pages?.[pages.length - 1]?.pagination.total
+  const topAds = useTopAds(filters, definitions)
+  const listed = pages?.[pages.length - 1]?.pagination.total
+  // Top Ads are left out of the list, so they are added back to the headline count.
+  const total = listed === undefined ? undefined : listed + topAds.length
 
   return {
     filters,
@@ -98,6 +103,7 @@ export function useSearchPageState({ fixedCategory }: Options = {}) {
     search,
     items,
     total,
+    topAds,
   }
 }
 

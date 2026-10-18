@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { fireEvent, screen } from "@testing-library/react"
+import { toListingCardData } from "@/features/listings/lib/to-listing-card-data"
 import { renderWithProviders } from "@/test/test-utils"
 import type { PublicListing } from "@/features/listings/api/listings.api"
 import { DEFAULT_SORT, type SearchFilters } from "../lib/search-filters"
@@ -67,6 +68,7 @@ function makeState(overrides: {
   search?: Partial<SearchPageState["search"]>
   setFilters?: SearchPageState["setFilters"]
   isCategoryRoute?: boolean
+  topAds?: SearchPageState["topAds"]
 }): SearchPageState {
   return {
     filters: { ...baseFilters, ...overrides.filters },
@@ -76,6 +78,7 @@ function makeState(overrides: {
     fieldsLoading: false,
     items: overrides.items ?? [],
     total: overrides.total,
+    topAds: overrides.topAds ?? [],
     search: {
       isPending: false,
       isError: false,
@@ -192,6 +195,18 @@ describe("<SearchResultsView />", () => {
     )
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByRole("button", { name: /^Remove filter/ })).toHaveLength(3)
+  })
+
+  it("shows promoted listings in Top Ads without a featured badge and skips the empty state", () => {
+    renderWithProviders(
+      <SearchResultsView
+        state={makeState({ total: 1, topAds: [toListingCardData(listing({ title: "Promoted bike", featured: true }))] })}
+      />
+    )
+    expect(screen.getByRole("region", { name: "Top Ads" })).toBeInTheDocument()
+    expect(screen.getAllByText("Promoted bike").length).toBeGreaterThan(0)
+    expect(screen.queryByText(/featured/i)).toBeNull()
+    expect(screen.queryByText("No result found")).toBeNull()
   })
 
   it("uses the category empty state when only the category is selected", () => {

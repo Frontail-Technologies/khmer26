@@ -19,7 +19,6 @@ import { formatCompactRelativeTime } from "@/lib/formatters/date"
 
 export function ListingListRow({
   listing,
-  featured = false,
   className,
 }: ListingListRowProps) {
   const tGenerated = useTranslations("generated")
@@ -31,7 +30,6 @@ export function ListingListRow({
   const imageUrl = listing.primaryImage?.url ?? null
   const imageAlt = listing.primaryImage?.alt ?? listing.title
   const locationLabel = listing.location.label || listing.location.province
-  const isFeatured = featured || listing.featured
   const metaLine = listing.metadata && listing.metadata.length > 0 ? listing.metadata.join(" • ") : null
 
   return (
@@ -64,11 +62,6 @@ export function ListingListRow({
           </div>
         )}
         <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none flex flex-col gap-1 items-start">
-          {isFeatured && (
-            <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-1.5 py-0.5 text-3xs font-bold tracking-wider uppercase shadow-xs">
-              <LocalizedText id="featured" />
-            </span>
-          )}
           {listing.urgent && (
             <span className="inline-flex items-center rounded-md bg-destructive text-destructive-foreground px-1.5 py-0.5 text-3xs font-bold tracking-wider uppercase shadow-xs">
               <LocalizedText id="urgent" />

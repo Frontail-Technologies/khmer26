@@ -60,6 +60,8 @@ export interface ListingSearchInput {
   fields?: Record<string, string>;
   /** Only listings with an active featured promotion. */
   featuredOnly?: boolean;
+  /** Leave out featured listings (shown separately as Top Ads). */
+  excludeFeatured?: boolean;
 }
 
 export const SEARCH_PAGE_SIZE = 12;
@@ -79,6 +81,7 @@ export function buildListingsQuery(
   if (input.maxPrice !== undefined) query.maxPrice = input.maxPrice;
   if (input.currency) query.currency = input.currency;
   if (input.featuredOnly) query.featuredOnly = 'true';
+  if (input.excludeFeatured) query.excludeFeatured = 'true';
   if (input.category && input.fields) {
     for (const [name, value] of Object.entries(input.fields)) {
       query[`fields[${name}]`] = value;

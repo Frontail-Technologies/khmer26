@@ -54,7 +54,7 @@ export function SearchResultsView({
 }: SearchResultsViewProps) {
   const tGenerated = useTranslations("generated")
   const tDynamic = useTranslations("dynamic")
-  const { filters, setFilters, definitions, fieldsLoading, search, items, total, isCategoryRoute } =
+  const { filters, setFilters, definitions, fieldsLoading, search, items, total, topAds, isCategoryRoute } =
     state
   const [viewMode, setViewMode] = useListingViewMode()
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
@@ -118,7 +118,7 @@ export function SearchResultsView({
           categoryChipLabel={categoryChipLabel}
         />
 
-        <TopAdsStrip filters={filters} definitions={definitions} />
+        <TopAdsStrip listings={topAds} />
 
         <div className={cn("transition-opacity", isRefreshing && "opacity-60")}>
           {search.isPending ? (
@@ -183,7 +183,7 @@ export function SearchResultsView({
                 ) : null}
               </div>
             </div>
-          ) : categoryEmptyState && !hasRefinements ? (
+          ) : topAds.length > 0 ? null : categoryEmptyState && !hasRefinements ? (
             categoryEmptyState
           ) : (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-border/80 bg-card py-16 px-6 text-center shadow-2xs">

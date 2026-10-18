@@ -20,7 +20,6 @@ import { formatCompactRelativeTime } from "@/lib/formatters/date"
 
 export function ListingCard({
   listing,
-  featured = false,
   compact = false,
   className,
 }: ListingCardProps) {
@@ -33,7 +32,6 @@ export function ListingCard({
   const imageUrl = listing.primaryImage?.url ?? null
   const imageAlt = listing.primaryImage?.alt ?? listing.title
   const locationLabel = listing.location.label || listing.location.province
-  const isFeatured = featured || listing.featured
   const metaLine = listing.metadata && listing.metadata.length > 0 ? listing.metadata.join(" • ") : null
 
   return (
@@ -66,14 +64,6 @@ export function ListingCard({
           </div>
         )}
         <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 z-10 pointer-events-none flex flex-col gap-1 items-start">
-          {isFeatured && (
-            <span className={cn(
-              "inline-flex items-center rounded-md bg-accent text-accent-foreground font-bold tracking-wider uppercase shadow-xs",
-              compact ? "px-1.5 py-0.5 text-3xs" : "px-2 py-0.5 text-2xs"
-            )}>
-              <LocalizedText id="featured" />
-            </span>
-          )}
           {listing.urgent && (
             <span className={cn(
               "inline-flex items-center rounded-md bg-destructive text-destructive-foreground font-bold tracking-wider uppercase shadow-xs",
