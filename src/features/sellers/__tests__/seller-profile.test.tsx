@@ -124,13 +124,20 @@ describe("seller header", () => {
     expect(screen.getByText("Family-run dealership in Phnom Penh.")).toBeInTheDocument()
   })
 
-  it("never invents followers, response time, phone, sales or views", async () => {
+  it("never invents response time, phone, sales or views", async () => {
     const { container } = setup()
     await findShopHeading("Angkor Motors")
     const text = container.textContent ?? ""
-    for (const fake of [/follower/i, /response/i, /\bphone\b/i, /\bsold\b/i, /\bviews\b/i]) {
+    for (const fake of [/response/i, /\bphone\b/i, /\bsold\b/i, /\bviews\b/i]) {
       expect(text).not.toMatch(fake)
     }
+  })
+
+  it("shows the backend follower and following counts as links to the lists", async () => {
+    setup({ seller: makeSeller({ followerCount: 12, followingCount: 3 }) })
+    await findShopHeading("Angkor Motors")
+    expect(screen.getByRole("link", { name: /12\s+Followers/ })).toHaveAttribute("href", expect.stringMatching(/\/followers$/))
+    expect(screen.getByRole("link", { name: /3\s+Following/ })).toHaveAttribute("href", expect.stringMatching(/\/following$/))
   })
 
   it("hides the verified badge, rating and bio when the backend does not return them, and falls back to initials", async () => {

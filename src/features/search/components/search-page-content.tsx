@@ -13,10 +13,11 @@ import type { CategoryNavData } from "./filter-panel"
 import { ResultsHeader } from "./results-header"
 import { SearchResultsView } from "./search-results-view"
 import { SellerResults } from "./seller-results"
+import { SearchTabs } from "./search-tabs"
 import { useLocalizedName } from "@/lib/i18n/localized"
 import { useTranslations } from "next-intl"
 
-export function SearchPageContent() {
+export function SearchPageContent({ showSellers = true }: { showSellers?: boolean } = {}) {
   const tGenerated = useTranslations("generated")
   const tDynamic = useTranslations("dynamic")
   const getLocalizedName = useLocalizedName()
@@ -58,7 +59,8 @@ export function SearchPageContent() {
   return (
     <>
       <ResultsHeader title={title} totalCount={state.total} breadcrumbs={breadcrumbs} />
-      {filters.q && <SellerResults q={filters.q} />}
+      {showSellers && filters.q && <SellerResults q={filters.q} />}
+      {!showSellers && filters.q && <SearchTabs q={filters.q} />}
       <div id="posts" className="scroll-mt-32">
         <SearchResultsView
           state={state}

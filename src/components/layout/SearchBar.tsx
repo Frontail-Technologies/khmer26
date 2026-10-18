@@ -435,7 +435,7 @@ function SearchBarWithUrl(props: SearchBarProps) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
-  const onSearchPage = pathname === "/search"
+  const onSearchPage = pathname === "/search" || pathname.startsWith("/search/")
   const onCategoryPage = pathname.startsWith("/category/")
   const routeCategory = onCategoryPage ? safeDecode(pathname.split("/").filter(Boolean).pop() ?? "") : undefined
 

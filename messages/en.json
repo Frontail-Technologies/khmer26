@@ -1127,7 +1127,16 @@
       "posts": "Posts",
       "noPosts": "No posts match your search",
       "noUsers": "No users found",
-      "noCompanies": "No companies found"
+      "noCompanies": "No companies found",
+      "followers": "Followers",
+      "following": "Following",
+      "followersCount": "{count} followers",
+      "followingCount": "{count} following",
+      "loadMore": "Load more",
+      "noFollowers": "No followers yet",
+      "noFollowing": "Not following anyone yet",
+      "seeAll": "See all",
+      "backToProfile": "Back to profile"
     }
   },
   "meta": {

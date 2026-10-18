@@ -14,6 +14,8 @@ export function makeSeller(overrides: Partial<SellerProfile> = {}): SellerProfil
     listingCount: 2,
     contacts: [],
     isFollowing: false,
+    followerCount: 0,
+    followingCount: 0,
     allowBuyersFollow: true,
     isActive: false,
     isOwner: false,

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl"
 import { LocalizedText } from "@/components/i18n/localized-text"
 import { ShieldCheck, CalendarBlank, Star, Storefront } from "@phosphor-icons/react/dist/ssr"
 import Image from "next/image"
+import Link from "next/link"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getMediaUrl } from "@/lib/media/get-media-url"
@@ -22,6 +23,7 @@ interface SellerProfileHeaderProps {
 export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: SellerProfileHeaderProps) {
   const tGenerated = useTranslations("generated")
   const tDynamic = useTranslations("dynamic")
+  const tSearch = useTranslations("ui.searchBar")
   const intlLocale = useIntlLocale()
   const avatarUrl = getMediaUrl(seller.avatarR2Key)
   const coverUrl = getMediaUrl(seller.coverR2Key)
@@ -116,6 +118,12 @@ export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: 
             <Storefront size={15} className="text-primary shrink-0" />
             {tDynamic("activeListingCount", { count: seller.listingCount })}
           </span>
+          <Link href={`/seller/${encodeURIComponent(seller.id)}/followers`} className="hover:text-primary hover:underline">
+            <span className="font-semibold text-foreground">{seller.followerCount}</span> {tSearch("followers")}
+          </Link>
+          <Link href={`/seller/${encodeURIComponent(seller.id)}/following`} className="hover:text-primary hover:underline">
+            <span className="font-semibold text-foreground">{seller.followingCount}</span> {tSearch("following")}
+          </Link>
           {seller.rating && (
             <span className="inline-flex items-center gap-1.5">
               <Star size={15} weight="fill" className="text-accent shrink-0" />

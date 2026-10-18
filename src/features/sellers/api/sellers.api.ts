@@ -30,6 +30,8 @@ export interface SellerProfile {
   contacts: MaskedContact[];
   /** Whether the signed-in viewer follows this seller (false when signed out). */
   isFollowing: boolean;
+  followerCount: number;
+  followingCount: number;
   /** Whether this seller accepts new followers. */
   allowBuyersFollow: boolean;
   /** True only when active-status sharing is enabled and a session was recently used. */
@@ -88,6 +90,7 @@ export interface SellerSearchResult {
   avatarR2Key: string | null;
   isVerified: boolean;
   listingCount: number;
+  followerCount: number;
 }
 
 export async function searchSellers(
@@ -96,6 +99,25 @@ export async function searchSellers(
 ): Promise<SellerSearchResult[]> {
   const res = await apiClient.get<SellerSearchResult[]>('/sellers/search', { params: { q, ...options } });
   return res.data;
+}
+
+export async function searchSellersPage(
+  q: string,
+  group: 'user' | 'company',
+  params: PageParams
+): Promise<Page<SellerSearchResult>> {
+  const res = await apiClient.get<SellerSearchResult[]>('/sellers/search', { params: { q, group, ...params } });
+  return toPage(res, params);
+}
+
+export async function getSellerFollowersPage(id: string, params: PageParams): Promise<Page<SellerSearchResult>> {
+  const res = await apiClient.get<SellerSearchResult[]>(`/sellers/${encodeURIComponent(id)}/followers`, { params: { ...params } });
+  return toPage(res, params);
+}
+
+export async function getSellerFollowingPage(id: string, params: PageParams): Promise<Page<SellerSearchResult>> {
+  const res = await apiClient.get<SellerSearchResult[]>(`/sellers/${encodeURIComponent(id)}/following`, { params: { ...params } });
+  return toPage(res, params);
 }
 
 export async function getSeller(id: string): Promise<SellerProfile> {

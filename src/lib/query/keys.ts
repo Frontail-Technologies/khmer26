@@ -48,6 +48,7 @@ export const marketplaceKeys = {
       [...marketplaceKeys.sellers.all, 'review-eligibility', id] as const,
     categories: (id: string) => [...marketplaceKeys.sellers.all, 'categories', id] as const,
     contacts: (id: string) => [...marketplaceKeys.sellers.all, 'contacts', id] as const,
+    directory: (params: Record<string, unknown>) => [...marketplaceKeys.sellers.all, 'directory', params] as const,
   },
 
   reports: {
