@@ -8,9 +8,11 @@ import type { ConversationMessage, ConversationRole } from "../types"
 interface MessageThreadProps {
   messages: ConversationMessage[]
   role: ConversationRole
+  currentUserId: string
   onAcceptOffer?: (offerId: string) => void
   onDeclineOffer?: (offerId: string) => void
   onWithdrawOffer?: (offerId: string) => void
+  onCounterOffer?: (offerId: string) => void
 }
 
 function getDateGroupLabel(dateString: string): string {
@@ -30,9 +32,11 @@ function getDateGroupLabel(dateString: string): string {
 export function MessageThread({
   messages,
   role,
+  currentUserId,
   onAcceptOffer,
   onDeclineOffer,
   onWithdrawOffer,
+  onCounterOffer,
 }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -58,7 +62,7 @@ export function MessageThread({
       {groupedMessages.map((group) => (
         <div key={group.date} className="space-y-3">
           <div className="flex items-center justify-center my-2">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-muted/60">
+            <span className="text-2xs font-bold text-muted-foreground uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-muted/60">
               {group.date}
             </span>
           </div>
@@ -69,9 +73,11 @@ export function MessageThread({
                 key={msg.id}
                 message={msg}
                 role={role}
+                currentUserId={currentUserId}
                 onAcceptOffer={onAcceptOffer}
                 onDeclineOffer={onDeclineOffer}
                 onWithdrawOffer={onWithdrawOffer}
+                onCounterOffer={onCounterOffer}
               />
             ))}
           </div>

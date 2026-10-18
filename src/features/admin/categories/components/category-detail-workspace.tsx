@@ -98,7 +98,7 @@ export function CategoryDetailWorkspace({
             </h1>
             <Badge
               variant="secondary"
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+              className={`text-2xs font-bold px-2 py-0.5 rounded-md ${
                 isActive
                   ? "bg-success/10 text-success border-success/20"
                   : "bg-muted text-muted-foreground"
@@ -316,7 +316,7 @@ export function CategoryDetailWorkspace({
                     <div className="p-8 text-center border border-dashed border-border/70 rounded-xl space-y-2">
                       <Folder size={28} weight="duotone" className="mx-auto text-muted-foreground/60" />
                       <p className="text-xs font-bold text-foreground">No subcategories assigned</p>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-xxs text-muted-foreground">
                         Add subcategories to organize listings and configure specific listing fields.
                       </p>
                     </div>
@@ -346,18 +346,18 @@ export function CategoryDetailWorkspace({
 
                             <div className="min-w-0 space-y-0.5">
                               <p className="text-xs font-bold text-foreground truncate">{sub.name}</p>
-                              <p className="text-[11px] text-muted-foreground font-mono">/{sub.slug}</p>
+                              <p className="text-xxs text-muted-foreground font-mono">/{sub.slug}</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-[11px] font-semibold text-foreground/80 px-2 py-0.5 rounded-md bg-muted/60">
+                            <span className="text-xxs font-semibold text-foreground/80 px-2 py-0.5 rounded-md bg-muted/60">
                               {sub.listingCount.toLocaleString()} listings
                             </span>
 
                             <Badge
                               variant="secondary"
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                              className={`text-2xs font-bold px-2 py-0.5 rounded-md ${
                                 sub.isActive
                                   ? "bg-success/10 text-success border-success/20"
                                   : "bg-muted text-muted-foreground"
@@ -370,7 +370,7 @@ export function CategoryDetailWorkspace({
                               variant="outline"
                               size="sm"
                               render={<Link href={`/admin/categories/${sub.id}`} />}
-                              className="h-7 px-2.5 text-[11px] font-semibold rounded-lg"
+                              className="h-7 px-2.5 text-xxs font-semibold rounded-lg"
                             >
                               <span>Edit</span>
                             </Button>
@@ -392,11 +392,11 @@ export function CategoryDetailWorkspace({
                 <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
                   Listing Fields
                 </h2>
-                <p className="text-[11px] text-muted-foreground">
-                  {isRoot
-                    ? "Listing fields are configured per subcategory"
-                    : `${assignedFields.length} fields assigned`}
-                </p>
+                {!isRoot ? (
+                  <p className="text-xxs text-muted-foreground">
+                    {assignedFields.length} fields assigned
+                  </p>
+                ) : null}
               </div>
               <Sliders size={16} weight="duotone" className="text-primary" />
             </div>
@@ -404,10 +404,6 @@ export function CategoryDetailWorkspace({
             <CardContent className="p-4 space-y-3.5">
               {isRoot ? (
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    Fields are attached to leaf subcategories where sellers post ads.
-                  </p>
-
                   <div className="space-y-1.5">
                     {subcategoriesList.map((sub) => {
                       return (
@@ -417,12 +413,12 @@ export function CategoryDetailWorkspace({
                         >
                           <span className="font-semibold text-foreground truncate">{sub.name}</span>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-xxs text-muted-foreground">
                               Fields
                             </span>
                             <Link
                               href={`/admin/listing-fields?category=${sub.id}`}
-                              className="text-primary hover:underline text-[11px] font-bold"
+                              className="text-primary hover:underline text-xxs font-bold"
                             >
                               Configure
                             </Link>
@@ -443,16 +439,16 @@ export function CategoryDetailWorkspace({
                       {assignedFields.slice(0, 6).map(({ field, assignment }) => (
                         <span
                           key={field.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 text-foreground text-[11px] font-medium"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 text-foreground text-xxs font-medium"
                         >
                           <span>{field.label}</span>
                           {assignment.required && (
-                            <span className="text-destructive font-bold text-[10px]">*</span>
+                            <span className="text-destructive font-bold text-2xs">*</span>
                           )}
                         </span>
                       ))}
                       {assignedFields.length > 6 && (
-                        <span className="px-2 py-0.5 rounded-md bg-muted/40 text-muted-foreground text-[11px] font-semibold">
+                        <span className="px-2 py-0.5 rounded-md bg-muted/40 text-muted-foreground text-xxs font-semibold">
                           +{assignedFields.length - 6} more
                         </span>
                       )}

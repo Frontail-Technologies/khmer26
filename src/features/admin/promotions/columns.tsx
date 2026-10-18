@@ -72,8 +72,8 @@ export function createPromotionColumns({
               >
                 {item.listingTitle}
               </Link>
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="font-mono text-[10px]">{item.listingId}</span>
+              <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
+                <span className="font-mono text-2xs">{item.listingDisplayId}</span>
                 <span>•</span>
                 <span className="font-semibold text-foreground">
                   ${typeof item.listingPrice === 'number' ? item.listingPrice.toLocaleString() : (item.listingPrice ?? 0)}
@@ -100,7 +100,7 @@ export function createPromotionColumns({
             >
               {item.sellerName}
             </Link>
-            <span className="font-mono text-[10px] text-muted-foreground block">{item.sellerId}</span>
+            <span className="text-2xs text-muted-foreground block">Seller account</span>
           </div>
         )
       },
@@ -117,7 +117,7 @@ export function createPromotionColumns({
         return (
           <Badge
             variant="outline"
-            className={`text-[10px] font-semibold px-2 py-0.5 h-5 flex items-center gap-1 w-fit ${conf.badgeClass}`}
+            className={`text-2xs font-semibold px-2 py-0.5 h-5 flex items-center gap-1 w-fit ${conf.badgeClass}`}
           >
             <Icon size={12} weight="fill" />
             <span>{conf.label}</span>

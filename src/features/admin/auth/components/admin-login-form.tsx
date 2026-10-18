@@ -11,9 +11,8 @@ import {
   ShieldCheck,
   ArrowSquareOut,
   SpinnerGap,
-  Key,
 } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -27,12 +26,6 @@ export function AdminLoginForm() {
   const [rememberMe, setRememberMe] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { login, isLoggingIn } = useAdminAuth()
-
-  const handleFillDemoAdmin = () => {
-    setEmail("admin@khmer26.com")
-    setPassword("Admin@Khmer26!")
-    setErrorMessage(null)
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,31 +63,9 @@ export function AdminLoginForm() {
           <CardTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             Sign In
           </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground mt-0.5">
-            Sign in to manage the marketplace, review listings, and oversee moderation.
-          </CardDescription>
         </CardHeader>
 
         <CardContent className="p-5 sm:p-7 space-y-4">
-          <div className="flex items-center justify-between p-2.5 rounded-lg border border-primary/20 bg-primary/5 text-xs text-foreground">
-            <div className="flex items-center gap-2">
-              <Key size={16} className="text-primary shrink-0" weight="bold" />
-              <div>
-                <p className="font-semibold text-[11px] text-foreground">Demo Account</p>
-                <p className="text-[10px] text-muted-foreground">admin@khmer26.com</p>
-              </div>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleFillDemoAdmin}
-              className="h-7 px-2.5 text-[11px] font-medium border-primary/30 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
-            >
-              Fill Credentials
-            </Button>
-          </div>
-
           {errorMessage && (
             <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium leading-relaxed">
               {errorMessage}
@@ -125,7 +96,7 @@ export function AdminLoginForm() {
             <Field className="gap-2">
               <div className="flex items-center justify-between">
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-2xs text-muted-foreground">
                   Internal accounts only
                 </span>
               </div>

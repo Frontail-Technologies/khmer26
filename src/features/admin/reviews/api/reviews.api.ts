@@ -1,8 +1,10 @@
 import { apiClient } from '@/lib/api/client';
 import type { AdminReview, AdminReviewStatus } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface BackendReviewDto {
   id: string;
+  displayId: string;
   rating: number;
   comment: string | null;
   visibility: string;
@@ -14,9 +16,10 @@ export interface BackendReviewDto {
 export function normalizeReview(r: BackendReviewDto): AdminReview {
   return {
     id: r.id,
-    rating: r.rating || 5,
+    displayId: r.displayId,
+    rating: r.rating,
     comment: r.comment || '',
-    createdAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—',
+    createdAt: r.createdAt ? formatAdminDateTime(r.createdAt) : '—',
     status: (r.visibility === 'hidden' ? 'hidden' : 'visible') as AdminReviewStatus,
     reportsCount: 0,
     reviewer: {
@@ -27,8 +30,6 @@ export function normalizeReview(r: BackendReviewDto): AdminReview {
     seller: {
       id: r.seller?.id || '',
       name: r.seller?.shopName || 'Seller',
-      rating: 5,
-      totalReviewsCount: 1,
     },
   };
 }

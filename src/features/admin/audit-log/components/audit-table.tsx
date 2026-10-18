@@ -109,7 +109,8 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
         const matchesAction = item.action.toLowerCase().includes(q)
         const matchesActor = item.actorName.toLowerCase().includes(q)
         const matchesTarget = item.targetName.toLowerCase().includes(q)
-        if (!matchesAction && !matchesActor && !matchesTarget) return false
+        const matchesReference = item.displayId.toLowerCase().includes(q)
+        if (!matchesAction && !matchesActor && !matchesTarget && !matchesReference) return false
       }
 
       return true
@@ -271,7 +272,6 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No audit events found"
-                  description="Try adjusting your search criteria or active module filter."
                 />
               )}
             </TableBody>
@@ -291,12 +291,12 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
                     <span className="font-semibold text-xs text-foreground block">
                       {entry.actorName}
                     </span>
-                    <span className="text-[10px] text-muted-foreground block">
+                    <span className="text-2xs text-muted-foreground block">
                       {entry.actorRole}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5">
+                    <Badge variant="outline" className="text-2xs font-medium px-2 py-0.5 h-5">
                       {MODULE_LABELS[entry.module] || entry.module}
                     </Badge>
                     <Button
@@ -317,16 +317,15 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
                   {entry.action}
                 </p>
 
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                <div className="flex items-center justify-between text-xxs text-muted-foreground pt-1 border-t border-border/40">
                   <span className="truncate pr-2">{entry.targetName}</span>
-                  <span className="text-[10px] whitespace-nowrap shrink-0">{entry.timestamp}</span>
+                  <span className="text-2xs whitespace-nowrap shrink-0">{entry.timestamp}</span>
                 </div>
               </div>
             ))
           ) : (
             <DataTableEmpty
               title="No audit events found"
-              description="Try adjusting your search criteria or active module filter."
             />
           )}
         </div>

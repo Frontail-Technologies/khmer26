@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { StatusBadge } from "@/components/shared/status-badge"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import { useUpdateSubscriptionPlan } from "../hooks/subscriptions.mutations"
 import type { SubscriptionPlan } from "../types"
 
@@ -36,6 +37,9 @@ export function SubscriptionPlansTable({
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   const [formName, setFormName] = useState("")
+  const [formNameKm, setFormNameKm] = useState("")
+  const [formDescription, setFormDescription] = useState("")
+  const [formDescriptionKm, setFormDescriptionKm] = useState("")
   const [formLimit, setFormLimit] = useState(10)
   const [formPrice, setFormPrice] = useState(0)
   const [formActive, setFormActive] = useState(true)
@@ -43,6 +47,9 @@ export function SubscriptionPlansTable({
   const handleEditClick = (plan: SubscriptionPlan) => {
     setEditingPlan(plan)
     setFormName(plan.name)
+    setFormNameKm(plan.nameKm ?? "")
+    setFormDescription(plan.description)
+    setFormDescriptionKm(plan.descriptionKm ?? "")
     setFormLimit(plan.maxListings)
     setFormPrice(plan.price)
     setFormActive(plan.isActive)
@@ -55,7 +62,10 @@ export function SubscriptionPlansTable({
       {
         id: editingPlan.id,
         data: {
-          name: formName,
+          name: formName.trim(),
+          nameKm: formNameKm.trim() || null,
+          description: formDescription.trim(),
+          descriptionKm: formDescriptionKm.trim() || null,
           maxListings: Number(formLimit),
           price: Number(formPrice),
           isActive: formActive,
@@ -109,7 +119,7 @@ export function SubscriptionPlansTable({
                     <span className="font-semibold text-xs text-foreground block">
                       {plan.name}
                     </span>
-                    <span className="text-[11px] text-muted-foreground block line-clamp-1">
+                    <span className="text-xxs text-muted-foreground block line-clamp-1">
                       {plan.description}
                     </span>
                   </div>
@@ -120,7 +130,7 @@ export function SubscriptionPlansTable({
                   </span>
                 </TableCell>
                 <TableCell className="py-3 px-4 text-xs">
-                  <Badge variant="outline" className="text-[10px] font-semibold">
+                  <Badge variant="outline" className="text-2xs font-semibold">
                     {plan.billingInterval}
                   </Badge>
                 </TableCell>
@@ -164,7 +174,7 @@ export function SubscriptionPlansTable({
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-semibold text-xs text-foreground">{plan.name}</h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{plan.description}</p>
+                <p className="text-xxs text-muted-foreground mt-0.5">{plan.description}</p>
               </div>
               <StatusBadge
                 label={plan.isActive ? "Active" : "Paused"}
@@ -175,13 +185,13 @@ export function SubscriptionPlansTable({
 
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div className="p-2 rounded-lg bg-muted/40 border border-border/50 space-y-0.5">
-                <span className="text-[10px] text-muted-foreground block">Listing Limit</span>
+                <span className="text-2xs text-muted-foreground block">Listing Limit</span>
                 <span className="font-semibold text-foreground">
                   {plan.maxListings === 0 ? "Custom / Unset" : `${plan.maxListings} listings`}
                 </span>
               </div>
               <div className="p-2 rounded-lg bg-muted/40 border border-border/50 space-y-0.5">
-                <span className="text-[10px] text-muted-foreground block">Price</span>
+                <span className="text-2xs text-muted-foreground block">Price</span>
                 <span className="font-bold text-foreground">
                   {plan.price === 0 && plan.tier === "free" ? "Free" : plan.price === 0 ? "Unset" : `$${plan.price} / mo`}
                 </span>
@@ -189,7 +199,7 @@ export function SubscriptionPlansTable({
             </div>
 
             <div className="flex items-center justify-between pt-1 border-t border-border/40">
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xxs text-muted-foreground">
                 {plan.subscribersCount.toLocaleString()} active sellers
               </span>
               <Button
@@ -207,25 +217,37 @@ export function SubscriptionPlansTable({
       </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Edit Subscription Plan</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3.5 py-2 text-xs">
-            <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-muted-foreground">Plan Name</label>
-              <input
-                type="text"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
+            <BilingualField
+              id="plan-name"
+              label="Name"
+              required
+              valueEn={formName}
+              valueKm={formNameKm}
+              onChangeEn={setFormName}
+              onChangeKm={setFormNameKm}
+              maxLength={120}
+            />
+            <BilingualField
+              id="plan-description"
+              label="Description"
+              multiline
+              rows={3}
+              valueEn={formDescription}
+              valueKm={formDescriptionKm}
+              onChangeEn={setFormDescription}
+              onChangeKm={setFormDescriptionKm}
+              maxLength={1000}
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-muted-foreground">Listing Limit</label>
+                <label className="text-xxs font-semibold text-muted-foreground">Listing Limit</label>
                 <input
                   type="number"
                   value={formLimit}
@@ -235,7 +257,7 @@ export function SubscriptionPlansTable({
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-muted-foreground">Price (USD)</label>
+                <label className="text-xxs font-semibold text-muted-foreground">Price (USD)</label>
                 <input
                   type="number"
                   value={formPrice}

@@ -1,7 +1,11 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { MagnifyingGlass, Funnel, ArrowsDownUp } from "@phosphor-icons/react"
 import { Input } from "@/components/ui/input"
+import { useCategoryTree } from "@/features/categories/api/categories.queries"
+import { useLocalizedName } from "@/lib/i18n/localized"
 import {
   Select,
   SelectTrigger,
@@ -26,14 +30,13 @@ interface AccountListingsToolbarProps {
   onSortOptionChange: (val: ListingSortOption) => void
 }
 
-const CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "vehicles", label: "Vehicles" },
-  { value: "electronics", label: "Electronics" },
-  { value: "property", label: "Property" },
-  { value: "fashion", label: "Fashion & Beauty" },
-  { value: "home", label: "Home & Garden" },
-]
+const SORT_LABEL_KEYS = {
+  newest: "sortNewest",
+  oldest: "sortOldest",
+  most_viewed: "sortMostViewed",
+  price_high_low: "sortPriceHighLow",
+  price_low_high: "sortPriceLowHigh",
+} as const satisfies Record<ListingSortOption, string>
 
 export function AccountListingsToolbar({
   searchQuery,
@@ -43,6 +46,18 @@ export function AccountListingsToolbar({
   sortOption,
   onSortOptionChange,
 }: AccountListingsToolbarProps) {
+  const tGenerated = useTranslations("generated")
+  const t = useTranslations("ui.myListings")
+  const getLocalizedName = useLocalizedName()
+  const { data: categoryTree = [] } = useCategoryTree()
+  const categoryOptions = [
+    { value: "all", label: t("allCategories") },
+    ...categoryTree.map((category) => ({ value: category.id, label: getLocalizedName(category) })),
+  ]
+  const sortOptions = (Object.keys(SORT_LABEL_KEYS) as ListingSortOption[]).map((value) => ({
+    value,
+    label: t(SORT_LABEL_KEYS[value]),
+  }))
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
       <div className="relative flex-1">
@@ -52,7 +67,7 @@ export function AccountListingsToolbar({
         />
         <Input
           type="search"
-          placeholder="Search my listings..."
+          placeholder={tGenerated("searchMyListings")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 h-9 text-xs sm:text-sm bg-background"
@@ -63,16 +78,17 @@ export function AccountListingsToolbar({
         <div className="flex-1 sm:w-44">
           <Select
             value={categoryFilter}
+            items={categoryOptions}
             onValueChange={(val) => onCategoryFilterChange(val as string)}
           >
             <SelectTrigger className="h-9 text-xs sm:text-sm bg-background">
               <div className="flex items-center gap-1.5 truncate">
                 <Funnel size={14} className="text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={tGenerated("category")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              {CATEGORIES.map((cat) => (
+              {categoryOptions.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value} className="text-xs">
                   {cat.label}
                 </SelectItem>
@@ -84,30 +100,21 @@ export function AccountListingsToolbar({
         <div className="flex-1 sm:w-44">
           <Select
             value={sortOption}
+            items={sortOptions}
             onValueChange={(val) => onSortOptionChange(val as ListingSortOption)}
           >
             <SelectTrigger className="h-9 text-xs sm:text-sm bg-background">
               <div className="flex items-center gap-1.5 truncate">
                 <ArrowsDownUp size={14} className="text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Sort By" />
+                <SelectValue placeholder={tGenerated("sortBy")} />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="newest" className="text-xs">
-                Newest
-              </SelectItem>
-              <SelectItem value="oldest" className="text-xs">
-                Oldest
-              </SelectItem>
-              <SelectItem value="most_viewed" className="text-xs">
-                Most Viewed
-              </SelectItem>
-              <SelectItem value="price_high_low" className="text-xs">
-                Price: High to Low
-              </SelectItem>
-              <SelectItem value="price_low_high" className="text-xs">
-                Price: Low to High
-              </SelectItem>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value} className="text-xs">
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

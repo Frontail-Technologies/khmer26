@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { Suspense } from "react"
 import type { Metadata } from "next"
 import { Container } from "@/components/layout/Container"
@@ -10,9 +11,10 @@ interface SearchPageProps {
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams
+  const t = await getTranslations("meta.search")
   return {
-    title: q ? `Results for "${q}"` : "Search Marketplace Listings",
-    description: "Search verified marketplace listings in Cambodia.",
+    title: q ? t("results", { query: q }) : t("title"),
+    description: t("description"),
   }
 }
 

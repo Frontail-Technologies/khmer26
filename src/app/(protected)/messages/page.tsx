@@ -1,11 +1,15 @@
+import { getTranslations } from "next-intl/server"
+import type { Metadata } from "next"
 import { MessagesShell } from "@/features/messages/components/messages-shell"
-import { DEMO_CONVERSATIONS } from "@/features/messages/data/demo-conversations"
 
-export const metadata = {
-  title: "Messages",
-  description: "Marketplace buyer and seller messages on Khmer26",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.messages")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function MessagesPage() {
-  return <MessagesShell initialConversations={DEMO_CONVERSATIONS} />
+  return <MessagesShell />
 }

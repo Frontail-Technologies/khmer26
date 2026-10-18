@@ -64,7 +64,7 @@ export function DismissReportDialog({
             <XCircle size={20} weight="bold" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">
-            Dismiss Report {report.id}
+            Dismiss report
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
             Dismiss this report without taking punitive action against the reported target.

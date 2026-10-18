@@ -28,7 +28,7 @@ export function VerificationMobileCards({ data }: VerificationMobileCardsProps) 
     return (
       <div className="rounded-xl border border-dashed border-border/70 p-8 text-center bg-card">
         <p className="text-xs font-semibold text-foreground">No verification requests found</p>
-        <p className="text-[11px] text-muted-foreground mt-1">Try changing your search keywords or active filters.</p>
+        <p className="text-xxs text-muted-foreground mt-1">Try changing your search keywords or active filters.</p>
       </div>
     )
   }
@@ -55,7 +55,7 @@ export function VerificationMobileCards({ data }: VerificationMobileCardsProps) 
                     <span className="text-xs font-bold text-foreground block truncate">
                       {request.seller.name}
                     </span>
-                    <span className="text-[10px] text-muted-foreground block truncate">
+                    <span className="text-2xs text-muted-foreground block truncate">
                       {request.seller.phone || request.seller.email}
                     </span>
                   </div>
@@ -68,9 +68,9 @@ export function VerificationMobileCards({ data }: VerificationMobileCardsProps) 
                 />
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/60">
-                <div className="flex items-center gap-1.5 font-mono font-semibold text-foreground text-[10px]">
-                  <span>{request.id}</span>
+              <div className="flex items-center justify-between text-xxs text-muted-foreground pt-1 border-t border-border/60">
+                <div className="flex items-center gap-1.5 font-mono font-semibold text-foreground text-2xs">
+                  <span>{request.displayId}</span>
                   <span className="text-muted-foreground/50">•</span>
                   <span className="capitalize font-sans font-normal text-muted-foreground">{request.type}</span>
                 </div>
@@ -81,7 +81,7 @@ export function VerificationMobileCards({ data }: VerificationMobileCardsProps) 
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-2xs text-muted-foreground">
                 <span>Submitted {request.submittedAt}</span>
                 <span className="inline-flex items-center gap-0.5 text-primary font-semibold">
                   <span>Review</span>

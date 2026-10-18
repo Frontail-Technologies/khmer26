@@ -1,7 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { cn } from "@/lib/utils"
-import { Heart } from "@phosphor-icons/react"
+import { BookmarkSimple, Heart } from "@phosphor-icons/react"
 import { useState, type MouseEvent } from "react"
 import { useRouter } from "next/navigation"
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user"
@@ -13,6 +15,8 @@ interface FavoriteButtonProps {
   className?: string
   /** Renders a text label next to the heart ("Save" / "Saved"). */
   showLabel?: boolean
+  /** Icon shown next to the label; cards use the heart, the detail action row a bookmark. */
+  icon?: "heart" | "bookmark"
 }
 
 export function FavoriteButton({
@@ -20,7 +24,9 @@ export function FavoriteButton({
   initialFavorited = false,
   className,
   showLabel = false,
+  icon = "heart",
 }: FavoriteButtonProps) {
+  const tGenerated = useTranslations("generated")
   const router = useRouter()
   const { isAuthenticated, isLoading } = useCurrentUser()
   const toggle = useToggleFavorite()
@@ -51,11 +57,13 @@ export function FavoriteButton({
     )
   }
 
+  const Icon = icon === "bookmark" ? BookmarkSimple : Heart
+
   return (
     <button
       type="button"
       onClick={handleToggle}
-      aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
+      aria-label={favorited ? tGenerated("removeFromFavorites") : tGenerated("saveToFavorites")}
       aria-pressed={favorited}
       data-listing-id={listingId}
       className={cn(
@@ -63,16 +71,16 @@ export function FavoriteButton({
           ? "flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors"
           : "flex h-7 w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-xs text-white transition-all hover:bg-black/65 active:scale-90",
         !showLabel && favorited && "bg-black/60 text-accent",
-        showLabel && favorited && "text-destructive",
+        showLabel && favorited && (icon === "bookmark" ? "text-primary" : "text-destructive"),
         className
       )}
     >
-      <Heart
-        size={showLabel ? 17 : 15}
+      <Icon
+        size={showLabel ? 19 : 15}
         weight={favorited ? "fill" : "bold"}
         className="transition-transform"
       />
-      {showLabel && <span>{favorited ? "Saved" : "Save"}</span>}
+      {showLabel && <span>{favorited ? tGenerated("saved") : tGenerated("save")}</span>}
     </button>
   )
 }

@@ -4,8 +4,11 @@ export type NotificationStatus = "sent" | "pending" | "failed"
 
 export interface NotificationRecord {
   id: string
+  displayId: string
   title: string
+  titleKm: string | null
   message: string
+  messageKm: string | null
   audience: NotificationAudience
   targetUser?: string
   sentAt: string

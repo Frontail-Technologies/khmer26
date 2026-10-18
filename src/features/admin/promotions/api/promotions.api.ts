@@ -1,11 +1,14 @@
 import { apiClient } from '@/lib/api/client';
 import type { ActivePromotionItem, PromotionType } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface AdminPromotionPackageRow {
   id: string;
   promotionType: 'featured' | 'top_listing' | 'urgent';
   name: string;
+  nameKm: string | null;
   description: string | null;
+  descriptionKm: string | null;
   durationDays: number;
   price: string | number;
   currency: 'USD' | 'KHR';
@@ -22,7 +25,9 @@ export async function getAdminPromotionPackages(): Promise<AdminPromotionPackage
 export async function createAdminPromotionPackage(data: {
   promotionType: 'featured' | 'top_listing' | 'urgent';
   name: string;
+  nameKm?: string | null;
   description?: string | null;
+  descriptionKm?: string | null;
   durationDays: number;
   price: number;
   currency?: 'USD' | 'KHR';
@@ -36,7 +41,9 @@ export async function updateAdminPromotionPackage(
   data: Partial<{
     promotionType: 'featured' | 'top_listing' | 'urgent';
     name: string;
+    nameKm: string | null;
     description: string | null;
+    descriptionKm: string | null;
     durationDays: number;
     price: number;
     currency: 'USD' | 'KHR';
@@ -59,6 +66,9 @@ export async function deleteAdminPromotionPackage(id: string) {
 }
 
 interface RawActivePromotionRow {
+  displayId: string;
+  listingDisplayId: string;
+  listingImage?: string;
   promotion: { id: string; listingId: string; startedAt: string; expiresAt: string };
   package: { promotionType: PromotionType; durationDays: number };
   listing: { id: string; title: string; price: string; currency: string; userId: string };
@@ -72,7 +82,10 @@ function normalizeActivePromotion(row: RawActivePromotionRow): ActivePromotionIt
   const expiresAt = new Date(row.promotion.expiresAt).getTime();
   return {
     id: row.promotion.id,
+    displayId: row.displayId,
     listingId: row.listing.id,
+    listingDisplayId: row.listingDisplayId,
+    listingImage: row.listingImage,
     listingTitle: row.listing.title,
     listingPrice: Number(row.listing.price),
     currency: row.listing.currency,
@@ -80,8 +93,8 @@ function normalizeActivePromotion(row: RawActivePromotionRow): ActivePromotionIt
     sellerName: row.sellerProfile?.shopName || row.seller.email || 'Unknown Seller',
     promotionType: row.package.promotionType,
     durationDays: row.package.durationDays,
-    startedAt: new Date(row.promotion.startedAt).toLocaleDateString(),
-    expiresAt: new Date(row.promotion.expiresAt).toLocaleDateString(),
+    startedAt: formatAdminDateTime(row.promotion.startedAt),
+    expiresAt: formatAdminDateTime(row.promotion.expiresAt),
     status: expiresAt > now ? 'active' : 'expired',
     paymentReference: row.payment?.referenceCode,
     amountPaid: row.payment ? Number(row.payment.amount) : undefined,
@@ -109,4 +122,8 @@ export async function getAdminActivePromotions(params: { status?: 'active' | 'ex
       totalPages: 1,
     },
   };
+}
+
+export async function endAdminPromotion(id: string) {
+  return apiClient.post(`/admin/promotions/${id}/end`);
 }

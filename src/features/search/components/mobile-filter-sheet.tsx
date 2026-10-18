@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import {
   Sheet,
@@ -35,6 +39,7 @@ export function MobileFilterSheet({
   categoryNav,
   isCategoryRoute,
 }: MobileFilterSheetProps) {
+  const tGenerated = useTranslations("generated")
   const [draft, setDraft] = useState<SearchFilters>(filters)
 
   const handleOpen = (open: boolean) => {
@@ -72,9 +77,9 @@ export function MobileFilterSheet({
         <SheetHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-3 shrink-0">
           <SheetTitle className="flex items-center gap-2 text-base font-bold">
             <Funnel size={18} className="text-primary" />
-            <span>Filters</span>
+            <span><LocalizedText id="filters" /></span>
             {activeCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xxs font-bold text-primary-foreground">
                 {activeCount}
               </span>
             )}
@@ -83,7 +88,7 @@ export function MobileFilterSheet({
             type="button"
             onClick={() => onOpenChange(false)}
             className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label="Close filters"
+            aria-label={tGenerated("closeFilters")}
           >
             <X size={18} />
           </button>
@@ -106,14 +111,14 @@ export function MobileFilterSheet({
             onClick={() => setDraft(clearAllFilters(draft, { preserveCategory: isCategoryRoute }))}
             className="flex-1 font-medium text-xs h-10 cursor-pointer"
           >
-            Clear
+            <LocalizedText id="clear" />
           </Button>
           <Button
             type="button"
             onClick={handleApply}
             className="flex-2 bg-primary text-primary-foreground font-semibold text-xs h-10 shadow-xs cursor-pointer"
           >
-            Show results
+            <LocalizedText id="showResults" />
           </Button>
         </div>
       </SheetContent>

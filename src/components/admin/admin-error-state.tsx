@@ -36,7 +36,7 @@ export function AdminErrorState({
         {message}
       </p>
       {requestId && (
-        <span className="text-[10px] text-muted-foreground/70 font-mono mt-2 bg-muted px-2 py-0.5 rounded">
+        <span className="text-2xs text-muted-foreground/70 font-mono mt-2 bg-muted px-2 py-0.5 rounded">
           Req ID: {requestId}
         </span>
       )}

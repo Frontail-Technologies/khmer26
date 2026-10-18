@@ -10,14 +10,14 @@ export const SORT_VALUES = [
 export type SortValue = (typeof SORT_VALUES)[number]
 export const DEFAULT_SORT: SortValue = "newest"
 
-/** Presentation labels only; the API always receives the SortValue. */
-export const SORT_LABELS: Record<SortValue, string> = {
-  newest: "Newest",
-  oldest: "Oldest",
-  price_asc: "Price: Low to High",
-  price_desc: "Price: High to Low",
-  recently_updated: "Recently Updated",
-}
+/** Message keys (ui.sort) for the labels; the API always receives the SortValue. */
+export const SORT_LABEL_KEYS = {
+  newest: "newest",
+  oldest: "oldest",
+  price_asc: "priceLowHigh",
+  price_desc: "priceHighLow",
+  recently_updated: "recentlyUpdated",
+} as const satisfies Record<SortValue, string>
 
 export const CURRENCIES = ["USD", "KHR"] as const
 export type Currency = (typeof CURRENCIES)[number]

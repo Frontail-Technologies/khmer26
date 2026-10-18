@@ -1,366 +1,176 @@
 "use client"
 
-import { useState, useRef, type ChangeEvent, type FormEvent } from "react"
-import {
-  Camera,
-  Trash,
-  CheckCircle,
-  User,
-  EnvelopeSimple,
-  Phone,
-  Storefront,
-} from "@phosphor-icons/react"
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
+import { useMemo, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { Camera, CheckCircle, EnvelopeSimple, Storefront, Trash, User, WarningCircle } from "@phosphor-icons/react"
+import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
-import { DEMO_ACCOUNT_PROFILE } from "../../data/demo-account-data"
-import type { AccountProfileData } from "../../types"
-
-const PROVINCES = [
-  "Phnom Penh",
-  "Siem Reap",
-  "Battambang",
-  "Kandal",
-  "Sihanoukville",
-  "Kampot",
-  "Kampong Cham",
-  "Banteay Meanchey",
-  "Takeo",
-  "Prey Veng",
-  "Svay Rieng",
-]
+import { Textarea } from "@/components/ui/textarea"
+import { useDistricts, useProvinces } from "@/features/locations/api/locations.queries"
+import { useMediaUpload } from "@/hooks/use-media-upload"
+import { getMediaUrl } from "@/lib/media/get-media-url"
+import { useSaveAccountProfile } from "../api/profile.queries"
+import type { AccountProfile, SellerType } from "../api/profile.api"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface ProfileFormProps {
-  initialProfile?: AccountProfileData
+  account: AccountProfile
 }
 
-export function ProfileForm({
-  initialProfile = DEMO_ACCOUNT_PROFILE,
-}: ProfileFormProps) {
-  const [profile, setProfile] = useState<AccountProfileData>(initialProfile)
+export function ProfileForm({ account }: ProfileFormProps) {
+  const tGenerated = useTranslations("generated")
+  const t = useTranslations("ui.account")
+  const getLocalizedName = useLocalizedName()
+  const current = account.sellerProfile
+  const emailName = account.user.email?.split("@")[0] ?? "member"
+  const [fullName, setFullName] = useState(current?.fullName ?? current?.shopName ?? "")
+  const [username, setUsername] = useState(current?.username ?? emailName)
+  const [phone, setPhone] = useState(current?.phone ?? "")
+  const [bio, setBio] = useState(current?.bio ?? "")
+  const [sellerType, setSellerType] = useState<SellerType>(current?.sellerType ?? "individual")
+  const [shopName, setShopName] = useState(current?.shopName ?? "")
+  const [provinceId, setProvinceId] = useState<number | undefined>(current?.provinceId ?? undefined)
+  const [districtId, setDistrictId] = useState<number | undefined>(current?.districtId ?? undefined)
   const [isDirty, setIsDirty] = useState(false)
-  const [isSaved, setIsSaved] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const avatarUrl = getMediaUrl(current?.avatarR2Key)
+  const uploader = useMediaUpload({
+    purpose: "seller_avatar",
+    max: 1,
+    initialItems: current?.avatarMediaId && avatarUrl ? [{
+      id: `existing-${current.avatarMediaId}`,
+      previewUrl: avatarUrl,
+      progress: 100,
+      status: "done",
+      mediaId: current.avatarMediaId,
+      name: t("profilePhotoAlt"),
+    }] : [],
+  })
+  const provinces = useProvinces()
+  const districts = useDistricts(provinceId)
+  const saveProfile = useSaveAccountProfile(current?.id ?? null)
 
-  const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const previewUrl = URL.createObjectURL(file)
-      setProfile((prev) => ({ ...prev, avatarUrl: previewUrl }))
-      setIsDirty(true)
-      setIsSaved(false)
+  const displayName = fullName.trim() || shopName.trim() || emailName
+  const displayedAvatar = uploader.items[0]?.previewUrl
+  const canSave = isDirty && !uploader.isUploading && !uploader.hasErrors && !saveProfile.isPending
+  const selectedProvince = useMemo(
+    () => provinces.data?.find((item) => item.id === provinceId),
+    [provinceId, provinces.data]
+  )
+
+  function handlePhoto(files: FileList | null) {
+    if (!files?.length) return
+    uploader.clear()
+    uploader.addFiles([files[0]])
+    setIsDirty(true)
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    const cleanName = fullName.trim()
+    const effectiveShopName = sellerType === "individual" ? cleanName : shopName.trim()
+    if (!cleanName || !effectiveShopName) {
+      toast.error(tGenerated("enterYourFullNameAndSellerName"))
+      return
     }
-  }
-
-  const handleRemovePhoto = () => {
-    setProfile((prev) => ({ ...prev, avatarUrl: "" }))
-    setIsDirty(true)
-    setIsSaved(false)
-  }
-
-  const handleChange = <K extends keyof AccountProfileData>(
-    field: K,
-    value: AccountProfileData[K]
-  ) => {
-    setProfile((prev) => ({ ...prev, [field]: value }))
-    setIsDirty(true)
-    setIsSaved(false)
-  }
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    setIsSaved(true)
-    setIsDirty(false)
-    setTimeout(() => setIsSaved(false), 3000)
+    try {
+      await saveProfile.mutateAsync({
+        fullName: cleanName,
+        username: username.trim(),
+        phone: phone.trim() || null,
+        bio: bio.trim() || null,
+        shopName: effectiveShopName,
+        sellerType,
+        avatarMediaId: uploader.mediaIds[0] ?? null,
+        provinceId: provinceId ?? null,
+        districtId: districtId ?? null,
+      })
+      setIsDirty(false)
+      toast.success(tGenerated("profileSaved"))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("profileSaveFailed"))
+    }
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="rounded-2xl border border-border/80 bg-card p-4 sm:p-6 shadow-2xs space-y-6">
-        <CardContent className="p-0 space-y-6">
+      <Card className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs sm:p-6">
+        <CardContent className="space-y-6 p-0">
           <div className="flex items-center gap-4 sm:gap-5">
-            <Avatar className="h-18 w-18 sm:h-20 sm:w-20 rounded-full border-2 border-border/80 shadow-xs shrink-0">
-              <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
-              <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
-                {profile.fullName.slice(0, 2).toUpperCase()}
+            <Avatar className="h-18 w-18 shrink-0 border-2 border-border/80 sm:h-20 sm:w-20">
+              <AvatarImage src={displayedAvatar} alt={displayName} />
+              <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary">
+                {displayName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <div className="min-w-0">
-                <h3 className="font-bold text-base sm:text-lg text-foreground truncate leading-tight">
-                  {profile.fullName}
-                </h3>
-                <p className="text-xs text-muted-foreground truncate">
-                  @{profile.username}
-                </p>
+            <div className="min-w-0 flex-1 space-y-2">
+              <div>
+                <h2 className="truncate text-base font-bold sm:text-lg">{displayName}</h2>
+                <p className="truncate text-xs text-muted-foreground">@{username || emailName}</p>
               </div>
-
-              <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handlePhotoUpload}
-                />
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-7 px-2.5 text-xs font-semibold gap-1.5 rounded-lg"
-                >
-                  <Camera size={14} />
-                  <span>Change Photo</span>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => handlePhoto(event.target.files)} />
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="xs" className="h-8 gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={uploader.isUploading}>
+                  {uploader.isUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                  {uploader.isUploading ? `Uploading ${uploader.items[0]?.progress ?? 0}%` : tGenerated("changePhoto")}
                 </Button>
-
-                {profile.avatarUrl && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="xs"
-                    onClick={handleRemovePhoto}
-                    className="h-7 px-2 text-xs font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 gap-1 rounded-lg"
-                  >
-                    <Trash size={14} />
-                    <span>Remove</span>
+                {uploader.items.length > 0 && (
+                  <Button type="button" variant="ghost" size="xs" className="h-8 gap-1 text-destructive hover:text-destructive" onClick={() => { uploader.clear(); setIsDirty(true) }}>
+                    <Trash size={14} /> <LocalizedText id="remove" />
                   </Button>
                 )}
               </div>
-            </div>
-          </div>
-
-          <Separator className="bg-border/60" />
-
-          <div className="space-y-4">
-            <div className="space-y-0.5">
-              <h3 className="text-sm sm:text-base font-bold text-foreground">
-                Basic Information
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Your primary account credentials and contact info.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <User size={14} className="text-muted-foreground" />
-                  <span>Full Name</span>
-                </label>
-                <Input
-                  value={profile.fullName}
-                  onChange={(e) => handleChange("fullName", e.target.value)}
-                  placeholder="Your full name"
-                  className="h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  Username
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">
-                    @
-                  </span>
-                  <Input
-                    value={profile.username}
-                    onChange={(e) => handleChange("username", e.target.value)}
-                    placeholder="username"
-                    className="pl-7 h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <EnvelopeSimple size={14} className="text-muted-foreground" />
-                    <span>Email Address</span>
-                  </label>
-                  {profile.emailVerified && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
-                      <CheckCircle size={13} weight="fill" />
-                      <span>Verified</span>
-                    </span>
-                  )}
-                </div>
-                <Input
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Phone size={14} className="text-muted-foreground" />
-                    <span>Phone Number</span>
-                  </label>
-                  {profile.phoneVerified && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
-                      <CheckCircle size={13} weight="fill" />
-                      <span>Verified</span>
-                    </span>
-                  )}
-                </div>
-                <Input
-                  type="tel"
-                  value={profile.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder="+855 12 345 678"
-                  className="h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  Province / City
-                </label>
-                <Select
-                  value={profile.province}
-                  onValueChange={(val) => handleChange("province", val as string)}
-                >
-                  <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm bg-background">
-                    <SelectValue placeholder="Select Province" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVINCES.map((prov) => (
-                      <SelectItem key={prov} value={prov} className="text-xs">
-                        {prov}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  District / Khan
-                </label>
-                <Input
-                  value={profile.district || ""}
-                  onChange={(e) => handleChange("district", e.target.value)}
-                  placeholder="e.g. Chamkarmon"
-                  className="h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5 pt-1">
-              <label className="text-xs font-bold text-foreground">
-                Bio / Description
-              </label>
-              <Textarea
-                value={profile.bio}
-                onChange={(e) => handleChange("bio", e.target.value)}
-                placeholder="Tell buyers a little about yourself or your store..."
-                rows={3}
-                className="text-xs sm:text-sm bg-background resize-none leading-relaxed"
-              />
-            </div>
-          </div>
-
-          <Separator className="bg-border/60" />
-
-          <div className="space-y-4">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 text-primary">
-                <Storefront size={16} weight="fill" />
-                <h3 className="text-sm sm:text-base font-bold text-foreground">
-                  Seller Profile
-                </h3>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Control how buyers see you on Khmer26.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  Seller Type
-                </label>
-                <Select
-                  value={profile.sellerType}
-                  onValueChange={(val) =>
-                    handleChange("sellerType", val as "individual" | "business")
-                  }
-                >
-                  <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm bg-background">
-                    <SelectValue placeholder="Seller Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="individual" className="text-xs">
-                      Individual Seller
-                    </SelectItem>
-                    <SelectItem value="business" className="text-xs">
-                      Business / Store
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {profile.sellerType === "business" && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground">
-                    Business / Store Name
-                  </label>
-                  <Input
-                    value={profile.businessName || ""}
-                    onChange={(e) => handleChange("businessName", e.target.value)}
-                    placeholder="e.g. Sokha Auto & Tech"
-                    className="h-9 sm:h-10 text-xs sm:text-sm bg-background"
-                  />
-                </div>
+              {(uploader.rejections[0] || uploader.items[0]?.error) && (
+                <p className="flex items-center gap-1 text-xs text-destructive"><WarningCircle size={14} />{uploader.rejections[0] || uploader.items[0]?.error}</p>
               )}
             </div>
           </div>
 
-          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-border/60">
-            <div className="min-h-5 flex items-center">
-              {isSaved ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary animate-in fade-in">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Profile changes saved successfully!</span>
-                </span>
-              ) : isDirty ? (
-                <span className="text-[11px] text-muted-foreground font-medium">
-                  You have unsaved changes
-                </span>
-              ) : null}
+          <Separator />
+          <section className="space-y-4">
+            <h3 className="text-sm font-bold sm:text-base"><LocalizedText id="basicInformation" /></h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label={tGenerated("fullName")} icon={<User size={14} />}><Input value={fullName} onChange={(event) => { setFullName(event.target.value); setIsDirty(true) }} maxLength={100} required /></Field>
+              <Field label={tGenerated("username")}><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span><Input className="pl-7" value={username} onChange={(event) => { setUsername(event.target.value.replace(/[^a-zA-Z0-9._]/g, "")); setIsDirty(true) }} minLength={3} maxLength={30} required /></div></Field>
+              <Field label={tGenerated("emailAddress")} icon={<EnvelopeSimple size={14} />}><Input type="email" value={account.user.email ?? ""} readOnly aria-readonly="true" className="bg-muted/40" /></Field>
+              <Field label={tGenerated("phoneNumber")}><Input type="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setIsDirty(true) }} placeholder="+855 12 345 678" maxLength={20} /></Field>
+              <Field label={tGenerated("provinceCity")}><Select value={provinceId?.toString()} onValueChange={(value) => { setProvinceId(Number(value)); setDistrictId(undefined); setIsDirty(true) }}><SelectTrigger><SelectValue placeholder={provinces.isLoading ? tGenerated("loadingProvinces") : tGenerated("selectProvince_1cb975")} /></SelectTrigger><SelectContent>{provinces.data?.map((province) => <SelectItem key={province.id} value={String(province.id)}>{getLocalizedName(province)}</SelectItem>)}</SelectContent></Select></Field>
+              <Field label={tGenerated("districtKhan")}><Select value={districtId?.toString()} disabled={!provinceId || districts.isLoading} onValueChange={(value) => { setDistrictId(Number(value)); setIsDirty(true) }}><SelectTrigger><SelectValue placeholder={!selectedProvince ? tGenerated("selectProvinceFirst") : districts.isLoading ? tGenerated("loadingDistricts") : tGenerated("selectDistrictKhan")} /></SelectTrigger><SelectContent>{districts.data?.map((district) => <SelectItem key={district.id} value={String(district.id)}>{getLocalizedName(district)}</SelectItem>)}</SelectContent></Select></Field>
             </div>
+            <Field label={tGenerated("bioDescription")}><Textarea value={bio} onChange={(event) => { setBio(event.target.value); setIsDirty(true) }} rows={4} maxLength={1000} placeholder={tGenerated("tellBuyersAboutYourselfOrYourStore")} /></Field>
+          </section>
 
-            <Button
-              type="submit"
-              disabled={!isDirty && !isSaved}
-              className="w-full sm:w-auto h-10 px-6 font-bold text-xs sm:text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-xs shrink-0"
-            >
-              Save Changes
+          <Separator />
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold sm:text-base"><Storefront size={16} className="text-primary" /><LocalizedText id="sellerProfile" /></h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label={tGenerated("sellerType")}><Select value={sellerType} onValueChange={(value) => { setSellerType(value as SellerType); setIsDirty(true) }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual"><LocalizedText id="individualSeller" /></SelectItem><SelectItem value="business"><LocalizedText id="businessStore" /></SelectItem><SelectItem value="dealer"><LocalizedText id="dealer" /></SelectItem></SelectContent></Select></Field>
+              {sellerType !== "individual" && <Field label={tGenerated("businessStoreName")}><Input value={shopName} onChange={(event) => { setShopName(event.target.value); setIsDirty(true) }} minLength={2} maxLength={100} required /></Field>}
+            </div>
+          </section>
+
+          <div className="flex flex-col items-stretch justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center">
+            <p className="min-h-5 text-xs text-muted-foreground">{isDirty ? tGenerated("youHaveUnsavedChanges") : current ? tGenerated("profileUpToDate") : tGenerated("completeProfileToSell")}</p>
+            <Button type="submit" disabled={!canSave} className="h-10 gap-2 px-6 font-bold">
+              {saveProfile.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} weight="fill" />}
+              {saveProfile.isPending ? tGenerated("saving") : tGenerated("saveChanges")}
             </Button>
           </div>
         </CardContent>
       </Card>
     </form>
   )
+}
+
+function Field({ label, icon, children }: { label: string; icon?: ReactNode; children: ReactNode }) {
+  return <div className="space-y-1.5"><label className="flex items-center gap-1.5 text-xs font-bold">{icon}<span>{label}</span></label>{children}</div>
 }

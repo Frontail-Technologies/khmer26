@@ -101,13 +101,33 @@ describe("<ListingDetailContent /> layout rules", () => {
     expect(screen.queryByText("Loan Calculator")).toBeNull()
   })
 
-  it("has no chat button inside the seller card", async () => {
+  it("has exactly one Save, one Share and one Report per breakpoint", async () => {
+    getListing.mockResolvedValue(makeDetail())
+    renderWithProviders(<ListingDetailContent id="x" />)
+    await screen.findAllByRole("link", { name: /\/seller\/s1/ })
+
+    // jsdom has no CSS, so read the responsive classes: the overlay is `md:hidden`, the row's
+    // Save/Share are `max-md:hidden`. Report is in the row on every breakpoint.
+    const inMobileOverlay = (el: HTMLElement) => Boolean(el.closest(".md\\:hidden"))
+    const forBreakpoint = (name: RegExp, mobile: boolean) =>
+      screen
+        .getAllByRole("button", { name })
+        .filter((el) => (mobile ? !el.className.includes("max-md:hidden") : !inMobileOverlay(el)))
+
+    for (const mobile of [true, false]) {
+      expect(forBreakpoint(/save/i, mobile)).toHaveLength(1)
+      expect(forBreakpoint(/^share$/i, mobile)).toHaveLength(1)
+    }
+    expect(screen.getAllByRole("button", { name: "Report" })).toHaveLength(1)
+  })
+
+  it("puts chat in the seller card", async () => {
     getListing.mockResolvedValue(makeDetail())
     renderWithProviders(<ListingDetailContent id="x" />)
 
-    const sellerLink = (await screen.findAllByText("View Store Profile"))[0]!
+    const sellerLink = (await screen.findAllByRole("link", { name: /\/seller\/s1/ }))[0]!
     const sellerCard = sellerLink.closest('[data-slot="card"]') as HTMLElement
-    expect(sellerCard.textContent).not.toMatch(/chat/i)
+    expect(sellerCard.textContent).toMatch(/chat/i)
   })
 
   it("shows 'More from this seller' without repeating related listings or the current one", async () => {
@@ -134,7 +154,7 @@ describe("<ListingDetailContent /> layout rules", () => {
     getSellerListings.mockResolvedValue([card("52bb0b3f-4272-43a6-baa4-76bacc1d13c0", "The current listing")])
     renderWithProviders(<ListingDetailContent id="x" />)
 
-    await screen.findByRole("heading", { name: "Related listings" })
+    await screen.findByRole("heading", { name: "Related Posts" })
     expect(screen.queryByText(/More from/)).toBeNull()
   })
 

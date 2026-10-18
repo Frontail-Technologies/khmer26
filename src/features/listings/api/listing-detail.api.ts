@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import type { PublicListing } from './listings.api';
+import type { ListingModerationMatch } from '@/features/content/types';
 
 export interface CategoryCrumb {
   id: string;
@@ -26,6 +27,14 @@ export interface ListingSpec {
   valueLabelKm?: string | null;
 }
 
+export interface EditableListingFieldValue {
+  fieldDefinitionId: string;
+  valueText: string | null;
+  valueNumber: number | null;
+  valueBoolean: boolean | null;
+  valueOptionId: string | null;
+}
+
 /** Exact response of GET /listings/:id (data.listing). */
 export interface ListingDetail {
   id: string;
@@ -33,9 +42,16 @@ export interface ListingDetail {
   description: string | null;
   price: string | null;
   currency: 'USD' | 'KHR' | null;
+  condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts';
+  negotiable: boolean;
+  contactMethod: 'chat' | 'phone' | 'both';
   status: string;
   /** Only present for the owner. */
   moderationStatus?: string;
+  /** Owner-only edit metadata. */
+  isDraft?: boolean;
+  editableFieldValues?: EditableListingFieldValue[];
+  moderationMatches?: ListingModerationMatch[];
   createdAt: string;
   updatedAt: string;
   expiresAt: string | null;
@@ -45,7 +61,9 @@ export interface ListingDetail {
     district: LocationLevel | null;
     commune: LocationLevel | null;
     /** Approximate administrative-area centre resolved by the backend, or null without coordinates. */
-    map: { latitude: number; longitude: number; precision: 'commune' | 'district' | 'province' } | null;
+    map: { latitude: number; longitude: number; precision: 'exact' | 'commune' | 'district' | 'province' } | null;
+    /** Optional exact location supplied by the seller and validated by the API. */
+    googleMapsUrl?: string | null;
   };
   media: Array<{ id: string; r2Key: string; mimeType: string; displayOrder: number }>;
   specs: ListingSpec[];
@@ -56,6 +74,14 @@ export interface ListingDetail {
     avatarR2Key: string | null;
     joinedAt: string;
     isVerified: boolean;
+    /** Public contact numbers, masked. The full number is only available via revealListingContacts. */
+    contacts: MaskedContact[];
+    /** Whether the signed-in viewer follows this seller (always false when signed out). */
+    isFollowing: boolean;
+    /** Whether this seller accepts new followers. */
+    allowBuyersFollow: boolean;
+    /** True only when active-status sharing is enabled and the seller was recently active. */
+    isActive: boolean;
     /** null until the seller has at least one visible review. */
     rating: { average: number; count: number } | null;
   } | null;
@@ -64,7 +90,26 @@ export interface ListingDetail {
   views: number;
 }
 
+export type PhoneCarrier = 'cellcard' | 'smart' | 'metfone' | 'other';
+
+export interface MaskedContact {
+  id: string;
+  type: 'phone';
+  valueMasked: string;
+  /** Declared by the seller; null when unknown (never inferred from the number). */
+  carrier: PhoneCarrier | null;
+}
+
+export interface RevealedContact {
+  id: string;
+  type: 'phone';
+  value: string;
+  carrier: PhoneCarrier | null;
+}
+
 export interface ReportReason {
+  labelKm?: string | null
+  descriptionKm?: string | null
   id: string;
   label: string;
   description: string | null;
@@ -126,4 +171,20 @@ export async function getSellerListings(sellerId: string, limit = 13): Promise<P
     { params: { limit } }
   );
   return res.data;
+}
+
+/** Returns the seller's full public numbers (rate-limited, tracked by the backend). */
+export async function revealListingContacts(listingId: string): Promise<RevealedContact[]> {
+  const res = await apiClient.post<{ contacts: RevealedContact[] }>(
+    `/listings/${encodeURIComponent(listingId)}/reveal-contact`
+  );
+  return res.data.contacts;
+}
+
+export async function followSeller(sellerId: string): Promise<void> {
+  await apiClient.post(`/sellers/${encodeURIComponent(sellerId)}/follow`);
+}
+
+export async function unfollowSeller(sellerId: string): Promise<void> {
+  await apiClient.delete(`/sellers/${encodeURIComponent(sellerId)}/follow`);
 }

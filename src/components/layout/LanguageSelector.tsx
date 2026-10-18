@@ -1,6 +1,8 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,59 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Check } from "@phosphor-icons/react"
+import { LOCALES, type Locale } from "@/i18n/config"
+import { setLocaleCookie } from "@/lib/i18n/set-locale-cookie"
 
-export type LanguageCode = "en" | "km"
+export type LanguageCode = Locale
 
-interface LanguageOption {
-  code: LanguageCode
-  name: string
-  nativeName: string
-}
-
-const LANGUAGES: LanguageOption[] = [
-  {
-    code: "en",
-    name: "English",
-    nativeName: "English",
-  },
-  {
-    code: "km",
-    name: "Khmer",
-    nativeName: "ភាសាខ្មែរ",
-  },
-]
-
-let activeLanguage: LanguageCode = "en"
-const subscribers = new Set<() => void>()
-
-if (typeof window !== "undefined") {
-  const saved = localStorage.getItem("khmer26_lang")
-  if (saved === "en" || saved === "km") {
-    activeLanguage = saved
-  }
-}
-
-function subscribe(callback: () => void) {
-  subscribers.add(callback)
-  return () => {
-    subscribers.delete(callback)
-  }
-}
-
-function getSnapshot(): LanguageCode {
-  return activeLanguage
-}
-
-function getServerSnapshot(): LanguageCode {
-  return "en"
-}
-
-function setLanguage(code: LanguageCode) {
-  activeLanguage = code
-  if (typeof window !== "undefined") {
-    localStorage.setItem("khmer26_lang", code)
-  }
-  subscribers.forEach((callback) => callback())
+/** Each language is always shown in its own script so people can find theirs. */
+const NATIVE_NAMES: Record<Locale, string> = {
+  en: "English",
+  km: "ភាសាខ្មែរ",
 }
 
 function UkFlagIcon({ className = "w-5 h-5" }: { className?: string }) {
@@ -107,50 +65,52 @@ function CambodiaFlagIcon({ className = "w-5 h-5" }: { className?: string }) {
   )
 }
 
+const Flag = ({ code, className }: { code: Locale; className?: string }) =>
+  code === "en" ? <UkFlagIcon className={className} /> : <CambodiaFlagIcon className={className} />
+
+/**
+ * Switches the interface language. The choice is stored in a cookie (read on the server by
+ * `src/i18n/request.ts`), then the route is refreshed so server and client components re-render
+ * in the new language without changing the URL.
+ */
 export function LanguageSelector() {
-  const currentLang = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
-  )
+  const t = useTranslations("language")
+  const current = useLocale() as Locale
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+
+  const choose = (code: Locale) => {
+    if (code === current) return
+    setLocaleCookie(code)
+    startTransition(() => router.refresh())
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 focus:outline-none"
-        aria-label="Change language"
+        className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 focus:outline-none disabled:opacity-60"
+        aria-label={t("change")}
+        disabled={pending}
       >
-        {currentLang === "en" ? (
-          <UkFlagIcon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-        ) : (
-          <CambodiaFlagIcon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-        )}
+        <Flag code={current} className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44 p-1.5">
-        {LANGUAGES.map((lang) => (
+        {LOCALES.map((code) => (
           <DropdownMenuItem
-            key={lang.code}
-            onClick={() => setLanguage(lang.code)}
+            key={code}
+            onClick={() => choose(code)}
             className="flex items-center justify-between gap-2 px-2.5 py-2 cursor-pointer rounded-md"
           >
             <div className="flex items-center gap-2.5">
-              {lang.code === "en" ? (
-                <UkFlagIcon className="h-4.5 w-4.5" />
-              ) : (
-                <CambodiaFlagIcon className="h-4.5 w-4.5" />
-              )}
+              <Flag code={code} className="h-4.5 w-4.5" />
               <div className="flex flex-col">
-                <span className="text-sm font-medium leading-none">
-                  {lang.nativeName}
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  {lang.name}
+                <span className="text-sm font-medium leading-none">{NATIVE_NAMES[code]}</span>
+                <span className="text-xxs text-muted-foreground">
+                  {code === "en" ? t("english") : t("khmer")}
                 </span>
               </div>
             </div>
-            {currentLang === lang.code && (
-              <Check size={16} className="text-primary" />
-            )}
+            {current === code && <Check size={16} className="text-primary" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

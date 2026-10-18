@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -18,7 +17,6 @@ import type { ListingField } from "@/features/admin/categories/types"
 interface AssignFieldDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  categoryName: string
   categoryId: string
   availableFields: ListingField[]
   assignedFieldIds: string[]
@@ -28,7 +26,6 @@ interface AssignFieldDialogProps {
 export function AssignFieldDialog({
   open,
   onOpenChange,
-  categoryName,
   availableFields,
   assignedFieldIds,
   onAssign,
@@ -77,9 +74,6 @@ export function AssignFieldDialog({
           <DialogTitle className="text-base font-bold text-foreground">
             Assign Existing Field
           </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Attaching field to <span className="font-semibold text-foreground">{categoryName}</span>
-          </DialogDescription>
         </DialogHeader>
 
         <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
@@ -114,11 +108,11 @@ export function AssignFieldDialog({
                       <div className="min-w-0 space-y-0.5">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-bold text-foreground">{field.label}</span>
-                          <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-muted text-muted-foreground">
+                          <span className="text-2xs font-mono px-1 py-0.2 rounded bg-muted text-muted-foreground">
                             {field.key}
                           </span>
                         </div>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-xxs text-muted-foreground">
                           {field.type.toUpperCase()} · Used in {field.usedInCount ?? 0} categories
                         </p>
                       </div>
@@ -141,7 +135,7 @@ export function AssignFieldDialog({
               <div className="p-3 bg-muted/20 border border-border/60 rounded-xl flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="text-xs font-bold text-foreground">{selectedField.label}</span>
-                  <p className="text-[11px] text-muted-foreground font-mono">
+                  <p className="text-xxs text-muted-foreground font-mono">
                     key: {selectedField.key} · type: {selectedField.type}
                   </p>
                 </div>
@@ -165,7 +159,7 @@ export function AssignFieldDialog({
                   <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/10">
                     <div className="space-y-0.5">
                       <span className="text-xs font-bold text-foreground block">Mandatory Field</span>
-                      <span className="text-[11px] text-muted-foreground block">
+                      <span className="text-xxs text-muted-foreground block">
                         Requires seller to provide a value before publishing
                       </span>
                     </div>
@@ -178,7 +172,7 @@ export function AssignFieldDialog({
                   <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/10">
                     <div className="space-y-0.5">
                       <span className="text-xs font-bold text-foreground block">Search Filterable</span>
-                      <span className="text-[11px] text-muted-foreground block">
+                      <span className="text-xxs text-muted-foreground block">
                         Generates a faceted filter on public search & category pages
                       </span>
                     </div>
@@ -191,7 +185,7 @@ export function AssignFieldDialog({
                   <div className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/10">
                     <div className="space-y-0.5">
                       <span className="text-xs font-bold text-foreground block">Active State</span>
-                      <span className="text-[11px] text-muted-foreground block">
+                      <span className="text-xxs text-muted-foreground block">
                         Visible in Post Ad form when active
                       </span>
                     </div>

@@ -1,3 +1,4 @@
+import { formatAdminDateTime } from '@/lib/formatters/date';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
   normalizeUserDetail,
@@ -44,6 +45,7 @@ describe('users.api regression and DTO normalization', () => {
       isPhoneVerified: true,
       isEmailVerified: true,
       lastLoginAt: '2026-10-01T10:00:00.000Z',
+      lastActiveAt: '2026-10-01T10:00:00.000Z',
       createdAt: '2026-01-01T00:00:00.000Z',
       shopName: 'Elite Motors',
       sellerType: 'dealer',
@@ -121,6 +123,9 @@ describe('users.api regression and DTO normalization', () => {
     expect(normalized.recentListings[0]!.title).toBe('2023 Toyota Camry Hybrid');
     expect(normalized.accountHistory).toHaveLength(1);
     expect(normalized.relatedReports).toHaveLength(1);
+    expect(normalized.joinedAt).toBe(formatAdminDateTime('2026-01-01T00:00:00.000Z'));
+    expect(normalized.lastActiveAt).toBe(formatAdminDateTime('2026-10-01T10:00:00.000Z'));
+    expect(normalized.recentListings[0]!.category).toBe('Cars');
   });
 
   it('normalizes list item with role and verification info', () => {
@@ -171,8 +176,8 @@ describe('users.api regression and DTO normalization', () => {
     expect(sentBody.bio).toBe('New bio');
   });
 
-  it('calls DELETE /admin/users/:id for soft-delete', async () => {
-    const fetchMock = mockApiFetch({ success: true, data: { message: 'User soft-deleted' } });
+  it('calls DELETE /admin/users/:id for permanent deletion', async () => {
+    const fetchMock = mockApiFetch({ success: true, data: { message: 'User deleted' } });
 
     await deleteAdminUser('usr-10');
 

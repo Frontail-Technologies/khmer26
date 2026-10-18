@@ -8,24 +8,26 @@ export function formatListingPrice(listing: Pick<ListingDetail, "price" | "curre
 }
 
 /** Most specific level first, only the levels that exist. */
-export function formatLocation(location: ListingDetail["location"]): string {
-  return [location.commune?.nameEn, location.district?.nameEn, location.province.nameEn]
+export function formatLocation(location: ListingDetail["location"], locale = "en"): string {
+  const name = (item: { nameEn: string; nameKm: string | null } | null) =>
+    item ? (locale === "km" && item.nameKm?.trim() ? item.nameKm : item.nameEn) : null
+  return [name(location.commune), name(location.district), name(location.province)]
     .filter(Boolean)
     .join(", ")
 }
 
-export function formatSpecValue(spec: ListingSpec): string {
+export function formatSpecValue(spec: ListingSpec, locale = "en"): string {
   switch (spec.fieldType) {
     case "select":
-      return spec.valueLabelEn ?? String(spec.value)
+      return (locale === "km" && spec.valueLabelKm?.trim() ? spec.valueLabelKm : spec.valueLabelEn) ?? String(spec.value)
     case "boolean":
-      return spec.value ? "Yes" : "No"
+      return locale === "km" ? (spec.value ? "បាទ/ចាស" : "ទេ") : (spec.value ? "Yes" : "No")
     case "number":
       if (typeof spec.value !== "number") return String(spec.value)
       // Four-digit whole numbers stay ungrouped so values such as a year never read "2,022".
       return Number.isInteger(spec.value) && Math.abs(spec.value) < 10000
         ? String(spec.value)
-        : spec.value.toLocaleString("en-US")
+        : spec.value.toLocaleString(locale === "km" ? "km-KH" : "en-US")
     default:
       return String(spec.value)
   }
@@ -47,10 +49,11 @@ export function toGalleryImages(media: ListingDetail["media"], title: string): G
     })
 }
 
-export function formatMemberSince(iso: string): string {
+export function formatMemberSince(iso: string | null | undefined, locale = "en-US"): string {
+  if (!iso) return ""
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return ""
-  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(date)
+  return new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(date)
 }
 
 export function sellerTypeLabel(type: "individual" | "business" | "dealer"): string {

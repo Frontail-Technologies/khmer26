@@ -1,17 +1,21 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Storefront, Star } from "@phosphor-icons/react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
+  useSellerCategories,
   useSellerListingsInfinite,
   useSellerReviewsInfinite,
 } from "../api/sellers.queries"
+import { useSellerListingFilters } from "../hooks/use-seller-listing-filters"
 import type { SellerProfile } from "../api/sellers.api"
 import { SellerListingsTab } from "./seller-listings-tab"
 import { SellerReviewsTab } from "./seller-reviews-tab"
 
 const countPill =
-  "ml-0.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground"
+  "ml-0.5 rounded-full bg-muted px-2 py-0.5 text-2xs font-bold text-muted-foreground"
 
 interface SellerTabsProps {
   seller: SellerProfile
@@ -19,7 +23,14 @@ interface SellerTabsProps {
 }
 
 export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
-  const listings = useSellerListingsInfinite(seller.id)
+  const urlFilters = useSellerListingFilters()
+  const { filters } = urlFilters
+  const listings = useSellerListingsInfinite(seller.id, true, {
+    q: filters.q,
+    categoryId: filters.category || undefined,
+    sort: filters.sort,
+  })
+  const categories = useSellerCategories(seller.id)
   const reviews = useSellerReviewsInfinite(seller.id)
 
   return (
@@ -31,7 +42,7 @@ export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
             className="h-8 sm:h-9 px-3 text-xs sm:text-sm font-bold gap-2 rounded-lg cursor-pointer"
           >
             <Storefront size={16} weight="bold" />
-            <span>Listings</span>
+            <span><LocalizedText id="listings" /></span>
             <span className={countPill}>{seller.listingCount}</span>
           </TabsTrigger>
 
@@ -40,7 +51,7 @@ export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
             className="h-8 sm:h-9 px-3 text-xs sm:text-sm font-bold gap-2 rounded-lg cursor-pointer"
           >
             <Star size={16} weight="bold" />
-            <span>Reviews</span>
+            <span><LocalizedText id="reviews" /></span>
             <span className={countPill}>{seller.rating?.count ?? 0}</span>
           </TabsTrigger>
         </TabsList>
@@ -56,6 +67,15 @@ export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
           isFetchingNextPage={listings.isFetchingNextPage}
           onLoadMore={() => listings.fetchNextPage()}
           onRetry={() => listings.refetch()}
+          filters={filters}
+          keyword={urlFilters.keyword}
+          onKeywordChange={urlFilters.setKeyword}
+          onCategoryChange={urlFilters.setCategory}
+          onSortChange={urlFilters.setSort}
+          onClearFilters={urlFilters.clear}
+          isFiltered={urlFilters.isFiltered}
+          categories={categories.data ?? []}
+          inventoryTotal={seller.listingCount}
         />
       </TabsContent>
 

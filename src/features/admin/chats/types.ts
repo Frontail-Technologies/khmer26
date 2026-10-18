@@ -21,7 +21,10 @@ export interface AdminChatMessage {
   conversationId: string
   senderId: string
   senderName: string
+  type: "text" | "image" | "offer" | "system"
   text: string
+  imageUrl?: string
+  imageAlt?: string
   createdAt: string
   isReported?: boolean
   flagReason?: string
@@ -29,6 +32,7 @@ export interface AdminChatMessage {
 
 export interface AdminChatConversation {
   id: string
+  displayId: string
   participantA: AdminChatParticipant
   participantB: AdminChatParticipant
   listing?: AdminChatListing

@@ -7,6 +7,8 @@ import {
   getSimilarListings,
 } from './listing-detail.api';
 
+export const RELATED_LIMIT = 12
+
 export const listingDetailQueryOptions = (id: string) =>
   queryOptions({
     queryKey: marketplaceKeys.listings.detail(id),
@@ -22,7 +24,7 @@ export function useListingDetail(id: string) {
 export function useSimilarListings(id: string, enabled: boolean) {
   return useQuery({
     queryKey: marketplaceKeys.listings.similar(id),
-    queryFn: () => getSimilarListings(id, 12),
+    queryFn: () => getSimilarListings(id, RELATED_LIMIT),
     enabled,
     staleTime: 60_000,
   });

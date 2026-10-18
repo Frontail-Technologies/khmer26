@@ -41,7 +41,7 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
         href={`/admin/verifications/${row.original.id}`}
         className="font-mono text-xs font-bold text-foreground hover:text-primary transition-colors"
       >
-        {row.original.id}
+        {row.original.displayId}
       </Link>
     ),
     sortingFn: "alphanumeric",
@@ -58,7 +58,7 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
         <div className="flex items-center gap-2.5 min-w-0">
           <Avatar className="size-8 rounded-full border border-border/70 shrink-0">
             <AvatarImage src={seller.avatar} alt={seller.name} />
-            <AvatarFallback className="text-[11px] font-bold bg-primary/10 text-primary">
+            <AvatarFallback className="text-xxs font-bold bg-primary/10 text-primary">
               {seller.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -74,7 +74,7 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
               </TooltipTrigger>
               <TooltipContent>{seller.name}</TooltipContent>
             </Tooltip>
-            <span className="text-[11px] text-muted-foreground block truncate">
+            <span className="text-xxs text-muted-foreground block truncate">
               {seller.phone || seller.email}
             </span>
           </div>
@@ -119,7 +119,7 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
   },
   {
     id: "documents",
-    header: () => <span className="text-[11px] font-semibold text-muted-foreground">Documents</span>,
+    header: () => <span className="text-xxs font-semibold text-muted-foreground">Documents</span>,
     cell: ({ row }) => (
       <span className="text-xs font-medium text-foreground">
         {row.original.documents.length} files
@@ -133,14 +133,9 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
       <DataTableColumnHeader column={column} title="Submitted" />
     ),
     cell: ({ row }) => (
-      <div className="space-y-0.5">
-        <span className="text-xs font-medium text-foreground block">
-          {row.original.submittedAt}
-        </span>
-        <span className="text-[10px] text-muted-foreground block">
-          {row.original.submittedDate}
-        </span>
-      </div>
+      <span className="text-xs text-foreground block whitespace-nowrap">
+        {row.original.submittedDate}
+      </span>
     ),
     sortingFn: "datetime",
   },

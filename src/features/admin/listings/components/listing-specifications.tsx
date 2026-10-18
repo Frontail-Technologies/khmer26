@@ -27,7 +27,7 @@ export function ListingSpecifications({ specifications }: ListingSpecificationsP
               key={idx}
               className="p-2.5 rounded-lg bg-muted/20 border border-border/50 space-y-0.5"
             >
-              <span className="text-[10px] font-medium text-muted-foreground block truncate">
+              <span className="text-2xs font-medium text-muted-foreground block truncate">
                 {spec.label}
               </span>
               <span className="font-semibold text-foreground block truncate">

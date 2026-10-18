@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
@@ -16,6 +20,7 @@ export function LoanCalculatorForm({
   onChange,
   currency = "$",
 }: LoanCalculatorFormProps) {
+  const tGenerated = useTranslations("generated")
   const handlePriceChange = (val: string) => {
     const num = Math.max(0, parseFloat(val) || 0)
     onChange((prev) => {
@@ -97,7 +102,7 @@ export function LoanCalculatorForm({
     <div className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="loan-price" className="text-xs font-bold text-foreground flex items-center gap-1">
-          Price <span className="text-destructive">*</span>
+          <LocalizedText id="price" /> <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
@@ -117,7 +122,7 @@ export function LoanCalculatorForm({
 
       <div className="space-y-1.5">
         <Label className="text-xs font-bold text-foreground">
-          Down Payment
+          <LocalizedText id="downPayment" />
         </Label>
         <div className="grid grid-cols-2 gap-2.5">
           <div className="relative">
@@ -130,7 +135,7 @@ export function LoanCalculatorForm({
               step="100"
               value={input.downPaymentAmount || ""}
               onChange={(e) => handleDownAmountChange(e.target.value)}
-              aria-label="Down payment amount in currency"
+              aria-label={tGenerated("downPaymentAmountInCurrency")}
               className="pl-7 text-xs sm:text-sm font-semibold h-10 rounded-xl"
             />
           </div>
@@ -142,7 +147,7 @@ export function LoanCalculatorForm({
               max="100"
               value={input.downPaymentPercent || ""}
               onChange={(e) => handleDownPercentChange(e.target.value)}
-              aria-label="Down payment percentage"
+              aria-label={tGenerated("downPaymentPercentage")}
               className="pr-7 text-xs sm:text-sm font-semibold h-10 rounded-xl text-right"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
@@ -155,7 +160,7 @@ export function LoanCalculatorForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="loan-term" className="text-xs font-bold text-foreground flex items-center gap-1">
-            Term <span className="text-destructive">*</span>
+            <LocalizedText id="term" /> <span className="text-destructive">*</span>
           </Label>
           <div className="flex gap-2">
             <Input
@@ -178,7 +183,7 @@ export function LoanCalculatorForm({
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                year
+                <LocalizedText id="year" />
               </button>
               <button
                 type="button"
@@ -190,7 +195,7 @@ export function LoanCalculatorForm({
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                month
+                <LocalizedText id="month" />
               </button>
             </div>
           </div>
@@ -198,7 +203,7 @@ export function LoanCalculatorForm({
 
         <div className="space-y-1.5">
           <Label htmlFor="loan-rate" className="text-xs font-bold text-foreground flex items-center gap-1">
-            Interest Rate
+            <LocalizedText id="interestRate" />
           </Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -227,7 +232,7 @@ export function LoanCalculatorForm({
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Annual
+                <LocalizedText id="annual" />
               </button>
               <button
                 type="button"
@@ -239,7 +244,7 @@ export function LoanCalculatorForm({
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Monthly
+                <LocalizedText id="monthly" />
               </button>
             </div>
           </div>
@@ -248,7 +253,7 @@ export function LoanCalculatorForm({
 
       <div className="space-y-1.5 pt-1">
         <Label className="text-xs font-bold text-foreground">
-          Loan Type
+          <LocalizedText id="loanType" />
         </Label>
         <div className="grid grid-cols-2 gap-2 bg-muted/60 p-1 rounded-xl border border-border/60">
           <button
@@ -261,7 +266,7 @@ export function LoanCalculatorForm({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Fixed (Reducing)
+            <LocalizedText id="fixedReducing" />
           </button>
           <button
             type="button"
@@ -273,7 +278,7 @@ export function LoanCalculatorForm({
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Flat
+            <LocalizedText id="flat" />
           </button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { ListingCardData } from "@/types"
@@ -20,8 +22,10 @@ export function ListingListRow({
   featured = false,
   className,
 }: ListingListRowProps) {
+  const tGenerated = useTranslations("generated")
+  const tUi = useTranslations("ui.common")
   const formattedPrice = listing.priceOnRequest
-    ? "Contact for price"
+    ? tUi("contactForPrice")
     : formatPriceWithCurrency(listing.price, listing.currency)
   const timeAgo = formatCompactRelativeTime(listing.createdAt)
   const imageUrl = listing.primaryImage?.url ?? null
@@ -61,13 +65,13 @@ export function ListingListRow({
         )}
         <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none flex flex-col gap-1 items-start">
           {isFeatured && (
-            <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-xs">
-              Featured
+            <span className="inline-flex items-center rounded-md bg-accent text-accent-foreground px-1.5 py-0.5 text-3xs font-bold tracking-wider uppercase shadow-xs">
+              <LocalizedText id="featured" />
             </span>
           )}
           {listing.urgent && (
-            <span className="inline-flex items-center rounded-md bg-destructive text-destructive-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-xs">
-              Urgent
+            <span className="inline-flex items-center rounded-md bg-destructive text-destructive-foreground px-1.5 py-0.5 text-3xs font-bold tracking-wider uppercase shadow-xs">
+              <LocalizedText id="urgent" />
             </span>
           )}
         </div>
@@ -83,7 +87,7 @@ export function ListingListRow({
           <span aria-hidden="true">•</span>
           <span className="truncate">{locationLabel}</span>
           {listing.verified && (
-            <ShieldCheck size={13} weight="fill" className="shrink-0 text-primary" aria-label="Verified Seller" />
+            <ShieldCheck size={13} weight="fill" className="shrink-0 text-primary" aria-label={tGenerated("verifiedSeller_af2cd9")} />
           )}
         </p>
 
@@ -97,7 +101,7 @@ export function ListingListRow({
               {formattedPrice}
             </span>
             {listing.negotiable && (
-              <span className="text-[10px] font-medium text-muted-foreground">Negotiable</span>
+              <span className="text-2xs font-medium text-muted-foreground"><LocalizedText id="negotiable" /></span>
             )}
           </div>
           <div className="pointer-events-auto relative z-10 shrink-0">

@@ -9,15 +9,16 @@ import {
   ArrowUp,
   ArrowDown,
   MagnifyingGlass,
+  DotsSixVertical,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DragReorderList } from "@/components/shared/drag-reorder-list"
 import { cn } from "@/lib/utils"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import {
   Select,
   SelectContent,
@@ -31,7 +32,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
@@ -75,12 +75,14 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
   const [tipToDelete, setTipToDelete] = useState<SafetyTipItem | null>(null)
 
   const [formTip, setFormTip] = useState("")
+  const [formTipKm, setFormTipKm] = useState("")
   const [formContext, setFormContext] = useState<SafetyTipContext>("listing_detail")
   const [formIsActive, setFormIsActive] = useState(true)
 
   const openAddModal = () => {
     setEditingTip(null)
     setFormTip("")
+    setFormTipKm("")
     setFormContext("listing_detail")
     setFormIsActive(true)
     setIsDialogOpen(true)
@@ -89,6 +91,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
   const openEditModal = (t: SafetyTipItem) => {
     setEditingTip(t)
     setFormTip(t.tip)
+    setFormTipKm(t.tipKm ?? "")
     setFormContext(t.context)
     setFormIsActive(t.isActive)
     setIsDialogOpen(true)
@@ -131,6 +134,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
 
     const validationResult = safetyTipFormSchema.safeParse({
       tip: formTip.trim(),
+      tipKm: formTipKm.trim() || null,
       context: formContext,
       isActive: formIsActive,
       sortOrder: editingTip ? editingTip.sortOrder : tips.length + 1,
@@ -143,12 +147,12 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
 
     if (editingTip) {
       updateTip.mutate(
-        { id: editingTip.id, data: { tip: formTip.trim(), context: formContext, isActive: formIsActive } },
+        { id: editingTip.id, data: { tip: formTip.trim(), tipKm: formTipKm.trim() || null, context: formContext, isActive: formIsActive } },
         { onSuccess: () => setIsDialogOpen(false) }
       )
     } else {
       createTip.mutate(
-        { tip: formTip.trim(), context: formContext, isActive: formIsActive, sortOrder: tips.length + 1 },
+        { tip: formTip.trim(), tipKm: formTipKm.trim() || null, context: formContext, isActive: formIsActive, sortOrder: tips.length + 1 },
         { onSuccess: () => setIsDialogOpen(false) }
       )
     }
@@ -157,7 +161,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
   const filteredTips = tips.filter((t) => {
     if (!searchQuery.trim()) return true
     const q = searchQuery.toLowerCase()
-    return t.tip.toLowerCase().includes(q) || t.context.toLowerCase().includes(q)
+    return t.tip.toLowerCase().includes(q) || (t.tipKm ?? "").toLowerCase().includes(q) || t.context.toLowerCase().includes(q)
   })
 
   return (
@@ -167,12 +171,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
           <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <ShieldCheck size={20} weight="duotone" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground">Safety Tips</h1>
-            <p className="text-xs text-muted-foreground">
-              Manage buyer and seller safety guidelines shown across the marketplace.
-            </p>
-          </div>
+          <h1 className="text-base font-bold text-foreground">Safety Tips</h1>
         </div>
 
         <Button
@@ -206,11 +205,11 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/60">
-                <TableHead className="w-16 text-[11px] font-bold text-center">Order</TableHead>
-                <TableHead className="text-[11px] font-bold">Safety Guideline</TableHead>
-                <TableHead className="text-[11px] font-bold">Placement / Context</TableHead>
-                <TableHead className="text-[11px] font-bold">Status</TableHead>
-                <TableHead className="w-20 text-[11px] font-bold text-right">Actions</TableHead>
+                <TableHead className="w-16 text-xxs font-bold text-center">Order</TableHead>
+                <TableHead className="text-xxs font-bold">Safety Guideline</TableHead>
+                <TableHead className="text-xxs font-bold">Placement / Context</TableHead>
+                <TableHead className="text-xxs font-bold">Status</TableHead>
+                <TableHead className="w-20 text-xxs font-bold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -221,15 +220,34 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
                   items={filteredTips}
                   getId={(t) => t.id}
                   onReorder={persistReorderedTips}
-                  itemClassName="border-b border-border/50 hover:bg-muted/20"
-                  renderItem={(t, idx, { isDragging, isDropTarget }) => {
+                  dragHandleOnly
+                  itemClassName={({ isDragging, isDropTarget }) =>
+                    cn(
+                      "border-b border-border/50 hover:bg-muted/20 [&>td]:transition-colors",
+                      isDragging && "[&>td]:bg-primary/10",
+                      isDropTarget && "[&>td]:bg-primary/5"
+                    )
+                  }
+                  renderItem={(t, idx, { isDragging, dragHandleProps }) => {
                   const isFirst = idx === 0
                   const isLast = idx === filteredTips.length - 1
 
                   return (
                     <>
-                      <TableCell className={cn("text-center", isDragging && "opacity-40", isDropTarget && "bg-primary/5")}>
+                      <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-0.5">
+                          <button
+                            type="button"
+                            {...dragHandleProps}
+                            className={cn(
+                              "size-6 rounded-md inline-flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              isDragging && "text-primary"
+                            )}
+                            aria-label="Drag to reorder safety tip"
+                            title="Drag to reorder"
+                          >
+                            <DotsSixVertical size={13} weight="bold" />
+                          </button>
                           <Button
                             type="button"
                             variant="ghost"
@@ -258,9 +276,14 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
                         <span className="text-xs font-medium text-foreground leading-relaxed block">
                           {t.tip}
                         </span>
+                        {t.tipKm ? (
+                          <span lang="km" className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{t.tipKm}</span>
+                        ) : (
+                          <span className="mt-0.5 block text-xxs text-muted-foreground/70">No Khmer translation</span>
+                        )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-2xs">
                           {t.context.replace("_", " ")}
                         </Badge>
                       </TableCell>
@@ -312,28 +335,27 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-card">
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-card">
           <DialogHeader className="p-4 sm:p-5 border-b border-border/60">
             <DialogTitle className="text-sm font-bold text-foreground">
               {editingTip ? "Edit Safety Tip" : "Add Safety Tip"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Configure trust guidelines displayed to buyers and sellers.
-            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSaveForm} className="space-y-4 p-4 sm:p-5">
-            <Field>
-              <FieldLabel required>Safety Guideline Text</FieldLabel>
-              <Textarea
-                value={formTip}
-                onChange={(e) => setFormTip(e.target.value)}
-                placeholder="e.g. Always inspect items in person in a public area before payment..."
-                rows={3}
-                className="text-xs resize-none"
-                required
-              />
-            </Field>
+            <BilingualField
+              id="safety-tip"
+              label="Guideline"
+              required
+              multiline
+              rows={4}
+              maxLength={500}
+              valueEn={formTip}
+              valueKm={formTipKm}
+              onChangeEn={setFormTip}
+              onChangeKm={setFormTipKm}
+              placeholderEn="e.g. Inspect items in person in a public place before paying"
+            />
 
             <Field>
               <FieldLabel>Placement Surface</FieldLabel>
@@ -364,7 +386,7 @@ export function SafetyTipsWorkspace({ initialTips: fallbackTips = [] }: SafetyTi
                 <span className="text-xs font-semibold text-foreground block">
                   Active Status
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-xxs text-muted-foreground">
                   Display tip on selected marketplace surface
                 </span>
               </div>

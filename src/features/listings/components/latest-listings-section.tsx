@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Link from "next/link"
 import { ArrowRight, Clock } from "@phosphor-icons/react"
 import type { ListingCardData } from "@/types"
@@ -42,7 +44,7 @@ export function LatestListingsSection({
             href="/search?sort=newest"
             className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            <span>View all</span>
+            <span><LocalizedText id="viewAll" /></span>
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
@@ -51,13 +53,13 @@ export function LatestListingsSection({
       {listings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border/80 p-8 text-center bg-card/40">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            No listings available yet.
+            <LocalizedText id="noListingsAvailableYet" />
           </p>
           <Link
             href="/post-ad"
             className="mt-3 inline-flex items-center justify-center rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            Post an Ad
+            <LocalizedText id="postAnAd" />
           </Link>
         </div>
       ) : viewMode === "grid" ? (

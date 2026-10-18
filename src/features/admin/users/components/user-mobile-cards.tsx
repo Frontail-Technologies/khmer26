@@ -63,7 +63,7 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Avatar className="size-8 rounded-lg shrink-0 border border-border/60">
                     <AvatarImage src={user.avatarUrl} alt={displayName} />
-                    <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground rounded-lg">
+                    <AvatarFallback className="text-2xs font-bold bg-muted text-muted-foreground rounded-lg">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -73,13 +73,13 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
                         {displayName}
                       </span>
                       {user.reportsCount > 0 && (
-                        <Badge variant="destructive" className="text-[9px] px-1 py-0 h-3.5 shrink-0 gap-0.5">
+                        <Badge variant="destructive" className="text-3xs px-1 py-0 h-3.5 shrink-0 gap-0.5">
                           <WarningOctagon size={9} weight="fill" />
                           {user.reportsCount}
                         </Badge>
                       )}
                     </div>
-                    <span className="text-[11px] text-muted-foreground truncate block">
+                    <span className="text-xxs text-muted-foreground truncate block">
                       {contact || ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
                     </span>
                   </div>
@@ -91,13 +91,13 @@ export function UserMobileCards({ data }: UserMobileCardsProps) {
               </div>
 
               <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40 flex-wrap">
-                <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 h-4.5">
+                <Badge variant="outline" className="text-2xs font-medium px-1.5 py-0 h-4.5">
                   {ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
                 </Badge>
                 <StatusBadge label={verifConf.label} tone={verifConf.tone} size="sm" />
-                <span className="text-[11px] text-muted-foreground ml-auto">{user.province}</span>
+                <span className="text-xxs text-muted-foreground ml-auto">{user.province}</span>
                 {isSeller && (
-                  <span className="text-[11px] text-muted-foreground">{user.listingsCount} listings</span>
+                  <span className="text-xxs text-muted-foreground">{user.listingsCount} listings</span>
                 )}
               </div>
             </Card>

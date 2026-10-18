@@ -47,7 +47,13 @@ export function useDismissReport() {
 export function useCreateReportReason() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { label: string; description?: string; appliesTo: AdminReportTargetType[] }) =>
+    mutationFn: (data: {
+      label: string;
+      labelKm?: string | null;
+      description?: string;
+      descriptionKm?: string | null;
+      appliesTo: AdminReportTargetType[];
+    }) =>
       createAdminReportReason(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.reports.reasons() });
@@ -63,7 +69,7 @@ export function useCreateReportReason() {
 export function useUpdateReportReason() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string } & Partial<Pick<AdminReportReasonItem, 'label' | 'description' | 'isActive' | 'appliesTo'>>) =>
+    mutationFn: ({ id, ...data }: { id: string } & Partial<Pick<AdminReportReasonItem, 'label' | 'labelKm' | 'description' | 'descriptionKm' | 'isActive' | 'appliesTo'>>) =>
       updateAdminReportReason(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.reports.reasons() });

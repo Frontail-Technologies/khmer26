@@ -37,7 +37,7 @@ export function StatusBadge({
       variant="outline"
       className={cn(
         "font-bold uppercase tracking-wider gap-1 select-none",
-        size === "sm" ? "text-[9px] sm:text-[10px] px-1.5 py-0.5" : "text-[10px] sm:text-xs px-2 py-0.5",
+        size === "sm" ? "text-3xs sm:text-2xs px-1.5 py-0.5" : "text-2xs sm:text-xs px-2 py-0.5",
         TONE_CLASSES[tone],
         className
       )}

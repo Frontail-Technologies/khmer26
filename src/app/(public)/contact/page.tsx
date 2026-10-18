@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Container } from "@/components/layout/Container"
@@ -22,44 +26,57 @@ import {
   CheckCircle,
   ChatCircleText,
 } from "@phosphor-icons/react"
+import { createSupportSubmission, type SupportSubject } from "@/features/support/api/support.api"
+import type { GeneratedMessageKey } from "@/i18n/message-types"
 
-const SUBJECT_OPTIONS = [
-  { value: "general", label: "General Inquiry" },
-  { value: "feedback", label: "Product Feedback & Suggestions" },
-  { value: "report_issue", label: "Report a Technical Problem" },
-  { value: "verification", label: "Account Verification Support" },
-  { value: "business", label: "Business & Dealership Inquiries" },
+const SUBJECT_OPTIONS: Array<{ value: SupportSubject; messageKey: GeneratedMessageKey }> = [
+  { value: "general", messageKey: "generalInquiry" },
+  { value: "feedback", messageKey: "productFeedbackSuggestions" },
+  { value: "report_issue", messageKey: "reportATechnicalProblem" },
+  { value: "verification", messageKey: "accountVerificationSupport" },
+  { value: "business", messageKey: "businessDealershipInquiries" },
 ]
 
 function ContactForm() {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const subjectOptions = SUBJECT_OPTIONS.map((option) => ({
+    value: option.value,
+    label: tGenerated(option.messageKey),
+  }))
   const searchParams = useSearchParams()
   const defaultSubject =
     searchParams.get("type") === "feedback" ? "feedback" : "general"
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
-  const [subject, setSubject] = useState(defaultSubject)
+  const [subject, setSubject] = useState<SupportSubject>(defaultSubject)
   const [message, setMessage] = useState("")
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [reference, setReference] = useState("")
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitted(true)
+    setError("")
+    setIsSubmitting(true)
+    try {
+      const submission = await createSupportSubmission({ name, email, subject, message, website: "" })
+      setReference(submission.displayId)
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "We could not send your message. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
       <div className="md:col-span-5 space-y-4">
         <Card className="p-5 sm:p-6 rounded-2xl border border-border/80 bg-card shadow-2xs space-y-4">
-          <div className="space-y-1">
-            <h2 className="text-base font-bold text-foreground">
-              Contact Information
-            </h2>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Have questions or suggestions for Khmer26? Our local support team in
-              Phnom Penh is here to assist you.
-            </p>
-          </div>
+          <h2 className="text-base font-bold text-foreground">
+            <LocalizedText id="contactInformation" />
+          </h2>
 
           <div className="space-y-3 pt-2 text-xs">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 border border-border/50">
@@ -67,7 +84,7 @@ function ContactForm() {
                 <EnvelopeSimple size={16} weight="bold" />
               </div>
               <div>
-                <span className="font-semibold text-foreground block">Email Us</span>
+                <span className="font-semibold text-foreground block"><LocalizedText id="emailUs" /></span>
                 <span className="text-muted-foreground">support@khmer26.com</span>
               </div>
             </div>
@@ -77,7 +94,7 @@ function ContactForm() {
                 <Phone size={16} weight="bold" />
               </div>
               <div>
-                <span className="font-semibold text-foreground block">Customer Hotline</span>
+                <span className="font-semibold text-foreground block"><LocalizedText id="customerHotline" /></span>
                 <span className="text-muted-foreground">+855 23 999 826</span>
               </div>
             </div>
@@ -87,9 +104,9 @@ function ContactForm() {
                 <MapPin size={16} weight="bold" />
               </div>
               <div>
-                <span className="font-semibold text-foreground block">Headquarters</span>
+                <span className="font-semibold text-foreground block"><LocalizedText id="headquarters" /></span>
                 <span className="text-muted-foreground">
-                  Khan Chamkarmon, Phnom Penh, Cambodia
+                  <LocalizedText id="khanChamkarmonPhnomPenhCambodia" />
                 </span>
               </div>
             </div>
@@ -99,59 +116,56 @@ function ContactForm() {
 
       <div className="md:col-span-7">
         <Card className="p-5 sm:p-6 rounded-2xl border border-border/80 bg-card shadow-2xs">
-          {isSubmitted ? (
+          {reference ? (
             <div className="py-10 text-center space-y-3 animate-in fade-in duration-300">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success">
                 <CheckCircle size={28} weight="fill" />
               </div>
               <h3 className="text-base font-bold text-foreground">
-                Message Sent Successfully
+                <LocalizedText id="messageSentSuccessfully" />
               </h3>
               <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                Thank you for reaching out to Khmer26. Our team has received your note
-                and will review your inquiry shortly.
+                <LocalizedText id="thankYouForReachingOutToKhmer26OurTeam" />
+              </p>
+              <p className="text-xs font-semibold text-foreground">
+                {tDynamic("reference", { reference })}
               </p>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setIsSubmitted(false)
+                  setReference("")
                   setName("")
                   setEmail("")
                   setMessage("")
                 }}
                 className="text-xs font-semibold h-9 mt-2 cursor-pointer"
               >
-                Send Another Message
+                <LocalizedText id="sendAnotherMessage" />
               </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-foreground">
-                  Send a Message
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Fill out the form below and we will respond as soon as possible.
-                </p>
-              </div>
+              <h2 className="text-base font-bold text-foreground">
+                <LocalizedText id="sendAMessage" />
+              </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                 <Field>
-                  <FieldLabel required>Your Name</FieldLabel>
+                  <FieldLabel required><LocalizedText id="yourName" /></FieldLabel>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Sokha Chan"
+                    placeholder={tGenerated("eGSokhaChan")}
                     className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel required>Email Address</FieldLabel>
+                  <FieldLabel required><LocalizedText id="emailAddress" /></FieldLabel>
                   <input
                     type="email"
                     required
@@ -164,19 +178,19 @@ function ContactForm() {
               </div>
 
               <Field>
-                <FieldLabel required>Inquiry Subject</FieldLabel>
+                <FieldLabel required><LocalizedText id="inquirySubject" /></FieldLabel>
                 <Select
                   value={subject}
-                  items={SUBJECT_OPTIONS}
+                  items={subjectOptions}
                   onValueChange={(val) => {
-                    if (val) setSubject(val)
+                    if (val) setSubject(val as SupportSubject)
                   }}
                 >
                   <SelectTrigger className="h-9 text-xs w-full">
-                    <SelectValue placeholder="Select topic">
+                    <SelectValue placeholder={tGenerated("selectTopic")}>
                       {(val) =>
                         getSelectOptionLabel(
-                          SUBJECT_OPTIONS,
+                          subjectOptions,
                           val,
                           "General Inquiry"
                         )
@@ -184,7 +198,7 @@ function ContactForm() {
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {SUBJECT_OPTIONS.map((opt) => (
+                    {subjectOptions.map((opt) => (
                       <SelectItem
                         key={opt.value}
                         value={opt.value}
@@ -198,23 +212,30 @@ function ContactForm() {
               </Field>
 
               <Field>
-                <FieldLabel required>Your Message</FieldLabel>
+                <FieldLabel required><LocalizedText id="yourMessage" /></FieldLabel>
                 <textarea
                   required
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describe your inquiry or feedback in detail..."
+                  placeholder={tGenerated("describeYourInquiryOrFeedbackInDetail")}
                   className="w-full p-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none leading-relaxed"
                 />
               </Field>
 
+              {error && (
+                <p role="alert" className="text-xs font-medium text-destructive">
+                  {error}
+                </p>
+              )}
+
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full sm:w-auto h-9 px-5 text-xs font-bold gap-1.5 cursor-pointer"
               >
                 <PaperPlaneTilt size={14} weight="bold" />
-                <span>Submit Inquiry</span>
+                <span>{isSubmitting ? tGenerated("sending") : tGenerated("submitInquiry")}</span>
               </Button>
             </form>
           )}
@@ -232,16 +253,12 @@ export default function ContactPage() {
           <div className="flex items-center gap-2 justify-center sm:justify-start text-primary">
             <ChatCircleText size={22} weight="duotone" />
             <span className="text-xs font-bold uppercase tracking-wider">
-              Khmer26 Support
+              <LocalizedText id="khmer26Support" />
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            Contact & Feedback
+            <LocalizedText id="contactFeedback" />
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            We value your suggestions and are here to help with any marketplace
-            questions.
-          </p>
         </div>
 
         <Suspense fallback={null}>

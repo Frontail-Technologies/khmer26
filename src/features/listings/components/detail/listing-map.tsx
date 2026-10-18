@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { useEffect, useRef } from "react"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
@@ -24,10 +26,10 @@ interface ListingMapProps {
 }
 
 /**
- * Interactive map of an approximate administrative area. The centre is an area centre
- * (commune, district or province), never a seller or household position.
+ * Interactive map of either the seller-provided exact position or an administrative-area centre.
  */
 export function ListingMap({ latitude, longitude, precision, label, onUnavailable }: ListingMapProps) {
+  const tGenerated = useTranslations("generated")
   const containerRef = useRef<HTMLDivElement>(null)
   const onUnavailableRef = useRef(onUnavailable)
   useEffect(() => {
@@ -61,7 +63,7 @@ export function ListingMap({ latitude, longitude, precision, label, onUnavailabl
           },
           center: [longitude, latitude],
           zoom: MAP_ZOOM[precision],
-          maxZoom: 15,
+          maxZoom: precision === "exact" ? 19 : 15,
           // Two-finger pan on touch and Ctrl+scroll on desktop, so the page keeps scrolling normally.
           cooperativeGestures: true,
           attributionControl: { compact: true },
@@ -71,29 +73,31 @@ export function ListingMap({ latitude, longitude, precision, label, onUnavailabl
 
         instance.on("load", () => {
           if (cancelled) return
-          instance.addSource("area", {
-            type: "geojson",
-            data: {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Polygon",
-                coordinates: [circleRing(latitude, longitude, MAP_AREA_RADIUS_M[precision])],
+          if (precision !== "exact") {
+            instance.addSource("area", {
+              type: "geojson",
+              data: {
+                type: "Feature",
+                properties: {},
+                geometry: {
+                  type: "Polygon",
+                  coordinates: [circleRing(latitude, longitude, MAP_AREA_RADIUS_M[precision])],
+                },
               },
-            },
-          })
-          instance.addLayer({
-            id: "area-fill",
-            type: "fill",
-            source: "area",
-            paint: { "fill-color": "#2563eb", "fill-opacity": 0.14 },
-          })
-          instance.addLayer({
-            id: "area-line",
-            type: "line",
-            source: "area",
-            paint: { "line-color": "#2563eb", "line-width": 2, "line-opacity": 0.7 },
-          })
+            })
+            instance.addLayer({
+              id: "area-fill",
+              type: "fill",
+              source: "area",
+              paint: { "fill-color": "#2563eb", "fill-opacity": 0.14 },
+            })
+            instance.addLayer({
+              id: "area-line",
+              type: "line",
+              source: "area",
+              paint: { "line-color": "#2563eb", "line-width": 2, "line-opacity": 0.7 },
+            })
+          }
         })
 
         new maplibregl.Marker({ color: "#2563eb" }).setLngLat([longitude, latitude]).addTo(instance)
@@ -110,15 +114,15 @@ export function ListingMap({ latitude, longitude, precision, label, onUnavailabl
   }, [latitude, longitude, precision])
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-border/70 bg-muted/50">
+    <div className="relative overflow-hidden rounded-md border border-border/70 bg-muted/50">
       <div
         ref={containerRef}
         role="region"
-        aria-label={`Map of the approximate area: ${label}`}
-        className="h-44 w-full sm:h-52 md:h-56"
+        aria-label={precision === "exact" ? `Map of the exact location: ${label}` : `Map of the approximate area: ${label}`}
+        className="h-44 w-full sm:h-32"
       />
-      <span className="pointer-events-none absolute left-2 top-2 rounded-md bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground shadow-xs">
-        Approximate area
+      <span className="pointer-events-none absolute left-2 top-2 rounded-md bg-background/90 px-2 py-0.5 text-xxs font-semibold text-foreground shadow-xs">
+        {precision === "exact" ? tGenerated("exactLocation") : tGenerated("approximateArea_03dbb4")}
       </span>
     </div>
   )

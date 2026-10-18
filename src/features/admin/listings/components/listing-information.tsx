@@ -16,7 +16,7 @@ export function ListingInformation({ listing }: ListingInformationProps) {
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden space-y-0">
       <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground flex-wrap mb-1">
+        <div className="flex items-center gap-1.5 text-xxs text-muted-foreground flex-wrap mb-1">
           {listing.categoryPath.map((segment, idx) => (
             <span key={segment} className="inline-flex items-center gap-1">
               {idx > 0 && <CaretRight size={10} className="text-muted-foreground/60" />}
@@ -34,7 +34,7 @@ export function ListingInformation({ listing }: ListingInformationProps) {
       <CardContent className="p-4 sm:p-5 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border/60">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+            <span className="text-2xs uppercase font-bold text-muted-foreground tracking-wider">
               Asking Price
             </span>
             <div className="flex items-baseline gap-2">
@@ -42,7 +42,7 @@ export function ListingInformation({ listing }: ListingInformationProps) {
                 {formattedPrice}
               </span>
               {listing.negotiable && (
-                <Badge variant="outline" className="text-[10px] font-semibold">
+                <Badge variant="outline" className="text-2xs font-semibold">
                   Negotiable
                 </Badge>
               )}
@@ -63,7 +63,7 @@ export function ListingInformation({ listing }: ListingInformationProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div className="space-y-1 p-2.5 rounded-lg bg-muted/20">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
               <MapPin size={12} />
               <span>Location</span>
             </span>
@@ -72,19 +72,19 @@ export function ListingInformation({ listing }: ListingInformationProps) {
               {listing.location.province}
             </p>
             {listing.location.address && (
-              <p className="text-[11px] text-muted-foreground truncate">
+              <p className="text-xxs text-muted-foreground truncate">
                 {listing.location.address}
               </p>
             )}
           </div>
 
           <div className="space-y-1 p-2.5 rounded-lg bg-muted/20">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
               <Tag size={12} />
               <span>Item Condition</span>
             </span>
             <p className="font-semibold text-foreground">{listing.condition}</p>
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+            <p className="text-xxs text-muted-foreground flex items-center gap-1">
               <Calendar size={11} />
               <span>Created {listing.createdDate}</span>
             </p>

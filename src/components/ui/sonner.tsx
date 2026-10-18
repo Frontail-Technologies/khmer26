@@ -20,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground text-xs font-semibold',
           error: 'group-[.toaster]:border-destructive/30 group-[.toaster]:text-destructive',
-          success: 'group-[.toaster]:border-emerald-500/30 group-[.toaster]:text-emerald-700 dark:group-[.toaster]:text-emerald-400',
+          success: 'group-[.toaster]:border-success/30 group-[.toaster]:text-success',
         },
       }}
       {...props}

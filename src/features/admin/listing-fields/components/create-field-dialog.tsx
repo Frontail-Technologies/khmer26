@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -119,9 +118,6 @@ export function CreateFieldDialog({
           <DialogTitle className="text-base font-bold text-foreground">
             {initialField ? "Edit Field Definition" : "Create Reusable Field"}
           </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Define a global listing attribute that can be assigned to multiple categories.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">

@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { ArrowRight, SpinnerGap } from "@phosphor-icons/react"
@@ -19,6 +23,10 @@ import {
 const RESEND_COOLDOWN_SEC = 60
 
 export function RegisterVerifyForm() {
+  const tGenerated = useTranslations("generated")
+  const tValidation = useTranslations("ui.auth.validation")
+  const validationMessage = (key: string) => tValidation(key as Parameters<typeof tValidation>[0])
+  const tDynamic = useTranslations("dynamic")
   const [formData, setFormData] = useState<VerificationCodeFormData>({ code: "" })
   const [errors, setErrors] = useState<Partial<Record<keyof VerificationCodeFormData, string>>>({})
   const [apiError, setApiError] = useState<string | null>(null)
@@ -46,7 +54,7 @@ export function RegisterVerifyForm() {
     const result = verificationCodeSchema.safeParse(formData)
 
     if (!result.success) {
-      setErrors({ code: result.error.issues[0]?.message ?? "Please enter the 6-digit code" })
+      setErrors({ code: validationMessage(result.error.issues[0]?.message ?? "enterCode") })
       return
     }
 
@@ -78,7 +86,7 @@ export function RegisterVerifyForm() {
           htmlFor="code"
           className="block text-xs sm:text-sm font-semibold text-foreground text-center"
         >
-          Verification code <span className="text-destructive">*</span>
+          <LocalizedText id="verificationCode" /> <span className="text-destructive">*</span>
         </label>
 
         <div className="flex justify-center">
@@ -120,11 +128,11 @@ export function RegisterVerifyForm() {
           {verify.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Verifying...</span>
+              <span><LocalizedText id="verifying" /></span>
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <span>Verify &amp; Continue</span>
+              <span><LocalizedText id="verifyContinue" /></span>
               <ArrowRight size={18} weight="bold" />
             </span>
           )}
@@ -133,10 +141,10 @@ export function RegisterVerifyForm() {
 
       <div className="flex flex-col items-center gap-2 pt-3 text-xs sm:text-sm text-muted-foreground text-center">
         <div className="flex items-center gap-1.5">
-          <span>Didn&apos;t receive a code?</span>
+          <span><LocalizedText id="didnTReceiveACode" /></span>
           {countdown > 0 ? (
             <span className="font-bold text-muted-foreground">
-              Resend in {countdown}s
+              {tDynamic("resendIn", { seconds: countdown })}
             </span>
           ) : (
             <button
@@ -145,7 +153,7 @@ export function RegisterVerifyForm() {
               disabled={resend.isPending}
               className="font-bold text-primary hover:underline cursor-pointer focus:outline-none disabled:opacity-50"
             >
-              {resend.isPending ? "Sending..." : "Resend code"}
+              {resend.isPending ? tGenerated("sending") : tGenerated("resendCode")}
             </button>
           )}
         </div>
@@ -155,7 +163,7 @@ export function RegisterVerifyForm() {
             href="/register"
             className="font-medium text-muted-foreground hover:text-foreground transition-colors hover:underline"
           >
-            Change email address
+            <LocalizedText id="changeEmailAddress" />
           </Link>
         </div>
       </div>

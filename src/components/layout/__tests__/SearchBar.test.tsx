@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
-import { act, fireEvent, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import { renderWithProviders } from "@/test/test-utils"
 import { linkTree, node } from "@/features/categories/__tests__/fixtures"
 import type { PublicListing } from "@/features/listings/api/listings.api"
@@ -205,25 +205,55 @@ describe("<SearchBar /> autosuggestions", () => {
     await act(async () => vi.advanceTimersByTime(400))
 
     expect(await screen.findByRole("option", { name: /Yamaha Motorcycles/ })).toBeInTheDocument()
-    expect(await screen.findByRole("option", { name: /Yamaha Aerox 155 Connected 2023/ })).toBeInTheDocument()
+    const listings = await screen.findByRole("group", { name: "Listings" })
+    expect(within(listings).getByRole("option", { name: /Yamaha Aerox 155 Connected 2023/ })).toBeInTheDocument()
     expect(screen.getAllByText("$3,150 · Phnom Penh", { exact: false })).toHaveLength(2)
   })
 
-  it("navigates with ArrowDown/ArrowUp and selects with Enter (category and listing)", async () => {
+  it("offers matching listing titles as keyword completions", async () => {
+    renderWithProviders(<SearchBar />)
+    await screen.findByRole("combobox", { name: "Search listings" })
+    typeInto("yamaha")
+    await act(async () => vi.advanceTimersByTime(400))
+
+    const searchTerms = await screen.findByRole("group", { name: "Search terms" })
+    const terms = within(searchTerms).getAllByRole("option")
+    expect(terms).toHaveLength(3)
+    expect(terms[0]).toHaveTextContent("yamaha")
+    expect(terms[1]).toHaveTextContent("Yamaha Aerox 155 Connected 2023")
+    expect(terms[2]).toHaveTextContent("Yamaha NMAX")
+  })
+
+  it("still shows listing suggestions when the category tree cannot load", async () => {
+    getCategoryTree.mockRejectedValueOnce(new Error("Category API unavailable"))
+    renderWithProviders(<SearchBar />)
+    await screen.findByRole("combobox", { name: "Search listings" })
+    typeInto("yamaha")
+    await act(async () => vi.advanceTimersByTime(400))
+
+    const listings = await screen.findByRole("group", { name: "Listings" })
+    expect(within(listings).getByRole("option", { name: /Yamaha Aerox 155 Connected 2023/ })).toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: /Yamaha Motorcycles/ })).toBeNull()
+  })
+
+  it("navigates keyword and listing suggestions with the keyboard", async () => {
     renderWithProviders(<SearchBar />)
     await screen.findByRole("combobox", { name: "Search listings" })
     const input = typeInto("yamaha")
     await act(async () => vi.advanceTimersByTime(400))
-    await screen.findByRole("option", { name: /Yamaha NMAX/ })
+    let listings = await screen.findByRole("group", { name: "Listings" })
+    expect(within(listings).getByRole("option", { name: /Yamaha NMAX/ })).toBeInTheDocument()
 
     fireEvent.keyDown(input, { key: "ArrowDown" })
-    expect(screen.getAllByRole("option", { selected: true })[0]).toHaveTextContent("Yamaha Motorcycles")
+    expect(screen.getAllByRole("option", { selected: true })[0]).toHaveTextContent("yamaha")
+    expect(screen.getAllByRole("option", { selected: true })[0]).toHaveTextContent("Search all listings")
     fireEvent.keyDown(input, { key: "Enter" })
-    expect(push).toHaveBeenLastCalledWith("/category/vehicles/motorcycles")
+    expect(push).toHaveBeenLastCalledWith("/search?q=yamaha")
 
     typeInto("yamaha")
     await act(async () => vi.advanceTimersByTime(400))
-    await screen.findByRole("option", { name: /Yamaha NMAX/ })
+    listings = await screen.findByRole("group", { name: "Listings" })
+    expect(within(listings).getByRole("option", { name: /Yamaha NMAX/ })).toBeInTheDocument()
     fireEvent.keyDown(input, { key: "ArrowUp" })
     expect(screen.getAllByRole("option", { selected: true })[0]).toHaveTextContent("Yamaha NMAX")
     fireEvent.keyDown(input, { key: "Enter" })
@@ -258,13 +288,14 @@ describe("<SearchBar /> autosuggestions", () => {
     expect(screen.queryByRole("listbox", { name: "Search suggestions" })).toBeNull()
   })
 
-  it("shows nothing quietly when there are no matches", async () => {
+  it("keeps the typed keyword actionable when there are no backend matches", async () => {
     searchListings.mockResolvedValue({ items: [], pagination: { page: 1, limit: 5, total: 0, totalPages: 0 } })
     renderWithProviders(<SearchBar />)
     await screen.findByRole("combobox", { name: "Search listings" })
     typeInto("zzzzz")
     await act(async () => vi.advanceTimersByTime(600))
     await waitFor(() => expect(searchListings).toHaveBeenCalled())
-    expect(screen.queryByRole("listbox", { name: "Search suggestions" })).toBeNull()
+    expect(screen.getByRole("option", { name: /zzzzz.*search all listings/i })).toBeInTheDocument()
+    expect(screen.getAllByRole("option")).toHaveLength(1)
   })
 })

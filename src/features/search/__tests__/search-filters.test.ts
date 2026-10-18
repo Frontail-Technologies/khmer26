@@ -9,7 +9,7 @@ import {
   reconcileLocation,
   sanitizeFieldFilters,
   serializeSearchFilters,
-  SORT_LABELS,
+  SORT_LABEL_KEYS,
   SORT_VALUES,
   type SearchFilters,
 } from "../lib/search-filters"
@@ -73,8 +73,8 @@ describe("sort values", () => {
       "price_desc",
       "recently_updated",
     ])
-    expect(SORT_LABELS.price_asc).toBe("Price: Low to High")
-    for (const value of SORT_VALUES) expect(SORT_LABELS[value]).not.toBe(value)
+    expect(SORT_LABEL_KEYS.price_asc).toBe("priceLowHigh")
+    for (const value of SORT_VALUES) expect(SORT_LABEL_KEYS[value]).toBeTruthy()
   })
 
   it("falls back to the default for unsupported sorts such as the removed 'recommended'", () => {

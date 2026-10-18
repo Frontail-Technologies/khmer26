@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
+import { renderWithProviders } from "@/test/test-utils"
 import { PriceRangeFilter } from "../components/price-range-filter"
 
 const type = (label: string, value: string) =>
@@ -8,7 +9,7 @@ const type = (label: string, value: string) =>
 describe("<PriceRangeFilter />", () => {
   it("applies min, max and currency in a single change", () => {
     const onChange = vi.fn()
-    render(<PriceRangeFilter onChange={onChange} />)
+    renderWithProviders(<PriceRangeFilter onChange={onChange} />)
 
     type("Minimum price", "100")
     type("Maximum price", "500")
@@ -21,7 +22,7 @@ describe("<PriceRangeFilter />", () => {
 
   it("ignores empty fields cleanly instead of sending NaN or zero", () => {
     const onChange = vi.fn()
-    render(<PriceRangeFilter onChange={onChange} />)
+    renderWithProviders(<PriceRangeFilter onChange={onChange} />)
 
     type("Minimum price", "250")
     fireEvent.click(screen.getByRole("button", { name: "Apply" }))
@@ -30,7 +31,7 @@ describe("<PriceRangeFilter />", () => {
 
   it("refuses a minimum higher than the maximum and explains why", () => {
     const onChange = vi.fn()
-    render(<PriceRangeFilter onChange={onChange} />)
+    renderWithProviders(<PriceRangeFilter onChange={onChange} />)
 
     type("Minimum price", "900")
     type("Maximum price", "100")
@@ -42,7 +43,7 @@ describe("<PriceRangeFilter />", () => {
 
   it("preserves the currently selected currency", () => {
     const onChange = vi.fn()
-    render(<PriceRangeFilter minPrice={10} currency="USD" onChange={onChange} />)
+    renderWithProviders(<PriceRangeFilter minPrice={10} currency="USD" onChange={onChange} />)
 
     type("Maximum price", "20")
     fireEvent.click(screen.getByRole("button", { name: "Apply" }))
@@ -51,7 +52,7 @@ describe("<PriceRangeFilter />", () => {
 
   it("Clear removes both prices and the currency", () => {
     const onChange = vi.fn()
-    render(<PriceRangeFilter minPrice={10} maxPrice={20} currency="USD" onChange={onChange} />)
+    renderWithProviders(<PriceRangeFilter minPrice={10} maxPrice={20} currency="USD" onChange={onChange} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Clear" }))
     expect(onChange).toHaveBeenCalledWith(undefined, undefined, undefined)
@@ -59,7 +60,7 @@ describe("<PriceRangeFilter />", () => {
   })
 
   it("does not show Clear when no price is applied", () => {
-    render(<PriceRangeFilter onChange={vi.fn()} />)
+    renderWithProviders(<PriceRangeFilter onChange={vi.fn()} />)
     expect(screen.queryByRole("button", { name: "Clear" })).toBeNull()
   })
 })

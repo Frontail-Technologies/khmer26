@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import type { AdminAuditEntry, AuditModule } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export function normalizeAuditLog(raw: Record<string, unknown>): AdminAuditEntry {
   const actionParts = ((raw.action as string) || '').split('.');
@@ -27,14 +28,16 @@ export function normalizeAuditLog(raw: Record<string, unknown>): AdminAuditEntry
 
   return {
     id: String(raw.id),
-    timestamp: raw.createdAt ? new Date(raw.createdAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—',
+    displayId: String(raw.displayId || 'EVT'),
+    timestamp: raw.createdAt ? formatAdminDateTime(raw.createdAt as string) : '—',
     rawTimestamp: (raw.createdAt as string) || undefined,
     actorName: (actor?.fullName || actor?.username || (typeof actor?.email === 'string' ? actor.email.split('@')[0] : 'System Admin')) as string,
     actorRole: 'Admin',
     action: (raw.action as string) || 'admin.action',
     module: auditModule,
-    targetName: `${(raw.targetType as string) || 'Entity'} #${(raw.targetId as string) || ''}`,
+    targetName: `${(raw.targetType as string) || 'Entity'} ${String(raw.targetDisplayId || '')}`.trim(),
     targetId: (raw.targetId as string) || String(raw.id),
+    targetDisplayId: String(raw.targetDisplayId || 'REF'),
     targetType: (raw.targetType as string) || 'entity',
     details: typeof raw.details === 'string' ? raw.details : JSON.stringify(raw.details || {}),
   };

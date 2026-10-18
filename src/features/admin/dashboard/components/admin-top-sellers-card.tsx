@@ -24,7 +24,7 @@ export function AdminTopSellersCard() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Top Verified Merchants
           </CardTitle>
-          <Badge variant="outline" className="h-4.5 px-2 text-[9px] font-bold rounded-md text-primary border-primary/30">
+          <Badge variant="outline" className="h-4.5 px-2 text-3xs font-bold rounded-md text-primary border-primary/30">
             Active Listings
           </Badge>
         </div>
@@ -46,7 +46,7 @@ export function AdminTopSellersCard() {
           >
             <div className="flex items-center gap-3 min-w-0">
               <Avatar className="size-9 rounded-full border border-border shrink-0">
-                <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+                <AvatarFallback className="text-2xs font-bold bg-primary/10 text-primary">
                   {seller.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -59,7 +59,7 @@ export function AdminTopSellersCard() {
                   <SealCheck size={14} weight="fill" className="text-primary shrink-0" />
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                <div className="flex items-center gap-2 text-xxs text-muted-foreground">
                   <span className="truncate">{formatSellerType(seller.sellerType)}</span>
                   <span>|</span>
                   <span className="font-semibold text-foreground">{seller.activeListings.toLocaleString()} active ads</span>

@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import {
   Select,
   SelectContent,
@@ -31,7 +32,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet"
 import {
@@ -43,7 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
-import { ALL_DETAILED_CATEGORIES } from "@/features/categories/data/all-categories"
+import { useAdminCategories } from "@/features/admin/categories/hooks/categories.queries"
 import { useAdminFeaturedSections } from "../hooks/content.queries"
 import {
   useCreateFeaturedSection,
@@ -76,7 +76,16 @@ export function FeaturedSectionsWorkspace({
   initialSections: fallbackSections = [],
 }: FeaturedSectionsWorkspaceProps) {
   const { data: remoteSections } = useAdminFeaturedSections()
+  const { data: categoryTree = [] } = useAdminCategories()
   const sections = remoteSections ?? fallbackSections
+  const selectableCategories = categoryTree.flatMap((category) => [
+    { id: category.id, name: category.name, listingCount: category.listingCount },
+    ...category.subcategories.map((subcategory) => ({
+      id: subcategory.id,
+      name: `${category.name} / ${subcategory.name}`,
+      listingCount: subcategory.listingCount,
+    })),
+  ])
   const createSection = useCreateFeaturedSection()
   const updateSection = useUpdateFeaturedSection()
   const deleteSection = useDeleteFeaturedSection()
@@ -86,6 +95,7 @@ export function FeaturedSectionsWorkspace({
   const [sectionToDelete, setSectionToDelete] = useState<FeaturedSectionItem | null>(null)
 
   const [formTitle, setFormTitle] = useState("")
+  const [formTitleKm, setFormTitleKm] = useState("")
   const [formSlug, setFormSlug] = useState("")
   const [formSourceType, setFormSourceType] = useState<FeaturedSourceType>("category")
   const [formCategoryIds, setFormCategoryIds] = useState<string[]>([])
@@ -95,6 +105,7 @@ export function FeaturedSectionsWorkspace({
   const openAddModal = () => {
     setEditingSection(null)
     setFormTitle("")
+    setFormTitleKm("")
     setFormSlug("")
     setFormSourceType("category")
     setFormCategoryIds([])
@@ -106,6 +117,7 @@ export function FeaturedSectionsWorkspace({
   const openEditModal = (sec: FeaturedSectionItem) => {
     setEditingSection(sec)
     setFormTitle(sec.title)
+    setFormTitleKm(sec.titleKm ?? "")
     setFormSlug(sec.slug)
     setFormSourceType(sec.sourceType)
     setFormCategoryIds(sec.categoryIds)
@@ -172,10 +184,12 @@ export function FeaturedSectionsWorkspace({
 
     const payload = {
       title: formTitle.trim(),
+      titleKm: formTitleKm.trim() || null,
       slug: computedSlug,
       sourceType: formSourceType,
       sortMode: formSortMode,
       isActive: formIsActive,
+      categoryIds: formSourceType === "category" ? formCategoryIds : [],
     }
 
     if (editingSection) {
@@ -213,12 +227,7 @@ export function FeaturedSectionsWorkspace({
           <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Sparkle size={20} weight="duotone" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground">Featured Sections</h1>
-            <p className="text-xs text-muted-foreground">
-              Manage dynamic listing sections on homepage and discovery surfaces.
-            </p>
-          </div>
+          <h1 className="text-base font-bold text-foreground">Featured Sections</h1>
         </div>
 
         <Button
@@ -252,14 +261,14 @@ export function FeaturedSectionsWorkspace({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/60">
-                <TableHead className="w-12 text-[11px] font-bold">#</TableHead>
-                <TableHead className="text-[11px] font-bold">Section</TableHead>
-                <TableHead className="text-[11px] font-bold">Source</TableHead>
-                <TableHead className="text-[11px] font-bold">Categories</TableHead>
-                <TableHead className="text-[11px] font-bold">Sort Mode</TableHead>
-                <TableHead className="text-[11px] font-bold">Status</TableHead>
-                <TableHead className="w-20 text-[11px] font-bold text-center">Order</TableHead>
-                <TableHead className="w-20 text-[11px] font-bold text-right">Actions</TableHead>
+                <TableHead className="w-12 text-xxs font-bold">#</TableHead>
+                <TableHead className="text-xxs font-bold">Section</TableHead>
+                <TableHead className="text-xxs font-bold">Source</TableHead>
+                <TableHead className="text-xxs font-bold">Categories</TableHead>
+                <TableHead className="text-xxs font-bold">Sort Mode</TableHead>
+                <TableHead className="text-xxs font-bold">Status</TableHead>
+                <TableHead className="w-20 text-xxs font-bold text-center">Order</TableHead>
+                <TableHead className="w-20 text-xxs font-bold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -284,12 +293,12 @@ export function FeaturedSectionsWorkspace({
                         <span className="text-xs font-semibold text-foreground block">
                           {sec.title}
                         </span>
-                        <span className="text-[10px] font-mono text-muted-foreground">
+                        <span className="text-2xs font-mono text-muted-foreground">
                           {sec.slug}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-[10px] capitalize">
+                        <Badge variant="outline" className="text-2xs capitalize">
                           {sec.sourceType.replace("_", " ")}
                         </Badge>
                       </TableCell>
@@ -300,7 +309,7 @@ export function FeaturedSectionsWorkspace({
                               <Badge
                                 key={catName}
                                 variant="secondary"
-                                className="text-[10px] px-1.5 py-0 h-4.5 bg-muted text-foreground"
+                                className="text-2xs px-1.5 py-0 h-4.5 bg-muted text-foreground"
                               >
                                 {catName}
                               </Badge>
@@ -397,23 +406,22 @@ export function FeaturedSectionsWorkspace({
             <SheetTitle className="text-sm font-bold text-foreground">
               {editingSection ? "Edit Featured Section" : "Add Featured Section"}
             </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground">
-              Configure collection criteria and discovery presentation.
-            </SheetDescription>
           </SheetHeader>
 
           <form onSubmit={handleSaveForm} className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-              <Field>
-                <FieldLabel required>Section Title</FieldLabel>
-                <Input
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="e.g. Featured Luxury Vehicles"
-                  className="h-9 text-xs"
-                  required
-                />
-              </Field>
+              <BilingualField
+                id="featured-title"
+                label="Title"
+                required
+                stacked
+                valueEn={formTitle}
+                valueKm={formTitleKm}
+                onChangeEn={setFormTitle}
+                onChangeKm={setFormTitleKm}
+                placeholderEn="e.g. Featured Luxury Vehicles"
+                maxLength={200}
+              />
 
               <Field>
                 <FieldLabel>Slug</FieldLabel>
@@ -453,7 +461,7 @@ export function FeaturedSectionsWorkspace({
                 <Field>
                   <FieldLabel>Target Categories</FieldLabel>
                   <div className="max-h-40 overflow-y-auto space-y-1.5 p-2 rounded-lg border border-border/50 bg-background/50">
-                    {ALL_DETAILED_CATEGORIES.map((cat) => {
+                    {selectableCategories.map((cat) => {
                       const isSelected = formCategoryIds.includes(cat.id)
                       return (
                         <button
@@ -467,7 +475,7 @@ export function FeaturedSectionsWorkspace({
                           }`}
                         >
                           <span>{cat.name}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">
+                          <span className="text-2xs text-muted-foreground font-mono">
                             {cat.listingCount} ads
                           </span>
                         </button>
@@ -506,7 +514,7 @@ export function FeaturedSectionsWorkspace({
                   <span className="text-xs font-semibold text-foreground block">
                     Active Status
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-xxs text-muted-foreground">
                     Display section on live marketplace
                   </span>
                 </div>

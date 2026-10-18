@@ -37,7 +37,7 @@ export function VerificationHistoryTimeline({ history }: VerificationHistoryTime
                   <p className="text-foreground font-medium leading-snug">
                     {event.action}
                   </p>
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xxs text-muted-foreground">
                     <span className="inline-flex items-center gap-1 font-semibold text-foreground/80">
                       <UserCircle size={12} />
                       <span>{event.actor}</span>
@@ -47,7 +47,7 @@ export function VerificationHistoryTimeline({ history }: VerificationHistoryTime
                   </div>
 
                   {event.note && (
-                    <div className="mt-1.5 p-2 rounded-md bg-muted/40 text-[11px] text-muted-foreground border border-border/50">
+                    <div className="mt-1.5 p-2 rounded-md bg-muted/40 text-xxs text-muted-foreground border border-border/50">
                       <span className="font-semibold text-foreground">Note: </span>
                       <span>{event.note}</span>
                     </div>

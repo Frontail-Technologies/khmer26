@@ -1,25 +1,16 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
-import {
-  Car,
-  Buildings,
-  DeviceMobile,
-  Laptop,
-  Armchair,
-  TShirt,
-  Briefcase,
-  Wrench,
-  Dog,
-  DotsThreeCircle,
-  CaretRight,
-  ArrowLeft,
-  CheckCircle,
-} from "@phosphor-icons/react"
+import { CaretRight, ArrowLeft, CheckCircle } from "@phosphor-icons/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DEMO_CATEGORIES } from "@/features/categories/data/demo-categories"
-import type { Category } from "@/types"
+import { useCategoryTree } from "@/features/categories/api/categories.queries"
+import type { CategoryNode } from "@/features/categories/api/categories.api"
+import { CategoryThumb } from "@/features/categories/components/category-thumb"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface CategoryStepProps {
   selectedCategoryId: string
@@ -28,31 +19,19 @@ interface CategoryStepProps {
   onSelect: (category: { id: string; slug: string; path: string[] }) => void
 }
 
-function getCategoryIcon(slug: string) {
-  const iconProps = { size: 24, weight: "duotone" as const }
-  switch (slug) {
-    case "vehicles": return <Car {...iconProps} />
-    case "property": return <Buildings {...iconProps} />
-    case "electronics": return <Laptop {...iconProps} />
-    case "phones": return <DeviceMobile {...iconProps} />
-    case "furniture": return <Armchair {...iconProps} />
-    case "fashion": return <TShirt {...iconProps} />
-    case "jobs": return <Briefcase {...iconProps} />
-    case "services": return <Wrench {...iconProps} />
-    case "pets": return <Dog {...iconProps} />
-    default: return <DotsThreeCircle {...iconProps} />
-  }
-}
-
 export function CategoryStep({
   selectedCategoryId,
   selectedCategoryPath,
   onSelect,
 }: CategoryStepProps) {
-  const [activeParent, setActiveParent] = useState<Category | null>(null)
-  const [activeSubcategory, setActiveSubcategory] = useState<Category | null>(null)
+  const tDynamic = useTranslations("dynamic")
+  const tGenerated = useTranslations("generated")
+  const getLocalizedName = useLocalizedName()
+  const { data: categories = [], isLoading, isError } = useCategoryTree()
+  const [activeParent, setActiveParent] = useState<CategoryNode | null>(null)
+  const [activeSubcategory, setActiveSubcategory] = useState<CategoryNode | null>(null)
 
-  const handleParentClick = (cat: Category) => {
+  const handleParentClick = (cat: CategoryNode) => {
     if (cat.children && cat.children.length > 0) {
       setActiveParent(cat)
       setActiveSubcategory(null)
@@ -60,29 +39,29 @@ export function CategoryStep({
       onSelect({
         id: cat.id,
         slug: cat.slug,
-        path: [cat.name],
+        path: [getLocalizedName(cat)],
       })
     }
   }
 
-  const handleSubcategoryClick = (sub: Category) => {
+  const handleSubcategoryClick = (sub: CategoryNode) => {
     if (sub.children && sub.children.length > 0) {
       setActiveSubcategory(sub)
     } else if (activeParent) {
       onSelect({
         id: sub.id,
         slug: sub.slug,
-        path: [activeParent.name, sub.name],
+        path: [getLocalizedName(activeParent), getLocalizedName(sub)],
       })
     }
   }
 
-  const handleLeafClick = (leaf: Category) => {
+  const handleLeafClick = (leaf: CategoryNode) => {
     if (activeParent && activeSubcategory) {
       onSelect({
         id: leaf.id,
         slug: leaf.slug,
-        path: [activeParent.name, activeSubcategory.name, leaf.name],
+        path: [getLocalizedName(activeParent), getLocalizedName(activeSubcategory), getLocalizedName(leaf)],
       })
     }
   }
@@ -93,14 +72,11 @@ export function CategoryStep({
         <div>
           <h2 className="text-base sm:text-lg font-bold text-foreground">
             {activeSubcategory
-              ? `Select subcategory in ${activeSubcategory.name}`
+              ? tDynamic("selectSubcategoryIn", { name: getLocalizedName(activeSubcategory) })
               : activeParent
-              ? `Select subcategory in ${activeParent.name}`
-              : "Choose a Category"}
+              ? tDynamic("selectSubcategoryIn", { name: getLocalizedName(activeParent) })
+              : tGenerated("chooseListingCategory")}
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Select the category that best describes your item
-          </p>
         </div>
 
         {(activeParent || activeSubcategory) && (
@@ -117,7 +93,7 @@ export function CategoryStep({
             className="h-8 px-2 text-xs font-semibold gap-1 text-primary hover:text-primary"
           >
             <ArrowLeft size={14} weight="bold" />
-            <span>Back</span>
+            <span><LocalizedText id="back" /></span>
           </Button>
         )}
       </div>
@@ -126,7 +102,7 @@ export function CategoryStep({
         <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20 text-xs">
           <div className="flex items-center gap-1.5 font-bold text-primary">
             <CheckCircle size={16} weight="fill" />
-            <span>Selected: {selectedCategoryPath.join(" > ")}</span>
+            <span>{tDynamic("selectedValue", { value: selectedCategoryPath.join(" > ") })}</span>
           </div>
 
           <button
@@ -137,7 +113,7 @@ export function CategoryStep({
             }}
             className="font-bold text-primary hover:underline cursor-pointer"
           >
-            Change
+            <LocalizedText id="change" />
           </button>
         </div>
       )}
@@ -158,7 +134,7 @@ export function CategoryStep({
                     : "border-border/80 bg-card hover:border-primary/40 hover:bg-muted/40 text-foreground font-medium text-xs sm:text-sm"
                 }`}
               >
-                <span>{leaf.name}</span>
+                <span>{getLocalizedName(leaf)}</span>
                 {isSelected && <CheckCircle size={16} weight="fill" />}
               </button>
             )
@@ -182,10 +158,8 @@ export function CategoryStep({
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    {getCategoryIcon(sub.slug)}
-                  </div>
-                  <span>{sub.name}</span>
+                  <CategoryThumb imageR2Key={sub.imageR2Key} name={getLocalizedName(sub)} size={32} className="rounded-lg" />
+                  <span>{getLocalizedName(sub)}</span>
                 </div>
 
                 {hasChildren ? (
@@ -199,8 +173,14 @@ export function CategoryStep({
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-          {DEMO_CATEGORIES.map((cat) => {
-            const isSelected = selectedCategoryPath[0] === cat.name
+          {isLoading && (
+            <p className="col-span-full py-8 text-center text-sm text-muted-foreground"><LocalizedText id="loadingCategories_5f7cba" /></p>
+          )}
+          {isError && (
+            <p className="col-span-full py-8 text-center text-sm text-destructive"><LocalizedText id="categoriesCouldNotBeLoadedPleaseTryAgain" /></p>
+          )}
+          {categories.map((cat) => {
+            const isSelected = selectedCategoryId === cat.id
 
             return (
               <Card
@@ -213,11 +193,9 @@ export function CategoryStep({
                 }`}
               >
                 <CardContent className="p-0 flex flex-col items-center text-center space-y-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors">
-                    {getCategoryIcon(cat.slug)}
-                  </div>
+                  <CategoryThumb imageR2Key={cat.imageR2Key} name={getLocalizedName(cat)} size={56} className="rounded-xl" />
                   <span className="text-xs sm:text-sm font-bold text-foreground">
-                    {cat.name}
+                    {getLocalizedName(cat)}
                   </span>
                 </CardContent>
               </Card>

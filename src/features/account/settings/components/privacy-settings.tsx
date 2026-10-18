@@ -1,5 +1,8 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import {
   LockKey,
   Phone,
@@ -7,42 +10,41 @@ import {
   Eye,
   Star,
 } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import type { AccountSettingsData } from "../../types"
 
 interface PrivacySettingsProps {
   settings: AccountSettingsData["privacy"]
   onChange: (key: keyof AccountSettingsData["privacy"], value: boolean) => void
+  disabled?: boolean
 }
 
 export function PrivacySettings({
   settings,
   onChange,
+  disabled = false,
 }: PrivacySettingsProps) {
+  const t = useTranslations("ui.account")
   const items = [
     {
       key: "showPhoneNumber" as const,
-      label: "Show Phone Number Publicly",
-      description: "Display your contact phone number directly on all active listing detail pages.",
+      label: t("privacyShowPhone"),
       icon: Phone,
     },
     {
       key: "allowBuyersFollow" as const,
-      label: "Allow Buyers to Follow Me",
-      description: "Let registered marketplace buyers follow your store and get notified of new listings.",
+      label: t("privacyAllowFollow"),
       icon: UserPlus,
     },
     {
       key: "showActiveStatus" as const,
-      label: "Show Online / Active Status",
-      description: "Show a green indicator when you are actively browsing or responding to messages.",
+      label: t("privacyShowActive"),
       icon: Eye,
     },
     {
       key: "showSellerRating" as const,
-      label: "Show Seller Rating Publicly",
-      description: "Display your average star rating and positive review feedback score on your profile.",
+      label: t("privacyShowRating"),
       icon: Star,
     },
   ]
@@ -53,12 +55,9 @@ export function PrivacySettings({
         <div className="flex items-center gap-2 text-primary">
           <LockKey size={20} weight="fill" />
           <CardTitle className="text-base font-bold text-foreground">
-            Privacy & Visibility
+            <LocalizedText id="privacyVisibility" />
           </CardTitle>
         </div>
-        <CardDescription className="text-xs text-muted-foreground">
-          Control how your profile and contact information appear across the marketplace.
-        </CardDescription>
       </CardHeader>
 
       <CardContent className="p-0 divide-y divide-border/60">
@@ -75,18 +74,14 @@ export function PrivacySettings({
                 <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
                   <Icon size={16} />
                 </div>
-                <div>
-                  <span className="font-bold text-xs sm:text-sm text-foreground block">
-                    {item.label}
-                  </span>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-normal mt-0.5">
-                    {item.description}
-                  </p>
-                </div>
+                <span className="font-bold text-xs sm:text-sm text-foreground block">
+                  {item.label}
+                </span>
               </div>
 
               <Switch
                 checked={isChecked}
+                disabled={disabled}
                 onCheckedChange={(checked) => onChange(item.key, checked)}
                 aria-label={item.label}
               />

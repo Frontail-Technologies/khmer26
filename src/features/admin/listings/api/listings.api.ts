@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api/client';
-import { formatAdminDate } from '@/lib/formatters/date';
+import { formatAdminDate, formatAdminDateTime } from '@/lib/formatters/date';
 import type {
   AdminListing,
   AdminListingStatus,
@@ -72,13 +72,17 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
       ? 'rejected'
       : statusMapping[listing.status as string] || 'active';
 
-  const rawMedia = (listing.media || listing.images || []) as Array<Record<string, unknown>>;
-  const images: AdminListingImage[] = rawMedia.map((m) => ({
-    id: String(m.id || Math.random()),
-    url: (m.url || m.fileUrl || '/placeholder.png') as string,
-    alt: listing.title as string,
-    isPrimary: Boolean(m.isCover || m.isPrimary),
-  }));
+  const rawMedia = (raw.images || listing.media || listing.images || []) as Array<Record<string, unknown>>;
+  const images: AdminListingImage[] = rawMedia.flatMap((m) => {
+    const url = (m.url || m.fileUrl) as string | undefined;
+    if (!url) return [];
+    return [{
+      id: String(m.id ?? url),
+      url,
+      alt: listing.title as string,
+      isPrimary: Boolean(m.isCover || m.isPrimary),
+    }];
+  });
 
   const seller = {
     id: (rawSeller?.id || listing.sellerId || listing.userId || '') as string,
@@ -90,8 +94,8 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
     phone: (rawSeller?.phone || rawSeller?.phoneNumber) as string | undefined,
     email: rawSeller?.email as string | undefined,
     joinedDate: rawSeller?.createdAt ? formatAdminDate(rawSeller.createdAt as string) : '—',
-    activeListings: Number(rawSeller?.activeListingsCount || 1),
-    rating: Number(rawSeller?.rating || 5),
+    activeListings: Number(rawSeller?.activeListingsCount ?? 0),
+    rating: rawSeller?.rating != null ? Number(rawSeller.rating) : undefined,
     slug: rawSeller?.slug as string | undefined,
   };
 
@@ -99,7 +103,7 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
   const rawDist = listing.district as Record<string, unknown> | undefined;
 
   const location = {
-    province: (rawLoc?.provinceName || rawProvince?.nameEn || rawLoc?.province || 'Phnom Penh') as string,
+    province: (rawLoc?.provinceName || rawProvince?.nameEn || rawLoc?.province || '—') as string,
     district: (rawLoc?.districtName || rawDist?.nameEn || rawLoc?.district) as string | undefined,
     address: rawLoc?.address as string | undefined,
   };
@@ -116,7 +120,7 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
     id: String(r.id),
     reason: (r.reason as string) || 'Reported content',
     reporterType: 'user' as const,
-    submittedAt: r.createdAt ? formatAdminDate(r.createdAt as string) : '—',
+    submittedAt: r.createdAt ? formatAdminDateTime(r.createdAt as string) : '—',
     status: ((r.status as string) || 'pending') as 'pending' | 'reviewed' | 'dismissed',
   }));
 
@@ -128,15 +132,16 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
       action: (h.action as string) || 'Moderation',
       actor: (actorObj?.email || h.actorName || 'Moderator') as string,
       actorRole: 'Admin',
-      timestamp: h.createdAt ? formatAdminDate(h.createdAt as string) : '—',
+      timestamp: h.createdAt ? formatAdminDateTime(h.createdAt as string) : '—',
       reason: h.reason as string | undefined,
     };
   });
 
-  const createdDate = listing.createdAt ? formatAdminDate(listing.createdAt as string) : '—';
+  const createdDate = listing.createdAt ? formatAdminDateTime(listing.createdAt as string) : '—';
 
   return {
     id: String(listing.id),
+    displayId: String(listing.displayId || raw.displayId || 'LST'),
     slug: listing.slug as string | undefined,
     title: (listing.title as string) || 'Listing',
     price: Number(listing.price) || 0,
@@ -149,7 +154,7 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
     status,
     location,
     seller,
-    images: images.length > 0 ? images : [{ id: '1', url: '/placeholder.png', isPrimary: true }],
+    images,
     description: (listing.description as string) || '',
     specifications,
     reports,
@@ -160,6 +165,9 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
     createdDate,
     updatedAt: listing.updatedAt as string | undefined,
     rejectionReason: listing.rejectionReason as string | undefined,
+    moderationMatches: Array.isArray(listing.moderationMatches)
+      ? listing.moderationMatches as AdminListing['moderationMatches']
+      : [],
   };
 }
 

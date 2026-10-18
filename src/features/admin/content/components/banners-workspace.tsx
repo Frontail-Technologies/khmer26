@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, type ChangeEvent } from "react"
+import { useEffect, useState, useRef, type ChangeEvent } from "react"
 import Image from "next/image"
 import {
   Image as ImageIcon,
@@ -10,6 +10,7 @@ import {
   MagnifyingGlass,
   UploadSimple,
   X,
+  SpinnerGap,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,6 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import { AdminImageThumbnail } from "@/components/shared/admin-image-preview"
 import { formatAdminDate } from "@/lib/formatters/date"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import {
   Select,
   SelectContent,
@@ -32,7 +34,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet"
 import {
@@ -51,7 +52,7 @@ import {
   useToggleBannerActive,
   useDeleteBanner,
 } from "../hooks/content.mutations"
-import { uploadMediaFile } from "@/lib/api/media"
+import { uploadMediaFile, validateImageFile } from "@/lib/api/media"
 import { bannerFormSchema } from "../schemas/content.schema"
 import { toast } from "sonner"
 import type { AdminBannerItem, BannerPlacement, BannerDestinationType } from "../types"
@@ -98,27 +99,47 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
   const [bannerToDelete, setBannerToDelete] = useState<AdminBannerItem | null>(null)
 
   const [formTitle, setFormTitle] = useState("")
+  const [formTitleKm, setFormTitleKm] = useState("")
   const [formPlacement, setFormPlacement] = useState<BannerPlacement>("homepage_hero")
   const [formImageUrl, setFormImageUrl] = useState("")
   const [formImageMediaId, setFormImageMediaId] = useState<string | undefined>(undefined)
+  const [formImageFile, setFormImageFile] = useState<File | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [formDestinationType, setFormDestinationType] = useState<BannerDestinationType>("category")
   const [formDestinationValue, setFormDestinationValue] = useState("")
   const [formDestinationLabel, setFormDestinationLabel] = useState("")
+  const [formDestinationLabelKm, setFormDestinationLabelKm] = useState("")
   const [formStartDate, setFormStartDate] = useState("")
   const [formEndDate, setFormEndDate] = useState("")
   const [formIsActive, setFormIsActive] = useState(true)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewObjectUrlRef = useRef<string | null>(null)
+
+  const setImagePreview = (url: string, objectUrl = false) => {
+    if (previewObjectUrlRef.current) URL.revokeObjectURL(previewObjectUrlRef.current)
+    previewObjectUrlRef.current = objectUrl ? url : null
+    setFormImageUrl(url)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrlRef.current) URL.revokeObjectURL(previewObjectUrlRef.current)
+    }
+  }, [])
 
   const openAddModal = () => {
     setEditingBanner(null)
     setFormTitle("")
+    setFormTitleKm("")
     setFormPlacement("homepage_hero")
-    setFormImageUrl("")
+    setImagePreview("")
     setFormImageMediaId(undefined)
+    setFormImageFile(null)
     setFormDestinationType("no_action")
     setFormDestinationValue("")
     setFormDestinationLabel("")
+    setFormDestinationLabelKm("")
     setFormStartDate("")
     setFormEndDate("")
     setFormIsActive(true)
@@ -128,12 +149,15 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
   const openEditModal = (b: AdminBannerItem) => {
     setEditingBanner(b)
     setFormTitle(b.title)
+    setFormTitleKm(b.titleKm ?? "")
     setFormPlacement(b.placement)
-    setFormImageUrl(b.imageUrl)
+    setImagePreview(b.imageUrl)
     setFormImageMediaId(b.imageMediaId)
+    setFormImageFile(null)
     setFormDestinationType(b.destinationType)
     setFormDestinationValue(b.destinationValue)
     setFormDestinationLabel(b.destinationLabel ?? "")
+    setFormDestinationLabelKm(b.destinationLabelKm ?? "")
     setFormStartDate(b.startDate ?? "")
     setFormEndDate(b.endDate ?? "")
     setFormIsActive(b.isActive)
@@ -151,23 +175,31 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
     })
   }
 
-  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const previewUrl = URL.createObjectURL(file)
-      setFormImageUrl(previewUrl)
-      try {
-        const uploaded = await uploadMediaFile(file, 'banner')
-        if (uploaded.mediaId) {
-          setFormImageMediaId(uploaded.mediaId)
-        }
-      } catch {
-        // Fallback to sending imageUrl directly
-      }
+    if (!file) return
+
+    const invalid = validateImageFile(file)
+    if (invalid) {
+      toast.error(invalid.message)
+      e.target.value = ""
+      return
     }
+
+    const previewUrl = URL.createObjectURL(file)
+    setImagePreview(previewUrl, true)
+    setFormImageFile(file)
+    setFormImageMediaId(undefined)
   }
 
-  const handleSaveForm = (e: React.FormEvent) => {
+  const handleRemoveImage = () => {
+    setImagePreview("")
+    setFormImageFile(null)
+    setFormImageMediaId(undefined)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const finalTitle = formTitle.trim() || formDestinationLabel.trim() || "Promotional Banner"
@@ -189,14 +221,36 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
       return
     }
 
+    let imageMediaId = formImageMediaId
+    if (formImageFile) {
+      setIsUploadingImage(true)
+      try {
+        const uploaded = await uploadMediaFile(formImageFile, "banner")
+        imageMediaId = uploaded.mediaId
+        setFormImageMediaId(uploaded.mediaId)
+        setFormImageFile(null)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Banner image upload failed")
+        return
+      } finally {
+        setIsUploadingImage(false)
+      }
+    }
+
+    if (!imageMediaId) {
+      toast.error("Choose a banner image before saving")
+      return
+    }
+
     const payload = {
       title: finalTitle,
+      titleKm: formTitleKm.trim() || null,
       placement: formPlacement,
-      imageUrl: formImageUrl,
-      imageMediaId: formImageMediaId,
+      imageMediaId,
       destinationType: formDestinationType,
       destinationValue: formDestinationValue.trim() || undefined,
       destinationLabel: formDestinationLabel.trim() || undefined,
+      destinationLabelKm: formDestinationLabelKm.trim() || null,
       startDate: formStartDate ? new Date(formStartDate).toISOString() : undefined,
       endDate: formEndDate ? new Date(formEndDate).toISOString() : undefined,
       isActive: formIsActive,
@@ -235,12 +289,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
           <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <ImageIcon size={20} weight="duotone" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground">Banners</h1>
-            <p className="text-xs text-muted-foreground">
-              Schedule and manage promotional banners across marketplace surfaces.
-            </p>
-          </div>
+          <h1 className="text-base font-bold text-foreground">Banners</h1>
         </div>
 
         <Button
@@ -316,12 +365,12 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/60">
-                <TableHead className="text-[11px] font-bold">Banner</TableHead>
-                <TableHead className="text-[11px] font-bold">Placement</TableHead>
-                <TableHead className="text-[11px] font-bold">Destination</TableHead>
-                <TableHead className="text-[11px] font-bold">Status</TableHead>
-                <TableHead className="text-[11px] font-bold">Schedule</TableHead>
-                <TableHead className="w-20 text-[11px] font-bold text-right">Actions</TableHead>
+                <TableHead className="text-xxs font-bold">Banner</TableHead>
+                <TableHead className="text-xxs font-bold">Placement</TableHead>
+                <TableHead className="text-xxs font-bold">Destination</TableHead>
+                <TableHead className="text-xxs font-bold">Status</TableHead>
+                <TableHead className="text-xxs font-bold">Schedule</TableHead>
+                <TableHead className="w-20 text-xxs font-bold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -340,14 +389,14 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                           <span className="text-xs font-semibold text-foreground block truncate">
                             {b.title}
                           </span>
-                          <span className="text-[10px] text-muted-foreground block capitalize">
+                          <span className="text-2xs text-muted-foreground block capitalize">
                             {b.placement.replace("_", " ")}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-2xs">
                         {b.placement.replace("_", " ")}
                       </Badge>
                     </TableCell>
@@ -356,7 +405,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                         <span className="text-xs font-medium text-foreground block truncate">
                           {b.destinationLabel ?? b.destinationValue}
                         </span>
-                        <span className="text-[10px] text-muted-foreground capitalize">
+                        <span className="text-2xs text-muted-foreground capitalize">
                           {b.destinationType.replace("_", " ")}
                         </span>
                       </div>
@@ -425,23 +474,22 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
             <SheetTitle className="text-sm font-bold text-foreground">
               {editingBanner ? "Edit Banner" : "Add Banner"}
             </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground">
-              Configure banner placement, image creative, and destination.
-            </SheetDescription>
           </SheetHeader>
 
           <form onSubmit={handleSaveForm} className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-              <Field>
-                <FieldLabel required>Banner Title</FieldLabel>
-                <Input
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="e.g. Khmer New Year 2026 Mega Expo"
-                  className="h-9 text-xs"
-                  required
-                />
-              </Field>
+              <BilingualField
+                id="banner-title"
+                stacked
+                label="Title"
+                required
+                valueEn={formTitle}
+                valueKm={formTitleKm}
+                onChangeEn={setFormTitle}
+                onChangeKm={setFormTitleKm}
+                placeholderEn="e.g. Khmer New Year 2026 Mega Expo"
+                maxLength={200}
+              />
 
               <Field>
                 <FieldLabel>Placement Surface</FieldLabel>
@@ -499,7 +547,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                             type="button"
                             size="xs"
                             variant="outline"
-                            onClick={() => setFormImageUrl("")}
+                            onClick={handleRemoveImage}
                             className="size-7 p-0 cursor-pointer text-destructive"
                           >
                             <X size={12} />
@@ -513,8 +561,8 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                       >
                         <UploadSimple size={20} />
                         <span className="text-xs font-medium">Click or drop banner file</span>
-                        <span className="text-[10px] text-muted-foreground">
-                          PNG, JPG or WebP (max 4MB)
+                        <span className="text-2xs text-muted-foreground">
+                          PNG, JPG or WebP (max 10MB)
                         </span>
                       </div>
                     )}
@@ -563,15 +611,18 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                     />
                   </Field>
 
-                  <Field>
-                    <FieldLabel>Target Label</FieldLabel>
-                    <Input
-                      value={formDestinationLabel}
-                      onChange={(e) => setFormDestinationLabel(e.target.value)}
-                      placeholder="Display label or category name"
-                      className="h-9 text-xs"
-                    />
-                  </Field>
+                  <BilingualField
+                    id="banner-target-label"
+                    label="Target label"
+                    stacked
+                    className="sm:col-span-2"
+                    valueEn={formDestinationLabel}
+                    valueKm={formDestinationLabelKm}
+                    onChangeEn={setFormDestinationLabel}
+                    onChangeKm={setFormDestinationLabelKm}
+                    placeholderEn="Display label or category name"
+                    maxLength={120}
+                  />
                 </div>
               )}
 
@@ -602,7 +653,7 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
                   <span className="text-xs font-semibold text-foreground block">
                     Active Banner
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-xxs text-muted-foreground">
                     Display banner on live placement
                   </span>
                 </div>
@@ -623,10 +674,15 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
               <Button
                 type="submit"
                 size="sm"
-                disabled={!formTitle.trim()}
+                disabled={!formTitle.trim() || isUploadingImage}
                 className="text-xs font-semibold cursor-pointer"
               >
-                {editingBanner ? "Save Changes" : "Create Banner"}
+                {isUploadingImage && <SpinnerGap size={14} className="animate-spin" />}
+                {isUploadingImage
+                  ? "Uploading..."
+                  : editingBanner
+                    ? "Save Changes"
+                    : "Create Banner"}
               </Button>
             </SheetFooter>
           </form>

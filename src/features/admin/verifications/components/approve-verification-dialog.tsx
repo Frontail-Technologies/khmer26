@@ -54,7 +54,7 @@ export function ApproveVerificationDialog({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Request ID:</span>
-              <span className="font-mono text-foreground">{request.id}</span>
+              <span className="font-mono text-foreground">{request.displayId}</span>
             </div>
           </div>
 

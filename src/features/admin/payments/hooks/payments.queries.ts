@@ -5,6 +5,7 @@ import { getAdminPayments, getAdminPaymentDetail } from '../api/payments.api';
 export function useAdminPayments(params?: {
   page?: number;
   limit?: number;
+  userId?: string;
   status?: string;
   purpose?: string;
 }) {

@@ -30,10 +30,10 @@ export function ListingModerationHistory({ history }: ListingModerationHistoryPr
 
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className="font-bold text-foreground">{event.action}</span>
-                <span className="text-[10px] text-muted-foreground font-mono">{event.timestamp}</span>
+                <span className="text-2xs text-muted-foreground font-mono">{event.timestamp}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
                 <User size={12} />
                 <span>
                   {event.actor} <span className="text-muted-foreground/60">({event.actorRole})</span>
@@ -47,7 +47,7 @@ export function ListingModerationHistory({ history }: ListingModerationHistoryPr
               )}
 
               {event.details && (
-                <p className="text-[11px] text-muted-foreground bg-muted/20 p-2 rounded-md border border-border/40 leading-relaxed">
+                <p className="text-xxs text-muted-foreground bg-muted/20 p-2 rounded-md border border-border/40 leading-relaxed">
                   {event.details}
                 </p>
               )}

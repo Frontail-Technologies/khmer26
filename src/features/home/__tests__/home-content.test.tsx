@@ -99,6 +99,28 @@ describe("<HomeContent />", () => {
     expect(screen.getByRole("link", { name: "Real banner" })).toHaveAttribute("href", "/category/vehicles")
   })
 
+  it("renders listings from a configured featured section", async () => {
+    getHome.mockResolvedValue(makeHome({
+      featuredSections: [{
+        id: "featured-1",
+        title: "Featured Vehicles",
+        slug: "featured-vehicles",
+        sourceType: "category",
+        sortMode: "recent",
+        displayStyle: "grid",
+        isActive: true,
+        sortOrder: 1,
+        itemLimit: 8,
+        categoryIds: ["c1"],
+        listings: [makeListing()],
+      }],
+    }))
+    renderWithProviders(<HomeContent />)
+
+    expect(await screen.findByRole("heading", { name: "Featured Vehicles" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Backend Honda Dream" })).toBeInTheDocument()
+  })
+
   it("never falls back to demo listings, categories or locations", async () => {
     getHome.mockResolvedValue(makeHome())
     renderWithProviders(<HomeContent />)

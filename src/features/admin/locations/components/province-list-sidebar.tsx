@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { MapPin, CaretRight, MagnifyingGlass } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { CambodiaProvince } from "../types"
 
@@ -33,12 +32,7 @@ export function ProvinceListSidebar({
   return (
     <Card className="p-3 bg-card border-0 rounded-xl shadow-2xs space-y-3">
       <div className="flex items-center justify-between gap-2 pb-1">
-        <div className="space-y-0.5">
-          <span className="text-xs font-bold text-foreground">Provinces & Capital</span>
-          <span className="text-[10px] text-muted-foreground block">
-            {provinces.length} Administrative Divisions
-          </span>
-        </div>
+        <span className="text-xs font-bold text-foreground">Provinces & Capital</span>
       </div>
 
       <div className="relative">
@@ -76,21 +70,18 @@ export function ProvinceListSidebar({
                   <div className="flex items-center gap-1.5">
                     <span className="truncate">{prov.name}</span>
                     {prov.nameKhmer && (
-                      <span className="text-[10px] text-muted-foreground font-normal hidden sm:inline">
+                      <span className="text-2xs text-muted-foreground font-normal hidden sm:inline">
                         {prov.nameKhmer}
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-muted-foreground font-normal block">
-                    {prov.districts.length} Districts • {prov.listingCount.toLocaleString()} ads
-                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
-                <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
-                  {prov.code}
-                </Badge>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {prov.listingCount > 0 && (
+                  <span className="text-2xs font-normal text-muted-foreground">{prov.listingCount.toLocaleString()}</span>
+                )}
                 <CaretRight size={12} className={cn("text-muted-foreground", isSelected && "text-primary")} />
               </div>
             </div>

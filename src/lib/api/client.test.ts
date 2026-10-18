@@ -87,6 +87,101 @@ describe('apiClient access-token refresh flow', () => {
     }
   });
 
+  it('automatically obtains a fresh CSRF token and retries the first failed mutation', async () => {
+    window.sessionStorage.setItem('k26_csrf', 'stale-csrf');
+    let mutationCount = 0;
+
+    const fetchMock = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      if (u.includes('/auth/csrf')) {
+        return jsonResponse(200, { success: true, data: { csrfToken: 'fresh-csrf' } });
+      }
+      if (u.includes('/admin/content/banners')) {
+        mutationCount++;
+        const headers = init?.headers as Record<string, string>;
+        if (mutationCount === 1) {
+          expect(headers['x-csrf-token']).toBe('stale-csrf');
+          return jsonResponse(403, {
+            success: false,
+            error: { code: 'CSRF_INVALID', message: 'Invalid CSRF token' },
+          });
+        }
+        expect(headers['x-csrf-token']).toBe('fresh-csrf');
+        return jsonResponse(200, { success: true, data: { updated: true } });
+      }
+      throw new Error(`Unexpected fetch to ${u}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await apiClient.patch('/admin/content/banners/banner-1', { title: 'Updated' });
+
+    expect(result.data).toEqual({ updated: true });
+    expect(mutationCount).toBe(2);
+  });
+
+  it('deduplicates CSRF rotation when concurrent mutations reject the same stale token', async () => {
+    window.sessionStorage.setItem('k26_csrf', 'stale-concurrent-csrf');
+    let csrfRequestCount = 0;
+
+    const fetchMock = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      if (u.includes('/auth/csrf')) {
+        csrfRequestCount++;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return jsonResponse(200, { success: true, data: { csrfToken: 'shared-fresh-csrf' } });
+      }
+      if (u.includes('/admin/')) {
+        const headers = init?.headers as Record<string, string>;
+        if (headers['x-csrf-token'] !== 'shared-fresh-csrf') {
+          return jsonResponse(403, {
+            success: false,
+            error: { code: 'CSRF_INVALID', message: 'Invalid CSRF token' },
+          });
+        }
+        return jsonResponse(200, { success: true, data: { updated: true } });
+      }
+      throw new Error(`Unexpected fetch to ${u}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await Promise.all([
+      apiClient.patch('/admin/content/banners/banner-1', { title: 'One' }),
+      apiClient.delete('/admin/categories/category-1'),
+    ]);
+
+    expect(csrfRequestCount).toBe(1);
+  });
+
+  it('refreshes the session when CSRF initialization receives 401, then completes the action', async () => {
+    window.sessionStorage.setItem('k26_csrf', 'expired-session-csrf');
+    let mutationCount = 0;
+
+    const fetchMock = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      if (u.includes('/auth/csrf')) return jsonResponse(401, expiredPayload);
+      if (u.includes('/auth/refresh')) return jsonResponse(200, refreshOkPayload);
+      if (u.includes('/admin/content/banners')) {
+        mutationCount++;
+        const headers = init?.headers as Record<string, string>;
+        if (mutationCount === 1) {
+          return jsonResponse(403, {
+            success: false,
+            error: { code: 'CSRF_INVALID', message: 'Invalid CSRF token' },
+          });
+        }
+        expect(headers['x-csrf-token']).toBe('new-csrf');
+        return jsonResponse(200, { success: true, data: { updated: true } });
+      }
+      throw new Error(`Unexpected fetch to ${u}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await apiClient.patch('/admin/content/banners/banner-1', { title: 'Updated' });
+
+    expect(result.data).toEqual({ updated: true });
+    expect(mutationCount).toBe(2);
+  });
+
   it('surfaces the original 401 when the refresh attempt itself fails, without looping', async () => {
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
       const u = String(url);

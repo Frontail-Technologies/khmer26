@@ -55,7 +55,8 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
         const matchesName = item.seller.name.toLowerCase().includes(q)
         const matchesEmail = item.seller.email.toLowerCase().includes(q)
         const matchesPhone = item.seller.phone.toLowerCase().includes(q)
-        const matchesId = item.id.toLowerCase().includes(q)
+        const matchesId =
+          item.displayId.toLowerCase().includes(q) || item.id.toLowerCase().includes(q)
         if (!matchesName && !matchesEmail && !matchesPhone && !matchesId) return false
       }
       return true
@@ -116,7 +117,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
               <span>{tab.label}</span>
               <Badge
                 variant="outline"
-                className="px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
+                className="px-1.5 py-0 h-4 text-2xs font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
               >
                 {tab.count}
               </Badge>
@@ -156,7 +157,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80"
+                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
                     >
                       {header.isPlaceholder
                         ? null
@@ -189,7 +190,6 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
                 <DataTableEmpty
                   colSpan={verificationColumns.length}
                   title={isLoading ? "Loading verification requests" : "No verification requests found"}
-                  description={isLoading ? "Fetching the latest seller verification queue." : "Try adjusting your search terms or active filters."}
                 />
               )}
             </TableBody>

@@ -1,10 +1,14 @@
 import { apiClient } from '@/lib/api/client';
 import type { NotificationRecord, NotificationAudience } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface BackendBroadcastDto {
   id: string;
+  displayId: string;
   title: string;
+  titleKm?: string | null;
   body: string;
+  bodyKm?: string | null;
   audience: string;
   specificUserId: string | null;
   sentByUserId: string | null;
@@ -15,12 +19,15 @@ export interface BackendBroadcastDto {
 export function normalizeBroadcast(b: BackendBroadcastDto): NotificationRecord {
   return {
     id: b.id,
+    displayId: b.displayId,
     title: b.title,
+    titleKm: b.titleKm ?? null,
     message: b.body,
+    messageKm: b.bodyKm ?? null,
     audience: (b.audience || 'all_users') as NotificationAudience,
     targetUser: b.specificUserId || undefined,
     sentAt: b.createdAt
-      ? new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      ? formatAdminDateTime(b.createdAt)
       : '—',
     status: 'sent',
     sentBy: 'System Administrator',
@@ -42,14 +49,16 @@ export async function getAdminBroadcasts(params?: {
 
 export async function createAdminBroadcast(data: {
   title: string;
+  titleKm?: string | null;
   body: string;
+  bodyKm?: string | null;
   audience: 'all_users' | 'buyers' | 'sellers' | 'dealers' | 'specific_user';
   specificUserId?: string | null;
 }) {
   return apiClient.post('/admin/notifications/broadcasts', data);
 }
 
-export async function updateAdminBroadcast(id: string, data: { title?: string; body?: string }) {
+export async function updateAdminBroadcast(id: string, data: { title?: string; titleKm?: string | null; body?: string; bodyKm?: string | null }) {
   return apiClient.patch(`/admin/notifications/broadcasts/${id}`, data);
 }
 

@@ -1,8 +1,10 @@
 import { apiClient } from '@/lib/api/client';
 import type { AdminPaymentTransaction, PaymentStatus, PaymentPurpose } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface BackendPaymentDto {
   id: string;
+  displayId: string;
   referenceCode: string;
   user: { id: string; email: string | null };
   purpose: string;
@@ -22,11 +24,14 @@ export function normalizePayment(p: BackendPaymentDto): AdminPaymentTransaction 
     successful: 'successful',
     failed: 'failed',
     pending: 'pending',
+    expired: 'expired',
+    cancelled: 'cancelled',
     refunded: 'failed',
   };
 
   return {
     id: p.id,
+    displayId: p.displayId,
     transactionReference: p.referenceCode || p.id.slice(0, 8).toUpperCase(),
     payerId: p.user?.id || '',
     payerName: p.user?.email ? p.user.email.split('@')[0] : 'Customer',
@@ -41,8 +46,8 @@ export function normalizePayment(p: BackendPaymentDto): AdminPaymentTransaction 
       (p.purpose === 'subscription' ? 'Subscription Plan' : 'Promotion Boost'),
     paymentMethod: 'ABA KHQR',
     status: statusMap[p.status] || 'pending',
-    createdAt: p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—',
-    paidAt: p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined,
+    createdAt: p.createdAt ? formatAdminDateTime(p.createdAt) : '—',
+    paidAt: p.paidAt ? formatAdminDateTime(p.paidAt) : undefined,
     notes: `Provider: ${p.provider || 'Bakong KHQR'}`,
   };
 }
@@ -50,6 +55,7 @@ export function normalizePayment(p: BackendPaymentDto): AdminPaymentTransaction 
 export async function getAdminPayments(params?: {
   page?: number;
   limit?: number;
+  userId?: string;
   status?: string;
   purpose?: string;
 }): Promise<{ items: AdminPaymentTransaction[]; total: number }> {

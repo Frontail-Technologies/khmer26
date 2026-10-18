@@ -60,6 +60,10 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
     title: "Notifications",
     subtitle: "Broadcast system alerts, push notifications, and admin notices.",
   },
+  "/admin/support": {
+    title: "Support Inbox",
+    subtitle: "Review contact requests, feedback, and support inquiries.",
+  },
   "/admin/reported-chats": {
     title: "Reported Chats",
     subtitle: "Investigate flagged buyer-seller conversations and scam alerts.",
@@ -95,6 +99,14 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   "/admin/content/tips": {
     title: "Safety Tips",
     subtitle: "Manage buyer and seller safety guidelines shown across the marketplace.",
+  },
+  "/admin/content/pages": {
+    title: "Policy Pages",
+    subtitle: "Manage terms, privacy, and marketplace posting rules.",
+  },
+  "/admin/content/keywords": {
+    title: "Review Keywords",
+    subtitle: "Manage terms that flag seller listings for manual review.",
   },
 }
 

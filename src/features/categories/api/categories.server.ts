@@ -1,7 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+import { getApiBaseUrl } from '@/lib/api/base-url';
+
+const API_BASE_URL = getApiBaseUrl();
 
 export type ServerCategoryLookup =
-  | { status: 'found'; nameEn: string }
+  | { status: 'found'; nameEn: string; nameKm: string | null }
   | { status: 'not-found' }
   | { status: 'unknown' };
 
@@ -13,9 +15,9 @@ export async function lookupCategoryBySlug(slug: string): Promise<ServerCategory
     });
     if (res.status === 404) return { status: 'not-found' };
     if (!res.ok) return { status: 'unknown' };
-    const json = (await res.json()) as { data?: { category?: { nameEn?: string } } };
+    const json = (await res.json()) as { data?: { category?: { nameEn?: string; nameKm?: string | null } } };
     const nameEn = json.data?.category?.nameEn;
-    return nameEn ? { status: 'found', nameEn } : { status: 'unknown' };
+    return nameEn ? { status: 'found', nameEn, nameKm: json.data?.category?.nameKm ?? null } : { status: 'unknown' };
   } catch {
     return { status: 'unknown' };
   }

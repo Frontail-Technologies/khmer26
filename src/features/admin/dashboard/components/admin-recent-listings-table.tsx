@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { useAdminDashboard } from "../hooks/dashboard.queries"
+import { formatAdminDateTime } from "@/lib/formatters/date"
 
 type SortField = "title" | "price" | "status" | "createdAt"
 type SortOrder = "asc" | "desc" | null
@@ -76,9 +77,6 @@ export function AdminRecentListingsTable() {
     }).format(Number(price))
   }
 
-  const formatDate = (value: string) =>
-    new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(value))
-
   return (
     <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
       <CardHeader className="p-4 sm:p-5 pb-3 flex flex-row items-center justify-between border-b border-border/60">
@@ -102,7 +100,7 @@ export function AdminRecentListingsTable() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/60 dark:bg-muted/90 text-muted-foreground dark:text-foreground/80 border-b border-border/80 select-none">
               <tr>
-                <th className="py-3 px-5 font-bold text-[10px] uppercase tracking-wider">
+                <th className="py-3 px-5 font-bold text-2xs uppercase tracking-wider">
                   <button
                     type="button"
                     onClick={() => handleSort("title")}
@@ -120,8 +118,8 @@ export function AdminRecentListingsTable() {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-3 font-bold text-[10px] uppercase tracking-wider">Seller</th>
-                <th className="py-3 px-3 font-bold text-[10px] uppercase tracking-wider">
+                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">Seller</th>
+                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">
                   <button
                     type="button"
                     onClick={() => handleSort("price")}
@@ -139,7 +137,7 @@ export function AdminRecentListingsTable() {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-3 font-bold text-[10px] uppercase tracking-wider">
+                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">
                   <button
                     type="button"
                     onClick={() => handleSort("status")}
@@ -157,8 +155,8 @@ export function AdminRecentListingsTable() {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-3 font-bold text-[10px] uppercase tracking-wider">Submitted</th>
-                <th className="py-3 px-5 font-bold text-[10px] uppercase tracking-wider text-right">Actions</th>
+                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">Submitted</th>
+                <th className="py-3 px-5 font-bold text-2xs uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -187,13 +185,13 @@ export function AdminRecentListingsTable() {
                           >
                             {listing.title}
                           </Link>
-                          <span className="text-[10px] text-muted-foreground block truncate font-medium">
+                          <span className="text-2xs text-muted-foreground block truncate font-medium">
                             {listing.categoryName}
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 text-muted-foreground truncate max-w-28 text-[11px] font-medium">
+                    <td className="py-3.5 px-3 text-muted-foreground truncate max-w-28 text-xxs font-medium">
                       {listing.sellerEmail ?? "Unknown seller"}
                     </td>
                     <td className="py-3.5 px-3 font-bold text-foreground">
@@ -203,7 +201,7 @@ export function AdminRecentListingsTable() {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-[9px] font-bold px-2 py-0.5 h-5 uppercase rounded-md",
+                          "text-3xs font-bold px-2 py-0.5 h-5 uppercase rounded-md",
                           isActive
                             ? "bg-primary/10 text-primary border-primary/20"
                             : isPending
@@ -214,8 +212,8 @@ export function AdminRecentListingsTable() {
                           {statusLabel}
                       </Badge>
                     </td>
-                    <td className="py-3.5 px-3 text-muted-foreground text-[11px]">
-                      {formatDate(listing.createdAt)}
+                    <td className="py-3.5 px-3 text-muted-foreground text-xxs">
+                      {formatAdminDateTime(listing.createdAt)}
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <DropdownMenu>

@@ -71,6 +71,26 @@ describe("<ListingLocation /> approximate map", () => {
     expect(mapCalls[1]!.options.zoom).toBe(MAP_ZOOM.commune)
   })
 
+  it("uses the seller's exact coordinates without drawing an approximate area", async () => {
+    renderWithProviders(
+      <ListingLocation
+        location={{
+          ...location({ latitude: 11.556374, longitude: 104.92821, precision: "exact" }),
+          googleMapsUrl: "https://www.google.com/maps/place/Test/@11.556374,104.928210,17z",
+        }}
+      />
+    )
+
+    expect(await screen.findByRole("region", { name: /map of the exact location/i })).toBeInTheDocument()
+    await waitFor(() => expect(mapCalls).toHaveLength(1))
+    expect(mapCalls[0]!.options.center).toEqual([104.92821, 11.556374])
+    expect(mapCalls[0]!.options.zoom).toBe(MAP_ZOOM.exact)
+    expect(mapCalls[0]!.sources).toEqual([])
+    expect(mapCalls[0]!.layers).toEqual([])
+    expect(screen.getByText("Exact location")).toBeInTheDocument()
+    expect(screen.queryByText("Approximate area")).toBeNull()
+  })
+
   it("shows the compact text location, with no map at all, when there are no coordinates", () => {
     const { container } = renderWithProviders(<ListingLocation location={location(null)} />)
 

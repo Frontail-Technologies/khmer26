@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { ArrowCounterClockwise, CheckCircle, SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
@@ -16,6 +20,7 @@ import { DesktopFilterSidebar } from "./desktop-filter-sidebar"
 import type { CategoryNavData } from "./filter-panel"
 import { MobileFilterSheet } from "./mobile-filter-sheet"
 import { ResultsToolbar } from "./results-toolbar"
+import { SaveSearchDialog } from "./save-search-dialog"
 
 interface SearchResultsViewProps {
   state: SearchPageState
@@ -30,8 +35,9 @@ const GRID_CLASS =
   "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4"
 
 function ResultsSkeleton() {
+  const tGenerated = useTranslations("generated")
   return (
-    <div className={GRID_CLASS} aria-busy="true" aria-label="Loading results">
+    <div className={GRID_CLASS} aria-busy="true" aria-label={tGenerated("loadingResults")}>
       {Array.from({ length: 12 }).map((_, i) => (
         <Skeleton key={i} className="aspect-[4/5] w-full rounded-xl" />
       ))}
@@ -45,6 +51,8 @@ export function SearchResultsView({
   categoryChipLabel,
   categoryEmptyState,
 }: SearchResultsViewProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
   const { filters, setFilters, definitions, fieldsLoading, search, items, total, isCategoryRoute } =
     state
   const [viewMode, setViewMode] = useListingViewMode()
@@ -101,6 +109,7 @@ export function SearchResultsView({
           activeFilterCount={activeCount}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          extraAction={<SaveSearchDialog filters={filters} />}
         />
 
         <ActiveFilterChips
@@ -117,14 +126,14 @@ export function SearchResultsView({
           ) : search.isError ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-border/80 bg-card py-14 px-6 text-center shadow-2xs">
               <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                We couldn&apos;t load the results.
+                <LocalizedText id="weCouldnTLoadTheResults" />
               </h3>
               <p className="mt-1.5 max-w-sm text-xs sm:text-sm text-muted-foreground">
-                Check your connection and try again, or clear some filters.
+                <LocalizedText id="checkYourConnectionAndTryAgainOrClearSome" />
               </p>
               <div className="mt-5 flex items-center gap-2.5">
                 <Button size="sm" onClick={() => search.refetch()} className="h-9 text-xs font-semibold">
-                  Try again
+                  <LocalizedText id="tryAgain" />
                 </Button>
                 {hasClearable && (
                   <Button
@@ -133,7 +142,7 @@ export function SearchResultsView({
                     onClick={handleClearAll}
                     className="h-9 text-xs font-semibold"
                   >
-                    Clear all filters
+                    <LocalizedText id="clearAllFilters" />
                   </Button>
                 )}
               </div>
@@ -154,7 +163,7 @@ export function SearchResultsView({
                 {isFetchingNextPage ? (
                   <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-muted-foreground shadow-xs animate-pulse">
                     <SpinnerGap size={16} className="animate-spin text-primary" />
-                    <span>Loading more listings...</span>
+                    <span><LocalizedText id="loadingMoreListings" /></span>
                   </div>
                 ) : hasNextPage ? (
                   <Button
@@ -164,12 +173,12 @@ export function SearchResultsView({
                     onClick={() => fetchNextPage()}
                     className="text-xs font-semibold px-4 h-9 rounded-full cursor-pointer hover:border-primary hover:text-primary transition-colors"
                   >
-                    Load more listings
+                    <LocalizedText id="loadMoreListings" />
                   </Button>
                 ) : cards.length > 12 ? (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground py-2 font-medium">
                     <CheckCircle size={14} weight="bold" className="text-primary" />
-                    <span>You have viewed all {total} listings</span>
+                    <span>{tDynamic("viewedAllListings", { count: total ?? items.length })}</span>
                   </div>
                 ) : null}
               </div>
@@ -179,12 +188,12 @@ export function SearchResultsView({
           ) : (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-border/80 bg-card py-16 px-6 text-center shadow-2xs">
               <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                No Result Found
+                <LocalizedText id="noResultFound" />
               </h3>
               <p className="mt-1.5 max-w-sm text-xs sm:text-sm text-muted-foreground">
                 {hasRefinements
-                  ? "No listings match these filters. Try adjusting or clearing them."
-                  : "There are no active listings to show yet."}
+                  ? tGenerated("noListingsMatchTheseFiltersTryAdjustingOrClearing")
+                  : tGenerated("thereAreNoActiveListingsToShowYet")}
               </p>
               {hasClearable && (
                 <Button
@@ -194,7 +203,7 @@ export function SearchResultsView({
                   className="mt-5 font-semibold text-xs h-9 px-4 gap-1.5 rounded-lg cursor-pointer hover:bg-muted"
                 >
                   <ArrowCounterClockwise size={14} />
-                  Clear all filters
+                  <LocalizedText id="clearAllFilters" />
                 </Button>
               )}
             </div>

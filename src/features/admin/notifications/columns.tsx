@@ -46,7 +46,7 @@ export function createNotificationColumns({
             <span className="font-semibold text-xs text-foreground block truncate">
               {item.title}
             </span>
-            <span className="text-[11px] text-muted-foreground block truncate max-w-md">
+            <span className="text-xxs text-muted-foreground block truncate max-w-md">
               {item.message}
             </span>
           </div>
@@ -60,7 +60,7 @@ export function createNotificationColumns({
         <DataTableColumnHeader column={column} title="Audience" />
       ),
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-[10px] font-medium">
+        <Badge variant="outline" className="text-2xs font-medium">
           {AUDIENCE_LABELS[row.original.audience] || row.original.audience}
         </Badge>
       ),

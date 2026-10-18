@@ -7,7 +7,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
-import type { ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 
 export interface BreadcrumbSegment {
   label: string
@@ -24,7 +24,6 @@ interface PageHeaderProps {
 
 export function PageHeader({
   title,
-  description,
   breadcrumbs,
   actions,
   className,
@@ -37,31 +36,26 @@ export function PageHeader({
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1
               return (
-                <BreadcrumbItem key={crumb.href ?? crumb.label}>
-                  {isLast ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  ) : (
-                    <>
-                      <BreadcrumbLink href={crumb.href ?? "#"}>
-                        {crumb.label}
-                      </BreadcrumbLink>
-                      <BreadcrumbSeparator />
-                    </>
-                  )}
-                </BreadcrumbItem>
+                <Fragment key={crumb.href ?? crumb.label}>
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={crumb.href ?? "#"}>{crumb.label}</BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {!isLast && <BreadcrumbSeparator />}
+                </Fragment>
               )
             })}
           </BreadcrumbList>
         </Breadcrumb>
       )}
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
+        <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {title}
           </h1>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
         </div>
         {actions && <div className="shrink-0">{actions}</div>}
       </div>

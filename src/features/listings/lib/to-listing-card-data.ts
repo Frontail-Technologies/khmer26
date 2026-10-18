@@ -16,8 +16,11 @@ export function toListingCardData(listing: PublicListing): ListingCardData {
     price: hasPrice ? Number(listing.price) : 0,
     currency: listing.currency ?? "USD",
     priceOnRequest: !hasPrice,
+    negotiable: listing.negotiable,
     createdAt: listing.createdAt,
     isFavorited: listing.isFavorited,
+    featured: listing.featured,
+    urgent: listing.urgent,
     location: {
       province,
       district,

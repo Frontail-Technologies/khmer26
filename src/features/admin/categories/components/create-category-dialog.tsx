@@ -6,13 +6,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import {
   Select,
   SelectContent,
@@ -41,11 +40,26 @@ export function CreateCategoryDialog({
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
   const [parentId, setParentId] = useState(defaultParentId)
-  const [description, setDescription] = useState("")
+  const [nameKm, setNameKm] = useState("")
   const [imageUrl, setImageUrl] = useState<string | undefined>()
   const [sortOrder, setSortOrder] = useState("1")
   const [isActive, setIsActive] = useState("active")
+  const [wasOpen, setWasOpen] = useState(open)
   const createCategory = useCreateCategory()
+
+  // Start every opening from a clean form with the caller's parent preselected.
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setName("")
+      setSlug("")
+      setParentId(defaultParentId)
+      setNameKm("")
+      setImageUrl(undefined)
+      setSortOrder("1")
+      setIsActive("active")
+    }
+  }
 
   const parentOptions = [
     { value: "none", label: "None (Root Category)" },
@@ -73,7 +87,7 @@ export function CreateCategoryDialog({
     setName("")
     setSlug("")
     setParentId(defaultParentId)
-    setDescription("")
+    setNameKm("")
     setImageUrl(undefined)
     setSortOrder("1")
     setIsActive("active")
@@ -86,7 +100,7 @@ export function CreateCategoryDialog({
     createCategory.mutate(
       {
         nameEn: name.trim(),
-        nameKm: description.trim() || null,
+        nameKm: nameKm.trim() || null,
         slug: slug.trim(),
         parentId: parentId === "none" ? null : parentId,
         displayOrder: Number(sortOrder) || undefined,
@@ -103,9 +117,6 @@ export function CreateCategoryDialog({
           <DialogTitle className="text-base font-bold text-foreground">
             {defaultParentId !== "none" ? "Add Subcategory" : "Add New Category"}
           </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Create a category node for the Khmer26 marketplace taxonomy.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
@@ -115,31 +126,28 @@ export function CreateCategoryDialog({
             label={defaultParentId !== "none" ? "Subcategory Image" : "Category Image"}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field>
-              <FieldLabel required>Category Name</FieldLabel>
-              <Input
-                type="text"
-                placeholder="e.g. Electric Vehicles"
-                value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                required
-                className="h-9.5 text-xs rounded-lg"
-              />
-            </Field>
+          <BilingualField
+            id="category-name"
+            label="Name"
+            required
+            valueEn={name}
+            valueKm={nameKm}
+            onChangeEn={handleNameChange}
+            onChangeKm={setNameKm}
+            placeholderEn="e.g. Electric Vehicles"
+          />
 
-            <Field>
-              <FieldLabel required>URL Slug</FieldLabel>
-              <Input
-                type="text"
-                placeholder="e.g. electric-vehicles"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                required
-                className="h-9.5 text-xs font-mono rounded-lg"
-              />
-            </Field>
-          </div>
+          <Field>
+            <FieldLabel required>URL Slug</FieldLabel>
+            <Input
+              type="text"
+              placeholder="e.g. electric-vehicles"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              required
+              className="h-9.5 text-xs font-mono rounded-lg"
+            />
+          </Field>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field className="sm:col-span-1">
@@ -197,17 +205,6 @@ export function CreateCategoryDialog({
               </Select>
             </Field>
           </div>
-
-          <Field>
-            <FieldLabel>Description</FieldLabel>
-            <Textarea
-              rows={3}
-              placeholder="Brief description for SEO and category cards..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="text-xs rounded-lg resize-none min-h-20"
-            />
-          </Field>
 
           <DialogFooter className="pt-3 border-t border-border/60 flex items-center justify-end gap-2">
             <Button

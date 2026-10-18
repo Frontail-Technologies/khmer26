@@ -42,11 +42,11 @@ export function VerificationDocumentViewer({
               <DialogTitle className="text-sm font-bold text-foreground truncate">
                 {currentDoc.title}
               </DialogTitle>
-              <Badge variant="outline" className="text-[10px] uppercase font-semibold h-4.5 px-1.5 shrink-0">
+              <Badge variant="outline" className="text-2xs uppercase font-semibold h-4.5 px-1.5 shrink-0">
                 Doc {selectedIndex + 1} of {documents.length}
               </Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xxs text-muted-foreground">
               {currentDoc.fileSize} • {currentDoc.fileType} • Uploaded {currentDoc.uploadedAt}
             </p>
           </div>
@@ -70,7 +70,7 @@ export function VerificationDocumentViewer({
               </div>
               <div className="space-y-1 max-w-sm">
                 <p className="text-xs font-bold text-foreground">{currentDoc.title}</p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xxs text-muted-foreground">
                   Official PDF document uploaded by seller for administrative verification.
                 </p>
               </div>
@@ -82,6 +82,7 @@ export function VerificationDocumentViewer({
                 alt={currentDoc.title}
                 width={800}
                 height={600}
+                unoptimized
                 className="max-h-[65dvh] w-auto object-contain rounded-lg shadow-sm border border-border/40"
                 priority
               />
@@ -114,7 +115,7 @@ export function VerificationDocumentViewer({
         </div>
 
         <div className="p-3 border-t border-border/70 bg-card flex items-center justify-between text-xs shrink-0">
-          <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xxs">
             {isPdf ? <FilePdf size={15} /> : <FileImage size={15} />}
             <span>Confidential seller verification record</span>
           </div>

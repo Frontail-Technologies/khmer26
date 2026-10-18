@@ -1,3 +1,6 @@
+"use client"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
 import Link from "next/link"
 import {
   Breadcrumb,
@@ -8,6 +11,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import type { CategoryCrumb } from "../../api/listing-detail.api"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface ListingBreadcrumbsProps {
   /** Real category ancestry, root first. Any depth. */
@@ -16,11 +20,12 @@ interface ListingBreadcrumbsProps {
 }
 
 export function ListingBreadcrumbs({ categoryPath, title }: ListingBreadcrumbsProps) {
+  const getLocalizedName = useLocalizedName()
   return (
     <Breadcrumb className="hidden sm:block py-2 text-xs sm:text-sm">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link href="/">Home</Link>} />
+          <BreadcrumbLink render={<Link href="/"><LocalizedText id="home" /></Link>} />
         </BreadcrumbItem>
 
         {categoryPath.map((crumb, index) => {
@@ -32,7 +37,7 @@ export function ListingBreadcrumbs({ categoryPath, title }: ListingBreadcrumbsPr
             <span key={crumb.id} className="inline-flex items-center gap-1.5 sm:gap-2.5">
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink render={<Link href={href}>{crumb.nameEn}</Link>} />
+                <BreadcrumbLink render={<Link href={href}>{getLocalizedName(crumb)}</Link>} />
               </BreadcrumbItem>
             </span>
           )
@@ -49,3 +54,4 @@ export function ListingBreadcrumbs({ categoryPath, title }: ListingBreadcrumbsPr
     </Breadcrumb>
   )
 }
+

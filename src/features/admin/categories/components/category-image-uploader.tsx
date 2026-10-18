@@ -85,7 +85,7 @@ export function CategoryImageUploader({
       <div className="flex items-center justify-between">
         <FieldLabel>{label}</FieldLabel>
         {preview && (
-          <span className="text-[11px] text-muted-foreground font-medium">Image attached</span>
+          <span className="text-xxs text-muted-foreground font-medium">Image attached</span>
         )}
       </div>
 
@@ -113,7 +113,7 @@ export function CategoryImageUploader({
             <p className="text-xs font-bold text-foreground truncate">
               {preview.startsWith("blob:") ? "New uploaded image" : preview.split("/").pop()}
             </p>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xxs text-muted-foreground">
               Ready for preview in Admin & Marketplace
             </p>
 
@@ -123,7 +123,7 @@ export function CategoryImageUploader({
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                className="h-7 px-2.5 text-[11px] font-semibold gap-1 rounded-lg cursor-pointer"
+                className="h-7 px-2.5 text-xxs font-semibold gap-1 rounded-lg cursor-pointer"
               >
                 <ArrowClockwise size={12} weight="bold" />
                 <span>Replace</span>
@@ -134,7 +134,7 @@ export function CategoryImageUploader({
                 variant="ghost"
                 size="sm"
                 onClick={handleRemove}
-                className="h-7 px-2.5 text-[11px] font-semibold gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
+                className="h-7 px-2.5 text-xxs font-semibold gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer"
               >
                 <Trash size={12} weight="bold" />
                 <span>Remove</span>
@@ -167,13 +167,13 @@ export function CategoryImageUploader({
             <p className="text-xs font-bold text-foreground">
               <span className="text-primary hover:underline">Click to upload</span> or drag and drop
             </p>
-            <p className="text-[11px] text-muted-foreground max-w-xs">{description}</p>
+            <p className="text-xxs text-muted-foreground max-w-xs">{description}</p>
           </div>
         </div>
       )}
 
       {errorMessage && (
-        <div className="flex items-center gap-1.5 text-destructive text-[11px] font-medium pt-0.5">
+        <div className="flex items-center gap-1.5 text-destructive text-xxs font-medium pt-0.5">
           <WarningCircle size={14} weight="fill" />
           <span>{errorMessage}</span>
         </div>

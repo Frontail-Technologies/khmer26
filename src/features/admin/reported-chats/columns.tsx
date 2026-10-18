@@ -36,12 +36,15 @@ export function createReportedChatColumns({
               <span className="text-muted-foreground font-normal">↔</span>
               <span>{item.participantB.name}</span>
             </div>
+            <span className="text-2xs font-medium text-muted-foreground block">
+              {item.conversationDisplayId}
+            </span>
             {item.listing && (
-              <span className="text-[11px] text-primary block truncate">
+              <span className="text-xxs text-primary block truncate">
                 {item.listing.title}
               </span>
             )}
-            <span className="text-[10px] text-muted-foreground block truncate max-w-sm">
+            <span className="text-2xs text-muted-foreground block truncate max-w-sm">
               &quot;{item.reportedMessageText}&quot;
             </span>
           </div>
@@ -62,7 +65,7 @@ export function createReportedChatColumns({
               <WarningCircle size={13} className="text-destructive shrink-0" weight="fill" />
               <span className="truncate">{item.reportedUserName}</span>
             </div>
-            <span className="text-[10px] text-muted-foreground capitalize block">
+            <span className="text-2xs text-muted-foreground capitalize block">
               {item.reportedUserAccountType}
             </span>
           </div>
@@ -76,7 +79,7 @@ export function createReportedChatColumns({
         <DataTableColumnHeader column={column} title="Reason" />
       ),
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-[10px] font-medium border-destructive/30 text-destructive bg-destructive/5">
+        <Badge variant="outline" className="text-2xs font-medium border-destructive/30 text-destructive bg-destructive/5">
           {row.original.reason}
         </Badge>
       ),

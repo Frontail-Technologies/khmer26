@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import type { BreadcrumbItem as BreadcrumbItemType } from "../types"
 import { CaretRight, SquaresFour, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr"
 import Link from "next/link"
@@ -15,11 +16,12 @@ export function ResultsHeader({
   totalCount,
   breadcrumbs,
 }: ResultsHeaderProps) {
+  const tGenerated = useTranslations("generated")
   const isSearch = title.toLowerCase().includes("results for")
 
   return (
     <div className="border-b border-border/70 pb-3 pt-2 mb-4">
-      <nav aria-label="Breadcrumb" className="hidden sm:block mb-2">
+      <nav aria-label={tGenerated("breadcrumb")} className="hidden sm:block mb-2">
         <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
@@ -59,7 +61,7 @@ export function ResultsHeader({
             {title}
           </h1>
           {totalCount !== undefined && (
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-primary">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xxs sm:text-xs font-bold text-primary">
               {formatAdCount(totalCount)}
             </span>
           )}

@@ -26,6 +26,8 @@ describe('ADMIN_NAV_CONFIG', () => {
     expect(hrefs).toContain('/admin/users');
     expect(hrefs).toContain('/admin/reviews');
     expect(hrefs).toContain('/admin/content/homepage');
+    expect(hrefs).toContain('/admin/content/pages');
+    expect(hrefs).toContain('/admin/content/keywords');
     expect(hrefs).toContain('/admin/promotions');
     expect(hrefs).toContain('/admin/subscriptions');
     expect(hrefs).toContain('/admin/payments');
@@ -37,8 +39,10 @@ describe('ADMIN_NAV_CONFIG', () => {
     expect(hrefs).toContain('/admin/audit-log');
   });
 
-  it('no longer links to the removed Static Pages feature', () => {
-    const hrefs = allHrefs();
-    expect(hrefs).not.toContain('/admin/content/pages');
+  it('exposes policy pages under content management', () => {
+    const content = ADMIN_NAV_CONFIG.find((group) => group.id === 'content');
+    const policyPages = content?.items.flatMap((item) => item.subItems ?? [])
+      .find((item) => item.href === '/admin/content/pages');
+    expect(policyPages?.title).toBe('Policy Pages');
   });
 });

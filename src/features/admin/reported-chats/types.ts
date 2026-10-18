@@ -12,7 +12,9 @@ export interface ReportedChatMessage {
 
 export interface ReportedChatRecord {
   id: string
+  displayId: string
   conversationId: string
+  conversationDisplayId: string
   reportedUserId: string
   reportedUserName: string
   reportedUserAccountType: string

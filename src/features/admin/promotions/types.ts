@@ -4,7 +4,9 @@ export type PromotionStatus = "active" | "expired"
 
 export interface ActivePromotionItem {
   id: string
+  displayId: string
   listingId: string
+  listingDisplayId: string
   listingTitle: string
   listingPrice: number
   listingImage?: string

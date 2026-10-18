@@ -186,7 +186,7 @@ export function UserToolbar({
         </div>
       </div>
 
-      <span className="text-[11px] text-muted-foreground">
+      <span className="text-xxs text-muted-foreground">
         <span className="font-semibold text-foreground">{filteredCount}</span>
         {" "}of{" "}
         <span className="font-semibold text-foreground">{totalCount}</span>

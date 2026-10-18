@@ -67,7 +67,7 @@ export function RejectVerificationDialog({
             Reject Verification Request
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Reject verification request <span className="font-mono font-semibold text-foreground">#{request.id}</span> for <span className="font-semibold text-foreground">{request.seller.name}</span>.
+            Reject verification request <span className="font-mono font-semibold text-foreground">{request.displayId}</span> for <span className="font-semibold text-foreground">{request.seller.name}</span>.
           </DialogDescription>
         </DialogHeader>
 

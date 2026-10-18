@@ -36,7 +36,7 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
           >
             {sub.businessName || sub.sellerName}
           </Link>
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
             <span>{sub.businessName ? sub.sellerName : sub.planName}</span>
           </div>
         </div>
@@ -58,7 +58,7 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
       return (
         <Badge
           variant="outline"
-          className={`text-[10px] font-semibold px-2 py-0.5 h-5 ${planConfig.badgeClass}`}
+          className={`text-2xs font-semibold px-2 py-0.5 h-5 ${planConfig.badgeClass}`}
         >
           {planConfig.label}
         </Badge>
@@ -76,11 +76,11 @@ export const subscriberColumns: ColumnDef<SubscriberRecord>[] = [
       const pct = Math.round((usage.used / usage.limit) * 100)
       return (
         <div className="space-y-1 min-w-[120px]">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-xxs">
             <span className="font-semibold text-foreground">
               {usage.used} / {usage.limit}
             </span>
-            <span className="text-muted-foreground text-[10px]">{pct}%</span>
+            <span className="text-muted-foreground text-2xs">{pct}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
             <div

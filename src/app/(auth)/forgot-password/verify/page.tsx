@@ -1,20 +1,27 @@
+import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 import { AuthCard } from "@/features/auth/components/auth-card"
 import { AuthHeader } from "@/features/auth/components/auth-header"
 import { VerificationCodeForm } from "@/features/auth/components/verification-code-form"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Verify Code",
-  description: "Enter the verification code sent to your email or phone number.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.forgotPasswordVerify")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function VerifyCodePage() {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
   return (
-    <AuthCard maxWidth="sm" backHref="/forgot-password" backLabel="Back to recovery">
+    <AuthCard maxWidth="sm" backHref="/forgot-password" backLabel={tAuth("backToRecovery")}>
       <AuthHeader
-        eyebrow="ACCOUNT RECOVERY"
-        title="Enter verification code"
-        subtitle="We sent a verification code to the selected email address or phone number."
+        eyebrow={tAuth("eyebrowRecovery")}
+        title={tGenerated("enterVerificationCode")}
+        subtitle={tAuth("subtitleForgotVerify")}
         align="center"
       />
       <VerificationCodeForm />

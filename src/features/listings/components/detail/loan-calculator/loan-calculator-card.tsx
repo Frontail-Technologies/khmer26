@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState, useMemo } from "react"
 import { Calculator, ArrowRight } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,12 +44,12 @@ export function LoanCalculatorCard({
 
   return (
     <>
-      <Card size="sm">
+      <Card size="sm" className="rounded-md border border-border/70 shadow-none ring-0">
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Calculator size={18} className="text-primary shrink-0" />
-            <CardTitle className="text-base sm:text-lg font-bold text-foreground">
-              Loan Calculator
+            <CardTitle className="text-sm font-bold uppercase tracking-wide text-foreground">
+              <LocalizedText id="loanCalculator" />
             </CardTitle>
           </div>
 
@@ -56,13 +58,13 @@ export function LoanCalculatorCard({
             onClick={() => setSheetOpen(true)}
             className="text-xs font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
           >
-            <span>Customize</span>
+            <span><LocalizedText id="customize" /></span>
             <ArrowRight size={13} weight="bold" />
           </button>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/60">
+          <div className="flex items-center gap-4 p-3 rounded-md bg-muted/30 border border-border/60">
             <div className="relative size-20 shrink-0 flex items-center justify-center">
               <svg className="size-full -rotate-90" viewBox="0 0 80 80">
                 <circle
@@ -115,41 +117,41 @@ export function LoanCalculatorCard({
                 )}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-1 pointer-events-none">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none">
-                  Est.
+                <span className="text-2xs font-bold text-muted-foreground uppercase leading-none">
+                  <LocalizedText id="est" />
                 </span>
               </div>
             </div>
 
             <div className="min-w-0 flex-1 space-y-1">
-              <span className="text-[11px] text-muted-foreground font-medium block">
-                Estimated Monthly Payment
+              <span className="text-xxs text-muted-foreground font-medium block">
+                <LocalizedText id="estimatedMonthlyPayment" />
               </span>
               <span className="text-lg sm:text-xl font-black text-foreground tracking-tight block">
                 {formatPriceWithCurrency(Math.round(result.monthlyPayment), currency)}
-                <span className="text-xs font-normal text-muted-foreground"> / month</span>
+                <span className="text-xs font-normal text-muted-foreground"> <LocalizedText id="month_f7fa5d" /></span>
               </span>
-              <span className="text-[10px] text-muted-foreground block">
-                Based on 20% down payment over 5 years (8.5% rate)
+              <span className="text-2xs text-muted-foreground block">
+                <LocalizedText id="basedOn20DownPaymentOver5Years8" />
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className="p-2 rounded-lg bg-muted/40 border border-border/50">
-              <span className="text-[10px] text-muted-foreground block">Down Payment</span>
+              <span className="text-2xs text-muted-foreground block"><LocalizedText id="downPayment" /></span>
               <span className="font-bold text-foreground block truncate">
                 {formatPriceWithCurrency(Math.round(result.downPayment), currency)}
               </span>
             </div>
             <div className="p-2 rounded-lg bg-muted/40 border border-border/50">
-              <span className="text-[10px] text-muted-foreground block">Loan Amount</span>
+              <span className="text-2xs text-muted-foreground block"><LocalizedText id="loanAmount_bed46a" /></span>
               <span className="font-bold text-foreground block truncate">
                 {formatPriceWithCurrency(Math.round(result.loanAmount), currency)}
               </span>
             </div>
             <div className="p-2 rounded-lg bg-muted/40 border border-border/50">
-              <span className="text-[10px] text-muted-foreground block">Total Interest</span>
+              <span className="text-2xs text-muted-foreground block"><LocalizedText id="totalInterest" /></span>
               <span className="font-bold text-accent block truncate">
                 {formatPriceWithCurrency(Math.round(result.totalInterest), currency)}
               </span>
@@ -160,9 +162,9 @@ export function LoanCalculatorCard({
             type="button"
             variant="outline"
             onClick={() => setSheetOpen(true)}
-            className="w-full h-10 text-xs font-bold rounded-xl border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+            className="w-full h-10 text-xs font-bold rounded-md border-primary/30 text-primary hover:bg-primary/10 transition-colors"
           >
-            <span>Open Loan Calculator & Schedule</span>
+            <span><LocalizedText id="openLoanCalculatorSchedule" /></span>
           </Button>
         </CardContent>
       </Card>

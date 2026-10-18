@@ -12,6 +12,7 @@ import {
   getSellerListingsPage,
   getSellerReportReasons,
   getSellerReviewsPage,
+  getReviewEligibility,
   reportSeller,
 } from "../api/sellers.api"
 import { marketplaceKeys } from "@/lib/query/keys"
@@ -53,8 +54,27 @@ describe("sellers API contract", () => {
 
   it("posts a review with the seller profile id, rating and comment", async () => {
     post.mockResolvedValue({ data: {} })
-    await createReview({ sellerProfileId: "s1", rating: 4, comment: "Nice" })
-    expect(post).toHaveBeenCalledWith("/reviews", { sellerProfileId: "s1", rating: 4, comment: "Nice" })
+    await createReview({ sellerProfileId: "s1", listingId: "l1", offerId: "o1", rating: 4, comment: "Nice" })
+    expect(post).toHaveBeenCalledWith("/reviews", {
+      sellerProfileId: "s1",
+      listingId: "l1",
+      offerId: "o1",
+      rating: 4,
+      comment: "Nice",
+    })
+  })
+
+  it("loads review eligibility for the seller", async () => {
+    const eligibility = {
+      eligible: true,
+      reason: null,
+      deal: { listingId: "l1", listingTitle: "Phone", offerId: "o1" },
+    }
+    get.mockResolvedValue({ data: { eligibility } })
+    await expect(getReviewEligibility("s1")).resolves.toEqual(eligibility)
+    expect(get).toHaveBeenCalledWith("/reviews/eligibility", {
+      params: { sellerProfileId: "s1" },
+    })
   })
 
   it("loads seller report reasons and posts the report payload", async () => {
@@ -84,6 +104,12 @@ describe("seller query keys", () => {
       "reviews",
       "s1",
       { limit: 10 },
+    ])
+    expect(marketplaceKeys.sellers.reviewEligibility("s1")).toEqual([
+      "marketplace",
+      "sellers",
+      "review-eligibility",
+      "s1",
     ])
   })
 })

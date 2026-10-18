@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { CaretRight, Check } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
@@ -9,6 +11,7 @@ import {
   OPTION_BUTTON_BASE,
   OPTION_BUTTON_IDLE,
 } from "./filter-section"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface CategoryTreeNavProps {
   roots: CategoryNode[]
@@ -26,6 +29,7 @@ interface ExpansionState {
 }
 
 export function CategoryTreeNav({ roots, selectedSlug, ancestorIds, onSelect }: CategoryTreeNavProps) {
+  const getLocalizedName = useLocalizedName()
   const [expansion, setExpansion] = useState<ExpansionState>({
     forSlug: selectedSlug,
     toggled: {},
@@ -59,7 +63,7 @@ export function CategoryTreeNav({ roots, selectedSlug, ancestorIds, onSelect }: 
                 <button
                   type="button"
                   onClick={() => toggle(node.id)}
-                  aria-label={`${expanded ? "Collapse" : "Expand"} ${node.nameEn}`}
+                  aria-label={`${expanded ? "Collapse" : "Expand"} ${getLocalizedName(node)}`}
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted"
                 >
                   <CaretRight
@@ -81,7 +85,7 @@ export function CategoryTreeNav({ roots, selectedSlug, ancestorIds, onSelect }: 
                   selected ? OPTION_BUTTON_ACTIVE : OPTION_BUTTON_IDLE
                 )}
               >
-                <span className="truncate">{node.nameEn}</span>
+                <span className="truncate">{getLocalizedName(node)}</span>
                 {selected && <Check size={12} weight="bold" className="shrink-0" />}
               </button>
             </div>
@@ -100,7 +104,7 @@ export function CategoryTreeNav({ roots, selectedSlug, ancestorIds, onSelect }: 
         aria-current={!selectedSlug ? "true" : undefined}
         className={cn(OPTION_BUTTON_BASE, !selectedSlug ? OPTION_BUTTON_ACTIVE : OPTION_BUTTON_IDLE)}
       >
-        <span className="truncate">All Categories</span>
+        <span className="truncate"><LocalizedText id="allCategories" /></span>
         {!selectedSlug && <Check size={12} weight="bold" className="shrink-0" />}
       </button>
       {renderNodes(roots, 0)}

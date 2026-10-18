@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
@@ -6,12 +8,21 @@ import { Container } from "@/components/layout/Container"
 import { PostAdWizard } from "@/features/post-ad/components/post-ad-wizard"
 import { Button } from "@/components/ui/button"
 
-export const metadata: Metadata = {
-  title: "Post an Ad — Khmer26",
-  description: "Create and publish your marketplace listing in minutes on Khmer26.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.postAd")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
-export default function PostAdPage() {
+interface PostAdPageProps {
+  searchParams: Promise<{ edit?: string }>
+}
+
+export default async function PostAdPage({ searchParams }: PostAdPageProps) {
+  const { edit } = await searchParams
+  const isEditing = Boolean(edit)
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-card/95 backdrop-blur-md py-3 sm:py-3.5">
@@ -35,7 +46,7 @@ export default function PostAdPage() {
               render={
                 <Link href="/">
                   <X size={16} weight="bold" />
-                  <span>Exit</span>
+                  <span><LocalizedText id="exit" /></span>
                 </Link>
               }
             />
@@ -45,22 +56,19 @@ export default function PostAdPage() {
 
       <div className="border-b border-border/60 bg-card py-4 sm:py-5">
         <Container>
-          <div className="space-y-0.5">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-              Seller Wizard
+          <div>
+            <span className="text-xxs sm:text-xs font-bold uppercase tracking-wider text-primary">
+              <LocalizedText id="sellerWizard" />
             </span>
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-              Create New Listing
+              {isEditing ? "Edit Listing" : "Create New Listing"}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Follow the guided steps to post your item on the marketplace
-            </p>
           </div>
         </Container>
       </div>
 
       <Container className="py-6 sm:py-8">
-        <PostAdWizard />
+        <PostAdWizard listingId={edit} />
       </Container>
     </div>
   )

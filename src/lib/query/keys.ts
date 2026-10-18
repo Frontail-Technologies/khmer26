@@ -8,6 +8,12 @@ export const marketplaceKeys = {
   all: ['marketplace'] as const,
   home: () => [...marketplaceKeys.all, 'home'] as const,
 
+  content: {
+    all: ['marketplace', 'content'] as const,
+    safetyTips: (context: string) => ['marketplace', 'content', 'safety-tips', context] as const,
+    moderationKeywords: () => ['marketplace', 'content', 'moderation-keywords'] as const,
+  },
+
   categories: {
     all: ['marketplace', 'categories'] as const,
     tree: () => [...marketplaceKeys.categories.all, 'tree'] as const,
@@ -27,6 +33,7 @@ export const marketplaceKeys = {
     all: ['marketplace', 'listings'] as const,
     detail: (id: string) => [...marketplaceKeys.listings.all, 'detail', id] as const,
     similar: (id: string) => [...marketplaceKeys.listings.all, 'similar', id] as const,
+    contacts: (id: string) => [...marketplaceKeys.listings.all, 'contacts', id] as const,
     bySeller: (sellerId: string) => [...marketplaceKeys.listings.all, 'seller', sellerId] as const,
   },
 
@@ -37,6 +44,10 @@ export const marketplaceKeys = {
       [...marketplaceKeys.sellers.all, 'listings', id, params ?? {}] as const,
     reviews: (id: string, params?: Record<string, unknown>) =>
       [...marketplaceKeys.sellers.all, 'reviews', id, params ?? {}] as const,
+    reviewEligibility: (id: string) =>
+      [...marketplaceKeys.sellers.all, 'review-eligibility', id] as const,
+    categories: (id: string) => [...marketplaceKeys.sellers.all, 'categories', id] as const,
+    contacts: (id: string) => [...marketplaceKeys.sellers.all, 'contacts', id] as const,
   },
 
   reports: {
@@ -54,8 +65,84 @@ export const marketplaceKeys = {
   },
 };
 
+/**
+ * Signed-in customer areas. Everything is hierarchical so a feature can invalidate precisely
+ * (e.g. `customerKeys.myListings.all` after any listing change, `.list(params)` for one tab).
+ */
+export const customerKeys = {
+  profile: ['customer', 'profile'] as const,
+
+  myListings: {
+    all: ['customer', 'listings'] as const,
+    list: (params: Record<string, unknown>) => [...customerKeys.myListings.all, 'list', params] as const,
+    draft: (id: string) => [...customerKeys.myListings.all, 'draft', id] as const,
+    edit: (id: string) => [...customerKeys.myListings.all, 'edit', id] as const,
+  },
+
+  promotions: {
+    all: ['customer', 'promotions'] as const,
+    packages: () => [...customerKeys.promotions.all, 'packages'] as const,
+  },
+
+  favorites: {
+    all: ['customer', 'favorites'] as const,
+    list: (params: Record<string, unknown>) => [...customerKeys.favorites.all, 'list', params] as const,
+  },
+
+  savedSearches: {
+    all: ['customer', 'saved-searches'] as const,
+    list: (params: Record<string, unknown>) =>
+      [...customerKeys.savedSearches.all, 'list', params] as const,
+  },
+
+  conversations: {
+    all: ['customer', 'conversations'] as const,
+    list: (params: Record<string, unknown>) => [...customerKeys.conversations.all, 'list', params] as const,
+    detail: (id: string) => [...customerKeys.conversations.all, 'detail', id] as const,
+    unread: () => [...customerKeys.conversations.all, 'unread'] as const,
+  },
+
+  messages: {
+    all: ['customer', 'messages'] as const,
+    thread: (conversationId: string) => [...customerKeys.messages.all, conversationId] as const,
+  },
+
+  notifications: {
+    all: ['customer', 'notifications'] as const,
+    list: (params: Record<string, unknown>) => [...customerKeys.notifications.all, 'list', params] as const,
+    unread: () => [...customerKeys.notifications.all, 'unread'] as const,
+    preferences: () => [...customerKeys.notifications.all, 'preferences'] as const,
+  },
+
+  subscription: {
+    all: ['customer', 'subscription'] as const,
+    plans: () => ['marketplace', 'plans'] as const,
+    current: () => [...customerKeys.subscription.all, 'current'] as const,
+    usage: () => [...customerKeys.subscription.all, 'usage'] as const,
+    orders: (params: Record<string, unknown>) => [...customerKeys.subscription.all, 'orders', params] as const,
+    history: () => [...customerKeys.subscription.all, 'history'] as const,
+  },
+
+  payments: {
+    all: ['customer', 'payments'] as const,
+    list: (params: Record<string, unknown>) => [...customerKeys.payments.all, 'list', params] as const,
+    detail: (id: string) => [...customerKeys.payments.all, 'detail', id] as const,
+  },
+
+  verification: ['customer', 'verification'] as const,
+  blockedUsers: ['customer', 'blocked-users'] as const,
+  privacy: ['customer', 'privacy'] as const,
+  sessions: ['customer', 'sessions'] as const,
+  publicSettings: ['marketplace', 'settings'] as const,
+};
+
 export const adminKeys = {
   all: ['admin'] as const,
+
+  support: {
+    all: ['admin', 'support'] as const,
+    list: (params?: Record<string, unknown>) => ['admin', 'support', params ? { ...params } : {}] as const,
+  },
 
   auth: () => [...adminKeys.all, 'auth'] as const,
 
@@ -264,5 +351,7 @@ export const adminKeys = {
     banners: () => [...adminKeys.all, 'banners'] as const,
     featuredSections: () => [...adminKeys.all, 'featured-sections'] as const,
     safetyTips: () => [...adminKeys.all, 'safety-tips'] as const,
+    pages: () => [...adminKeys.all, 'content', 'pages'] as const,
+    moderationKeywords: () => [...adminKeys.all, 'content', 'moderation-keywords'] as const,
   },
 };

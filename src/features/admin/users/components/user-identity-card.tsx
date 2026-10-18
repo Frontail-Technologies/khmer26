@@ -95,11 +95,11 @@ export function UserIdentityCard({
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-base font-bold text-foreground">{displayName}</h1>
-              <Badge variant="outline" className="text-[10px] font-medium px-2 py-0 h-5">
+              <Badge variant="outline" className="text-2xs font-medium px-2 py-0 h-5">
                 {ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
               </Badge>
               {user.role === "admin" && (
-                <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0 h-5 bg-primary/10 text-primary border-primary/20">
+                <Badge variant="secondary" className="text-2xs font-bold px-2 py-0 h-5 bg-primary/10 text-primary border-primary/20">
                   Administrator
                 </Badge>
               )}

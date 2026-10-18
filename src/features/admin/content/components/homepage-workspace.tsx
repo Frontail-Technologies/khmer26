@@ -13,6 +13,9 @@ import {
   Check,
   House,
   DotsSixVertical,
+  Images,
+  Sparkle,
+  PencilSimple,
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { DragReorderList } from "@/components/shared/drag-reorder-list"
@@ -21,7 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import { Field, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -37,13 +40,22 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { useAdminCategories } from "@/features/admin/categories/hooks/categories.queries"
-import { useAdminHomepageConfig, useAdminHomepagePopularCategories } from "../hooks/content.queries"
+import {
+  useAdminBanners,
+  useAdminFeaturedSections,
+  useAdminHomepageConfig,
+  useAdminHomepagePopularCategories,
+} from "../hooks/content.queries"
 import { useUpdateHomepageConfig, useUpdateHomepagePopularCategories } from "../hooks/content.mutations"
-import type { HomepageSectionConfig, PopularCategoryItem } from "../types"
+import type {
+  AdminBannerItem,
+  HomepageLayoutItem,
+  HomepageSectionConfig,
+  PopularCategoryItem,
+} from "../types"
 import type { AdminCategoryItem } from "@/features/admin/categories/types"
 
 interface HomepageWorkspaceProps {
@@ -65,10 +77,28 @@ export function HomepageWorkspace({
   initialPopularCategories,
 }: HomepageWorkspaceProps) {
   const { data: remoteSections } = useAdminHomepageConfig()
+  const { data: featuredSections = [] } = useAdminFeaturedSections()
+  const { data: banners = [] } = useAdminBanners()
   const { data: categoryTree = [] } = useAdminCategories()
   const { data: remotePopularCategories } = useAdminHomepagePopularCategories()
-  const [localSections, setLocalSections] = useState<HomepageSectionConfig[] | null>(null)
-  const sections = localSections ?? remoteSections ?? initialSections
+  const builtinSections = remoteSections ?? initialSections
+  const combinedSections = useMemo<HomepageLayoutItem[]>(() => [
+    ...builtinSections.map((section) => ({ ...section, kind: "builtin" as const })),
+    ...featuredSections
+      .filter((section) => section.slug !== "homepage-popular-categories")
+      .map((section) => ({
+        kind: "featured" as const,
+        id: section.id,
+        title: section.title,
+        subtitle: `${section.sourceType.replaceAll("_", " ")} listings`,
+        type: "featured_section" as const,
+        isEnabled: section.isActive,
+        sortOrder: section.sortOrder,
+        sourceType: section.sourceType,
+      })),
+  ].sort((a, b) => a.sortOrder - b.sortOrder), [builtinSections, featuredSections])
+  const [localSections, setLocalSections] = useState<HomepageLayoutItem[] | null>(null)
+  const sections = localSections ?? combinedSections
   const updateHomepageConfig = useUpdateHomepageConfig()
   const updatePopularCategories = useUpdateHomepagePopularCategories()
 
@@ -81,18 +111,61 @@ export function HomepageWorkspace({
   const [newSectionType, setNewSectionType] = useState<HomepageSectionConfig["type"]>("hero_slider")
   const [newSectionTitle, setNewSectionTitle] = useState("")
   const [newSectionSubtitle, setNewSectionSubtitle] = useState("")
+  const [newSectionTitleKm, setNewSectionTitleKm] = useState("")
+  const [newSectionSubtitleKm, setNewSectionSubtitleKm] = useState("")
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null)
 
-  const persistSections = (newSections: HomepageSectionConfig[]) => {
+  const homepageBanners = banners.filter((banner) =>
+    ["homepage", "homepage_hero", "homepage_cta"].includes(banner.placement)
+  )
+
+  const buildLayoutPayload = (
+    newSections: HomepageLayoutItem[],
+    orderedBanners: AdminBannerItem[] = homepageBanners
+  ) => ({
+    sections: newSections
+      .filter((section): section is HomepageLayoutItem & { kind: "builtin" } => section.kind === "builtin")
+      .map((section) => ({
+        sectionKey: section.id,
+        title: section.title,
+        titleKm: section.titleKm,
+        subtitle: section.subtitle,
+        subtitleKm: section.subtitleKm,
+        isEnabled: section.isEnabled,
+        sortOrder: section.sortOrder,
+        itemCount: section.itemCount,
+      })),
+    featuredSections: newSections
+      .filter((section) => section.kind === "featured")
+      .map((section) => ({
+        id: section.id,
+        isActive: section.isEnabled,
+        sortOrder: section.sortOrder,
+      })),
+    banners: orderedBanners.map((banner) => ({
+      id: banner.id,
+      isActive: banner.isActive,
+      sortOrder: banner.sortOrder,
+    })),
+  })
+
+  const persistSections = (newSections: HomepageLayoutItem[]) => {
     setLocalSections(newSections)
-    updateHomepageConfig.mutate(
-      newSections.map((sec) => ({
-        sectionKey: sec.id,
-        title: sec.title,
-        subtitle: sec.subtitle,
-        isEnabled: sec.isEnabled,
-        sortOrder: sec.sortOrder,
-      }))
-    )
+    updateHomepageConfig.mutate(buildLayoutPayload(newSections))
+  }
+
+  const persistBannerOrder = (placementBanners: AdminBannerItem[]) => {
+    const placement = placementBanners[0]?.placement
+    const isHeroPlacement = placement === "homepage_hero" || (placement as string) === "homepage"
+    const ordered = banners.map((banner) => {
+      const isSamePlacement = isHeroPlacement
+        ? banner.placement === "homepage_hero" || (banner.placement as string) === "homepage"
+        : banner.placement === placement
+      if (!isSamePlacement) return banner
+      const index = placementBanners.findIndex((item) => item.id === banner.id)
+      return index >= 0 ? { ...banner, sortOrder: index + 1 } : banner
+    })
+    updateHomepageConfig.mutate(buildLayoutPayload(sections, ordered))
   }
 
   const handleToggleSection = (id: string, isEnabled: boolean) => {
@@ -108,17 +181,51 @@ export function HomepageWorkspace({
     setNewSectionType(firstAvailable?.value ?? "hero_slider")
     setNewSectionTitle(firstAvailable?.label ?? "")
     setNewSectionSubtitle("")
+    setNewSectionTitleKm("")
+    setNewSectionSubtitleKm("")
+    setEditingSectionId(null)
     setIsAddSectionOpen(true)
+  }
+
+  const openEditSectionTitles = (section: HomepageLayoutItem) => {
+    setEditingSectionId(section.id)
+    setNewSectionTitle(section.title)
+    setNewSectionTitleKm(section.titleKm ?? "")
+    setNewSectionSubtitle(section.subtitle ?? "")
+    setNewSectionSubtitleKm(section.subtitleKm ?? "")
+    setIsAddSectionOpen(true)
+  }
+
+  const handleSaveSectionTitles = () => {
+    if (!editingSectionId || !newSectionTitle.trim()) return
+    persistSections(
+      sections.map((sec) =>
+        sec.id === editingSectionId
+          ? {
+              ...sec,
+              title: newSectionTitle.trim(),
+              titleKm: newSectionTitleKm.trim() || null,
+              subtitle: newSectionSubtitle.trim() || undefined,
+              subtitleKm: newSectionSubtitleKm.trim() || null,
+            }
+          : sec
+      )
+    )
+    setIsAddSectionOpen(false)
+    setEditingSectionId(null)
   }
 
   const handleConfirmAddSection = () => {
     if (!newSectionTitle.trim()) return
     if (sections.some((sec) => sec.id === newSectionType)) return
 
-    const newSection: HomepageSectionConfig = {
+    const newSection: HomepageLayoutItem = {
+      kind: "builtin",
       id: newSectionType,
       title: newSectionTitle.trim(),
+      titleKm: newSectionTitleKm.trim() || null,
       subtitle: newSectionSubtitle.trim() || undefined,
+      subtitleKm: newSectionSubtitleKm.trim() || null,
       type: newSectionType,
       isEnabled: true,
       sortOrder: sections.length + 1,
@@ -258,12 +365,7 @@ export function HomepageWorkspace({
           <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <House size={20} weight="duotone" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground">Homepage</h1>
-            <p className="text-xs text-muted-foreground">
-              Manage section visibility, sort order, and popular categories.
-            </p>
-          </div>
+          <h1 className="text-base font-bold text-foreground">Homepage</h1>
         </div>
 
         <Button
@@ -298,7 +400,7 @@ export function HomepageWorkspace({
                 variant="outline"
                 onClick={openAddSectionModal}
                 disabled={availableSectionTypes.length === 0}
-                className="h-7 px-2.5 text-[11px] font-semibold gap-1 cursor-pointer"
+                className="h-7 px-2.5 text-xxs font-semibold gap-1 cursor-pointer"
               >
                 <Plus size={12} weight="bold" />
                 <span>Add Section</span>
@@ -315,70 +417,172 @@ export function HomepageWorkspace({
             renderItem={(section, idx, { isDragging, isDropTarget }) => {
               const isFirst = idx === 0
               const isLast = idx === sections.length - 1
+              const bannerPlacement = section.kind === "builtin" && section.type === "hero_slider"
+                ? "homepage_hero"
+                : section.kind === "builtin" && section.type === "trust_banner"
+                  ? "homepage_cta"
+                  : null
+              const attachedBanners = bannerPlacement
+                ? homepageBanners
+                    .filter((banner) => bannerPlacement === "homepage_hero"
+                      ? banner.placement === "homepage_hero" || (banner.placement as string) === "homepage"
+                      : banner.placement === bannerPlacement)
+                    .sort((a, b) => a.sortOrder - b.sortOrder)
+                : []
+
+              const moveBanner = (bannerIndex: number, direction: "up" | "down") => {
+                const targetIndex = direction === "up" ? bannerIndex - 1 : bannerIndex + 1
+                if (targetIndex < 0 || targetIndex >= attachedBanners.length) return
+                const reordered = [...attachedBanners]
+                const current = reordered[bannerIndex]
+                const target = reordered[targetIndex]
+                if (!current || !target) return
+                reordered[bannerIndex] = target
+                reordered[targetIndex] = current
+                persistBannerOrder(reordered)
+              }
 
               return (
                 <div
                   className={cn(
-                    "flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
+                    "transition-colors hover:bg-muted/30",
                     isDragging && "opacity-40",
                     isDropTarget && "ring-2 ring-primary/30 bg-primary/5"
                   )}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <DotsSixVertical size={14} className="text-muted-foreground shrink-0 cursor-grab" />
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        disabled={isFirst}
-                        onClick={() => handleMoveSection(idx, "up")}
-                        className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
-                        aria-label="Move section up"
-                      >
-                        <ArrowUp size={12} />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        disabled={isLast}
-                        onClick={() => handleMoveSection(idx, "down")}
-                        className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
-                        aria-label="Move section down"
-                      >
-                        <ArrowDown size={12} />
-                      </Button>
-                    </div>
-
-                    <span className="text-xs font-bold text-muted-foreground font-mono w-4">
-                      {idx + 1}
-                    </span>
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-foreground truncate">
-                          {section.title}
-                        </span>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono">
-                          {section.type}
-                        </Badge>
+                  <div className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <DotsSixVertical size={14} className="text-muted-foreground shrink-0 cursor-grab" />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          disabled={isFirst}
+                          onClick={() => handleMoveSection(idx, "up")}
+                          className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                          aria-label="Move section up"
+                        >
+                          <ArrowUp size={12} />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          disabled={isLast}
+                          onClick={() => handleMoveSection(idx, "down")}
+                          className="size-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                          aria-label="Move section down"
+                        >
+                          <ArrowDown size={12} />
+                        </Button>
                       </div>
-                      {section.subtitle && (
-                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                          {section.subtitle}
-                        </p>
+
+                      <span className="text-xs font-bold text-muted-foreground font-mono w-4">
+                        {idx + 1}
+                      </span>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {section.kind === "featured" ? (
+                            <Sparkle size={14} weight="duotone" className="text-primary" />
+                          ) : bannerPlacement ? (
+                            <Images size={14} weight="duotone" className="text-primary" />
+                          ) : null}
+                          <span className="text-xs font-semibold text-foreground truncate">
+                            {section.title}
+                          </span>
+                          <Badge variant="outline" className="text-2xs px-1.5 py-0 h-4">
+                            {section.kind === "featured" ? "Featured" : "Built-in"}
+                          </Badge>
+                        </div>
+                        {(section.subtitle || bannerPlacement) && (
+                          <p className="text-xxs text-muted-foreground truncate mt-0.5">
+                            {bannerPlacement
+                              ? `${attachedBanners.length} banner${attachedBanners.length === 1 ? "" : "s"}`
+                              : section.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {(section.kind === "featured" || bannerPlacement) && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xxs"
+                          render={
+                            <Link href={section.kind === "featured"
+                              ? "/admin/content/featured-sections"
+                              : "/admin/content/banners"}
+                            >
+                              Manage
+                            </Link>
+                          }
+                        />
                       )}
+                      {section.kind === "builtin" && (
+                        <Button
+                          type="button"
+                          size="icon-xs"
+                          variant="ghost"
+                          aria-label={`Edit titles for ${section.title}`}
+                          onClick={() => openEditSectionTitles(section)}
+                        >
+                          <PencilSimple size={13} />
+                        </Button>
+                      )}
+                      <Switch
+                        checked={section.isEnabled}
+                        onCheckedChange={(checked) => handleToggleSection(section.id, checked)}
+                        aria-label={`Toggle ${section.title}`}
+                      />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Switch
-                      checked={section.isEnabled}
-                      onCheckedChange={(checked) => handleToggleSection(section.id, checked)}
-                      aria-label={`Toggle ${section.title}`}
-                    />
-                  </div>
+                  {attachedBanners.length > 0 && (
+                    <div className="border-t border-border/50 bg-muted/10 px-4 py-2 pl-24 space-y-1">
+                      {attachedBanners.map((banner, bannerIndex) => (
+                        <div key={banner.id} className="flex items-center justify-between gap-3 py-1">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <AdminImageThumbnail
+                              src={banner.imageUrl}
+                              alt=""
+                              containerClassName="size-7 rounded border border-border/50 shrink-0"
+                              sizes="28px"
+                            />
+                            <span className="text-xxs font-medium text-foreground truncate">
+                              {banner.title}
+                            </span>
+                            {!banner.isActive && <Badge variant="secondary" className="text-3xs h-4">Hidden</Badge>}
+                          </div>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-xs"
+                              disabled={bannerIndex === 0}
+                              onClick={() => moveBanner(bannerIndex, "up")}
+                              aria-label={`Move ${banner.title} up`}
+                            >
+                              <ArrowUp size={11} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-xs"
+                              disabled={bannerIndex === attachedBanners.length - 1}
+                              onClick={() => moveBanner(bannerIndex, "down")}
+                              aria-label={`Move ${banner.title} down`}
+                            >
+                              <ArrowDown size={11} />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )
             }}
@@ -389,14 +593,9 @@ export function HomepageWorkspace({
 
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-            <div>
-              <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                Popular Categories
-              </h2>
-              <p className="text-[11px] text-muted-foreground">
-                Selected categories featured prominently with 3D artwork on the homepage.
-              </p>
-            </div>
+            <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">
+              Popular Categories
+            </h2>
 
             <Button
               size="sm"
@@ -438,7 +637,7 @@ export function HomepageWorkspace({
                         sizes="40px"
                       />
                     ) : (
-                      <div className="size-10 rounded-lg bg-muted/60 border border-border/40 shrink-0 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                      <div className="size-10 rounded-lg bg-muted/60 border border-border/40 shrink-0 flex items-center justify-center text-2xs font-bold text-muted-foreground">
                         {cat.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -446,7 +645,7 @@ export function HomepageWorkspace({
                       <span className="text-xs font-semibold text-foreground block truncate">
                         {cat.name}
                       </span>
-                      <span className="text-[10px] text-muted-foreground block truncate">
+                      <span className="text-2xs text-muted-foreground block truncate">
                         {cat.parentCategoryName ?? "Root Category"}
                       </span>
                     </div>
@@ -499,9 +698,6 @@ export function HomepageWorkspace({
             <DialogTitle className="text-sm font-bold text-foreground">
               Add Popular Category
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Select a root category or subcategory to highlight on the homepage.
-            </DialogDescription>
           </DialogHeader>
 
           <div className="p-4 sm:p-5 space-y-3">
@@ -550,7 +746,7 @@ export function HomepageWorkspace({
                           />
                         </div>
                       ) : (
-                        <div className="size-8 rounded bg-muted relative shrink-0 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                        <div className="size-8 rounded bg-muted relative shrink-0 flex items-center justify-center text-2xs font-bold text-muted-foreground">
                           {cat.name.slice(0, 2).toUpperCase()}
                         </div>
                       )}
@@ -558,7 +754,7 @@ export function HomepageWorkspace({
                         <span className="text-xs font-medium block truncate">
                           {cat.name}
                         </span>
-                        <span className="text-[10px] text-muted-foreground block truncate">
+                        <span className="text-2xs text-muted-foreground block truncate">
                           {cat.parentCategoryName ?? "Root Category"} · {cat.listingCount} listings
                         </span>
                       </div>
@@ -566,7 +762,7 @@ export function HomepageWorkspace({
 
                     <div className="shrink-0">
                       {isAlreadySelected ? (
-                        <span className="text-[10px] text-muted-foreground">Added</span>
+                        <span className="text-2xs text-muted-foreground">Added</span>
                       ) : isCurrentChoice ? (
                         <Check size={14} weight="bold" className="text-primary" />
                       ) : null}
@@ -606,61 +802,65 @@ export function HomepageWorkspace({
             <DialogTitle className="text-sm font-bold text-foreground">
               Add Homepage Section
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Add a new section block to the homepage layout.
-            </DialogDescription>
           </DialogHeader>
 
           <div className="p-4 sm:p-5 space-y-4">
-            <Field>
-              <FieldLabel required>Section Type</FieldLabel>
-              <Select
-                value={newSectionType}
-                items={availableSectionTypes}
-                onValueChange={(val) => {
-                  if (!val) return
-                  const typed = val as HomepageSectionConfig["type"]
-                  setNewSectionType(typed)
-                  const opt = SECTION_TYPE_OPTIONS.find((o) => o.value === typed)
-                  if (opt && (!newSectionTitle.trim() || SECTION_TYPE_OPTIONS.some((o) => o.label === newSectionTitle))) {
-                    setNewSectionTitle(opt.label)
-                  }
-                }}
-              >
-                <SelectTrigger className="h-9 text-xs w-full">
-                  <SelectValue>
-                    {(val) => getSelectOptionLabel(availableSectionTypes, val, "Select section type")}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSectionTypes.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+            {!editingSectionId && (
+              <Field>
+                <FieldLabel required>Section Type</FieldLabel>
+                <Select
+                  value={newSectionType}
+                  items={availableSectionTypes}
+                  onValueChange={(val) => {
+                    if (!val) return
+                    const typed = val as HomepageSectionConfig["type"]
+                    setNewSectionType(typed)
+                    const opt = SECTION_TYPE_OPTIONS.find((o) => o.value === typed)
+                    if (opt && (!newSectionTitle.trim() || SECTION_TYPE_OPTIONS.some((o) => o.label === newSectionTitle))) {
+                      setNewSectionTitle(opt.label)
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs w-full">
+                    <SelectValue>
+                      {(val) => getSelectOptionLabel(availableSectionTypes, val, "Select section type")}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSectionTypes.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
 
-            <Field>
-              <FieldLabel required>Section Title</FieldLabel>
-              <Input
-                value={newSectionTitle}
-                onChange={(e) => setNewSectionTitle(e.target.value)}
-                placeholder="e.g. Featured Listings"
-                className="h-9 text-xs"
-              />
-            </Field>
+            <BilingualField
+              id="section-title"
+              label="Title"
+              required
+              stacked
+              valueEn={newSectionTitle}
+              valueKm={newSectionTitleKm}
+              onChangeEn={setNewSectionTitle}
+              onChangeKm={setNewSectionTitleKm}
+              placeholderEn="e.g. Featured Listings"
+              maxLength={200}
+            />
 
-            <Field>
-              <FieldLabel>Subtitle</FieldLabel>
-              <Input
-                value={newSectionSubtitle}
-                onChange={(e) => setNewSectionSubtitle(e.target.value)}
-                placeholder="Optional short description"
-                className="h-9 text-xs"
-              />
-            </Field>
+            <BilingualField
+              id="section-subtitle"
+              label="Subtitle"
+              stacked
+              valueEn={newSectionSubtitle}
+              valueKm={newSectionSubtitleKm}
+              onChangeEn={setNewSectionSubtitle}
+              onChangeKm={setNewSectionSubtitleKm}
+              placeholderEn="Optional short description"
+              maxLength={400}
+            />
           </div>
 
           <DialogFooter className="p-4 border-t border-border/60 bg-muted/20 flex flex-row items-center justify-end gap-2">
@@ -677,10 +877,10 @@ export function HomepageWorkspace({
               type="button"
               size="sm"
               disabled={!newSectionTitle.trim()}
-              onClick={handleConfirmAddSection}
+              onClick={editingSectionId ? handleSaveSectionTitles : handleConfirmAddSection}
               className="text-xs font-semibold cursor-pointer"
             >
-              Add Section
+              {editingSectionId ? "Save Titles" : "Add Section"}
             </Button>
           </DialogFooter>
         </DialogContent>

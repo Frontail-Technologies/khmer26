@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { useState } from "react"
 import { Eye, EyeSlash, Lock } from "@phosphor-icons/react"
 import {
@@ -30,6 +32,7 @@ export function PasswordField({
   autoComplete = "current-password",
   required = true,
 }: PasswordFieldProps) {
+  const tGenerated = useTranslations("generated")
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -61,7 +64,7 @@ export function PasswordField({
           <InputGroupButton
             size="icon-sm"
             onClick={() => setShowPassword((prev) => !prev)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? tGenerated("hidePassword") : tGenerated("showPassword")}
           >
             {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
           </InputGroupButton>

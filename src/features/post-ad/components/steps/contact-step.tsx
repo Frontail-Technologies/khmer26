@@ -1,8 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { ChatCircleDots, Phone, DeviceMobile, ShieldCheck } from "@phosphor-icons/react"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import type { ListingDraft } from "../../types"
 
 interface ContactStepProps {
@@ -11,25 +12,26 @@ interface ContactStepProps {
   errors?: Record<string, string>
 }
 
-export function ContactStep({ draft, onChange, errors = {} }: ContactStepProps) {
+export function ContactStep({ draft, onChange }: ContactStepProps) {
+  const t = useTranslations("ui.postAd")
   const methods = [
     {
       id: "chat",
-      title: "In-App Chat Only",
-      badge: "Recommended",
-      description: "Fast, safe, and spam-free communication within Khmer26 messaging.",
+      title: t("contactChatTitle"),
+      badge: t("contactChatBadge"),
+      description: t("contactChatDescription"),
       icon: <ChatCircleDots size={22} weight="fill" className="text-primary" />,
     },
     {
       id: "both",
-      title: "Chat & Phone Call",
-      description: "Receive instant chat messages plus direct phone calls from buyers.",
+      title: t("contactBothTitle"),
+      description: t("contactBothDescription"),
       icon: <DeviceMobile size={22} weight="fill" className="text-primary" />,
     },
     {
       id: "phone",
-      title: "Phone Call Only",
-      description: "Buyers will contact you directly via your verified phone number.",
+      title: t("contactPhoneTitle"),
+      description: t("contactPhoneDescription"),
       icon: <Phone size={22} weight="bold" className="text-primary" />,
     },
   ]
@@ -38,11 +40,8 @@ export function ContactStep({ draft, onChange, errors = {} }: ContactStepProps) 
     <div className="space-y-6">
       <div>
         <h2 className="text-base sm:text-lg font-bold text-foreground">
-          Contact Preferences
+          <LocalizedText id="contactPreferences" />
         </h2>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Choose how you prefer potential buyers to get in touch with you
-        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-3">
@@ -70,12 +69,12 @@ export function ContactStep({ draft, onChange, errors = {} }: ContactStepProps) 
                       {m.title}
                     </span>
                     {m.badge && (
-                      <span className="text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                      <span className="text-2xs font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
                         {m.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xxs sm:text-xs text-muted-foreground mt-0.5">
                     {m.description}
                   </p>
                 </div>
@@ -85,43 +84,10 @@ export function ContactStep({ draft, onChange, errors = {} }: ContactStepProps) 
         })}
       </div>
 
-      {(draft.contactMethod === "phone" || draft.contactMethod === "both") && (
-        <div className="space-y-3 pt-2 border-t border-border/60">
-          <div className="space-y-1.5">
-            <label htmlFor="contact-phone" className="text-xs font-bold text-foreground">
-              Contact Phone Number <span className="text-destructive">*</span>
-            </label>
-            <Input
-              id="contact-phone"
-              type="tel"
-              placeholder="+855 12 345 678"
-              value={draft.phoneNumber}
-              onChange={(e) => onChange({ phoneNumber: e.target.value })}
-              className="h-10 text-xs sm:text-sm"
-            />
-            {errors.phoneNumber && (
-              <p className="text-[11px] font-medium text-destructive mt-1">
-                {errors.phoneNumber}
-              </p>
-            )}
-          </div>
-
-          <label className="flex items-center gap-2.5 cursor-pointer select-none">
-            <Checkbox
-              checked={draft.hidePhoneUntilClick}
-              onCheckedChange={(checked) => onChange({ hidePhoneUntilClick: Boolean(checked) })}
-            />
-            <span className="text-xs text-muted-foreground">
-              Hide phone number until buyer clicks &quot;Show Phone&quot;
-            </span>
-          </label>
-        </div>
-      )}
-
       <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-primary/20 bg-primary/5 text-xs text-muted-foreground">
         <ShieldCheck size={18} weight="fill" className="text-primary shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          Your personal contact details are protected under Khmer26 privacy terms and only shared with verified buyers per your preferences.
+          <LocalizedText id="phoneOptionsUseTheNumberSavedOnYourSeller" />
         </p>
       </div>
     </div>

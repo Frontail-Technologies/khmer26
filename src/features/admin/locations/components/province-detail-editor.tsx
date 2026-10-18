@@ -164,11 +164,9 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
           <div className="space-y-0.5">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <MapPin size={14} />
-              Division Details: {province.name} ({province.nameKhmer || province.name})
+              {province.name}
+              {province.nameKhmer && <span className="font-normal normal-case tracking-normal">{province.nameKhmer}</span>}
             </CardTitle>
-            <span className="text-[10px] text-muted-foreground block">
-              {province.type} • Postal Prefix: {province.postalCode} • {province.listingCount.toLocaleString()} ads
-            </span>
           </div>
 
           <Button size="sm" className="h-8 text-xs" onClick={handleSaveProvince} disabled={updateProvince.isPending}>
@@ -199,10 +197,7 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
             <div className="flex items-center justify-between gap-3">
               <div className="space-y-0.5">
                 <span className="text-xs font-semibold text-foreground block">
-                  Administrative Districts & Khans ({province.districts.length})
-                </span>
-                <span className="text-[10px] text-muted-foreground block">
-                  Districts registered under {province.name}
+                  Districts & Khans ({province.districts.length})
                 </span>
               </div>
               <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={openAddDistrict}>
@@ -223,12 +218,10 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-foreground">{dist.name}</span>
-                          {dist.nameKhmer && <span className="text-[11px] text-muted-foreground">{dist.nameKhmer}</span>}
-                          <Badge variant={dist.isActive ? "outline" : "secondary"} className="text-[10px] h-4.5">
-                            {dist.isActive ? "Active" : "Disabled"}
-                          </Badge>
+                          {dist.nameKhmer && <span className="text-xxs text-muted-foreground">{dist.nameKhmer}</span>}
+                          {!dist.isActive && <Badge variant="secondary" className="text-2xs h-4.5">Disabled</Badge>}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-2 text-2xs text-muted-foreground">
                           <span>{dist.sangkatsCount} Communes / Sangkats</span>
                           <span>•</span>
                           <span className="font-medium text-foreground">{dist.listingCount.toLocaleString()} ads</span>
@@ -242,7 +235,7 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
                         <Button size="icon-xs" variant="ghost" className="size-7" onClick={() => toggleDistrict(dist)} aria-label={dist.isActive ? "Disable district" : "Enable district"}>
                           <Power size={13} />
                         </Button>
-                        <Button size="xs" variant="outline" className="h-7 text-[11px] gap-1" onClick={() => openAddCommune(dist)}>
+                        <Button size="xs" variant="outline" className="h-7 text-xxs gap-1" onClick={() => openAddCommune(dist)}>
                           <Plus size={11} />
                           Add Commune
                         </Button>
@@ -251,7 +244,7 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
 
                     <div className="space-y-1">
                       {(dist.communes ?? []).length === 0 ? (
-                        <div className="rounded-md bg-background/50 px-3 py-2 text-[11px] text-muted-foreground">
+                        <div className="rounded-md bg-background/50 px-3 py-2 text-xxs text-muted-foreground">
                           No communes registered yet.
                         </div>
                       ) : (
@@ -259,12 +252,10 @@ export function ProvinceDetailEditor({ province }: ProvinceDetailEditorProps) {
                           <div key={commune.id} className="flex items-center justify-between gap-2 rounded-md bg-background/60 px-3 py-2">
                             <div className="min-w-0">
                               <span className="font-medium text-foreground">{commune.name}</span>
-                              {commune.nameKhmer && <span className="ml-2 text-[11px] text-muted-foreground">{commune.nameKhmer}</span>}
+                              {commune.nameKhmer && <span className="ml-2 text-xxs text-muted-foreground">{commune.nameKhmer}</span>}
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
-                              <Badge variant={commune.isActive ? "outline" : "secondary"} className="h-4.5 text-[10px]">
-                                {commune.isActive ? "Active" : "Disabled"}
-                              </Badge>
+                              {!commune.isActive && <Badge variant="secondary" className="h-4.5 text-2xs">Disabled</Badge>}
                               <Button size="icon-xs" variant="ghost" className="size-6" onClick={() => openEditCommune(dist, commune)} aria-label="Edit commune">
                                 <PencilSimple size={12} />
                               </Button>

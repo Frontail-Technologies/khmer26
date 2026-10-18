@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { ListingCardData } from "@/types"
@@ -22,8 +24,10 @@ export function ListingCard({
   compact = false,
   className,
 }: ListingCardProps) {
+  const tGenerated = useTranslations("generated")
+  const tUi = useTranslations("ui.common")
   const formattedPrice = listing.priceOnRequest
-    ? "Contact for price"
+    ? tUi("contactForPrice")
     : formatPriceWithCurrency(listing.price, listing.currency)
   const timeAgo = formatCompactRelativeTime(listing.createdAt)
   const imageUrl = listing.primaryImage?.url ?? null
@@ -65,17 +69,17 @@ export function ListingCard({
           {isFeatured && (
             <span className={cn(
               "inline-flex items-center rounded-md bg-accent text-accent-foreground font-bold tracking-wider uppercase shadow-xs",
-              compact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]"
+              compact ? "px-1.5 py-0.5 text-3xs" : "px-2 py-0.5 text-2xs"
             )}>
-              Featured
+              <LocalizedText id="featured" />
             </span>
           )}
           {listing.urgent && (
             <span className={cn(
               "inline-flex items-center rounded-md bg-destructive text-destructive-foreground font-bold tracking-wider uppercase shadow-xs",
-              compact ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]"
+              compact ? "px-1.5 py-0.5 text-3xs" : "px-2 py-0.5 text-2xs"
             )}>
-              Urgent
+              <LocalizedText id="urgent" />
             </span>
           )}
         </div>
@@ -96,7 +100,7 @@ export function ListingCard({
           {listing.title}
         </h3>
 
-        <p className={cn("flex items-center gap-1 text-muted-foreground", compact ? "text-[11px]" : "text-xs")}>
+        <p className={cn("flex items-center gap-1 text-muted-foreground", compact ? "text-xxs" : "text-xs")}>
           <span className="shrink-0">{timeAgo}</span>
           <span aria-hidden="true">•</span>
           <span className="truncate">{locationLabel}</span>
@@ -105,13 +109,13 @@ export function ListingCard({
               size={compact ? 13 : 14}
               weight="fill"
               className="shrink-0 text-primary"
-              aria-label="Verified Seller"
+              aria-label={tGenerated("verifiedSeller_af2cd9")}
             />
           )}
         </p>
 
         {metaLine && (
-          <p className={cn("truncate text-muted-foreground", compact ? "text-[11px]" : "text-xs")}>
+          <p className={cn("truncate text-muted-foreground", compact ? "text-xxs" : "text-xs")}>
             {metaLine}
           </p>
         )}
@@ -127,7 +131,7 @@ export function ListingCard({
               {formattedPrice}
             </span>
             {listing.negotiable && (
-              <span className="text-[10px] font-medium text-muted-foreground">Negotiable</span>
+              <span className="text-2xs font-medium text-muted-foreground"><LocalizedText id="negotiable" /></span>
             )}
           </div>
           <div className="pointer-events-auto relative z-10 shrink-0">

@@ -4,13 +4,13 @@ export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(6, "Password must be at least 6 characters"),
+      .min(6, "passwordMin6"),
     confirmPassword: z
       .string()
-      .min(1, "Please confirm your new password"),
+      .min(1, "confirmNewPassword"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "passwordsMismatch",
     path: ["confirmPassword"],
   })
 

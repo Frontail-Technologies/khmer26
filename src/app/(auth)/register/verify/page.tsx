@@ -1,20 +1,27 @@
+import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 import { AuthCard } from "@/features/auth/components/auth-card"
 import { AuthHeader } from "@/features/auth/components/auth-header"
 import { RegisterVerifyForm } from "@/features/auth/components/register-verify-form"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Verify Your Email",
-  description: "Enter the verification code sent to your email to complete registration.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.registerVerify")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function RegisterVerifyPage() {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
   return (
-    <AuthCard maxWidth="sm" backHref="/register" backLabel="Back to registration">
+    <AuthCard maxWidth="sm" backHref="/register" backLabel={tAuth("backToRegistration")}>
       <AuthHeader
-        eyebrow="EMAIL VERIFICATION"
-        title="Check your inbox"
-        subtitle="We sent a 6-digit verification code to your email address. Enter it below to complete your registration."
+        eyebrow={tAuth("eyebrowEmailVerification")}
+        title={tGenerated("checkYourInbox")}
+        subtitle={tAuth("subtitleRegisterVerify")}
         align="center"
       />
       <RegisterVerifyForm />

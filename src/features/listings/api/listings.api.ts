@@ -7,6 +7,9 @@ export interface PublicListing {
   description: string | null;
   price: string | null;
   currency: string | null;
+  condition: 'new' | 'like_new' | 'good' | 'fair' | 'for_parts';
+  negotiable: boolean;
+  contactMethod: 'chat' | 'phone' | 'both';
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -25,6 +28,10 @@ export interface PublicListing {
   } | null;
   primaryImage: { mediaId: string; r2Key: string; mimeType: string; sizeBytes: number } | null;
   isFavorited?: boolean;
+  featured?: boolean;
+  urgent?: boolean;
+  topListing?: boolean;
+  boostedAt?: string | null;
 }
 
 export interface ListingsPagination {

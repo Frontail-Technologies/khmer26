@@ -3,6 +3,7 @@ import type { ListingCondition, ListingLocation } from "@/types/listing"
 export type AccountListingStatus =
   | "active"
   | "pending"
+  | "rejected"
   | "sold"
   | "draft"
   | "expired"
@@ -12,6 +13,7 @@ export type AccountListingFilterStatus =
   | "all"
   | "active"
   | "pending"
+  | "rejected"
   | "sold"
   | "draft"
   | "expired"
@@ -31,11 +33,14 @@ export interface AccountListingItem {
   categoryId: string
   createdAt: string
   updatedAt: string
-  expiresAt?: string
   viewsCount: number
   favoritesCount: number
   messagesCount: number
   featured?: boolean
+  urgent?: boolean
+  topListing?: boolean
+  expiresAt?: string
+    moderationMatches?: import("@/features/content/types").ListingModerationMatch[]
 }
 
 export type PaymentType =
@@ -44,19 +49,23 @@ export type PaymentType =
   | "featured_listing"
   | "top_listing"
 
-export type PaymentStatus = "paid" | "pending" | "failed" | "refunded"
+export type PaymentStatus = "paid" | "pending" | "failed" | "expired" | "cancelled" | "refunded"
 
 export interface AccountPaymentRecord {
   id: string
   transactionId: string
-  date: string
+  createdAt?: string
+  /** Legacy demo field retained until the shared fixture file is removed. */
+  date?: string
+  paidAt?: string
   description: string
   type: PaymentType
   amount: number
   currency: string
   paymentMethod: string
   status: PaymentStatus
-  invoiceNumber: string
+  checkoutUrl?: string
+  invoiceNumber?: string
 }
 
 export interface AccountSubscriptionPlan {

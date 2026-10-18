@@ -10,7 +10,7 @@ export function AuthDivider({ label = "OR CONTINUE WITH" }: AuthDividerProps) {
       <div className="absolute inset-0 flex items-center">
         <Separator className="w-full" />
       </div>
-      <div className="relative flex justify-center text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="relative flex justify-center text-2xs sm:text-xxs font-bold uppercase tracking-wider text-muted-foreground">
         <span className="bg-card px-3">{label}</span>
       </div>
     </div>

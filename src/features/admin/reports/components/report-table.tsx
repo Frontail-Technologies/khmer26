@@ -75,6 +75,7 @@ export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim()
         const matchesId = item.id.toLowerCase().includes(q)
+        const matchesDisplayId = item.displayId?.toLowerCase().includes(q) ?? false
         const matchesTitle = item.target.title.toLowerCase().includes(q)
         const matchesTargetId = item.target.id.toLowerCase().includes(q)
         const matchesReason = item.reasonLabel.toLowerCase().includes(q)
@@ -83,6 +84,7 @@ export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps
 
         if (
           !matchesId &&
+          !matchesDisplayId &&
           !matchesTitle &&
           !matchesTargetId &&
           !matchesReason &&
@@ -159,7 +161,7 @@ export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       tab.warning
                         ? "bg-accent/10 text-accent border-accent/30"
                         : isActive
@@ -202,7 +204,7 @@ export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80"
+                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
                     >
                       {header.isPlaceholder
                         ? null
@@ -235,7 +237,6 @@ export function ReportTable({ initialData: fallbackData = [] }: ReportTableProps
                 <DataTableEmpty
                   colSpan={reportColumns.length}
                   title="No reports found"
-                  description="Try adjusting your search terms, status tabs, or active filters."
                 />
               )}
             </TableBody>

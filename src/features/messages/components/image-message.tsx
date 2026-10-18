@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import Image from "next/image"
 import { Eye } from "@phosphor-icons/react"
@@ -50,7 +52,7 @@ export function ImageMessage({
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-3xl p-2 bg-background/95 border-none shadow-2xl">
-          <DialogTitle className="sr-only">Image Preview</DialogTitle>
+          <DialogTitle className="sr-only"><LocalizedText id="imagePreview" /></DialogTitle>
           <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-lg overflow-hidden bg-black">
             <Image
               src={imageUrl}

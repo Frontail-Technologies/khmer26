@@ -7,6 +7,7 @@ import type {
   VerificationDocument,
   VerificationDocumentType,
 } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface AdminVerificationsQueryParams {
   page?: number;
@@ -39,7 +40,7 @@ export function normalizeVerification(raw: Record<string, unknown>): Verificatio
     phone: (rawSeller?.phoneNumber || rawSeller?.phone || '—') as string,
     sellerType: ((rawSeller?.sellerType as string) || 'individual') as VerificationSellerType,
     location: (rawSeller?.province as string) || 'Phnom Penh',
-    joinedDate: rawSeller?.createdAt ? new Date(rawSeller.createdAt as string).toLocaleDateString() : '2026',
+    joinedDate: rawSeller?.createdAt ? formatAdminDateTime(rawSeller.createdAt as string) : '2026',
     activeListings: Number(rawSeller?.activeListingsCount || 0),
     slug: rawSeller?.slug as string | undefined,
   };
@@ -52,19 +53,20 @@ export function normalizeVerification(raw: Record<string, unknown>): Verificatio
     fileUrl: (d.url || d.fileUrl || '/placeholder.png') as string,
     fileSize: (d.fileSize as string) || '1.2 MB',
     fileType: (d.fileType as string) || 'image/jpeg',
-    uploadedAt: d.createdAt ? new Date(d.createdAt as string).toLocaleDateString() : '—',
+    uploadedAt: d.createdAt ? formatAdminDateTime(d.createdAt as string) : '—',
     status: 'submitted' as const,
   }));
 
   const rawHistory = (req.history || raw.history || []) as Array<Record<string, unknown>>;
   const submittedAt = (req.createdAt as string) || (raw.createdAt as string) || new Date().toISOString();
-  const submittedDate = new Date(submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const submittedDate = formatAdminDateTime(submittedAt);
 
   const rawIdDetails = (req.identityDetails || raw.identityDetails) as Record<string, unknown> | undefined;
   const rawBizDetails = (req.businessDetails || raw.businessDetails) as Record<string, unknown> | undefined;
 
   return {
     id: String(req.id || raw.id),
+    displayId: String(req.displayId || raw.displayId || 'VRF'),
     seller,
     type: ((req.verificationType || req.type || raw.type || 'identity') as string) as VerificationType,
     status: statusMap[String(req.status || raw.status)] || 'pending',
@@ -72,18 +74,7 @@ export function normalizeVerification(raw: Record<string, unknown>): Verificatio
     submittedDate,
     updatedAt: (req.updatedAt as string) || (raw.updatedAt as string) || submittedAt,
     assignedTo: (req.assignedModerator || raw.assignedModerator) as string | undefined,
-    documents: documents.length > 0 ? documents : [
-      {
-        id: 'doc-1',
-        type: 'national_id_front',
-        title: 'National ID (Front)',
-        fileUrl: '/placeholder.png',
-        fileSize: '1.4 MB',
-        fileType: 'image/jpeg',
-        uploadedAt: submittedDate,
-        status: 'submitted',
-      },
-    ],
+    documents,
     identityDetails: rawIdDetails
       ? {
           fullName: (rawIdDetails.fullName as string) || seller.name,
@@ -109,7 +100,7 @@ export function normalizeVerification(raw: Record<string, unknown>): Verificatio
       id: String(h.id || Math.random()),
       action: (h.action as string) || 'Status Update',
       actor: (h.actor as string) || 'Moderator',
-      timestamp: h.createdAt ? new Date(h.createdAt as string).toLocaleDateString() : '—',
+      timestamp: h.createdAt ? formatAdminDateTime(h.createdAt as string) : '—',
       note: h.note as string | undefined,
       type: 'status_change',
     })),
@@ -143,9 +134,10 @@ export async function getAdminVerifications(params: AdminVerificationsQueryParam
 }
 
 export async function getAdminVerification(id: string): Promise<VerificationRequest | undefined> {
-  const res = await apiClient.get<{ verification: Record<string, unknown> }>(`/admin/verifications/${id}`);
-  if (!res.data?.verification) return undefined;
-  return normalizeVerification(res.data.verification);
+  const res = await apiClient.get<Record<string, unknown>>(`/admin/verifications/${id}`);
+  const detail = (res.data?.verification as Record<string, unknown> | undefined) ?? res.data;
+  if (!detail || (!detail.request && !detail.id)) return undefined;
+  return normalizeVerification(detail);
 }
 
 export function approveVerification(id: string) {

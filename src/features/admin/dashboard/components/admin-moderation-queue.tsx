@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useAdminDashboard } from "../hooks/dashboard.queries"
+import { formatAdminDateTime } from "@/lib/formatters/date"
 
 export function AdminModerationQueue() {
   const { data } = useAdminDashboard()
@@ -18,7 +19,7 @@ export function AdminModerationQueue() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Moderation Queue
           </CardTitle>
-          <Badge variant="destructive" className="h-4.5 px-2 text-[9px] font-bold rounded-md">
+          <Badge variant="destructive" className="h-4.5 px-2 text-3xs font-bold rounded-md">
             {queue.length} Pending
           </Badge>
         </div>
@@ -70,7 +71,7 @@ export function AdminModerationQueue() {
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-[9px] px-1.5 py-0 uppercase font-bold h-4 rounded",
+                        "text-3xs px-1.5 py-0 uppercase font-bold h-4 rounded",
                         isUrgent
                           ? "border-destructive/40 text-destructive bg-destructive/5"
                           : isHigh
@@ -81,15 +82,15 @@ export function AdminModerationQueue() {
                       {item.priority}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-xxs text-muted-foreground truncate">
                     {item.subtitle}
                   </p>
                 </div>
               </div>
 
               <div className="text-right shrink-0">
-                <span className="text-[10px] text-muted-foreground block font-medium">
-                  {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(item.submittedAt))}
+                <span className="text-2xs text-muted-foreground block font-medium">
+                  {formatAdminDateTime(item.submittedAt)}
                 </span>
                 <Link
                   href={item.href}

@@ -66,6 +66,7 @@ export interface VerificationAuditEvent {
 
 export interface VerificationRequest {
   id: string
+  displayId: string
   seller: VerificationSellerSummary
   type: VerificationType
   status: VerificationStatus

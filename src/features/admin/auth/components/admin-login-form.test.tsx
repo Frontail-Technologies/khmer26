@@ -28,14 +28,14 @@ describe('<AdminLoginForm />', () => {
     expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument();
   });
 
-  it('populates demo credentials when "Fill Credentials" is clicked', () => {
-    renderWithProviders(<AdminLoginForm />);
+  it('ships no demo credentials or prefill button', () => {
+    const { container } = renderWithProviders(<AdminLoginForm />);
 
-    const fillButton = screen.getByRole('button', { name: /fill credentials/i });
-    fireEvent.click(fillButton);
-
-    expect(screen.getByLabelText(/^email$/i)).toHaveValue('admin@khmer26.com');
-    expect(screen.getByLabelText(/^password$/i)).toHaveValue('Admin@Khmer26!');
+    expect(screen.queryByRole('button', { name: /fill credentials/i })).toBeNull();
+    expect(screen.queryByText(/demo account/i)).toBeNull();
+    expect(container.textContent).not.toMatch(/Admin@Khmer26/);
+    expect(screen.getByLabelText(/^email$/i)).toHaveValue('');
+    expect(screen.getByLabelText(/^password$/i)).toHaveValue('');
   });
 
   it('submits email and password to login mutation', async () => {
@@ -46,7 +46,7 @@ describe('<AdminLoginForm />', () => {
       target: { value: 'admin@khmer26.com' },
     });
     fireEvent.change(screen.getByLabelText(/^password$/i), {
-      target: { value: 'Admin@Khmer26!' },
+      target: { value: 'correct-horse-battery' },
     });
 
     const submitButton = screen.getByRole('button', { name: /^sign in$/i });
@@ -54,7 +54,7 @@ describe('<AdminLoginForm />', () => {
 
     expect(mockLogin).toHaveBeenCalledWith({
       email: 'admin@khmer26.com',
-      password: 'Admin@Khmer26!',
+      password: 'correct-horse-battery',
     });
   });
 

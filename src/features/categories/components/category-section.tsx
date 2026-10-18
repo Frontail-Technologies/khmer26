@@ -1,3 +1,4 @@
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { SectionHeader } from "@/components/shared/SectionHeader"
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 import Link from "next/link"
@@ -23,7 +24,7 @@ export function CategorySection({
             href="/categories"
             className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            View all
+            <LocalizedText id="viewAll" />
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
         }

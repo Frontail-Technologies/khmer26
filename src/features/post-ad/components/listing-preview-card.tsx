@@ -1,5 +1,8 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Image from "next/image"
 import { Eye, MapPin, Tag, Image as ImageIcon, ShieldCheck } from "@phosphor-icons/react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -11,6 +14,7 @@ interface ListingPreviewCardProps {
 }
 
 export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
+  const t = useTranslations("ui.postAd")
   const coverPhoto = draft.photos.find((p) => p.isCover) || draft.photos[0]
   const formattedPrice =
     draft.price !== ""
@@ -26,7 +30,7 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
       <div className="flex items-center gap-1.5 p-3 border-b border-border/60 bg-muted/30">
         <Eye size={16} className="text-primary shrink-0" />
         <span className="text-xs font-bold text-foreground">
-          Live Card Preview
+          <LocalizedText id="liveCardPreview" />
         </span>
       </div>
 
@@ -34,15 +38,16 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
         {coverPhoto ? (
           <Image
             src={coverPhoto.previewUrl}
-            alt={draft.title || "Listing preview"}
+            alt={draft.title || t("previewAlt")}
             fill
             sizes="350px"
+            unoptimized={coverPhoto.previewUrl.startsWith("blob:")}
             className="object-cover"
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground/60 p-4 text-center">
             <ImageIcon size={32} className="mb-1" />
-            <span className="text-[11px] font-medium">Add photos to preview</span>
+            <span className="text-xxs font-medium"><LocalizedText id="addPhotosToPreview" /></span>
           </div>
         )}
 
@@ -50,7 +55,7 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
           <div className="absolute top-2 left-2 z-10">
             <Badge
               variant="secondary"
-              className="text-[10px] font-semibold bg-background/80 backdrop-blur-md text-foreground"
+              className="text-2xs font-semibold bg-background/80 backdrop-blur-md text-foreground"
             >
               {draft.categoryPath[draft.categoryPath.length - 1]}
             </Badge>
@@ -64,14 +69,14 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
             {formattedPrice}
           </span>
           {draft.negotiable && (
-            <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-              Negotiable
+            <span className="text-2xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              <LocalizedText id="negotiable" />
             </span>
           )}
         </div>
 
         <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-2 leading-snug">
-          {draft.title || "Untitled Listing"}
+          {draft.title || t("previewUntitled")}
         </h3>
 
         {attributeEntries.length > 0 && (
@@ -79,7 +84,7 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
             {attributeEntries.map(([key, val]) => (
               <span
                 key={key}
-                className="text-[10px] bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded font-medium truncate max-w-30"
+                className="text-2xs bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded font-medium truncate max-w-30"
               >
                 {val}
               </span>
@@ -87,30 +92,30 @@ export function ListingPreviewCard({ draft }: ListingPreviewCardProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t border-border/50 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xxs text-muted-foreground">
           <div className="flex items-center gap-1 truncate max-w-37.5">
             <MapPin size={13} className="shrink-0 text-primary" />
             <span className="truncate">
-              {draft.location.label || "Select Location"}
+              {draft.location.label || t("previewSelectLocation")}
             </span>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
             <Tag size={13} className="shrink-0" />
-            <span>{draft.condition || "Condition"}</span>
+            <span>{draft.condition || t("previewCondition")}</span>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px]">
+        <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xxs">
           <div className="flex items-center gap-1.5">
-            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center font-bold text-[9px] text-primary">
-              You
+            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center font-bold text-3xs text-primary">
+              <LocalizedText id="you" />
             </div>
-            <span className="font-semibold text-foreground">Your Store</span>
+            <span className="font-semibold text-foreground"><LocalizedText id="yourStore" /></span>
             <ShieldCheck size={14} weight="fill" className="text-primary shrink-0" />
           </div>
 
-          <span className="text-[10px] text-muted-foreground">Just now</span>
+          <span className="text-2xs text-muted-foreground"><LocalizedText id="justNow" /></span>
         </div>
       </CardContent>
     </Card>

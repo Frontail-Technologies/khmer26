@@ -84,16 +84,16 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base sm:text-lg font-bold text-foreground font-mono">
-                    {report.id}
+                  <h1 className="text-base sm:text-lg font-bold text-foreground">
+                    {target.title}
                   </h1>
-                  <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5">
+                  <Badge variant="outline" className="text-2xs font-medium px-2 py-0.5 h-5">
                     {TARGET_TYPE_LABELS[report.targetType] || report.targetType}
                   </Badge>
                   <StatusBadge label={statusConf.label} tone={statusConf.tone} />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Reported on {report.createdDate} · Target ID: <span className="font-mono text-foreground font-medium">{target.id}</span>
+                  {report.displayId ? `${report.displayId} · ` : ""}Reported on {report.createdDate}
                 </p>
               </div>
             </div>
@@ -121,7 +121,6 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
                   {getTargetIcon(report.targetType)}
                   Reported Item Preview
                 </CardTitle>
-                <span className="font-mono text-xs text-muted-foreground">{target.id}</span>
               </CardHeader>
               <CardContent className="p-4 space-y-3.5 text-xs">
                 <div className="flex flex-col sm:flex-row items-start gap-3.5">
@@ -148,25 +147,25 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-muted-foreground pt-1">
                       {target.category && (
                         <div>
-                          <span className="text-[10px] text-muted-foreground block">Category</span>
+                          <span className="text-2xs text-muted-foreground block">Category</span>
                           <span className="font-medium text-foreground">{target.category}</span>
                         </div>
                       )}
                       {target.price !== undefined && (
                         <div>
-                          <span className="text-[10px] text-muted-foreground block">Price</span>
+                          <span className="text-2xs text-muted-foreground block">Price</span>
                           <span className="font-medium text-foreground">${target.price.toLocaleString()}</span>
                         </div>
                       )}
                       {target.sellerName && (
                         <div>
-                          <span className="text-[10px] text-muted-foreground block">Seller / Owner</span>
+                          <span className="text-2xs text-muted-foreground block">Seller / Owner</span>
                           <span className="font-medium text-foreground">{target.sellerName}</span>
                         </div>
                       )}
                       {target.status && (
                         <div>
-                          <span className="text-[10px] text-muted-foreground block">Entity Status</span>
+                          <span className="text-2xs text-muted-foreground block">Entity Status</span>
                           <span className="font-medium text-foreground capitalize">{target.status}</span>
                         </div>
                       )}
@@ -186,19 +185,19 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
               <CardContent className="p-4 space-y-3.5 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-border/40">
                   <div>
-                    <span className="text-muted-foreground block text-[11px]">Reported Reason</span>
+                    <span className="text-muted-foreground block text-xxs">Reported Reason</span>
                     <span className="font-bold text-foreground text-xs mt-0.5 block">{report.reasonLabel}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block text-[11px]">Reported By</span>
+                    <span className="text-muted-foreground block text-xxs">Reported By</span>
                     <span className="font-semibold text-foreground text-xs mt-0.5 block">
-                      {report.reporter.name} <span className="text-muted-foreground text-[11px] font-normal capitalize">({report.reporter.accountType})</span>
+                      {report.reporter.name} <span className="text-muted-foreground text-xxs font-normal capitalize">({report.reporter.accountType})</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="text-muted-foreground block text-[11px]">Reporter Statement</span>
+                  <span className="text-muted-foreground block text-xxs">Reporter Statement</span>
                   <p className="text-foreground leading-relaxed bg-muted/30 p-3 rounded-lg border border-border/40 text-xs">
                     {"\""}{report.statement}{"\""}
                   </p>
@@ -206,7 +205,7 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
 
                 {hasAttachment && (
                   <div className="space-y-2 pt-2 border-t border-border/40">
-                    <span className="text-muted-foreground block text-[11px] flex items-center gap-1">
+                    <span className="text-muted-foreground block text-xxs flex items-center gap-1">
                       <ImageIcon size={14} />
                       Attached Screenshot / Evidence
                     </span>
@@ -224,7 +223,7 @@ export function ReportDetailView({ report }: ReportDetailViewProps) {
                               />
                             </div>
                           )}
-                          <span className="font-medium text-[11px] text-foreground block truncate">
+                          <span className="font-medium text-xxs text-foreground block truncate">
                             {ev.title}
                           </span>
                         </div>

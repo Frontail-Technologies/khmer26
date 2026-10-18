@@ -4,19 +4,19 @@ export const registerSchema = z
   .object({
     email: z
       .string()
-      .min(1, "Email address is required")
-      .email("Please enter a valid email address")
+      .min(1, "emailRequired")
+      .email("emailInvalid")
       .trim()
       .toLowerCase(),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters"),
+      .min(8, "passwordMin8"),
     confirmPassword: z
       .string()
-      .min(1, "Please confirm your password"),
+      .min(1, "confirmPassword"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "passwordsMismatch",
     path: ["confirmPassword"],
   })
 

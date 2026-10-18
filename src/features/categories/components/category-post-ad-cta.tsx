@@ -1,3 +1,4 @@
+import { LocalizedText } from "@/components/i18n/localized-text"
 import Link from "next/link"
 import { Plus, ShieldCheck, Sparkle } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
@@ -9,16 +10,13 @@ export function CategoryPostAdCta() {
         <div className="max-w-2xl space-y-2">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
             <Sparkle size={14} weight="fill" />
-            <span>Sell on Khmer26</span>
+            <span><LocalizedText id="sellOnKhmer26" /></span>
           </div>
 
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground tracking-tight">
-            Have something to sell in Cambodia?
+            <LocalizedText id="haveSomethingToSellInCambodia" />
           </h2>
 
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Post your ad in any category for free in less than 2 minutes. Connect directly with buyers via real-time messaging and verified inquiries.
-          </p>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full md:w-auto shrink-0">
@@ -28,7 +26,7 @@ export function CategoryPostAdCta() {
             render={
               <Link href="/post-ad">
                 <Plus size={18} weight="bold" />
-                <span>Post Free Ad</span>
+                <span><LocalizedText id="postFreeAd" /></span>
               </Link>
             }
           />
@@ -40,7 +38,7 @@ export function CategoryPostAdCta() {
             render={
               <Link href="/pricing">
                 <ShieldCheck size={18} weight="bold" />
-                <span>Seller Plans</span>
+                <span><LocalizedText id="sellerPlans" /></span>
               </Link>
             }
           />

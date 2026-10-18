@@ -1,11 +1,16 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { ShieldCheck, CalendarBlank, Star, Storefront } from "@phosphor-icons/react/dist/ssr"
+import Image from "next/image"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getMediaUrl } from "@/lib/media/get-media-url"
 import { formatMemberSince, sellerTypeLabel } from "@/features/listings/lib/listing-detail-format"
 import type { SellerProfile } from "../api/sellers.api"
-import { pluralize, sellerInitials } from "../lib/seller-format"
+import { sellerInitials } from "../lib/seller-format"
+import { useIntlLocale } from "@/lib/i18n/use-intl-locale"
 import { SellerActions } from "./seller-actions"
+import { SellerContacts } from "./seller-contacts"
 
 interface SellerProfileHeaderProps {
   seller: SellerProfile
@@ -15,12 +20,23 @@ interface SellerProfileHeaderProps {
 }
 
 export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: SellerProfileHeaderProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const intlLocale = useIntlLocale()
   const avatarUrl = getMediaUrl(seller.avatarR2Key)
-  const memberSince = formatMemberSince(seller.joinedAt)
+  const coverUrl = getMediaUrl(seller.coverR2Key)
+  const memberSince = formatMemberSince(seller.joinedAt, intlLocale)
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
-      <div className="h-28 sm:h-40 md:h-48 w-full bg-linear-to-r from-primary/15 via-primary/5 to-muted" />
+      <div className="relative h-28 sm:h-40 md:h-48 w-full overflow-hidden bg-linear-to-r from-primary/15 via-primary/5 to-muted">
+        {coverUrl && (
+          <>
+            <Image src={coverUrl} alt="" fill priority sizes="100vw" className="object-cover" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/25 to-transparent" />
+          </>
+        )}
+      </div>
 
       <div className="px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -48,7 +64,7 @@ export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: 
                     size={20}
                     weight="fill"
                     className="text-primary shrink-0"
-                    aria-label="Verified seller"
+                    aria-label={tGenerated("verifiedSeller")}
                   />
                 )}
               </div>
@@ -56,11 +72,17 @@ export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: 
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                 <Badge
                   variant="secondary"
-                  className="text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5"
+                  className="text-2xs font-semibold tracking-wide uppercase px-2 py-0.5"
                 >
                   {sellerTypeLabel(seller.sellerType)}
                 </Badge>
-                {seller.isVerified && <span className="font-semibold text-primary">Verified</span>}
+                {seller.isVerified && <span className="font-semibold text-primary"><LocalizedText id="verified" /></span>}
+                {seller.isActive && (
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+                    <LocalizedText id="activeNow" />
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -70,28 +92,35 @@ export function SellerProfileHeader({ seller, contactListingId, isOwnProfile }: 
           </div>
         </div>
 
-        {seller.bio?.trim() && (
-          <p className="mt-4 text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-line wrap-anywhere">
-            {seller.bio.trim()}
-          </p>
-        )}
+        {/* Mobile order: actions, masked contact, About. Desktop order: About, contact. */}
+        <div className="flex flex-col">
+          {seller.bio?.trim() && (
+            <p className="mt-4 text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-line wrap-anywhere max-md:order-2">
+              {seller.bio.trim()}
+            </p>
+          )}
+
+          <div className="mt-4 max-md:order-1">
+            <SellerContacts seller={seller} />
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-y-2 gap-x-4 pt-4 mt-4 border-t border-border/60 text-xs text-muted-foreground">
           {memberSince && (
             <span className="inline-flex items-center gap-1.5">
               <CalendarBlank size={15} className="shrink-0" />
-              Member since {memberSince}
+              {tDynamic("memberSince", { date: memberSince })}
             </span>
           )}
           <span className="inline-flex items-center gap-1.5">
             <Storefront size={15} className="text-primary shrink-0" />
-            {pluralize(seller.listingCount, "active listing")}
+            {tDynamic("activeListingCount", { count: seller.listingCount })}
           </span>
           {seller.rating && (
             <span className="inline-flex items-center gap-1.5">
               <Star size={15} weight="fill" className="text-accent shrink-0" />
               <span className="font-semibold text-foreground">{seller.rating.average.toFixed(1)}</span>
-              <span>({pluralize(seller.rating.count, "review")})</span>
+              <span>({tDynamic("reviewCount", { count: seller.rating.count })})</span>
             </span>
           )}
         </div>

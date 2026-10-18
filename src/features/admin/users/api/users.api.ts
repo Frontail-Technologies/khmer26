@@ -6,6 +6,7 @@ import type {
   AdminAccountStatus,
   AdminVerificationState,
 } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface AdminUsersQueryParams {
   page?: number;
@@ -17,11 +18,13 @@ export interface AdminUsersQueryParams {
   [key: string]: string | number | boolean | undefined | null;
 }
 
-export function normalizeUserListItem(u: Record<string, unknown>): AdminUserListItem {
-  if (u.name && u.accountType && u.verificationStatus && u.joinedAt) {
-    return u as unknown as AdminUserListItem;
-  }
+function formatOptionalDate(value: unknown): string | undefined {
+  if (!value) return undefined;
+  const formatted = formatAdminDateTime(String(value));
+  return formatted === '—' ? String(value) : formatted;
+}
 
+export function normalizeUserListItem(u: Record<string, unknown>): AdminUserListItem {
   const status: AdminAccountStatus =
     u.status === 'banned' || u.status === 'suspended'
       ? 'suspended'
@@ -36,7 +39,9 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
 
   const verification = u.verification as Record<string, unknown> | undefined;
   const verificationStatus: AdminVerificationState =
-    verification?.status === 'approved'
+    u.verificationStatus === 'verified' || u.verificationStatus === 'pending' || u.verificationStatus === 'unverified'
+      ? u.verificationStatus
+      : verification?.status === 'approved'
       ? 'verified'
       : verification?.status === 'pending' || verification?.status === 'in_review'
       ? 'pending'
@@ -44,11 +49,14 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
       ? 'verified'
       : 'unverified';
 
-  const accountType: AdminAccountType = (sellerProfile?.sellerType || u.sellerType)
-    ? ((sellerProfile?.sellerType || u.sellerType) as AdminAccountType)
-    : u.role === 'admin'
-    ? 'business'
-    : 'buyer';
+  const explicitAccountType = u.accountType as AdminAccountType | undefined;
+  const sellerAccountType = sellerProfile?.sellerType || u.sellerType;
+  const accountType: AdminAccountType = explicitAccountType
+    ?? (sellerAccountType
+      ? (sellerAccountType as AdminAccountType)
+      : u.role === 'admin'
+      ? 'business'
+      : 'buyer');
 
   return {
     id: String(u.id),
@@ -59,8 +67,8 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
     role: (u.role as 'user' | 'admin') || 'user',
     accountType,
     businessName: (sellerProfile?.shopName || u.shopName) as string | undefined,
-    location: provinceName || '',
-    province: provinceName || '',
+    location: (u.location as string) || provinceName || '',
+    province: provinceName || (u.location as string) || '',
     listingsCount: Number(
       u.listingCount ??
       u.listingsCount ??
@@ -68,36 +76,26 @@ export function normalizeUserListItem(u: Record<string, unknown>): AdminUserList
       (u.listingStats as Record<string, unknown> | undefined)?.total ??
       0
     ),
-    joinedAt: u.createdAt
-      ? new Date(u.createdAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '',
+    joinedAt: formatOptionalDate(u.createdAt || u.joinedAt) || '',
     verificationStatus,
     status,
     reportsCount: Number(u.reportCount ?? u.reportsCount ?? 0),
-    lastActiveAt: u.lastActiveAt
-      ? new Date(u.lastActiveAt as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : undefined,
+    lastActiveAt: formatOptionalDate(u.lastActiveAt),
     rating: Number(u.rating || 0),
     reviewsCount: Number(u.reviewsCount || 0),
   };
 }
 
 export function normalizeUserDetail(u: Record<string, unknown>): AdminUserDetail {
-  if (
-    u.name &&
-    u.accountType &&
-    u.verificationStatus &&
-    Array.isArray(u.recentListings) &&
-    Array.isArray(u.accountHistory)
-  ) {
-    return u as unknown as AdminUserDetail;
-  }
-
   const base = normalizeUserListItem(u);
   const rawListings = (u.recentListings || u.listings || []) as Array<Record<string, unknown>>;
   const recentListings = rawListings.map((l) => {
     const cat = l.category as Record<string, unknown> | string | undefined;
-    const catName = typeof cat === 'object' ? (cat?.nameEn as string) : typeof cat === 'string' ? cat : 'General';
+    const catName = typeof cat === 'object'
+      ? (cat?.nameEn as string)
+      : typeof cat === 'string'
+      ? cat
+      : (l.categoryName as string) || 'General';
     return {
       id: String(l.id),
       title: (l.title as string) || 'Listing',
@@ -105,7 +103,7 @@ export function normalizeUserDetail(u: Record<string, unknown>): AdminUserDetail
       price: Number(l.price) || 0,
       currency: (l.currency as string) || 'USD',
       status: (l.status as string) || 'active',
-      createdAt: l.createdAt ? new Date(l.createdAt as string).toLocaleDateString() : 'Recently',
+      createdAt: l.createdAt ? formatAdminDateTime(l.createdAt as string) : 'Recently',
     };
   });
 
@@ -125,9 +123,9 @@ export function normalizeUserDetail(u: Record<string, unknown>): AdminUserDetail
     soldListingsCount: Number(u.soldListingsCount || 0),
     totalSalesVolume: (u.totalSalesVolume as string) || undefined,
     verifiedAt: rawVerif?.reviewedAt
-      ? new Date(rawVerif.reviewedAt as string).toLocaleDateString()
+      ? formatAdminDateTime(rawVerif.reviewedAt as string)
       : u.verifiedAt
-      ? new Date(u.verifiedAt as string).toLocaleDateString()
+      ? formatAdminDateTime(u.verifiedAt as string)
       : undefined,
     verification: rawVerif
       ? {
@@ -152,29 +150,29 @@ export function normalizeUserDetail(u: Record<string, unknown>): AdminUserDetail
       : null,
     assignedModerator: u.assignedModerator as string | undefined,
     restrictionReason: u.restrictionReason as string | undefined,
-    accountHistory: rawHistory.map((h) => ({
-      id: String(h.id || Math.random()),
+    accountHistory: rawHistory.map((h, index) => ({
+      id: String(h.id ?? `history-${index}`),
       action: (h.action as string) || 'Account Updated',
       actor: (h.actor as string) || 'System',
-      timestamp: (h.timestamp || h.createdAt ? new Date((h.timestamp || h.createdAt) as string).toLocaleDateString() : '—') as string,
+      timestamp: (h.timestamp || h.createdAt ? formatAdminDateTime((h.timestamp || h.createdAt) as string) : '—') as string,
       note: (h.note || h.reason) as string | undefined,
     })),
     recentListings,
-    recentReviews: rawReviews.map((r) => {
+    recentReviews: rawReviews.map((r, index) => {
       const reviewer = r.reviewer as Record<string, unknown> | undefined;
       return {
-        id: String(r.id || Math.random()),
+        id: String(r.id ?? `review-${index}`),
         authorName: (r.authorName || (typeof reviewer?.email === 'string' ? reviewer.email.split('@')[0] : 'Customer')) as string,
-        rating: Number(r.rating || 5),
+        rating: Number(r.rating ?? 0),
         comment: (r.comment as string) || '',
-        createdAt: r.createdAt ? new Date(r.createdAt as string).toLocaleDateString() : '—',
+        createdAt: r.createdAt ? formatAdminDateTime(r.createdAt as string) : '—',
       };
     }),
-    relatedReports: rawReports.map((r) => ({
-      id: String(r.id || Math.random()),
+    relatedReports: rawReports.map((r, index) => ({
+      id: String(r.id ?? `report-${index}`),
       reason: (r.reason as string) || 'Report',
       status: (r.status as string) || 'pending',
-      createdAt: r.createdAt ? new Date(r.createdAt as string).toLocaleDateString() : '—',
+      createdAt: r.createdAt ? formatAdminDateTime(r.createdAt as string) : '—',
       reporterName: String(r.reporterName || (r as Record<string, unknown>).reporter_name || 'User'),
     })),
   };

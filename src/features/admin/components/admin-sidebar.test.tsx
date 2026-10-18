@@ -26,4 +26,47 @@ describe('<AdminSidebar />', () => {
     expect(screen.getByText('Promotions')).toBeInTheDocument();
     expect(screen.getByText('View Marketplace')).toBeInTheDocument();
   });
+
+  it('hides labels and uses compact branding when collapsed', () => {
+    const { container } = renderWithProviders(
+      <SidebarProvider defaultOpen={false}>
+        <AdminSidebar />
+      </SidebarProvider>
+    );
+
+    expect(screen.getByText('K26')).toHaveClass(
+      'group-data-[collapsible=icon]:inline-flex'
+    );
+    expect(screen.getByText('Listings')).toHaveClass(
+      'group-data-[collapsible=icon]:hidden'
+    );
+    expect(screen.getByText('Reports')).toHaveClass(
+      'group-data-[collapsible=icon]:hidden'
+    );
+    expect(screen.getByText('Content Management')).toHaveClass(
+      'group-data-[collapsible=icon]:hidden'
+    );
+    expect(screen.getByText('View Marketplace')).toHaveClass(
+      'group-data-[collapsible=icon]:hidden'
+    );
+
+    const sidebarMenus = container.querySelectorAll('[data-sidebar="menu"]');
+    expect(sidebarMenus.length).toBeGreaterThan(0);
+    sidebarMenus.forEach((menu) => {
+      expect(menu).toHaveClass('group-data-[collapsible=icon]:items-center');
+    });
+
+    expect(screen.getByText('Listings').closest('a')).toHaveAttribute(
+      'href',
+      '/admin/listings'
+    );
+    expect(screen.getByText('Reports').closest('a')).toHaveAttribute(
+      'href',
+      '/admin/reports'
+    );
+    expect(screen.getByText('Content Management').closest('a')).toHaveAttribute(
+      'href',
+      '/admin/content/homepage'
+    );
+  });
 });

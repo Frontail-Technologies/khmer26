@@ -46,6 +46,7 @@ import {
   useUpdateListing,
 } from "../hooks/listings.mutations"
 import type { AdminListing, AdminListingStatus } from "../types"
+import { ModerationKeywordNotice } from "@/features/content/components/moderation-keyword-notice"
 
 interface ListingModerationPanelProps {
   listing: AdminListing
@@ -150,6 +151,7 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
         </CardHeader>
 
         <CardContent className="p-4 sm:p-5 space-y-4">
+          <ModerationKeywordNotice matches={listing.moderationMatches ?? []} />
           <div className="space-y-3 text-xs">
             <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
               <span className="text-muted-foreground">Current Status</span>
@@ -220,7 +222,7 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Safety Assessment</span>
                 <span
-                  className={`font-bold uppercase text-[10px] ${
+                  className={`font-bold uppercase text-2xs ${
                     listing.riskLevel === "low"
                       ? "text-primary"
                       : listing.riskLevel === "medium"
@@ -323,7 +325,7 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
               </div>
               <p className="font-semibold">{listing.rejectionReason}</p>
               {listing.rejectionNote && (
-                <p className="text-[11px] text-destructive/80">&ldquo;{listing.rejectionNote}&rdquo;</p>
+                <p className="text-xxs text-destructive/80">&ldquo;{listing.rejectionNote}&rdquo;</p>
               )}
             </div>
           )}

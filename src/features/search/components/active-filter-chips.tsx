@@ -1,9 +1,13 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+import { useLocale, useTranslations } from "next-intl"
+
 import { X } from "@phosphor-icons/react"
 import type { CategoryField } from "@/features/categories/api/categories.api"
 import { useCommunes, useDistricts, useProvinces } from "@/features/locations/api/locations.queries"
 import { applyLocationChange, type SearchFilters } from "../lib/search-filters"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface ActiveFilterChipsProps {
   filters: SearchFilters
@@ -20,15 +24,18 @@ interface Chip {
   onRemove: () => void
 }
 
-function fieldChipLabel(definition: CategoryField, value: string): string {
+function fieldChipLabel(definition: CategoryField, value: string, locale: "en" | "km"): string {
   const { field } = definition
+  const label = locale === "km" && field.labelKm?.trim() ? field.labelKm : field.labelEn
+  const option = field.options.find((item) => item.value === value)
+  const optionLabel = option && locale === "km" && option.labelKm?.trim() ? option.labelKm : option?.labelEn
   switch (field.fieldType) {
     case "select":
-      return `${field.labelEn}: ${field.options.find((o) => o.value === value)?.labelEn ?? value}`
+      return `${label}: ${optionLabel ?? value}`
     case "boolean":
-      return value === "true" ? field.labelEn : `${field.labelEn}: No`
+      return value === "true" ? label : `${label}: ${locale === "km" ? "ទេ" : "No"}`
     default:
-      return `${field.labelEn}: ${value}`
+      return `${label}: ${value}`
   }
 }
 
@@ -39,6 +46,10 @@ export function ActiveFilterChips({
   definitions,
   categoryChipLabel,
 }: ActiveFilterChipsProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const getLocalizedName = useLocalizedName()
+  const locale = useLocale() as "en" | "km"
   const provinces = useProvinces()
   const districts = useDistricts(filters.provinceId)
   const communes = useCommunes(filters.districtId)
@@ -48,7 +59,7 @@ export function ActiveFilterChips({
   if (filters.q) {
     chips.push({
       key: "q",
-      label: `Keyword: ${filters.q}`,
+      label: tDynamic("filterValue", { label: tGenerated("keyword"), value: filters.q }),
       onRemove: () => onChange({ ...filters, q: undefined }),
     })
   }
@@ -56,7 +67,7 @@ export function ActiveFilterChips({
   if (categoryChipLabel && filters.category) {
     chips.push({
       key: "category",
-      label: `Category: ${categoryChipLabel}`,
+      label: tDynamic("filterValue", { label: tGenerated("category"), value: categoryChipLabel }),
       onRemove: () => onChange({ ...filters, category: undefined, fields: {} }),
     })
   }
@@ -64,28 +75,28 @@ export function ActiveFilterChips({
   if (filters.provinceId !== undefined) {
     chips.push({
       key: "province",
-      label: provinces.data?.find((p) => p.id === filters.provinceId)?.nameEn ?? "Province",
+      label: (() => { const item = provinces.data?.find((p) => p.id === filters.provinceId); return item ? getLocalizedName(item) : tGenerated("province") })(),
       onRemove: () => onChange(applyLocationChange(filters, { provinceId: null })),
     })
   }
   if (filters.districtId !== undefined) {
     chips.push({
       key: "district",
-      label: districts.data?.find((d) => d.id === filters.districtId)?.nameEn ?? "District",
+      label: (() => { const item = districts.data?.find((d) => d.id === filters.districtId); return item ? getLocalizedName(item) : tGenerated("district") })(),
       onRemove: () => onChange(applyLocationChange(filters, { districtId: null })),
     })
   }
   if (filters.communeId !== undefined) {
     chips.push({
       key: "commune",
-      label: communes.data?.find((c) => c.id === filters.communeId)?.nameEn ?? "Commune",
+      label: (() => { const item = communes.data?.find((c) => c.id === filters.communeId); return item ? getLocalizedName(item) : tGenerated("commune") })(),
       onRemove: () => onChange(applyLocationChange(filters, { communeId: null })),
     })
   }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     const min = filters.minPrice !== undefined ? filters.minPrice.toLocaleString() : "0"
-    const max = filters.maxPrice !== undefined ? filters.maxPrice.toLocaleString() : "Any"
+    const max = filters.maxPrice !== undefined ? filters.maxPrice.toLocaleString() : tGenerated("any")
     chips.push({
       key: "price",
       label: `${min} – ${max}${filters.currency ? ` ${filters.currency}` : ""}`,
@@ -106,7 +117,7 @@ export function ActiveFilterChips({
       if (!definition) continue
       chips.push({
         key: `field-${name}`,
-        label: fieldChipLabel(definition, value),
+        label: fieldChipLabel(definition, value, locale),
         onRemove: () => {
           const fields = { ...filters.fields }
           delete fields[name]
@@ -130,7 +141,7 @@ export function ActiveFilterChips({
             type="button"
             onClick={chip.onRemove}
             className="rounded-full p-0.5 text-primary/70 transition-colors hover:bg-primary/20 hover:text-primary focus:outline-none"
-            aria-label={`Remove filter ${chip.label}`}
+            aria-label={tDynamic("removeFilter", { label: chip.label })}
           >
             <X size={11} weight="bold" />
           </button>
@@ -141,7 +152,7 @@ export function ActiveFilterChips({
         onClick={onClearAll}
         className="shrink-0 text-xs font-bold text-primary hover:text-primary/80 transition-colors ml-1 px-1.5 py-0.5"
       >
-        Clear all
+        <LocalizedText id="clearAll" />
       </button>
     </div>
   )

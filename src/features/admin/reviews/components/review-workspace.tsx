@@ -257,7 +257,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                 <span>{tab.label}</span>
                 <Badge
                   variant="outline"
-                  className="px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
+                  className="px-1.5 py-0 h-4 text-2xs font-bold rounded-md border bg-background/80 text-muted-foreground border-border/60"
                 >
                   {tab.count}
                 </Badge>
@@ -380,7 +380,6 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No reviews found"
-                  description="Try clearing search or filter parameters."
                 />
               )}
             </TableBody>
@@ -464,13 +463,13 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                   {rev.comment}
                 </p>
 
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                <div className="flex items-center justify-between text-xxs text-muted-foreground pt-1 border-t border-border/40">
                   <div className="space-y-0.5 truncate pr-2">
                     <span className="font-medium text-foreground block truncate">
                       {rev.reviewer.name} → {rev.seller.businessName || rev.seller.name}
                     </span>
                     {rev.listing && (
-                      <span className="text-[10px] text-primary block truncate">
+                      <span className="text-2xs text-primary block truncate">
                         {rev.listing.title}
                       </span>
                     )}
@@ -479,13 +478,13 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                     {rev.reportsCount > 0 && (
                       <Badge
                         variant="outline"
-                        className="text-[9px] font-bold px-1 py-0 h-4 border-destructive/30 text-destructive bg-destructive/5"
+                        className="text-3xs font-bold px-1 py-0 h-4 border-destructive/30 text-destructive bg-destructive/5"
                       >
                         <WarningCircle size={10} className="mr-0.5" weight="fill" />
                         {rev.reportsCount}
                       </Badge>
                     )}
-                    <span className="text-[10px] whitespace-nowrap">{rev.createdAt.split(" ")[0]}</span>
+                    <span className="text-2xs whitespace-nowrap">{rev.createdAt.split(" ")[0]}</span>
                   </div>
                 </div>
               </div>
@@ -493,7 +492,6 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
           ) : (
             <DataTableEmpty
               title="No reviews found"
-              description="Try clearing search or filter parameters."
             />
           )}
         </div>
@@ -518,7 +516,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
             <div className="flex items-center gap-2 text-destructive font-semibold">
               <EyeSlash size={20} />
               <DialogTitle className="text-sm sm:text-base">
-                Hide Review ({reviewToHide?.id})
+                Hide Review {reviewToHide?.displayId}
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs text-muted-foreground pt-1 leading-relaxed">
@@ -528,7 +526,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
 
           {reviewToHide && (
             <div className="p-3 rounded-lg bg-muted/40 border border-border/60 text-xs text-foreground space-y-1 my-2">
-              <div className="font-semibold text-[11px] text-muted-foreground">
+              <div className="font-semibold text-xxs text-muted-foreground">
                 Review by {reviewToHide.reviewer.name} for {reviewToHide.seller.businessName || reviewToHide.seller.name}:
               </div>
               <p className="italic text-muted-foreground line-clamp-2">

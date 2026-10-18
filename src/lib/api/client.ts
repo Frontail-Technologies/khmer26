@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '@/lib/api/base-url';
+
 export interface ApiErrorPayload {
   code: string;
   message: string;
@@ -35,6 +37,7 @@ export interface ApiResponse<T> {
     limit: number;
     total: number;
     totalPages: number;
+    [key: string]: unknown;
   };
   error?: ApiErrorPayload;
 }
@@ -44,15 +47,12 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3001/api/v1`
-    : 'http://localhost:3001/api/v1');
+const API_BASE_URL = getApiBaseUrl();
 
 const CSRF_STORAGE_KEY = 'k26_csrf';
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 let csrfTokenCache: string | null = null;
+let csrfPromise: Promise<string | null> | null = null;
 let refreshPromise: Promise<boolean> | null = null;
 
 function getCookie(name: string): string | null {
@@ -62,14 +62,14 @@ function getCookie(name: string): string | null {
 }
 
 function getStoredCsrfToken(): string | null {
-  if (csrfTokenCache) return csrfTokenCache;
+  if (typeof window === 'undefined') return csrfTokenCache;
   const cookieToken = getCookie(CSRF_STORAGE_KEY);
   if (cookieToken) {
     csrfTokenCache = cookieToken;
     return cookieToken;
   }
-  if (typeof window === 'undefined') return null;
   const storedToken = window.sessionStorage.getItem(CSRF_STORAGE_KEY);
+  if (csrfTokenCache && csrfTokenCache === storedToken) return csrfTokenCache;
   csrfTokenCache = storedToken;
   return storedToken;
 }
@@ -97,10 +97,14 @@ function buildApiUrl(endpoint: string): string {
   return endpoint.startsWith('http') ? endpoint : `${API_BASE_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`;
 }
 
+export function getApiRequestUrl(endpoint: string): string {
+  return buildApiUrl(endpoint);
+}
+
 function csrfRequired(endpoint: string, method: string): boolean {
   if (!UNSAFE_METHODS.has(method.toUpperCase())) return false;
   const path = endpoint.startsWith('http') ? new URL(endpoint).pathname : `/${endpoint.replace(/^\//, '')}`;
-  return !['/auth/login', '/auth/register', '/auth/register/verify', '/auth/refresh', '/auth/csrf'].some((publicPath) =>
+  return !['/auth/login', '/auth/register', '/auth/register/verify', '/auth/refresh', '/auth/csrf', '/support/contact'].some((publicPath) =>
     path.endsWith(publicPath)
   );
 }
@@ -145,21 +149,48 @@ async function refreshAuthSession(): Promise<boolean> {
 async function ensureCsrfToken(): Promise<string | null> {
   const existingToken = getStoredCsrfToken();
   if (existingToken) return existingToken;
+  if (csrfPromise) return csrfPromise;
 
-  const res = await fetch(buildApiUrl('/auth/csrf'), {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-    },
+  csrfPromise = (async () => {
+    let res = await fetch(buildApiUrl('/auth/csrf'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (res.status === 401) {
+      const refreshed = await refreshAuthSession();
+      if (!refreshed) return null;
+
+      const refreshToken = getStoredCsrfToken();
+      if (refreshToken) return refreshToken;
+
+      res = await fetch(buildApiUrl('/auth/csrf'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+    }
+
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as unknown;
+    const token = csrfFromResponse(data);
+    setStoredCsrfToken(token);
+    return token || null;
+  })().finally(() => {
+    csrfPromise = null;
   });
 
-  if (!res.ok) return null;
+  return csrfPromise;
+}
 
-  const data = (await res.json()) as unknown;
-  const token = csrfFromResponse(data);
-  setStoredCsrfToken(token);
-  return token || null;
+export async function getCsrfTokenForRequest(): Promise<string | null> {
+  return ensureCsrfToken();
 }
 
 export async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
@@ -221,13 +252,30 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
     let data = isJson ? await res.json() : null;
 
     if (!res.ok) {
-      const errorPayload: ApiErrorPayload = data?.error || {
+      let errorPayload: ApiErrorPayload = data?.error || {
         code: `HTTP_${res.status}`,
         message: data?.message || res.statusText || 'Request failed',
         requestId: data?.requestId,
       };
-      if (errorPayload.code === 'CSRF_INVALID') {
+      if (errorPayload.code === 'CSRF_INVALID' && csrfRequired(endpoint, method)) {
         clearStoredCsrfToken();
+        const csrfToken = await ensureCsrfToken();
+        if (csrfToken) {
+          res = await fetch(url, await buildRequestConfig());
+          isJson = res.headers.get('content-type')?.includes('application/json');
+          data = isJson ? await res.json() : null;
+
+          if (res.ok) {
+            setStoredCsrfToken(csrfFromResponse(data));
+            return data as ApiResponse<T>;
+          }
+
+          errorPayload = data?.error || {
+            code: `HTTP_${res.status}`,
+            message: data?.message || res.statusText || 'Request failed',
+            requestId: data?.requestId,
+          };
+        }
       }
 
       // The backend's UnauthorizedError always reports the coarse `UNAUTHORIZED`

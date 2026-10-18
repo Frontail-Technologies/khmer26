@@ -3,14 +3,12 @@ import { cn } from "@/lib/utils"
 
 interface AccountPageHeaderProps {
   title: string
-  description?: string
   action?: React.ReactNode
   className?: string
 }
 
 export function AccountPageHeader({
   title,
-  description,
   action,
   className,
 }: AccountPageHeaderProps) {
@@ -21,15 +19,10 @@ export function AccountPageHeader({
         className
       )}
     >
-      <div className="space-y-1">
+      <div>
         <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
           {title}
         </h1>
-        {description && (
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            {description}
-          </p>
-        )}
       </div>
       {action && <div className="flex items-center gap-2">{action}</div>}
     </div>

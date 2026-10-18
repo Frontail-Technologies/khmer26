@@ -115,7 +115,10 @@ export function ReportedChatsWorkspace({
           item.reporterName.toLowerCase().includes(q) ||
           item.participantA.name.toLowerCase().includes(q) ||
           item.participantB.name.toLowerCase().includes(q)
-        const matchesId = item.id.toLowerCase().includes(q)
+        const matchesId =
+          item.displayId.toLowerCase().includes(q) ||
+          item.conversationDisplayId.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q)
         const matchesReason = item.reason.toLowerCase().includes(q)
         const matchesMessage = item.reportedMessageText.toLowerCase().includes(q)
         if (!matchesUser && !matchesId && !matchesReason && !matchesMessage) {
@@ -179,7 +182,7 @@ export function ReportedChatsWorkspace({
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       tab.warning
                         ? "bg-accent/10 text-accent border-accent/30"
                         : isActive
@@ -287,7 +290,6 @@ export function ReportedChatsWorkspace({
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No reported chats found"
-                  description="Try adjusting your search criteria or active tab."
                 />
               )}
             </TableBody>
@@ -315,7 +317,7 @@ export function ReportedChatsWorkspace({
                         <span className="text-muted-foreground font-normal">↔</span>
                         <span>{item.participantB.name}</span>
                       </div>
-                      <span className="text-[11px] text-muted-foreground block truncate">
+                      <span className="text-xxs text-muted-foreground block truncate">
                         &quot;{item.reportedMessageText}&quot;
                       </span>
                     </div>
@@ -323,10 +325,10 @@ export function ReportedChatsWorkspace({
                   </div>
 
                   <div className="flex items-center justify-between text-xs pt-1">
-                    <Badge variant="outline" className="text-[10px] font-medium border-destructive/30 text-destructive bg-destructive/5">
+                    <Badge variant="outline" className="text-2xs font-medium border-destructive/30 text-destructive bg-destructive/5">
                       {item.reason}
                     </Badge>
-                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                    <span className="text-xxs text-muted-foreground whitespace-nowrap">
                       {item.createdAt}
                     </span>
                   </div>
@@ -348,7 +350,6 @@ export function ReportedChatsWorkspace({
           ) : (
             <DataTableEmpty
               title="No reported chats found"
-              description="Try adjusting your search criteria or active tab."
             />
           )}
         </div>

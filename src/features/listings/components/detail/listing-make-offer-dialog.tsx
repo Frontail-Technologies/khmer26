@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { CheckCircle, CurrencyDollar, PaperPlaneTilt } from "@phosphor-icons/react"
@@ -16,6 +20,7 @@ import {
 import { formatPriceWithCurrency } from "@/lib/formatters/currency"
 import { createOffer, startConversation } from "../../api/listing-detail.api"
 import { describeError } from "../../hooks/use-start-conversation"
+import { useIntlLocale } from "@/lib/i18n/use-intl-locale"
 
 interface ListingMakeOfferDialogProps {
   open: boolean
@@ -36,6 +41,9 @@ export function ListingMakeOfferDialog({
   askingPrice,
   currency,
 }: ListingMakeOfferDialogProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const intlLocale = useIntlLocale()
   const [offerPrice, setOfferPrice] = useState("")
 
   const amount = Number(offerPrice)
@@ -68,11 +76,13 @@ export function ListingMakeOfferDialog({
         <DialogHeader>
           <div className="flex items-center gap-2 text-primary">
             <CurrencyDollar size={20} weight="bold" />
-            <DialogTitle>Make an offer</DialogTitle>
+            <DialogTitle><LocalizedText id="makeAnOffer" /></DialogTitle>
           </div>
           <DialogDescription>
-            Send your offer for &quot;{listingTitle}&quot;. Asking price:{" "}
-            <strong>{formatPriceWithCurrency(askingPrice, currency)}</strong>
+            {tDynamic("offerForAsking", {
+              title: listingTitle,
+              price: formatPriceWithCurrency(askingPrice, currency, intlLocale),
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -82,20 +92,22 @@ export function ListingMakeOfferDialog({
               <CheckCircle size={28} weight="fill" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-base font-bold text-foreground">Offer sent</h4>
+              <h4 className="text-base font-bold text-foreground"><LocalizedText id="offerSent" /></h4>
               <p className="text-xs text-muted-foreground max-w-xs">
-                Your offer of {formatPriceWithCurrency(amount, currency)} was sent to the seller.
+                {tDynamic("offerSentToSeller", {
+                  amount: formatPriceWithCurrency(amount, currency, intlLocale),
+                })}
               </p>
             </div>
             <Button onClick={() => handleClose(false)} className="mt-2 h-9 text-xs font-semibold">
-              Done
+              <LocalizedText id="done" />
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="offer-amount" className="text-xs font-semibold text-foreground">
-                Your offer ({currency})
+                {tDynamic("yourOfferCurrency", { currency })}
               </label>
               <Input
                 id="offer-amount"
@@ -116,7 +128,7 @@ export function ListingMakeOfferDialog({
                     onClick={() => setOfferPrice(String(Math.round(askingPrice * (1 - percentage / 100))))}
                     className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   >
-                    {percentage}% off
+                    {tDynamic("percentOff", { percent: percentage })}
                   </button>
                 ))}
               </div>
@@ -130,11 +142,11 @@ export function ListingMakeOfferDialog({
 
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => handleClose(false)}>
-                Cancel
+                <LocalizedText id="cancel" />
               </Button>
               <Button type="submit" disabled={!isValid || submit.isPending} className="gap-1.5">
                 <PaperPlaneTilt size={16} weight="bold" />
-                {submit.isPending ? "Sending…" : "Send Offer"}
+                {submit.isPending ? tGenerated("sending_cf7655") : tGenerated("sendOffer")}
               </Button>
             </DialogFooter>
           </form>

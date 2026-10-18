@@ -4,11 +4,11 @@ function parseDate(value?: string | Date | null): Date | null {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale: string = "en-US"): string {
   try {
     const date = parseDate(dateString)
     if (!date) return "—"
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -18,26 +18,19 @@ export function formatDate(dateString: string): string {
   }
 }
 
+const ADMIN_DATE_FORMAT = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" })
+const ADMIN_TIME_FORMAT = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" })
+
+/** Admin date such as "22 June 2020". */
 export function formatAdminDate(value?: string | Date | null): string {
   const date = parseDate(value)
-  if (!date) return "—"
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date)
+  return date ? ADMIN_DATE_FORMAT.format(date) : "—"
 }
 
+/** Admin timestamp such as "22 June 2020, 3:45 PM". */
 export function formatAdminDateTime(value?: string | Date | null): string {
   const date = parseDate(value)
-  if (!date) return "—"
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date)
+  return date ? `${ADMIN_DATE_FORMAT.format(date)}, ${ADMIN_TIME_FORMAT.format(date)}` : "—"
 }
 
 export function formatRelativeTime(dateString: string): string {

@@ -5,7 +5,9 @@ export interface HomeSection {
   id: string;
   sectionKey: string;
   title: string;
+  titleKm?: string | null;
   subtitle: string | null;
+  subtitleKm?: string | null;
   isEnabled: boolean;
   sortOrder: number;
   itemCount: number | null;
@@ -14,18 +16,21 @@ export interface HomeSection {
 export interface HomeBanner {
   id: string;
   title: string;
+  titleKm?: string | null;
   placement: string;
   imageR2Key: string | null;
   mobileImageR2Key: string | null;
   destinationType: string;
   destinationValue: string | null;
   destinationLabel: string | null;
+  destinationLabelKm?: string | null;
   sortOrder: number;
 }
 
 export interface HomeFeaturedSection {
   id: string;
   title: string;
+  titleKm?: string | null;
   slug: string;
   sourceType: string;
   sortMode: string;
@@ -33,11 +38,14 @@ export interface HomeFeaturedSection {
   isActive: boolean;
   sortOrder: number;
   itemLimit: number;
+  categoryIds: string[];
+  listings: HomeListing[];
 }
 
 export interface HomePopularCategory {
   id: string;
   name: string;
+  nameKm?: string | null;
   slug: string;
   parentId: string | null;
   imageR2Key: string | null;
@@ -47,6 +55,7 @@ export interface HomePopularCategory {
 export interface HomeSafetyTip {
   id: string;
   tip: string;
+  tipKm?: string | null;
   context: string;
   isActive: boolean;
   sortOrder: number;

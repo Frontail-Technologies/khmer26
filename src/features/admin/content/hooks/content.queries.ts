@@ -6,12 +6,21 @@ import {
   getAdminBanners,
   getAdminFeaturedSections,
   getAdminSafetyTips,
+  getAdminContentPages,
+  getAdminModerationKeywords,
 } from '../api/content.api';
 
 export function useAdminHomepageConfig() {
   return useQuery({
     queryKey: adminKeys.content.homeConfig(),
     queryFn: getAdminHomepageConfig,
+  });
+}
+
+export function useAdminModerationKeywords() {
+  return useQuery({
+    queryKey: adminKeys.content.moderationKeywords(),
+    queryFn: getAdminModerationKeywords,
   });
 }
 
@@ -40,5 +49,12 @@ export function useAdminSafetyTips() {
   return useQuery({
     queryKey: adminKeys.content.safetyTips(),
     queryFn: getAdminSafetyTips,
+  });
+}
+
+export function useAdminContentPages() {
+  return useQuery({
+    queryKey: adminKeys.content.pages(),
+    queryFn: getAdminContentPages,
   });
 }

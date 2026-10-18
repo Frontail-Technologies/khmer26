@@ -1,3 +1,4 @@
+import { LocalizedText } from "@/components/i18n/localized-text"
 import Link from "next/link"
 import {
   Breadcrumb,
@@ -17,13 +18,13 @@ export function SellerBreadcrumbs({ sellerName }: SellerBreadcrumbsProps) {
     <Breadcrumb className="hidden sm:block py-2.5 text-xs sm:text-sm">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link href="/">Home</Link>} />
+          <BreadcrumbLink render={<Link href="/"><LocalizedText id="home" /></Link>} />
         </BreadcrumbItem>
 
         <BreadcrumbSeparator />
 
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link href="/search">Marketplace</Link>} />
+          <BreadcrumbLink render={<Link href="/search"><LocalizedText id="marketplace" /></Link>} />
         </BreadcrumbItem>
 
         <BreadcrumbSeparator />

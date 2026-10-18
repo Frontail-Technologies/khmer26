@@ -2,6 +2,7 @@ export type AdminReviewStatus = "visible" | "hidden"
 
 export interface AdminReview {
   id: string
+  displayId: string
   rating: number
   comment: string
   createdAt: string
@@ -20,8 +21,8 @@ export interface AdminReview {
     name: string
     businessName?: string
     avatarUrl?: string
-    rating: number
-    totalReviewsCount: number
+    rating?: number
+    totalReviewsCount?: number
   }
   listing?: {
     id: string

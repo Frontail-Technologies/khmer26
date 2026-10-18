@@ -1,20 +1,27 @@
+import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 import { AuthCard } from "@/features/auth/components/auth-card"
 import { AuthHeader } from "@/features/auth/components/auth-header"
 import { RegisterForm } from "@/features/auth/components/register-form"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Create Account",
-  description: "Create your free Khmer26 account to start posting ads and connecting with buyers across Cambodia.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.register")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function RegisterPage() {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
   return (
-    <AuthCard maxWidth="md" backHref="/" backLabel="Back to marketplace">
+    <AuthCard maxWidth="md" backHref="/" backLabel={tAuth("backToMarketplace")}>
       <AuthHeader
-        eyebrow="JOIN KHMER26"
-        title="Create your Khmer26 account"
-        subtitle="Join thousands of buyers and sellers across Cambodia. Post ads, save your favorites, and get more opportunities."
+        eyebrow={tAuth("eyebrowJoin")}
+        title={tGenerated("createYourKhmer26Account")}
+        subtitle={tAuth("subtitleRegister")}
         align="left"
       />
       <RegisterForm />

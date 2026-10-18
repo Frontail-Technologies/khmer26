@@ -48,7 +48,7 @@ export function SubscriptionWorkspace({
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"

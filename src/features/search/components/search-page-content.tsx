@@ -12,8 +12,13 @@ import { carryFiltersToCategory } from "../lib/carry-filters"
 import type { CategoryNavData } from "./filter-panel"
 import { ResultsHeader } from "./results-header"
 import { SearchResultsView } from "./search-results-view"
+import { useLocalizedName } from "@/lib/i18n/localized"
+import { useTranslations } from "next-intl"
 
 export function SearchPageContent() {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const getLocalizedName = useLocalizedName()
   const state = useSearchPageState()
   const { filters, setFilters } = state
   const tree = useCategoryTree()
@@ -41,11 +46,11 @@ export function SearchPageContent() {
     [index, path, filters, setFilters, queryClient]
   )
 
-  const title = filters.q ? `Results for “${filters.q}”` : "All Marketplace Listings"
+  const title = filters.q ? tDynamic("resultsFor", { query: filters.q }) : tGenerated("allMarketplaceListings")
   const breadcrumbs = [
-    { label: "Home", href: "/" },
-    { label: "Search", href: filters.q || node ? "/search" : undefined },
-    ...(node ? [{ label: node.nameEn }] : []),
+    { label: tGenerated("home"), href: "/" },
+    { label: tGenerated("search"), href: filters.q || node ? "/search" : undefined },
+    ...(node ? [{ label: getLocalizedName(node) }] : []),
     ...(filters.q ? [{ label: `“${filters.q}”` }] : []),
   ]
 
@@ -55,7 +60,7 @@ export function SearchPageContent() {
       <SearchResultsView
         state={state}
         categoryNav={categoryNav}
-        categoryChipLabel={filters.category ? (node?.nameEn ?? filters.category) : undefined}
+        categoryChipLabel={filters.category ? (node ? getLocalizedName(node) : filters.category) : undefined}
       />
     </>
   )

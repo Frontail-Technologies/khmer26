@@ -1,8 +1,9 @@
+import { getApiBaseUrl } from '@/lib/api/base-url';
 import { getMediaUrl } from '@/lib/media/get-media-url';
 import { formatListingPrice } from '../lib/listing-detail-format';
 import type { ListingDetail } from './listing-detail.api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ListingMeta {
   title: string;

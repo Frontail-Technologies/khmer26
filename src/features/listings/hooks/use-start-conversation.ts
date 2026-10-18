@@ -1,6 +1,8 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useMutation } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { ApiError } from "@/lib/api/client"
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth"
@@ -13,10 +15,15 @@ export function describeError(err: unknown, fallback: string): string {
 /** Creates (or reuses) the real conversation with the seller. Requires a signed-in user. */
 export function useStartConversation(listingId: string) {
   const requireAuth = useRequireAuth()
+  const t = useTranslations("ui.listings")
+  const router = useRouter()
   const mutation = useMutation({
     mutationFn: () => startConversation(listingId),
-    onSuccess: () => toast.success("Chat started with the seller."),
-    onError: (err) => toast.error(describeError(err, "Couldn't start the chat. Please try again.")),
+    onSuccess: (conversation) => {
+      toast.success(t("chatStarted"))
+      router.push(`/messages/${conversation.id}`)
+    },
+    onError: (err) => toast.error(describeError(err, t("startChatFailed"))),
   })
 
   return {

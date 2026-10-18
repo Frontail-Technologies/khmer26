@@ -5,8 +5,10 @@ export type SubscriptionStatus = "active" | "expired" | "paused"
 export interface SubscriptionPlan {
   id: string
   name: string
+  nameKm: string | null
   tier: SubscriptionPlanTier
   description: string
+  descriptionKm: string | null
   price: number
   currency: string
   billingInterval: "Monthly" | "Annual"

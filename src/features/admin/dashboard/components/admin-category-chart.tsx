@@ -48,7 +48,7 @@ export function AdminCategoryChart() {
             <div key={cat.id || `${cat.name}-${index}`} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="text-foreground">{cat.name}</span>
-                <span className="text-muted-foreground font-medium text-[11px]">
+                <span className="text-muted-foreground font-medium text-xxs">
                   {formatCount(cat.count)} ({cat.percent}%)
                 </span>
               </div>
@@ -63,7 +63,7 @@ export function AdminCategoryChart() {
         </div>
 
         <div className="pt-4 border-t border-border/60 space-y-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+          <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground block">
             Listing Health Status
           </span>
           <div className="h-2 w-full rounded-full bg-muted/60 flex overflow-hidden">

@@ -1,7 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
+import { useCallback, useState } from "react"
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PostAdProgress } from "./post-ad-progress"
@@ -20,6 +25,9 @@ import {
   contactStepSchema,
 } from "../schemas/post-ad-schemas"
 import type { ListingDraft, PostAdStep } from "../types"
+import { useEditableListing } from "../api/post-ad.queries"
+import { useModerationKeywords } from "@/features/content/hooks/content.queries"
+import { findModerationMatches } from "@/features/content/lib/moderation-keywords"
 
 const INITIAL_DRAFT: ListingDraft = {
   categoryId: "",
@@ -34,12 +42,12 @@ const INITIAL_DRAFT: ListingDraft = {
   currency: "USD",
   negotiable: true,
   location: {
-    province: "Phnom Penh",
-    district: "Chamkarmon",
-    label: "Chamkarmon, Phnom Penh",
+    province: "",
+    district: "",
+    label: "",
   },
   contactMethod: "chat",
-  phoneNumber: "+855 12 345 678",
+  phoneNumber: "",
   hidePhoneUntilClick: false,
 }
 
@@ -75,17 +83,80 @@ function getInitialDraft(): { draft: ListingDraft; step: PostAdStep; done: Set<P
   return { draft: INITIAL_DRAFT, step: 1, done: new Set<PostAdStep>() }
 }
 
-export function PostAdWizard() {
-  const [initialData] = useState(getInitialDraft)
+interface PostAdWizardProps {
+  listingId?: string
+}
+
+export function PostAdWizard({ listingId }: PostAdWizardProps) {
+  const listing = useEditableListing(listingId)
+
+  if (listingId && listing.isPending) {
+    return (
+      <div className="rounded-xl border border-border/80 bg-card p-10 text-center text-sm text-muted-foreground">
+        <LocalizedText id="loadingListingEditor" />
+      </div>
+    )
+  }
+
+  if (listingId && (listing.isError || !listing.data)) {
+    return (
+      <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-10 text-center">
+        <p className="text-sm font-semibold text-destructive"><LocalizedText id="weCouldnTOpenThisListingForEditing" /></p>
+        <Button type="button" variant="outline" className="mt-4" onClick={() => listing.refetch()}>
+          <LocalizedText id="tryAgain" />
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <PostAdWizardForm
+      key={listing.data?.id ?? "new-listing"}
+      listingId={listing.data?.id}
+      existingIsDraft={listing.data?.isDraft ?? false}
+      initialDraft={listing.data?.draft}
+    />
+  )
+}
+
+interface PostAdWizardFormProps {
+  listingId?: string
+  existingIsDraft: boolean
+  initialDraft?: ListingDraft
+}
+
+function PostAdWizardForm({ listingId, existingIsDraft, initialDraft }: PostAdWizardFormProps) {
+  const tGenerated = useTranslations("generated")
+  const tPostAd = useTranslations("ui.postAd")
+  const router = useRouter()
+  const [initialData] = useState(() =>
+    initialDraft
+      ? {
+          draft: initialDraft,
+          step: 2 as PostAdStep,
+          done: new Set<PostAdStep>([1, 2, 3, 4, 5]),
+        }
+      : getInitialDraft()
+  )
   const [currentStep, setCurrentStep] = useState<PostAdStep>(initialData.step)
   const [completedSteps, setCompletedSteps] = useState<Set<PostAdStep>>(initialData.done)
   const [draft, setDraft] = useState<ListingDraft>(initialData.draft)
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({})
+  const [photoSessionKey, setPhotoSessionKey] = useState(0)
+  const moderationKeywords = useModerationKeywords()
+  const moderationMatches = findModerationMatches(
+    { title: draft.title, description: draft.description },
+    moderationKeywords.data ?? [],
+  )
 
-  const updateDraft = (updates: Partial<ListingDraft>) => {
+  const updateDraft = useCallback((updates: Partial<ListingDraft>) => {
     setDraft((prev) => ({ ...prev, ...updates }))
     setStepErrors({})
-  }
+  }, [])
+
+  const handlePhotosChange = useCallback((photos: ListingDraft["photos"]) => {
+    updateDraft({ photos })
+  }, [updateDraft])
 
   const validateCurrentStep = (): boolean => {
     setStepErrors({})
@@ -97,7 +168,7 @@ export function PostAdWizard() {
         categoryPath: draft.categoryPath,
       })
       if (!res.success) {
-        setStepErrors({ category: res.error.issues[0]?.message || "Category is required" })
+        setStepErrors({ category: res.error.issues[0]?.message || tPostAd("categoryRequired") })
         return false
       }
       return true
@@ -153,8 +224,6 @@ export function PostAdWizard() {
     if (currentStep === 5) {
       const res = contactStepSchema.safeParse({
         contactMethod: draft.contactMethod,
-        phoneNumber: draft.phoneNumber,
-        hidePhoneUntilClick: draft.hidePhoneUntilClick,
       })
       if (!res.success) {
         const errs: Record<string, string> = {}
@@ -194,7 +263,12 @@ export function PostAdWizard() {
   }
 
   const handleReset = () => {
+    if (listingId) {
+      router.replace("/post-ad")
+      return
+    }
     setDraft(INITIAL_DRAFT)
+    setPhotoSessionKey((key) => key + 1)
     setCurrentStep(1)
     setCompletedSteps(new Set())
     setStepErrors({})
@@ -238,16 +312,18 @@ export function PostAdWizard() {
                   draft={draft}
                   onChange={updateDraft}
                   errors={stepErrors}
+                  moderationMatches={moderationMatches}
                 />
               )}
 
-              {currentStep === 3 && (
+              <div className={currentStep === 3 ? "block" : "hidden"}>
                 <PhotosStep
+                  key={photoSessionKey}
                   photos={draft.photos}
-                  onChange={(photos) => updateDraft({ photos })}
+                  onChange={handlePhotosChange}
                   error={stepErrors.photos}
                 />
-              )}
+              </div>
 
               {currentStep === 4 && (
                 <PriceLocationStep
@@ -268,8 +344,11 @@ export function PostAdWizard() {
               {currentStep === 6 && (
                 <PreviewStep
                   draft={draft}
+                  listingId={listingId}
+                  existingIsDraft={existingIsDraft}
                   onEditStep={handleStepClick}
                   onReset={handleReset}
+                  moderationMatches={moderationMatches}
                 />
               )}
 
@@ -283,7 +362,7 @@ export function PostAdWizard() {
                     className="h-10 text-xs sm:text-sm font-semibold gap-1.5"
                   >
                     <ArrowLeft size={16} weight="bold" />
-                    <span>Back</span>
+                    <span><LocalizedText id="back" /></span>
                   </Button>
 
                   <Button
@@ -291,7 +370,7 @@ export function PostAdWizard() {
                     onClick={handleNext}
                     className="h-10 px-6 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-xs sm:text-sm rounded-lg shadow-sm gap-1.5"
                   >
-                    <span>{currentStep === 5 ? "Review & Publish" : "Continue"}</span>
+                    <span>{currentStep === 5 ? tGenerated("reviewPublish") : tGenerated("continue")}</span>
                     <ArrowRight size={16} weight="bold" />
                   </Button>
                 </div>
@@ -318,7 +397,7 @@ export function PostAdWizard() {
               className="flex-1 h-11 text-xs font-bold rounded-lg border-border"
             >
               <ArrowLeft size={16} weight="bold" className="mr-1" />
-              <span>Back</span>
+              <span><LocalizedText id="back" /></span>
             </Button>
 
             <Button
@@ -326,7 +405,7 @@ export function PostAdWizard() {
               onClick={handleNext}
               className="flex-1 h-11 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-xs rounded-lg shadow-sm"
             >
-              <span>{currentStep === 5 ? "Review & Publish" : "Continue"}</span>
+              <span>{currentStep === 5 ? tGenerated("reviewPublish") : tGenerated("continue")}</span>
               <ArrowRight size={16} weight="bold" className="ml-1" />
             </Button>
           </div>

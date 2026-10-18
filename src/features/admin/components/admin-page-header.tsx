@@ -17,7 +17,6 @@ interface AdminPageHeaderProps {
 
 export function AdminPageHeader({
   title,
-  description,
   badge,
   badgeVariant = "secondary",
   backHref,
@@ -48,17 +47,12 @@ export function AdminPageHeader({
             {title}
           </h1>
           {badge !== undefined && (
-            <Badge variant={badgeVariant} className="text-[11px] font-semibold h-5 px-2">
+            <Badge variant={badgeVariant} className="text-xxs font-semibold h-5 px-2">
               {badge}
             </Badge>
           )}
         </div>
 
-        {description && (
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {description}
-          </p>
-        )}
       </div>
 
       {actions && (

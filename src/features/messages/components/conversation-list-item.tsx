@@ -1,8 +1,12 @@
+"use client"
+
 import Image from "next/image"
 import { SealCheck } from "@phosphor-icons/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { useLocalizedText } from "@/lib/i18n/use-localized-text"
 import type { Conversation } from "../types"
 
 interface ConversationListItemProps {
@@ -30,7 +34,9 @@ export function ConversationListItem({
   isSelected,
   onClick,
 }: ConversationListItemProps) {
-  const { participant, listing, lastMessage, updatedAt, unreadCount } = conversation
+  const localized = useLocalizedText()
+  const tConversation = useTranslations("ui.common")
+  const { participant, listing, lastMessage, lastMessageKm, updatedAt, unreadCount } = conversation
 
   return (
     <button
@@ -67,12 +73,12 @@ export function ConversationListItem({
           >
             {participant.name}
           </span>
-          <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
+          <span className="text-2xs text-muted-foreground shrink-0 font-medium">
             {formatTime(updatedAt)}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px] text-primary/90 font-medium truncate">
+        <div className="flex items-center gap-1.5 text-xxs text-primary/90 font-medium truncate">
           <span className="truncate">{listing.title}</span>
         </div>
 
@@ -85,11 +91,11 @@ export function ConversationListItem({
                 : "text-muted-foreground"
             )}
           >
-            {lastMessage}
+            {lastMessage ? localized(lastMessage, lastMessageKm) : tConversation("conversationStarted")}
           </p>
 
           {unreadCount > 0 && (
-            <Badge className="h-4.5 min-w-4.5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center shrink-0">
+            <Badge className="h-4.5 min-w-4.5 px-1.5 rounded-full bg-primary text-primary-foreground text-2xs font-black flex items-center justify-center shrink-0">
               {unreadCount}
             </Badge>
           )}

@@ -6,7 +6,7 @@ const PROTECTED_PREFIXES = [
   '/messages',
   '/post-ad',
   '/notifications',
-  '/favorites',
+  '/checkout',
 ];
 
 // Session cookie names (30-day TTL) — dev and prod variants.
@@ -38,7 +38,8 @@ export function middleware(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     if (pathname.startsWith('/') && !pathname.startsWith('//')) {
-      loginUrl.searchParams.set('next', pathname);
+      loginUrl.search = '';
+      loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
     }
     return NextResponse.redirect(loginUrl);
   }
@@ -52,6 +53,6 @@ export const config = {
     '/messages/:path*',
     '/post-ad',
     '/notifications/:path*',
-    '/favorites/:path*',
+    '/checkout/:path*',
   ],
 };

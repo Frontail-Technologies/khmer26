@@ -50,7 +50,7 @@ export function UserTable({ initialData }: UserTableProps) {
   const [verificationFilter, setVerificationFilter] = useState("all")
   const [provinceFilter, setProvinceFilter] = useState("all")
   const [deleteTarget, setDeleteTarget] = useState<AdminUserListItem | null>(null)
-  const { data, isLoading } = useAdminUsers({ page: 1, limit: 100 })
+  const { data } = useAdminUsers({ page: 1, limit: 100 })
   const deleteUser = useDeleteAdminUser()
   const users = useMemo(() => data?.items ?? initialData ?? [], [data?.items, initialData])
   const columns = useMemo(() => createUserColumns(setDeleteTarget), [])
@@ -190,7 +190,7 @@ export function UserTable({ initialData }: UserTableProps) {
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       tab.warning
                         ? "bg-accent/10 text-accent border-accent/30"
                         : isActive
@@ -235,7 +235,7 @@ export function UserTable({ initialData }: UserTableProps) {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80"
+                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
                     >
                       {header.isPlaceholder
                         ? null
@@ -268,7 +268,6 @@ export function UserTable({ initialData }: UserTableProps) {
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No accounts found"
-                  description={isLoading ? "Fetching the latest user accounts." : "Try adjusting your search terms, account tabs, or active filters."}
                 />
               )}
             </TableBody>

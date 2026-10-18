@@ -56,16 +56,16 @@ export function createReviewColumns({
                   className={i < rev.rating ? "text-accent" : "text-muted-foreground/25"}
                 />
               ))}
-              <span className="text-[11px] font-bold text-foreground ml-1">
+              <span className="text-xxs font-bold text-foreground ml-1">
                 {rev.rating}.0
               </span>
             </div>
             <p className="text-xs text-foreground line-clamp-2 leading-relaxed">
               {rev.comment}
             </p>
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-xxs text-muted-foreground">
               <span className="font-medium text-foreground">{rev.reviewer.name}</span>
-              <span className="font-mono text-[10px] text-muted-foreground">({rev.reviewer.id})</span>
+              {rev.reviewer.email && <span className="truncate">{rev.reviewer.email}</span>}
             </div>
           </div>
         )
@@ -88,9 +88,8 @@ export function createReviewColumns({
             >
               {seller.businessName || seller.name}
             </Link>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <span className="font-mono">{seller.id}</span>
-              {seller.businessName && <span>• {seller.name}</span>}
+            <div className="flex items-center gap-1 text-2xs text-muted-foreground">
+              <span>{seller.businessName ? seller.name : "Seller account"}</span>
             </div>
           </div>
         )
@@ -125,7 +124,7 @@ export function createReviewColumns({
               >
                 {listing.title}
               </Link>
-              <span className="font-semibold text-[10px] text-primary block">
+              <span className="font-semibold text-2xs text-primary block">
                 ${listing.price.toLocaleString()} {listing.currency}
               </span>
             </div>
@@ -147,7 +146,7 @@ export function createReviewColumns({
         return (
           <Badge
             variant="outline"
-            className="text-[10px] font-bold px-1.5 py-0 h-5 border-destructive/30 text-destructive bg-destructive/5"
+            className="text-2xs font-bold px-1.5 py-0 h-5 border-destructive/30 text-destructive bg-destructive/5"
           >
             {count} {count === 1 ? "report" : "reports"}
           </Badge>

@@ -86,7 +86,7 @@ export function AdminDashboardMetrics() {
               </div>
 
               <div className="space-y-0.5">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block truncate">
+                <span className="text-xxs font-bold text-muted-foreground uppercase tracking-wider block truncate">
                   {kpi.label}
                 </span>
                 <span className="text-xl sm:text-2xl font-black text-foreground tracking-tight block">

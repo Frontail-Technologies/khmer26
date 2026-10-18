@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import Link from "next/link"
 import { EnvelopeSimple, SpinnerGap } from "@phosphor-icons/react"
@@ -16,6 +20,9 @@ import { loginSchema, type LoginFormData } from "../schemas/login-schema"
 import { useLogin, friendlyAuthError } from "../hooks/use-auth"
 
 export function LoginForm() {
+  const tGenerated = useTranslations("generated")
+  const tValidation = useTranslations("ui.auth.validation")
+  const validationMessage = (key: string) => tValidation(key as Parameters<typeof tValidation>[0])
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -41,7 +48,7 @@ export function LoginForm() {
       for (const issue of result.error.issues) {
         const field = issue.path[0] as keyof LoginFormData
         if (field && !fieldErrors[field]) {
-          fieldErrors[field] = issue.message
+          fieldErrors[field] = validationMessage(issue.message)
         }
       }
       setErrors(fieldErrors)
@@ -63,7 +70,7 @@ export function LoginForm() {
           htmlFor="email"
           className="block text-xs sm:text-sm font-semibold text-foreground"
         >
-          Email Address <span className="text-destructive">*</span>
+          <LocalizedText id="emailAddress" /> <span className="text-destructive">*</span>
         </label>
 
         <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.email}>
@@ -77,7 +84,7 @@ export function LoginForm() {
             type="email"
             value={formData.email}
             onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="Enter your email address"
+            placeholder={tGenerated("enterYourEmailAddress")}
             autoComplete="email"
             className="text-xs sm:text-sm text-foreground placeholder:text-muted-foreground"
           />
@@ -92,8 +99,8 @@ export function LoginForm() {
 
       <PasswordField
         id="password"
-        label="Password"
-        placeholder="Enter your password"
+        label={tGenerated("password")}
+        placeholder={tGenerated("enterYourPassword")}
         value={formData.password}
         onChange={(e) => handleChange("password", e.target.value)}
         error={errors.password}
@@ -105,7 +112,7 @@ export function LoginForm() {
           href="/forgot-password"
           className="text-xs font-semibold text-primary hover:underline transition-colors"
         >
-          Forgot password?
+          <LocalizedText id="forgotPassword" />
         </Link>
       </div>
 
@@ -124,10 +131,10 @@ export function LoginForm() {
           {login.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Signing in...</span>
+              <span><LocalizedText id="signingIn" /></span>
             </span>
           ) : (
-            <span>Sign In</span>
+            <span><LocalizedText id="signIn_f8492c" /></span>
           )}
         </Button>
       </div>
@@ -137,12 +144,12 @@ export function LoginForm() {
       <SocialAuthButtons />
 
       <div className="pt-4 text-center text-xs sm:text-sm text-muted-foreground">
-        <span>Don&apos;t have an account? </span>
+        <span><LocalizedText id="donTHaveAnAccount" /> </span>
         <Link
           href="/register"
           className="font-bold text-primary hover:underline transition-colors ml-1"
         >
-          Create an account
+          <LocalizedText id="createAnAccount" />
         </Link>
       </div>
     </form>

@@ -240,7 +240,6 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
               <DataTableEmpty
                 colSpan={subscriberColumns.length}
                 title="No subscribers found"
-                description="Try adjusting your search criteria or active filters."
               />
             )}
           </TableBody>
@@ -271,7 +270,7 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
                     >
                       {sub.businessName || sub.sellerName}
                     </Link>
-                    <span className="text-[10px] text-muted-foreground block">
+                    <span className="text-2xs text-muted-foreground block">
                       {sub.planName}
                     </span>
                   </div>
@@ -281,17 +280,17 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
                 <div className="flex items-center justify-between text-xs pt-1">
                   <Badge
                     variant="outline"
-                    className={`text-[10px] font-semibold px-2 py-0.5 h-5 ${planConfig.badgeClass}`}
+                    className={`text-2xs font-semibold px-2 py-0.5 h-5 ${planConfig.badgeClass}`}
                   >
                     {planConfig.label}
                   </Badge>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-xxs text-muted-foreground">
                     Expires: {sub.expiresAt}
                   </span>
                 </div>
 
                 <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center justify-between text-xxs">
                     <span className="text-muted-foreground">Listing Usage</span>
                     <span className="font-semibold text-foreground">
                       {usage.used} / {usage.limit} ({pct}%)
@@ -335,7 +334,6 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
         ) : (
           <DataTableEmpty
             title="No subscribers found"
-            description="Try adjusting your search criteria or active filters."
           />
         )}
       </div>

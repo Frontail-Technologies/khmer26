@@ -53,51 +53,57 @@ export function NotificationDetailSheet({
             </div>
             <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
           </div>
-          <span className="font-mono text-[11px] text-muted-foreground block pt-1">
-            {notification.id}
+          <span className="font-mono text-xxs text-muted-foreground block pt-1">
+            {notification.displayId}
           </span>
         </SheetHeader>
 
         <div className="p-4 rounded-xl bg-card border border-border space-y-3 shadow-xs">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-semibold text-muted-foreground">Title</span>
+            <span className="text-2xs uppercase font-semibold text-muted-foreground">Title</span>
             <h4 className="font-bold text-sm text-foreground">{notification.title}</h4>
+            {notification.titleKm && <p lang="km" className="text-sm text-muted-foreground">{notification.titleKm}</p>}
           </div>
 
           <div className="pt-2 border-t border-border/40 space-y-1">
-            <span className="text-[10px] uppercase font-semibold text-muted-foreground">Message</span>
+            <span className="text-2xs uppercase font-semibold text-muted-foreground">Message</span>
             <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">
               {notification.message}
             </p>
+            {notification.messageKm && (
+              <p lang="km" className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {notification.messageKm}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="space-y-3 pt-1">
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <Users size={13} />
               Target Audience
             </span>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Audience</span>
-              <Badge variant="outline" className="text-[10px] font-semibold">
+              <Badge variant="outline" className="text-2xs font-semibold">
                 {AUDIENCE_LABELS[notification.audience] || notification.audience}
               </Badge>
             </div>
             {notification.targetUser && (
               <div className="flex items-center justify-between text-xs pt-1 border-t border-border/40">
-                <span className="text-muted-foreground">User ID</span>
-                <span className="font-mono font-medium text-foreground">{notification.targetUser}</span>
+                <span className="text-muted-foreground">Recipient</span>
+                <span className="font-medium text-foreground">Specific user</span>
               </div>
             )}
           </div>
 
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <CalendarBlank size={13} />
               Dispatch Details
             </span>
-            <div className="space-y-1.5 text-[11px]">
+            <div className="space-y-1.5 text-xxs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Sent At</span>
                 <span className="text-foreground">{notification.sentAt}</span>

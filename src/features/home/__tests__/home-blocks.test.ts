@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { resolveHomeBlocks } from "../lib/home-blocks"
-import type { HomeSection } from "../api/home.api"
+import type { HomeFeaturedSection, HomeSection } from "../api/home.api"
 
 const section = (o: Partial<HomeSection>): HomeSection => ({
   id: o.sectionKey ?? "x",
@@ -34,5 +34,32 @@ describe("resolveHomeBlocks", () => {
 
   it("uses a default order only when the backend returns no section config", () => {
     expect(resolveHomeBlocks([]).map((b) => b.key)).toEqual(["categories", "banner", "latest"])
+  })
+
+  it("interleaves active featured sections with built-in homepage blocks", () => {
+    const featured: HomeFeaturedSection = {
+      id: "featured-1",
+      title: "Featured Vehicles",
+      slug: "featured-vehicles",
+      sourceType: "category",
+      sortMode: "recent",
+      displayStyle: "grid",
+      isActive: true,
+      sortOrder: 2,
+      itemLimit: 8,
+      categoryIds: [],
+      listings: [],
+    }
+
+    const blocks = resolveHomeBlocks([
+      section({ sectionKey: "hero_slider", sortOrder: 1 }),
+      section({ sectionKey: "recent_listings", sortOrder: 3 }),
+    ], [featured])
+
+    expect(blocks.map((block) => block.key)).toEqual([
+      "banner",
+      "featured:featured-1",
+      "latest",
+    ])
   })
 })

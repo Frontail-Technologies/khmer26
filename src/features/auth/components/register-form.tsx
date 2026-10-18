@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import Link from "next/link"
 import { EnvelopeSimple, ArrowRight, SpinnerGap } from "@phosphor-icons/react"
@@ -16,6 +20,9 @@ import { registerSchema, type RegisterFormData } from "../schemas/register-schem
 import { useRegister, friendlyAuthError } from "../hooks/use-auth"
 
 export function RegisterForm() {
+  const tGenerated = useTranslations("generated")
+  const tValidation = useTranslations("ui.auth.validation")
+  const validationMessage = (key: string) => tValidation(key as Parameters<typeof tValidation>[0])
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
     password: "",
@@ -42,7 +49,7 @@ export function RegisterForm() {
       for (const issue of result.error.issues) {
         const field = issue.path[0] as keyof RegisterFormData
         if (field && !fieldErrors[field]) {
-          fieldErrors[field] = issue.message
+          fieldErrors[field] = validationMessage(issue.message)
         }
       }
       setErrors(fieldErrors)
@@ -64,7 +71,7 @@ export function RegisterForm() {
           htmlFor="email"
           className="block text-xs sm:text-sm font-semibold text-foreground"
         >
-          Email Address <span className="text-destructive">*</span>
+          <LocalizedText id="emailAddress" /> <span className="text-destructive">*</span>
         </label>
 
         <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.email}>
@@ -93,8 +100,8 @@ export function RegisterForm() {
 
       <PasswordField
         id="password"
-        label="Password"
-        placeholder="Create a password (8+ characters)"
+        label={tGenerated("password")}
+        placeholder={tGenerated("createAPassword8Characters")}
         value={formData.password}
         onChange={(e) => handleChange("password", e.target.value)}
         error={errors.password}
@@ -103,8 +110,8 @@ export function RegisterForm() {
 
       <PasswordField
         id="confirmPassword"
-        label="Confirm Password"
-        placeholder="Confirm your password"
+        label={tGenerated("confirmPassword")}
+        placeholder={tGenerated("confirmYourPassword")}
         value={formData.confirmPassword}
         onChange={(e) => handleChange("confirmPassword", e.target.value)}
         error={errors.confirmPassword}
@@ -126,11 +133,11 @@ export function RegisterForm() {
           {register.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Creating account...</span>
+              <span><LocalizedText id="creatingAccount" /></span>
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <span>Create Account</span>
+              <span><LocalizedText id="createAccount" /></span>
               <ArrowRight size={18} weight="bold" />
             </span>
           )}
@@ -142,12 +149,12 @@ export function RegisterForm() {
       <SocialAuthButtons />
 
       <div className="pt-4 text-center text-xs sm:text-sm text-muted-foreground">
-        <span>Already have an account? </span>
+        <span><LocalizedText id="alreadyHaveAnAccount" /> </span>
         <Link
           href="/login"
           className="font-bold text-primary hover:underline transition-colors ml-1"
         >
-          Sign in
+          <LocalizedText id="signIn" />
         </Link>
       </div>
     </form>

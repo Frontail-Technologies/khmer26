@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import type { AdminUserDetail } from "../types"
+import { formatAdminDateTime } from "@/lib/formatters/date"
 
 interface UserDetailsPanelProps {
   user: AdminUserDetail
@@ -41,7 +42,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
     <div>
-      <span className="text-[11px] text-muted-foreground block mb-0.5">{label}</span>
+      <span className="text-xxs text-muted-foreground block mb-0.5">{label}</span>
       <span className="text-xs font-medium text-foreground">{value}</span>
     </div>
   )
@@ -82,7 +83,7 @@ export function UserDetailsPanel({
             </div>
             {user.bio && (
               <div className="mt-4 pt-3 border-t border-border/40">
-                <span className="text-[11px] text-muted-foreground block mb-1">Bio</span>
+                <span className="text-xxs text-muted-foreground block mb-1">Bio</span>
                 <p className="text-xs text-foreground leading-relaxed">{user.bio}</p>
               </div>
             )}
@@ -104,19 +105,19 @@ export function UserDetailsPanel({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Plan</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Plan</span>
                     <span className="font-bold text-foreground">{user.subscription.planName}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Started</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Started</span>
                     <span className="font-medium text-foreground">
-                      {new Date(user.subscription.startedAt).toLocaleDateString()}
+                      {formatAdminDateTime(user.subscription.startedAt)}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Expires</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Expires</span>
                     <span className="font-medium text-foreground">
-                      {user.subscription.expiresAt ? new Date(user.subscription.expiresAt).toLocaleDateString() : "Never"}
+                      {user.subscription.expiresAt ? formatAdminDateTime(user.subscription.expiresAt) : "Never"}
                     </span>
                   </div>
                 </div>
@@ -146,20 +147,20 @@ export function UserDetailsPanel({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Application Type</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Application Type</span>
                     <span className="capitalize font-semibold text-foreground">{user.verification.type}</span>
                   </div>
                   {user.verification.legalName && (
                     <div>
-                      <span className="text-[11px] text-muted-foreground block mb-0.5">Legal Name</span>
+                      <span className="text-xxs text-muted-foreground block mb-0.5">Legal Name</span>
                       <span className="font-semibold text-foreground">{user.verification.legalName}</span>
                     </div>
                   )}
                   {user.verification.reviewedAt && (
                     <div>
-                      <span className="text-[11px] text-muted-foreground block mb-0.5">Reviewed Date</span>
+                      <span className="text-xxs text-muted-foreground block mb-0.5">Reviewed Date</span>
                       <span className="font-medium text-foreground">
-                        {new Date(user.verification.reviewedAt).toLocaleDateString()}
+                        {formatAdminDateTime(user.verification.reviewedAt)}
                       </span>
                     </div>
                   )}
@@ -188,7 +189,7 @@ export function UserDetailsPanel({
                     render={
                       <Link
                         href={`/admin/listings?search=${encodeURIComponent(user.name)}`}
-                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="flex items-center gap-1 text-xxs text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         <ArrowSquareOut size={12} />
                         View Listings
@@ -199,22 +200,22 @@ export function UserDetailsPanel({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Active Listings</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Active Listings</span>
                     <span className="text-sm font-bold text-foreground">{user.activeListingsCount}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-muted-foreground block mb-0.5">Sold</span>
+                    <span className="text-xxs text-muted-foreground block mb-0.5">Sold</span>
                     <span className="text-sm font-bold text-foreground">{user.soldListingsCount}</span>
                   </div>
                   {user.reviewsCount !== undefined && (
                     <div>
-                      <span className="text-[11px] text-muted-foreground block mb-0.5">Reviews</span>
+                      <span className="text-xxs text-muted-foreground block mb-0.5">Reviews</span>
                       <span className="text-sm font-bold text-foreground">{user.reviewsCount}</span>
                     </div>
                   )}
                   {user.rating && (
                     <div>
-                      <span className="text-[11px] text-muted-foreground block mb-0.5">Rating</span>
+                      <span className="text-xxs text-muted-foreground block mb-0.5">Rating</span>
                       <span className="text-sm font-bold text-accent flex items-center gap-1">
                         <Star size={13} weight="fill" />
                         {user.rating}
@@ -225,7 +226,7 @@ export function UserDetailsPanel({
 
                 {user.recentListings.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
-                    <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <span className="text-xxs font-semibold text-muted-foreground flex items-center gap-1.5">
                       <ListBullets size={12} />
                       Recent Listings
                     </span>
@@ -241,7 +242,7 @@ export function UserDetailsPanel({
                             <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors block truncate">
                               {listing.title}
                             </span>
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-xxs text-muted-foreground">
                               {listing.category} · ${listing.price.toLocaleString()}
                             </span>
                           </div>
@@ -270,7 +271,7 @@ export function UserDetailsPanel({
                     render={
                       <Link
                         href={`/admin/reports?search=${encodeURIComponent(user.name)}`}
-                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                        className="flex items-center gap-1 text-xxs text-muted-foreground hover:text-foreground cursor-pointer"
                       >
                         <ArrowSquareOut size={12} />
                         Open in Reports
@@ -285,7 +286,7 @@ export function UserDetailsPanel({
                       <div key={rep.id} className="flex items-center justify-between gap-3 px-3.5 py-2.5 bg-muted/10">
                         <div className="min-w-0">
                           <span className="text-xs font-medium text-foreground block">{rep.reason}</span>
-                          <span className="text-[11px] text-muted-foreground">By {rep.reporterName} · {rep.createdAt}</span>
+                          <span className="text-xxs text-muted-foreground">By {rep.reporterName} · {rep.createdAt}</span>
                         </div>
                         <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
                       </div>
@@ -308,7 +309,7 @@ export function UserDetailsPanel({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-medium text-foreground block">Active Account</span>
-                <span className="text-[11px] text-muted-foreground">Allow login and access</span>
+                <span className="text-xxs text-muted-foreground">Allow login and access</span>
               </div>
               <Switch
                 checked={user.status === "active"}
@@ -331,7 +332,7 @@ export function UserDetailsPanel({
                 render={
                   <Link
                     href={`/admin/verifications?search=${encodeURIComponent(user.name)}`}
-                    className="flex items-center gap-1 text-[11px] text-primary hover:underline cursor-pointer"
+                    className="flex items-center gap-1 text-xxs text-primary hover:underline cursor-pointer"
                   >
                     <span>Review</span>
                     <ArrowRight size={11} />
@@ -390,11 +391,11 @@ export function UserDetailsPanel({
                   <div className="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                   <div className="space-y-0.5 min-w-0">
                     <span className="text-xs font-medium text-foreground block">{item.action}</span>
-                    <span className="text-[11px] text-muted-foreground block">
+                    <span className="text-xxs text-muted-foreground block">
                       {item.actor} · {item.timestamp}
                     </span>
                     {item.note && (
-                      <p className="text-[11px] text-muted-foreground bg-muted/40 px-2 py-1 rounded mt-1">
+                      <p className="text-xxs text-muted-foreground bg-muted/40 px-2 py-1 rounded mt-1">
                         {item.note}
                       </p>
                     )}

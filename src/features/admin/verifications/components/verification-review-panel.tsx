@@ -116,7 +116,7 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
           {request.status === "rejected" && request.rejectionReason && (
             <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs space-y-1">
               <p className="font-bold">Rejection Reason: {request.rejectionReason}</p>
-              {request.rejectionNote && <p className="text-[11px]">{request.rejectionNote}</p>}
+              {request.rejectionNote && <p className="text-xxs">{request.rejectionNote}</p>}
             </div>
           )}
         </CardContent>

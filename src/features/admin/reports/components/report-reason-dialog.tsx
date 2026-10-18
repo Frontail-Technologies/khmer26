@@ -4,15 +4,13 @@ import { useState } from "react"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { BilingualField } from "@/components/admin/bilingual-field"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
@@ -52,6 +50,8 @@ function ReportReasonForm({
   onCancel: () => void
 }) {
   const [label, setLabel] = useState(reason?.label ?? "")
+  const [labelKm, setLabelKm] = useState(reason?.labelKm ?? "")
+  const [descriptionKm, setDescriptionKm] = useState(reason?.descriptionKm ?? "")
   const [description, setDescription] = useState(reason?.description ?? "")
   const [appliesTo, setAppliesTo] = useState<AdminReportTargetType[]>(
     reason?.appliesTo ?? ["listing"]
@@ -74,7 +74,9 @@ function ReportReasonForm({
     onSave({
       id: reason ? reason.id : `RSN-${Date.now().toString().slice(-4)}`,
       label: label.trim(),
+      labelKm: labelKm.trim() || null,
       description: description.trim() || undefined,
+      descriptionKm: descriptionKm.trim() || null,
       appliesTo,
       isActive,
       createdAt: reason?.createdAt || new Date().toISOString().split("T")[0],
@@ -87,32 +89,33 @@ function ReportReasonForm({
         <DialogTitle className="text-sm sm:text-base">
           {reason ? "Edit Report Reason" : "Add Report Reason"}
         </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground pt-0.5">
-          Configure reasons available to users when reporting marketplace items or behavior.
-        </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4 py-1 text-xs">
-        <Field>
-          <FieldLabel required>Reason Title</FieldLabel>
-          <Input
-            placeholder="e.g. Misleading Description"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            className="h-9 text-xs rounded-lg"
-            required
-          />
-        </Field>
+        <BilingualField
+          id="reason-title"
+          label="Title"
+          required
+          valueEn={label}
+          valueKm={labelKm}
+          onChangeEn={setLabel}
+          onChangeKm={setLabelKm}
+          placeholderEn="e.g. Misleading Description"
+          maxLength={100}
+        />
 
-        <Field>
-          <FieldLabel>Description</FieldLabel>
-          <Textarea
-            placeholder="Brief explanation of when users should select this reason..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="text-xs min-h-[75px] resize-none rounded-lg"
-          />
-        </Field>
+        <BilingualField
+          id="reason-description"
+          label="Description"
+          multiline
+          rows={3}
+          valueEn={description}
+          valueKm={descriptionKm}
+          onChangeEn={setDescription}
+          onChangeKm={setDescriptionKm}
+          placeholderEn="When users should pick this reason"
+          maxLength={500}
+        />
 
         <Field>
           <FieldLabel required>Applies To</FieldLabel>
@@ -193,7 +196,7 @@ export function ReportReasonDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-5 rounded-xl bg-card border-0 shadow-lg">
+      <DialogContent className="sm:max-w-2xl p-5 rounded-xl bg-card border-0 shadow-lg">
         <ReportReasonForm
           key={reason?.id ?? "new"}
           reason={reason}

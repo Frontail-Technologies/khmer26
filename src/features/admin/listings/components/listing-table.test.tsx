@@ -7,6 +7,7 @@ import type { AdminListing } from '../types';
 const mockListings: AdminListing[] = [
   {
     id: 'list-1',
+    displayId: 'LST-100001',
     title: 'Honda Click 125i 2022',
     slug: 'honda-click-125i-2022',
     price: 1850,
@@ -41,6 +42,7 @@ const mockListings: AdminListing[] = [
   },
   {
     id: 'list-2',
+    displayId: 'LST-100002',
     title: 'iPhone 13 128GB Midnight',
     slug: 'iphone-13-128gb',
     price: 450,

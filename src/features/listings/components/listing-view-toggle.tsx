@@ -1,5 +1,7 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
 import { SquaresFour, ListBullets } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
@@ -16,10 +18,11 @@ export function ListingViewToggle({
   onChange,
   className,
 }: ListingViewToggleProps) {
+  const tGenerated = useTranslations("generated")
   return (
     <div
       role="group"
-      aria-label="Listing view mode"
+      aria-label={tGenerated("listingViewMode")}
       className={cn(
         "inline-flex items-center rounded-lg bg-muted/40 p-0.5 gap-0.5 shrink-0",
         className
@@ -28,7 +31,7 @@ export function ListingViewToggle({
       <button
         type="button"
         onClick={() => onChange("grid")}
-        aria-label="Grid view"
+        aria-label={tGenerated("gridView")}
         aria-pressed={viewMode === "grid"}
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center rounded-md text-xs transition-all cursor-pointer",
@@ -43,7 +46,7 @@ export function ListingViewToggle({
       <button
         type="button"
         onClick={() => onChange("list")}
-        aria-label="List view"
+        aria-label={tGenerated("listView")}
         aria-pressed={viewMode === "list"}
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center rounded-md text-xs transition-all cursor-pointer",

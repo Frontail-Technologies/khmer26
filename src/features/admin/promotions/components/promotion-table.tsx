@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useCallback, useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -48,6 +48,7 @@ import { createPromotionColumns } from "../columns"
 import { PromotionDetailSheet } from "./promotion-detail-sheet"
 import type { ActivePromotionItem, PromotionType } from "../types"
 import { cn } from "@/lib/utils"
+import { useEndPromotion } from "../hooks/promotions.mutations"
 
 interface PromotionTableProps {
   initialPromotions: ActivePromotionItem[]
@@ -98,26 +99,31 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
   const [typeFilter, setTypeFilter] = useState("all")
   const [selectedPromotion, setSelectedPromotion] = useState<ActivePromotionItem | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const endPromotion = useEndPromotion()
 
-  const handleViewDetails = (item: ActivePromotionItem) => {
+  const handleViewDetails = useCallback((item: ActivePromotionItem) => {
     setSelectedPromotion(item)
     setSheetOpen(true)
-  }
+  }, [])
 
-  const handleEndPromotion = (id: string) => {
-    setPromotions((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: "expired" as const } : item
-      )
-    )
-  }
+  const handleEndPromotion = useCallback((id: string) => {
+    endPromotion.mutate(id, {
+      onSuccess: () => {
+        setPromotions((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, status: "expired" as const } : item
+          )
+        )
+      },
+    })
+  }, [endPromotion])
 
   const columns = useMemo(() => {
     return createPromotionColumns({
       onViewDetails: handleViewDetails,
       onEndPromotion: handleEndPromotion,
     })
-  }, [])
+  }, [handleEndPromotion, handleViewDetails])
 
   const counts = useMemo(() => {
     return {
@@ -137,8 +143,10 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
         const q = searchQuery.toLowerCase()
         const matchesTitle = item.listingTitle.toLowerCase().includes(q)
         const matchesSeller = item.sellerName.toLowerCase().includes(q)
-        const matchesId = item.id.toLowerCase().includes(q)
-        const matchesListingId = item.listingId.toLowerCase().includes(q)
+        const matchesId =
+          item.displayId.toLowerCase().includes(q) || item.id.toLowerCase().includes(q)
+        const matchesListingId =
+          item.listingDisplayId.toLowerCase().includes(q) || item.listingId.toLowerCase().includes(q)
         if (!matchesTitle && !matchesSeller && !matchesId && !matchesListingId) {
           return false
         }
@@ -199,7 +207,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"
@@ -305,7 +313,6 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No promotions found"
-                  description="Try adjusting your search query or status tab."
                 />
               )}
             </TableBody>
@@ -344,7 +351,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
                         <span className="font-semibold text-xs text-foreground block truncate">
                           {item.listingTitle}
                         </span>
-                        <span className="text-[11px] text-muted-foreground block truncate">
+                        <span className="text-xxs text-muted-foreground block truncate">
                           {item.sellerName}
                         </span>
                       </div>
@@ -355,12 +362,12 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
                   <div className="flex items-center justify-between pt-1 text-xs">
                     <Badge
                       variant="outline"
-                      className={`text-[10px] font-semibold px-2 py-0.5 h-5 flex items-center gap-1 ${conf.badgeClass}`}
+                      className={`text-2xs font-semibold px-2 py-0.5 h-5 flex items-center gap-1 ${conf.badgeClass}`}
                     >
                       <Icon size={12} weight="fill" />
                       <span>{conf.label}</span>
                     </Badge>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-xxs text-muted-foreground">
                       Expires: {item.expiresAt}
                     </span>
                   </div>
@@ -404,7 +411,6 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
           ) : (
             <DataTableEmpty
               title="No promotions found"
-              description="Try adjusting your search query or status tab."
             />
           )}
         </div>

@@ -11,7 +11,6 @@ interface AuthHeaderProps {
 export function AuthHeader({
   eyebrow,
   title,
-  subtitle,
   align = "center",
   className,
 }: AuthHeaderProps) {
@@ -23,15 +22,12 @@ export function AuthHeader({
         className
       )}
     >
-      <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
+      <span className="text-xxs sm:text-xs font-bold uppercase tracking-wider text-primary">
         {eyebrow}
       </span>
       <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground">
         {title}
       </h1>
-      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        {subtitle}
-      </p>
     </div>
   )
 }

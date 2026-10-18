@@ -65,7 +65,7 @@ export function ResolveReportDialog({
             <CheckCircle size={20} weight="fill" />
           </div>
           <DialogTitle className="text-base font-bold text-foreground">
-            Resolve Report {report.id}
+            Resolve report
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
             Mark this community report as resolved. Specify the operational outcome and resolution notes.

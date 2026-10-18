@@ -60,7 +60,7 @@ export function VerificationSellerCard({
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base font-bold text-foreground">{seller.name}</h3>
-              <Badge variant="secondary" className="text-[10px] font-semibold uppercase px-2 h-5">
+              <Badge variant="secondary" className="text-2xs font-semibold uppercase px-2 h-5">
                 {seller.sellerType} Account
               </Badge>
             </div>
@@ -84,7 +84,7 @@ export function VerificationSellerCard({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/60 text-xs">
           <div className="space-y-1 p-2.5 rounded-lg bg-muted/30">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
               <Phone size={12} />
               <span>Contact Phone</span>
             </span>
@@ -92,7 +92,7 @@ export function VerificationSellerCard({
           </div>
 
           <div className="space-y-1 p-2.5 rounded-lg bg-muted/30">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
               <EnvelopeSimple size={12} />
               <span>Email Address</span>
             </span>
@@ -109,32 +109,32 @@ export function VerificationSellerCard({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">Full Legal Name</span>
+                <span className="text-2xs font-medium text-muted-foreground block">Full Legal Name</span>
                 <span className="font-semibold text-foreground block">{identityDetails.fullName}</span>
               </div>
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">ID / Passport Type</span>
+                <span className="text-2xs font-medium text-muted-foreground block">ID / Passport Type</span>
                 <span className="font-semibold text-foreground block">{identityDetails.idType}</span>
               </div>
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">ID Number</span>
+                <span className="text-2xs font-medium text-muted-foreground block">ID Number</span>
                 <span className="font-semibold font-mono text-foreground block">{identityDetails.idNumber}</span>
               </div>
               {identityDetails.dob && (
                 <div>
-                  <span className="text-[10px] font-medium text-muted-foreground block">Date of Birth</span>
+                  <span className="text-2xs font-medium text-muted-foreground block">Date of Birth</span>
                   <span className="text-foreground block">{identityDetails.dob}</span>
                 </div>
               )}
               {identityDetails.nationality && (
                 <div>
-                  <span className="text-[10px] font-medium text-muted-foreground block">Nationality</span>
+                  <span className="text-2xs font-medium text-muted-foreground block">Nationality</span>
                   <span className="text-foreground block">{identityDetails.nationality}</span>
                 </div>
               )}
               {identityDetails.expiryDate && (
                 <div>
-                  <span className="text-[10px] font-medium text-muted-foreground block">Expiry Date</span>
+                  <span className="text-2xs font-medium text-muted-foreground block">Expiry Date</span>
                   <span className="text-foreground block">{identityDetails.expiryDate}</span>
                 </div>
               )}
@@ -151,31 +151,31 @@ export function VerificationSellerCard({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">Registered Business Name</span>
+                <span className="text-2xs font-medium text-muted-foreground block">Registered Business Name</span>
                 <span className="font-semibold text-foreground block">{businessDetails.businessName}</span>
               </div>
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">MOC Registration #</span>
+                <span className="text-2xs font-medium text-muted-foreground block">MOC Registration #</span>
                 <span className="font-semibold font-mono text-foreground block">{businessDetails.registrationNumber}</span>
               </div>
               {businessDetails.taxNumber && (
                 <div>
-                  <span className="text-[10px] font-medium text-muted-foreground block">GDT Tax ID</span>
+                  <span className="text-2xs font-medium text-muted-foreground block">GDT Tax ID</span>
                   <span className="font-semibold font-mono text-foreground block">{businessDetails.taxNumber}</span>
                 </div>
               )}
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground block">Owner / Representative</span>
+                <span className="text-2xs font-medium text-muted-foreground block">Owner / Representative</span>
                 <span className="font-semibold text-foreground block">{businessDetails.ownerName}</span>
               </div>
               {businessDetails.businessCategory && (
                 <div>
-                  <span className="text-[10px] font-medium text-muted-foreground block">Business Scope</span>
+                  <span className="text-2xs font-medium text-muted-foreground block">Business Scope</span>
                   <span className="text-foreground block">{businessDetails.businessCategory}</span>
                 </div>
               )}
               <div className="col-span-2 sm:col-span-3">
-                <span className="text-[10px] font-medium text-muted-foreground block">Registered Office Address</span>
+                <span className="text-2xs font-medium text-muted-foreground block">Registered Office Address</span>
                 <span className="text-foreground block">{businessDetails.registeredAddress}</span>
               </div>
             </div>

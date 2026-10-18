@@ -41,6 +41,9 @@ const listing = (overrides: Partial<PublicListing> = {}): PublicListing => ({
   description: null,
   price: "1250.00",
   currency: "USD",
+  condition: "good",
+  negotiable: true,
+  contactMethod: "both",
   status: "active",
   createdAt: new Date(Date.now() - 3600_000).toISOString(),
   updatedAt: new Date().toISOString(),
@@ -104,9 +107,10 @@ describe("<SearchResultsView />", () => {
     expect(screen.getByText("1")).toBeInTheDocument()
   })
 
-  it("does not invent badges the backend did not return", () => {
+  it("renders negotiability from the backend without inventing promotion badges", () => {
     renderWithProviders(<SearchResultsView state={makeState({ items: [listing()], total: 1 })} />)
-    expect(screen.queryByText(/featured|urgent|negotiable/i)).toBeNull()
+    expect(screen.getByText("Negotiable")).toBeInTheDocument()
+    expect(screen.queryByText(/featured|urgent/i)).toBeNull()
     expect(screen.queryByLabelText("Verified Seller")).toBeNull()
   })
 

@@ -96,7 +96,8 @@ export function ListingTable() {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim()
         const matchesTitle = item.title.toLowerCase().includes(q)
-        const matchesId = item.id.toLowerCase().includes(q)
+        const matchesId =
+          item.displayId.toLowerCase().includes(q) || item.id.toLowerCase().includes(q)
         const matchesSeller = item.seller.name.toLowerCase().includes(q)
         const matchesCategory = item.categoryName.toLowerCase().includes(q)
         const matchesLocation = item.location.province.toLowerCase().includes(q)
@@ -218,7 +219,7 @@ export function ListingTable() {
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       tab.urgent
                         ? "bg-destructive/10 text-destructive border-destructive/30"
                         : tab.warning
@@ -257,7 +258,7 @@ export function ListingTable() {
       {selectedCount > 0 && (
         <div className="bg-primary/5 border-b border-primary/20 px-4 py-2 flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
           <div className="flex items-center gap-2 text-foreground font-semibold">
-            <span className="bg-primary text-primary-foreground font-bold px-2 py-0.5 rounded-md text-[11px]">
+            <span className="bg-primary text-primary-foreground font-bold px-2 py-0.5 rounded-md text-xxs">
               {selectedCount}
             </span>
             <span>listings selected</span>
@@ -298,7 +299,7 @@ export function ListingTable() {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80"
+                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
                     >
                       {header.isPlaceholder
                         ? null
@@ -331,7 +332,6 @@ export function ListingTable() {
                 <DataTableEmpty
                   colSpan={listingColumns.length}
                   title={isLoading ? "Loading listings" : "No listings found"}
-                  description={isLoading ? "Fetching the latest admin listing queue." : "Try adjusting your search terms, status tabs, or active filters."}
                 />
               )}
             </TableBody>

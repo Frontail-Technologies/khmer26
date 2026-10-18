@@ -37,7 +37,7 @@ export function AdminOverviewPanel() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Marketplace Activity
           </CardTitle>
-          <Badge variant="secondary" className="text-[10px] font-bold h-4.5 px-2 bg-success/10 text-success border-success/20 rounded-md">
+          <Badge variant="secondary" className="text-2xs font-bold h-4.5 px-2 bg-success/10 text-success border-success/20 rounded-md">
             Live Feed
           </Badge>
         </div>
@@ -64,7 +64,7 @@ export function AdminOverviewPanel() {
       <CardContent className="p-4 sm:p-5 space-y-4 flex-1 flex flex-col justify-between">
         <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
               Total Marketplace Volume
             </span>
             <div className="flex items-baseline gap-2">
@@ -95,7 +95,7 @@ export function AdminOverviewPanel() {
                   key={item.label}
                   className="flex-1 flex flex-col items-center h-full justify-end group/bar relative"
                 >
-                  <div className="opacity-0 group-hover/bar:opacity-100 absolute -top-7 text-[10px] font-bold bg-foreground text-background px-1.5 py-0.5 rounded shadow-sm transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  <div className="opacity-0 group-hover/bar:opacity-100 absolute -top-7 text-2xs font-bold bg-foreground text-background px-1.5 py-0.5 rounded shadow-sm transition-opacity pointer-events-none whitespace-nowrap z-10">
                     {formatCount(item.value)}
                   </div>
                   <div
@@ -107,7 +107,7 @@ export function AdminOverviewPanel() {
                     )}
                     style={{ height: `${Math.max((item.value / maxListingValue) * 100, item.value > 0 ? 8 : 2)}%` }}
                   />
-                  <span className="text-[10px] text-muted-foreground mt-2 font-semibold">
+                  <span className="text-2xs text-muted-foreground mt-2 font-semibold">
                     {item.label}
                   </span>
                 </div>

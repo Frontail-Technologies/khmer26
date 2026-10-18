@@ -54,17 +54,12 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             {routeInfo.badge && (
               <Badge
                 variant={routeInfo.badgeVariant || "secondary"}
-                className="text-[10px] font-bold px-1.5 h-4.5 shrink-0 hidden sm:inline-flex rounded-md"
+                className="text-2xs font-bold px-1.5 h-4.5 shrink-0 hidden sm:inline-flex rounded-md"
               >
                 {routeInfo.badge}
               </Badge>
             )}
           </div>
-          {routeInfo.subtitle && (
-            <p className="text-[11px] text-muted-foreground hidden sm:block truncate">
-              {routeInfo.subtitle}
-            </p>
-          )}
         </div>
       </div>
 
@@ -110,7 +105,7 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
               <span className="text-xs font-bold text-foreground truncate max-w-28 leading-tight">
                 {adminName}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase leading-tight tracking-wider">
+              <span className="text-2xs font-semibold text-muted-foreground uppercase leading-tight tracking-wider">
                 Super Admin
               </span>
             </div>
@@ -122,9 +117,9 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             <DropdownMenuLabel className="font-normal p-3">
               <div className="flex flex-col space-y-1">
                 <p className="text-xs font-bold text-foreground">{adminName}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{adminEmail}</p>
+                <p className="text-xxs text-muted-foreground truncate">{adminEmail}</p>
                 <div className="pt-1">
-                  <Badge variant="outline" className="text-[10px] font-semibold uppercase rounded-md">
+                  <Badge variant="outline" className="text-2xs font-semibold uppercase rounded-md">
                     {user?.role || "admin"}
                   </Badge>
                 </div>

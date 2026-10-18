@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import {
   CreditCard,
   CalendarCheck,
@@ -8,13 +10,12 @@ import type { AccountPaymentRecord } from "../../types"
 
 interface PaymentSummaryProps {
   payments: AccountPaymentRecord[]
+  summary: { totalPaid: number; primaryMethod: string | null }
 }
 
-export function PaymentSummary({ payments }: PaymentSummaryProps) {
-  const totalPaid = payments
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + p.amount, 0)
-
+export function PaymentSummary({ payments, summary }: PaymentSummaryProps) {
+  const tGenerated = useTranslations("generated")
+  const t = useTranslations("ui.account")
   const lastPayment = payments[0]
 
   return (
@@ -25,11 +26,11 @@ export function PaymentSummary({ payments }: PaymentSummaryProps) {
             <CreditCard size={22} weight="fill" />
           </div>
           <div className="min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground block truncate">
-              Total Spent
+            <span className="text-xxs sm:text-xs font-semibold text-muted-foreground block truncate">
+              <LocalizedText id="totalSpent" />
             </span>
             <span className="text-xl sm:text-2xl font-black text-foreground">
-              ${totalPaid.toFixed(2)}
+              ${summary.totalPaid.toFixed(2)}
             </span>
           </div>
         </CardContent>
@@ -41,11 +42,13 @@ export function PaymentSummary({ payments }: PaymentSummaryProps) {
             <CalendarCheck size={22} weight="fill" />
           </div>
           <div className="min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground block truncate">
-              Last Payment
+            <span className="text-xxs sm:text-xs font-semibold text-muted-foreground block truncate">
+              <LocalizedText id="lastPayment" />
             </span>
             <span className="text-sm sm:text-base font-bold text-foreground truncate block">
-              {lastPayment ? lastPayment.date : "No payments"}
+              {lastPayment?.createdAt
+                ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(lastPayment.createdAt))
+                : tGenerated("noPayments")}
             </span>
           </div>
         </CardContent>
@@ -57,11 +60,11 @@ export function PaymentSummary({ payments }: PaymentSummaryProps) {
             <QrCode size={22} weight="fill" />
           </div>
           <div className="min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground block truncate">
-              Primary Method
+            <span className="text-xxs sm:text-xs font-semibold text-muted-foreground block truncate">
+              <LocalizedText id="primaryMethod" />
             </span>
             <span className="text-sm sm:text-base font-bold text-foreground truncate block">
-              ABA KHQR
+              {summary.primaryMethod ?? t("noMethod")}
             </span>
           </div>
         </CardContent>

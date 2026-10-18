@@ -57,7 +57,7 @@ export function createUserColumns(onDelete?: (user: AdminUserListItem) => void):
         <div className="flex items-center gap-3 min-w-[200px]">
           <Avatar className="size-8 rounded-lg shrink-0 border border-border/60">
             <AvatarImage src={user.avatarUrl} alt={displayName} />
-            <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground rounded-lg">
+            <AvatarFallback className="text-2xs font-bold bg-muted text-muted-foreground rounded-lg">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -69,14 +69,14 @@ export function createUserColumns(onDelete?: (user: AdminUserListItem) => void):
               {user.reportsCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="text-[9px] font-bold px-1 py-0 h-3.5 shrink-0 gap-0.5"
+                  className="text-3xs font-bold px-1 py-0 h-3.5 shrink-0 gap-0.5"
                 >
                   <WarningOctagon size={9} weight="fill" />
                   {user.reportsCount}
                 </Badge>
               )}
             </div>
-            <span className="text-[11px] text-muted-foreground truncate block">
+            <span className="text-xxs text-muted-foreground truncate block">
               {contact || ACCOUNT_TYPE_LABELS[user.accountType] || user.accountType}
             </span>
           </div>
@@ -91,7 +91,7 @@ export function createUserColumns(onDelete?: (user: AdminUserListItem) => void):
       <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5 whitespace-nowrap">
+      <Badge variant="outline" className="text-2xs font-medium px-2 py-0.5 h-5 whitespace-nowrap">
         {ACCOUNT_TYPE_LABELS[row.original.accountType] || row.original.accountType}
       </Badge>
     ),

@@ -29,6 +29,7 @@ export function useSearchSuggestions({ query, categorySlug, index }: Options) {
   const debounced = useDebouncedValue(trimmed, SUGGESTION_DEBOUNCE_MS)
   const eligible = trimmed.length >= SUGGESTION_MIN_CHARS
   const requestEnabled = debounced.length >= SUGGESTION_MIN_CHARS && eligible
+  const hasCurrentResults = requestEnabled && debounced === trimmed
 
   const listingsQuery = useQuery({
     queryKey: marketplaceKeys.search.suggestions({ q: debounced, category: categorySlug }),
@@ -48,6 +49,6 @@ export function useSearchSuggestions({ query, categorySlug, index }: Options) {
     eligible,
     isLoading: requestEnabled && listingsQuery.isFetching,
     categories,
-    listings: eligible ? (listingsQuery.data?.items ?? []) : [],
+    listings: hasCurrentResults ? (listingsQuery.data?.items ?? []) : [],
   }
 }

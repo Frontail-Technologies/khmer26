@@ -1,3 +1,4 @@
+import { LocalizedText } from "@/components/i18n/localized-text"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowSquareOut } from "@phosphor-icons/react"
@@ -33,8 +34,8 @@ export function MobileListingContext({ listing }: MobileListingContextProps) {
               ${listing.price.toLocaleString()} {listing.currency}
             </span>
             {isSold && (
-              <Badge variant="outline" className="text-[9px] font-bold uppercase py-0 px-1 bg-muted text-muted-foreground">
-                Sold
+              <Badge variant="outline" className="text-3xs font-bold uppercase py-0 px-1 bg-muted text-muted-foreground">
+                <LocalizedText id="sold" />
               </Badge>
             )}
           </div>
@@ -43,9 +44,9 @@ export function MobileListingContext({ listing }: MobileListingContextProps) {
 
       <Link
         href={`/listing/${listing.slug}`}
-        className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 shrink-0 bg-primary/10 px-2 py-1 rounded-lg"
+        className="text-xxs font-bold text-primary hover:underline flex items-center gap-1 shrink-0 bg-primary/10 px-2 py-1 rounded-lg"
       >
-        <span>View</span>
+        <span><LocalizedText id="view" /></span>
         <ArrowSquareOut size={13} />
       </Link>
     </div>

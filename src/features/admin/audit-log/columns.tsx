@@ -50,7 +50,7 @@ export function createAuditColumns({
             <span className="font-semibold text-xs text-foreground block">
               {entry.actorName}
             </span>
-            <span className="text-[10px] text-muted-foreground block">
+            <span className="text-2xs text-muted-foreground block">
               {entry.actorRole}
             </span>
           </div>
@@ -78,7 +78,7 @@ export function createAuditColumns({
       cell: ({ row }) => {
         const mod = row.original.module
         return (
-          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 h-5">
+          <Badge variant="outline" className="text-2xs font-medium px-2 py-0.5 h-5">
             {MODULE_LABELS[mod] || mod}
           </Badge>
         )
@@ -97,7 +97,7 @@ export function createAuditColumns({
             <span className="font-medium text-xs text-foreground block truncate">
               {entry.targetName}
             </span>
-            <span className="text-[10px] text-muted-foreground capitalize">{entry.targetType}</span>
+            <span className="text-2xs text-muted-foreground capitalize">{entry.targetType}</span>
           </div>
         )
       },

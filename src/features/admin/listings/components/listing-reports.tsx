@@ -17,7 +17,7 @@ export function ListingReports({ reports }: ListingReportsProps) {
             <span>Community Flags & Reports</span>
           </CardTitle>
           {reports.length > 0 && (
-            <Badge variant="destructive" className="text-[10px] font-bold px-1.5 h-4.5">
+            <Badge variant="destructive" className="text-2xs font-bold px-1.5 h-4.5">
               {reports.length}
             </Badge>
           )}
@@ -43,11 +43,11 @@ export function ListingReports({ reports }: ListingReportsProps) {
                       <Warning size={14} weight="fill" />
                       <span>{report.reason}</span>
                     </span>
-                    <span className="text-[10px] text-muted-foreground block">
+                    <span className="text-2xs text-muted-foreground block">
                       Reported by <span className="font-semibold text-foreground">{report.reporterName || "Anonymous User"}</span> ({report.reporterType}) on {report.submittedAt}
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[9px] uppercase font-bold shrink-0">
+                  <Badge variant="outline" className="text-3xs uppercase font-bold shrink-0">
                     {report.status}
                   </Badge>
                 </div>

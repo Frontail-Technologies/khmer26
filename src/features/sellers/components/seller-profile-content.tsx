@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,9 +16,10 @@ import { SellerProfileHeader } from "./seller-profile-header"
 import { SellerTabs } from "./seller-tabs"
 
 function ProfileSkeleton() {
+  const tGenerated = useTranslations("generated")
   return (
     <Container className="py-3 sm:py-4">
-      <div aria-busy="true" aria-label="Loading seller" className="mt-2 space-y-6">
+      <div aria-busy="true" aria-label={tGenerated("loadingSeller")} className="mt-2 space-y-6">
         <Skeleton className="h-64 w-full rounded-2xl" />
         <Skeleton className="h-11 w-64 rounded-xl" />
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -28,6 +33,8 @@ function ProfileSkeleton() {
 }
 
 export function SellerProfileContent({ id }: { id: string }) {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
   const query = useSeller(id)
   const seller = query.data
   // Shares the cache entry with the listings tab; chat can only start from a public listing.
@@ -42,20 +49,20 @@ export function SellerProfileContent({ id }: { id: string }) {
       <Container className="py-10">
         <div className="mx-auto max-w-md rounded-2xl border border-dashed border-border/80 bg-card/40 p-10 text-center">
           <h1 className="text-lg font-bold text-foreground">
-            {notAvailable ? "This seller isn't available" : "We couldn't load this seller"}
+            {notAvailable ? tGenerated("thisSellerIsnTAvailable") : tGenerated("weCouldnTLoadThisSeller")}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             {notAvailable
-              ? "The profile may have been removed or doesn't exist."
-              : "Please check your connection and try again."}
+              ? tGenerated("theProfileMayHaveBeenRemovedOrDoesnT")
+              : tGenerated("pleaseCheckYourConnectionAndTryAgain")}
           </p>
           <div className="mt-5 flex items-center justify-center gap-2.5">
             {!notAvailable && (
               <Button size="sm" onClick={() => query.refetch()}>
-                Try again
+                <LocalizedText id="tryAgain" />
               </Button>
             )}
-            <Button size="sm" variant="outline" render={<Link href="/search">Browse listings</Link>} />
+            <Button size="sm" variant="outline" render={<Link href="/search"><LocalizedText id="browseListings" /></Link>} />
           </div>
         </div>
       </Container>
@@ -66,7 +73,7 @@ export function SellerProfileContent({ id }: { id: string }) {
 
   return (
     <div className="min-h-dvh bg-background pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-16">
-      <MobilePageHeader backHref="/search" backLabel="Back to marketplace" title={seller.shopName} />
+      <MobilePageHeader backHref="/search" backLabel={tAuth("backToMarketplace")} title={seller.shopName} />
       <Container className="py-3 sm:py-4">
         <SellerBreadcrumbs sellerName={seller.shopName} />
 

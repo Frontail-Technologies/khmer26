@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Input } from "@/components/ui/input"
 import {
   InputGroup,
@@ -48,7 +50,7 @@ export function DynamicFieldRenderer({
               {field.required ? (
                 <span className="text-destructive">*</span>
               ) : (
-                <span className="text-muted-foreground font-normal">(Optional)</span>
+                <span className="text-muted-foreground font-normal"><LocalizedText id="optional_c53994" /></span>
               )}
             </label>
 
@@ -66,11 +68,14 @@ export function DynamicFieldRenderer({
                   <SelectValue placeholder={`Select ${field.label}`} />
                 </SelectTrigger>
                 <SelectContent side="bottom">
-                  {field.options.map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {opt}
+                  {field.options.map((opt) => {
+                    const option = typeof opt === "string" ? { value: opt, label: opt } : opt
+                    return (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
-                  ))}
+                    )
+                  })}
                 </SelectContent>
               </Select>
             ) : field.unit ? (
@@ -101,7 +106,7 @@ export function DynamicFieldRenderer({
             )}
 
             {error && (
-              <p className="text-[11px] font-medium text-destructive mt-1">
+              <p className="text-xxs font-medium text-destructive mt-1">
                 {error}
               </p>
             )}

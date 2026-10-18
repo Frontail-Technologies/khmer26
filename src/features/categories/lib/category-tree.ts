@@ -27,6 +27,27 @@ export function buildCategoryIndex(tree: CategoryNode[]): CategoryIndex {
   return { roots: tree, byId, bySlug }
 }
 
+/** The category's own id plus the ids of everything beneath it, found anywhere in the tree. */
+export function collectCategoryIds(tree: CategoryNode[], id: string): Set<string> {
+  const ids = new Set<string>()
+  const gather = (node: CategoryNode) => {
+    ids.add(node.id)
+    node.children.forEach(gather)
+  }
+  const find = (nodes: CategoryNode[]): boolean => {
+    for (const node of nodes) {
+      if (node.id === id) {
+        gather(node)
+        return true
+      }
+      if (find(node.children)) return true
+    }
+    return false
+  }
+  find(tree)
+  return ids
+}
+
 /** Ancestors first, current node last. Works for any depth. */
 export function getCategoryPath(index: CategoryIndex, node: CategoryNode): CategoryNode[] {
   const path: CategoryNode[] = []
@@ -75,15 +96,26 @@ export function resolveCategoryFromSegments(
   return { node, path, canonicalHref: getCategoryHref(path), isCanonical }
 }
 
-export function getBreadcrumbs(path: CategoryNode[]): { label: string; href?: string }[] {
+export interface BreadcrumbLabels {
+  home: string
+  categories: string
+  name: (node: CategoryNode) => string
+}
+
+const DEFAULT_BREADCRUMB_LABELS: BreadcrumbLabels = { home: "Home", categories: "Categories", name: (node) => node.nameEn }
+
+export function getBreadcrumbs(
+  path: CategoryNode[],
+  labels: BreadcrumbLabels = DEFAULT_BREADCRUMB_LABELS
+): { label: string; href?: string }[] {
   const crumbs: { label: string; href?: string }[] = [
-    { label: "Home", href: "/" },
-    { label: "Categories", href: "/categories" },
+    { label: labels.home, href: "/" },
+    { label: labels.categories, href: "/categories" },
   ]
   path.forEach((node, i) => {
     const isLast = i === path.length - 1
     crumbs.push({
-      label: node.nameEn,
+      label: labels.name(node),
       href: isLast ? undefined : getCategoryHref(path.slice(0, i + 1)),
     })
   })

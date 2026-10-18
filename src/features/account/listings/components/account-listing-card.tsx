@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -11,7 +15,6 @@ import {
   DotsThreeVertical,
   PencilSimple,
   CheckCircle,
-  Pause,
   Play,
   Sparkle,
   Trash,
@@ -20,6 +23,7 @@ import {
 } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,13 +33,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ListingStatusBadge } from "./listing-status-badge"
 import type { AccountListingItem, AccountListingStatus } from "../../types"
+import { ModerationKeywordNotice } from "@/features/content/components/moderation-keyword-notice"
 
 interface AccountListingCardProps {
   listing: AccountListingItem
   onStatusChange: (id: string, status: AccountListingStatus) => void
   onPromote: (listing: AccountListingItem) => void
   onDelete: (listing: AccountListingItem) => void
-  onContinueEditingDraft: (listing: AccountListingItem) => void
+  onEdit: (listing: AccountListingItem) => void
 }
 
 export function AccountListingCard({
@@ -43,8 +48,9 @@ export function AccountListingCard({
   onStatusChange,
   onPromote,
   onDelete,
-  onContinueEditingDraft,
+  onEdit,
 }: AccountListingCardProps) {
+  const tGenerated = useTranslations("generated")
   const formattedPrice = `$${Number(listing.price).toLocaleString()} ${listing.currency}`
   const createdDateFormatted = new Date(listing.createdAt).toLocaleDateString(
     "en-US",
@@ -65,7 +71,7 @@ export function AccountListingCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-semibold">
-              No Image
+              <LocalizedText id="noImage" />
             </div>
           )}
 
@@ -83,6 +89,13 @@ export function AccountListingCard({
               <h3 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-1">
                 {listing.title}
               </h3>
+              {(listing.featured || listing.topListing || listing.urgent) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {listing.featured && <Badge variant="outline" className="h-5 text-2xs text-primary"><LocalizedText id="featured" /></Badge>}
+                  {listing.topListing && <Badge variant="outline" className="h-5 text-2xs text-accent"><LocalizedText id="boosted" /></Badge>}
+                  {listing.urgent && <Badge variant="destructive" className="h-5 text-2xs"><LocalizedText id="urgent" /></Badge>}
+                </div>
+              )}
             </div>
 
             <div className="text-right shrink-0">
@@ -90,8 +103,8 @@ export function AccountListingCard({
                 {formattedPrice}
               </span>
               {listing.negotiable && (
-                <span className="text-[10px] text-muted-foreground font-semibold">
-                  Negotiable
+                <span className="text-2xs text-muted-foreground font-semibold">
+                  <LocalizedText id="negotiable" />
                 </span>
               )}
             </div>
@@ -113,6 +126,10 @@ export function AccountListingCard({
             </span>
           </div>
 
+          {listing.status === "pending" && (
+            <ModerationKeywordNotice matches={listing.moderationMatches ?? []} />
+          )}
+
           <div className="pt-2 border-t border-border/50 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
               <span
@@ -123,7 +140,7 @@ export function AccountListingCard({
                 <span className="font-semibold text-foreground">
                   {listing.viewsCount.toLocaleString()}
                 </span>
-                <span className="hidden xs:inline text-[11px]">views</span>
+                <span className="hidden xs:inline text-xxs"><LocalizedText id="views" /></span>
               </span>
 
               <span
@@ -134,7 +151,7 @@ export function AccountListingCard({
                 <span className="font-semibold text-foreground">
                   {listing.favoritesCount}
                 </span>
-                <span className="hidden xs:inline text-[11px]">favorites</span>
+                <span className="hidden xs:inline text-xxs"><LocalizedText id="favorites" /></span>
               </span>
 
               <span
@@ -145,7 +162,7 @@ export function AccountListingCard({
                 <span className="font-semibold text-foreground">
                   {listing.messagesCount}
                 </span>
-                <span className="hidden xs:inline text-[11px]">messages</span>
+                <span className="hidden xs:inline text-xxs"><LocalizedText id="messages" /></span>
               </span>
             </div>
 
@@ -158,18 +175,18 @@ export function AccountListingCard({
                   className="h-8 px-2.5 text-xs font-semibold gap-1 text-accent border-accent/30 hover:bg-accent/10"
                 >
                   <Sparkle size={14} weight="fill" />
-                  <span>Promote</span>
+                  <span><LocalizedText id="promote" /></span>
                 </Button>
               )}
 
               {listing.status === "draft" && (
                 <Button
                   size="xs"
-                  onClick={() => onContinueEditingDraft(listing)}
+                  onClick={() => onEdit(listing)}
                   className="h-8 px-3 text-xs font-bold gap-1 bg-accent text-accent-foreground hover:bg-accent/90"
                 >
                   <PencilSimple size={14} weight="bold" />
-                  <span>Continue Editing</span>
+                  <span><LocalizedText id="continueEditing" /></span>
                 </Button>
               )}
 
@@ -179,7 +196,7 @@ export function AccountListingCard({
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label="Listing actions"
+                      aria-label={tGenerated("listingActions")}
                       className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
                     >
                       <DotsThreeVertical size={18} weight="bold" />
@@ -190,19 +207,19 @@ export function AccountListingCard({
                   {listing.status === "active" && (
                     <>
                       <DropdownMenuItem
+                        onClick={() => onEdit(listing)}
+                        className="gap-2 text-xs font-medium cursor-pointer"
+                      >
+                        <PencilSimple size={15} />
+                        <span><LocalizedText id="editListing" /></span>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
                         onClick={() => onStatusChange(listing.id, "sold")}
                         className="gap-2 text-xs font-medium cursor-pointer"
                       >
                         <CheckCircle size={15} />
-                        <span>Mark as Sold</span>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        onClick={() => onStatusChange(listing.id, "paused")}
-                        className="gap-2 text-xs font-medium cursor-pointer"
-                      >
-                        <Pause size={15} />
-                        <span>Pause Listing</span>
+                        <span><LocalizedText id="markAsSold" /></span>
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
@@ -212,7 +229,7 @@ export function AccountListingCard({
                             className="flex items-center gap-2 text-xs font-medium w-full"
                           >
                             <ArrowSquareOut size={15} />
-                            <span>View Public Listing</span>
+                            <span><LocalizedText id="viewPublicListing" /></span>
                           </Link>
                         }
                       />
@@ -224,7 +241,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Listing</span>
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -232,13 +249,21 @@ export function AccountListingCard({
                   {listing.status === "pending" && (
                     <>
                       <DropdownMenuItem
+                        onClick={() => onEdit(listing)}
+                        className="gap-2 text-xs font-medium cursor-pointer"
+                      >
+                        <PencilSimple size={15} />
+                        <span><LocalizedText id="editListing" /></span>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
                         render={
                           <Link
                             href={`/listing/${listing.slug}`}
                             className="flex items-center gap-2 text-xs font-medium w-full"
                           >
                             <ArrowSquareOut size={15} />
-                            <span>Preview Listing</span>
+                            <span><LocalizedText id="previewListing" /></span>
                           </Link>
                         }
                       />
@@ -250,7 +275,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Listing</span>
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -262,7 +287,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium cursor-pointer"
                       >
                         <ArrowClockwise size={15} />
-                        <span>Relist Item</span>
+                        <span><LocalizedText id="relistItem" /></span>
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
@@ -272,7 +297,7 @@ export function AccountListingCard({
                             className="flex items-center gap-2 text-xs font-medium w-full"
                           >
                             <ArrowSquareOut size={15} />
-                            <span>View Sold Listing</span>
+                            <span><LocalizedText id="viewSoldListing" /></span>
                           </Link>
                         }
                       />
@@ -284,7 +309,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Listing</span>
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -292,11 +317,11 @@ export function AccountListingCard({
                   {listing.status === "draft" && (
                     <>
                       <DropdownMenuItem
-                        onClick={() => onContinueEditingDraft(listing)}
+                        onClick={() => onEdit(listing)}
                         className="gap-2 text-xs font-medium cursor-pointer"
                       >
                         <PencilSimple size={15} />
-                        <span>Edit Draft</span>
+                        <span><LocalizedText id="editDraft" /></span>
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -306,7 +331,29 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Draft</span>
+                        <span><LocalizedText id="deleteDraft" /></span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  {listing.status === "rejected" && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => onEdit(listing)}
+                        className="gap-2 text-xs font-medium cursor-pointer"
+                      >
+                        <PencilSimple size={15} />
+                        <span><LocalizedText id="fixResubmit" /></span>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem
+                        onClick={() => onDelete(listing)}
+                        className="gap-2 text-xs font-medium text-destructive cursor-pointer"
+                      >
+                        <Trash size={15} />
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -318,7 +365,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium cursor-pointer"
                       >
                         <ArrowClockwise size={15} />
-                        <span>Renew & Relist</span>
+                        <span><LocalizedText id="renewRelist" /></span>
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -328,7 +375,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Listing</span>
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -340,7 +387,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium cursor-pointer"
                       >
                         <Play size={15} />
-                        <span>Reactivate Listing</span>
+                        <span><LocalizedText id="reactivateListing" /></span>
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -350,7 +397,7 @@ export function AccountListingCard({
                         className="gap-2 text-xs font-medium text-destructive cursor-pointer"
                       >
                         <Trash size={15} />
-                        <span>Delete Listing</span>
+                        <span><LocalizedText id="deleteListing" /></span>
                       </DropdownMenuItem>
                     </>
                   )}

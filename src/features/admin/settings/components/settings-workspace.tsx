@@ -266,7 +266,7 @@ export function SettingsWorkspace({ initialSettings }: SettingsWorkspaceProps) {
                   <span className="font-semibold text-xs text-foreground block">
                     Seller Posting Availability
                   </span>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xxs text-muted-foreground">
                     Allow registered marketplace users and sellers to publish new classified listings.
                   </p>
                 </div>

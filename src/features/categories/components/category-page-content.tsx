@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -23,10 +27,12 @@ import {
 } from "../lib/category-tree"
 import { CategoryEmptyState } from "./category-empty-state"
 import { CategoryPageHeader } from "./category-page-header"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 export function CategoryPageSkeleton() {
+  const tGenerated = useTranslations("generated")
   return (
-    <div aria-busy="true" aria-label="Loading category" className="space-y-4 pt-2">
+    <div aria-busy="true" aria-label={tGenerated("loadingCategory")} className="space-y-4 pt-2">
       <Skeleton className="h-4 w-56" />
       <Skeleton className="h-8 w-72" />
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -57,6 +63,8 @@ function CategoryMessage({
 }
 
 function CategoryPageBody({ resolved, index }: { resolved: ResolvedCategory; index: CategoryIndex }) {
+  const getLocalizedName = useLocalizedName()
+  const tUi = useTranslations("ui.common")
   const router = useRouter()
   const queryClient = useQueryClient()
   const { node, path } = resolved
@@ -88,13 +96,11 @@ function CategoryPageBody({ resolved, index }: { resolved: ResolvedCategory; ind
     [index, path, filters, router, queryClient]
   )
 
-  const parent = path[path.length - 2]
-
   return (
     <>
       <CategoryPageHeader
-        title={node.nameEn}
-        breadcrumbs={getBreadcrumbs(path)}
+        title={getLocalizedName(node)}
+        breadcrumbs={getBreadcrumbs(path, { home: tUi("home"), categories: tUi("categories"), name: getLocalizedName })}
         totalCount={state.total}
       />
 
@@ -102,13 +108,7 @@ function CategoryPageBody({ resolved, index }: { resolved: ResolvedCategory; ind
         <SearchResultsView
           state={state}
           categoryNav={categoryNav}
-          categoryEmptyState={
-            <CategoryEmptyState
-              parent={
-                parent ? { name: parent.nameEn, href: getCategoryHref(path.slice(0, -1)) } : undefined
-              }
-            />
-          }
+          categoryEmptyState={<CategoryEmptyState />}
         />
       </div>
     </>
@@ -116,6 +116,8 @@ function CategoryPageBody({ resolved, index }: { resolved: ResolvedCategory; ind
 }
 
 export function CategoryPageContent({ segments }: { segments: string[] }) {
+  const tGenerated = useTranslations("generated")
+  const tCat = useTranslations("ui.categoryPage")
   const router = useRouter()
   const searchParams = useSearchParams()
   const tree = useCategoryTree()
@@ -138,11 +140,11 @@ export function CategoryPageContent({ segments }: { segments: string[] }) {
   if (tree.isError || !index) {
     return (
       <CategoryMessage
-        title="We couldn't load this category."
-        body="Please check your connection and try again."
+        title={tGenerated("weCouldnTLoadThisCategory")}
+        body={tCat("loadFailed")}
         action={
           <Button size="sm" onClick={() => tree.refetch()}>
-            Try again
+            <LocalizedText id="tryAgain" />
           </Button>
         }
       />
@@ -152,11 +154,11 @@ export function CategoryPageContent({ segments }: { segments: string[] }) {
   if (!resolved) {
     return (
       <CategoryMessage
-        title="Category not found"
-        body="This category doesn't exist or is no longer available."
+        title={tGenerated("categoryNotFound")}
+        body={tCat("notFound")}
         action={
           <Link href="/categories" className="text-sm font-semibold text-primary hover:underline">
-            Browse all categories
+            <LocalizedText id="browseAllCategories" />
           </Link>
         }
       />

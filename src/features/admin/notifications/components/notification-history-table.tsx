@@ -109,7 +109,7 @@ export function NotificationHistoryTable({
         return (
           item.title.toLowerCase().includes(q) ||
           item.message.toLowerCase().includes(q) ||
-          item.id.toLowerCase().includes(q)
+          item.displayId.toLowerCase().includes(q)
         )
       }
       return true
@@ -194,7 +194,6 @@ export function NotificationHistoryTable({
               <DataTableEmpty
                 colSpan={columns.length}
                 title="No notification records found"
-                description="Try adjusting your search criteria."
               />
             )}
           </TableBody>
@@ -220,7 +219,7 @@ export function NotificationHistoryTable({
                     <span className="font-semibold text-xs text-foreground block truncate">
                       {item.title}
                     </span>
-                    <span className="text-[11px] text-muted-foreground block truncate">
+                    <span className="text-xxs text-muted-foreground block truncate">
                       {item.message}
                     </span>
                   </div>
@@ -228,10 +227,10 @@ export function NotificationHistoryTable({
                 </div>
 
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <Badge variant="outline" className="text-[10px] font-medium">
+                  <Badge variant="outline" className="text-2xs font-medium">
                     {AUDIENCE_LABELS[item.audience] || item.audience}
                   </Badge>
-                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                  <span className="text-xxs text-muted-foreground whitespace-nowrap">
                     {item.sentAt}
                   </span>
                 </div>
@@ -253,7 +252,6 @@ export function NotificationHistoryTable({
         ) : (
           <DataTableEmpty
             title="No notification records found"
-            description="Try adjusting your search criteria."
           />
         )}
       </div>

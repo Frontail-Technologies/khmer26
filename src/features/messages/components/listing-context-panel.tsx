@@ -1,3 +1,7 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+import { useIntlLocale } from "@/lib/i18n/use-intl-locale"
+import { formatMemberSince } from "@/features/listings/lib/listing-detail-format"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -27,11 +31,14 @@ export function ListingContextPanel({
   role,
   onOpenMakeOffer,
 }: ListingContextPanelProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const intlLocale = useIntlLocale()
   return (
     <aside className="w-72 xl:w-80 h-full bg-card border-l border-border/70 overflow-y-auto p-4 space-y-4 no-scrollbar shrink-0">
       <div className="space-y-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-          Item in Conversation
+        <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground block">
+          <LocalizedText id="itemInConversation" />
         </span>
       </div>
 
@@ -47,7 +54,7 @@ export function ListingContextPanel({
           <div className="absolute top-2 left-2">
             <Badge
               variant="outline"
-              className="bg-background/90 backdrop-blur-xs text-foreground font-bold text-[10px] uppercase tracking-wider px-2 py-0.5"
+              className="bg-background/90 backdrop-blur-xs text-foreground font-bold text-2xs uppercase tracking-wider px-2 py-0.5"
             >
               {listing.status}
             </Badge>
@@ -60,8 +67,8 @@ export function ListingContextPanel({
               ${listing.price.toLocaleString()} {listing.currency}
             </span>
             {listing.negotiable && (
-              <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                Negotiable
+              <span className="text-2xs font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                <LocalizedText id="negotiable" />
               </span>
             )}
           </div>
@@ -79,7 +86,7 @@ export function ListingContextPanel({
             <Button
               render={
                 <Link href={`/listing/${listing.slug}`}>
-                  <span>View Full Listing</span>
+                  <span><LocalizedText id="viewFullListing" /></span>
                   <ArrowSquareOut size={15} />
                 </Link>
               }
@@ -94,7 +101,7 @@ export function ListingContextPanel({
                 className="w-full h-9 text-xs font-bold rounded-xl gap-1.5 text-accent border-accent/30 hover:bg-accent/10"
               >
                 <Tag size={15} weight="bold" />
-                <span>Make a Price Offer</span>
+                <span><LocalizedText id="makeAPriceOffer" /></span>
               </Button>
             )}
           </div>
@@ -104,17 +111,17 @@ export function ListingContextPanel({
       <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 space-y-2.5 text-xs">
         <div className="flex items-center justify-between">
           <span className="font-bold text-foreground">
-            {participant.role === "seller" ? "Seller Details" : "Buyer Details"}
+            {participant.role === "seller" ? tGenerated("sellerDetails") : tGenerated("buyerDetails")}
           </span>
           {participant.verified && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
+            <span className="inline-flex items-center gap-1 text-xxs font-bold text-primary">
               <SealCheck size={14} weight="fill" />
-              <span>Verified</span>
+              <span><LocalizedText id="verified" /></span>
             </span>
           )}
         </div>
 
-        <div className="space-y-1.5 text-muted-foreground text-[11px]">
+        <div className="space-y-1.5 text-muted-foreground text-xxs">
           {participant.responseTime && (
             <div className="flex items-center gap-1.5">
               <Clock size={13} className="shrink-0" />
@@ -125,7 +132,11 @@ export function ListingContextPanel({
           {participant.joinedAt && (
             <div className="flex items-center gap-1.5">
               <ShieldCheck size={13} className="shrink-0" />
-              <span>Member since {participant.joinedAt}</span>
+              <span>
+                {tDynamic("memberSince", {
+                  date: formatMemberSince(participant.joinedAt, intlLocale),
+                })}
+              </span>
             </div>
           )}
 

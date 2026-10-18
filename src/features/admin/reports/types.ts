@@ -15,6 +15,7 @@ export interface AdminReportTargetParticipant {
 export interface AdminReportTargetReference {
   type: AdminReportTargetType
   id: string
+  displayId?: string
   title: string
   subtitle?: string
   thumbnail?: string
@@ -52,6 +53,7 @@ export interface AdminReportEvidence {
 
 export interface AdminReport {
   id: string
+  displayId?: string
   targetType: AdminReportTargetType
   target: AdminReportTargetReference
   reason: string
@@ -71,7 +73,9 @@ export interface AdminReport {
 export interface AdminReportReasonItem {
   id: string
   label: string
+  labelKm?: string | null
   description?: string
+  descriptionKm?: string | null
   appliesTo: AdminReportTargetType[]
   isActive: boolean
   createdAt?: string

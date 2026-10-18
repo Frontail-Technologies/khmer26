@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import Image from "next/image"
 import { X, Image as ImageIcon } from "@phosphor-icons/react"
@@ -20,6 +24,7 @@ export function AdminImagePreviewDialog({
   src,
   alt,
 }: AdminImagePreviewDialogProps) {
+  const tGenerated = useTranslations("generated")
   if (!src) return null
 
   return (
@@ -42,7 +47,7 @@ export function AdminImagePreviewDialog({
             {alt || "Image Preview"}
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
-            Enlarged preview of thumbnail image
+            <LocalizedText id="enlargedPreviewOfThumbnailImage" />
           </DialogPrimitive.Description>
 
           <div className="relative max-w-[90vw] max-h-[90dvh] flex items-center justify-center pointer-events-auto rounded-xl overflow-hidden shadow-2xl bg-black/30 border border-white/10">
@@ -62,7 +67,7 @@ export function AdminImagePreviewDialog({
                   variant="secondary"
                   size="icon-xs"
                   className="absolute top-3 right-3 size-7 rounded-full bg-black/70 hover:bg-black/90 text-white border border-white/20 shadow-md cursor-pointer transition-transform hover:scale-105"
-                  aria-label="Close image preview"
+                  aria-label={tGenerated("closeImagePreview")}
                 >
                   <X size={14} weight="bold" />
                 </Button>
@@ -105,6 +110,7 @@ export function AdminImageThumbnail({
   fill = true,
   sizes = "48px",
 }: AdminImageThumbnailProps) {
+  const tGenerated = useTranslations("generated")
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const safeSrc = sanitizeImageSrc(src)
 
@@ -121,7 +127,7 @@ export function AdminImageThumbnail({
           safeSrc ? "cursor-zoom-in" : "cursor-default",
           containerClassName
         )}
-        aria-label={safeSrc ? `View enlarged preview of ${alt}` : "No image"}
+        aria-label={safeSrc ? `View enlarged preview of ${alt}` : tGenerated("noImage_fc5e5b")}
       >
         {safeSrc ? (
           fill ? (

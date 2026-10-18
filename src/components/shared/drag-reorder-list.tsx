@@ -3,15 +3,26 @@
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
+interface DragReorderItemState {
+  isDragging: boolean
+  isDropTarget: boolean
+  dragHandleProps: {
+    draggable: true
+    onDragStart: (event: React.DragEvent<HTMLElement>) => void
+    onDragEnd: () => void
+  }
+}
+
 interface DragReorderListProps<T> {
   items: T[]
   getId: (item: T) => string
   onReorder: (newItems: T[]) => void
-  renderItem: (item: T, index: number, state: { isDragging: boolean; isDropTarget: boolean }) => React.ReactNode
+  renderItem: (item: T, index: number, state: DragReorderItemState) => React.ReactNode
   className?: string
-  itemClassName?: string
+  itemClassName?: string | ((state: DragReorderItemState) => string)
   as?: "div" | "ul" | "fragment"
   itemAs?: "div" | "tr"
+  dragHandleOnly?: boolean
 }
 
 export function DragReorderList<T>({
@@ -23,6 +34,7 @@ export function DragReorderList<T>({
   itemClassName,
   as = "div",
   itemAs = "div",
+  dragHandleOnly = false,
 }: DragReorderListProps<T>) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
@@ -71,23 +83,34 @@ export function DragReorderList<T>({
 
   const ItemTag = itemAs
 
-  const children = items.map((item, index) => (
-    <ItemTag
-      key={getId(item)}
-      draggable
-      onDragStart={(e) => handleDragStart(e, index)}
-      onDragOver={(e) => handleDragOver(e, index)}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => handleDrop(e, index)}
-      onDragEnd={handleDragEnd}
-      className={cn(itemClassName)}
-    >
-      {renderItem(item, index, {
+  const children = items.map((item, index) => {
+    const itemState: DragReorderItemState = {
         isDragging: draggedIndex === index,
         isDropTarget: dragOverIndex === index && draggedIndex !== index,
-      })}
-    </ItemTag>
-  ))
+        dragHandleProps: {
+          draggable: true,
+          onDragStart: (event) => handleDragStart(event, index),
+          onDragEnd: handleDragEnd,
+        },
+    }
+
+    return (
+      <ItemTag
+        key={getId(item)}
+        draggable={!dragHandleOnly}
+        onDragStart={dragHandleOnly ? undefined : (e) => handleDragStart(e, index)}
+        onDragOver={(e) => handleDragOver(e, index)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, index)}
+        onDragEnd={dragHandleOnly ? undefined : handleDragEnd}
+        className={cn(
+          typeof itemClassName === "function" ? itemClassName(itemState) : itemClassName
+        )}
+      >
+        {renderItem(item, index, itemState)}
+      </ItemTag>
+    )
+  })
 
   if (as === "fragment") {
     return <>{children}</>

@@ -1,10 +1,13 @@
 "use client"
 
+import { useLocale, useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Container } from "@/components/layout/Container"
-import { MobilePageHeader } from "@/components/shared/mobile-page-header"
 import { ApiError } from "@/lib/api/client"
 import { toListingCardData } from "@/features/listings/lib/to-listing-card-data"
 import {
@@ -14,6 +17,9 @@ import {
 } from "../../api/listing-detail.queries"
 import { toGalleryImages } from "../../lib/listing-detail-format"
 import { isLoanEligible } from "../../lib/loan-eligibility"
+import { usePublicSafetyTips } from "@/features/content/hooks/content.queries"
+import { localizeTip } from "@/features/content/lib/localize"
+import type { Locale } from "@/i18n/config"
 import { ListingBreadcrumbs } from "./listing-breadcrumbs"
 import { ListingGallery } from "./listing-gallery"
 import { ListingPrimaryPanel } from "./listing-primary-panel"
@@ -22,16 +28,18 @@ import { ListingInfoCard } from "./listing-info-card"
 import { ListingSafetyCard } from "./listing-safety-card"
 import { ListingCardsSection } from "./listing-cards-section"
 import { ListingMobileActionBar } from "./listing-mobile-action-bar"
+import { ListingMobileGalleryControls } from "./listing-mobile-gallery-controls"
 import { LoanCalculatorCard } from "./loan-calculator/loan-calculator-card"
 
 const MORE_FROM_SELLER_LIMIT = 4
 
 function DetailSkeleton() {
+  const tGenerated = useTranslations("generated")
   return (
     <Container className="py-3 sm:py-4">
       <div
         aria-busy="true"
-        aria-label="Loading listing"
+        aria-label={tGenerated("loadingListing")}
         className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6"
       >
         <div className="space-y-4 lg:col-span-8">
@@ -48,10 +56,14 @@ function DetailSkeleton() {
 }
 
 export function ListingDetailContent({ id }: { id: string }) {
+  const tGenerated = useTranslations("generated")
   const query = useListingDetail(id)
   const listing = query.data
   const similar = useSimilarListings(id, Boolean(listing))
   const sellerListings = useSellerListings(listing?.seller?.id, Boolean(listing))
+  const safetyTips = usePublicSafetyTips("listing_detail")
+  const locale = useLocale() as Locale
+  const safetyTipText = safetyTips.data?.map((item) => localizeTip(item, locale)) ?? []
 
   if (query.isPending) return <DetailSkeleton />
 
@@ -62,20 +74,20 @@ export function ListingDetailContent({ id }: { id: string }) {
       <Container className="py-10">
         <div className="mx-auto max-w-md rounded-2xl border border-dashed border-border/80 bg-card/40 p-10 text-center">
           <h1 className="text-lg font-bold text-foreground">
-            {notAvailable ? "This listing isn't available" : "We couldn't load this listing"}
+            {notAvailable ? tGenerated("thisListingIsnTAvailable") : tGenerated("weCouldnTLoadThisListing")}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             {notAvailable
-              ? "It may have been sold, removed or expired."
-              : "Please check your connection and try again."}
+              ? tGenerated("itMayHaveBeenSoldRemovedOrExpired")
+              : tGenerated("pleaseCheckYourConnectionAndTryAgain")}
           </p>
           <div className="mt-5 flex items-center justify-center gap-2.5">
             {!notAvailable && (
               <Button size="sm" onClick={() => query.refetch()}>
-                Try again
+                <LocalizedText id="tryAgain" />
               </Button>
             )}
-            <Button size="sm" variant="outline" render={<Link href="/search">Browse listings</Link>} />
+            <Button size="sm" variant="outline" render={<Link href="/search"><LocalizedText id="browseListings" /></Link>} />
           </div>
         </div>
       </Container>
@@ -98,6 +110,8 @@ export function ListingDetailContent({ id }: { id: string }) {
     .map((c) => encodeURIComponent(c.slug))
     .join("/")}`
   const sellerName = listing.seller?.shopName?.trim()
+  const hasContacts = (listing.seller?.contacts.length ?? 0) > 0
+  const canOffer = !listing.isOwner && listing.price !== null && listing.currency !== null
 
   const loan = showLoan ? (
     <LoanCalculatorCard price={price} currency={listing.currency ?? "USD"} />
@@ -105,54 +119,62 @@ export function ListingDetailContent({ id }: { id: string }) {
 
   return (
     <div className="min-h-dvh bg-background pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-12">
-      <MobilePageHeader
-        backHref="/search"
-        backLabel="Back to search results"
-        title={listing.title}
-      />
-      <Container className="py-3 sm:py-4">
+      <Container className="max-w-6xl py-0 sm:py-4">
         <ListingBreadcrumbs categoryPath={listing.category.breadcrumb} title={listing.title} />
 
-        <div className="mt-2 grid grid-cols-1 items-start gap-4 lg:grid-cols-12 lg:gap-6">
-          <div className="min-w-0 space-y-4 lg:col-span-8">
+        <div className="mt-0 grid grid-cols-1 items-start gap-2.5 sm:mt-2 sm:gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:gap-4">
+          <div className="-mx-3 min-w-0 overflow-hidden rounded-none border-y border-border/70 bg-card sm:-mx-4 md:mx-0 md:rounded-md md:border lg:col-start-1 lg:row-start-1">
             <ListingGallery
               images={toGalleryImages(listing.media, listing.title)}
               title={listing.title}
+              mobileControls={<ListingMobileGalleryControls listing={listing} fallbackHref={categoryHref} />}
             />
-
-            <div className="space-y-4 lg:hidden">
+            <div className="border-t border-border/60 px-3 py-2.5 sm:px-4 sm:py-3">
               <ListingPrimaryPanel listing={listing} />
-              {listing.seller && <ListingSellerCard seller={listing.seller} />}
-            </div>
-
-            <ListingInfoCard listing={listing} />
-
-            {loan && <div className="lg:hidden">{loan}</div>}
-
-            <div className="lg:hidden">
-              <ListingSafetyCard />
             </div>
           </div>
 
-          <div className="hidden space-y-4 lg:sticky lg:top-20 lg:col-span-4 lg:block">
-            <ListingPrimaryPanel listing={listing} />
-            {listing.seller && <ListingSellerCard seller={listing.seller} />}
-            {loan}
-            <ListingSafetyCard />
+          <div className="space-y-3 lg:col-start-2 lg:row-span-3 lg:row-start-1">
+            {listing.seller && (
+              <ListingSellerCard
+                seller={listing.seller}
+                listingId={listing.id}
+                isOwner={listing.isOwner}
+                mobileOffer={
+                  hasContacts && canOffer
+                    ? { title: listing.title, price: Number(listing.price), currency: listing.currency! }
+                    : null
+                }
+              />
+            )}
+            <div className="hidden lg:block">
+              <ListingSafetyCard tips={safetyTipText} isLoading={safetyTips.isPending} />
+            </div>
+          </div>
+
+          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <ListingInfoCard listing={listing} />
+          </div>
+
+          {loan && <div className="min-w-0 lg:col-start-1 lg:row-start-3">{loan}</div>}
+
+          <div className="min-w-0 lg:hidden">
+            <ListingSafetyCard tips={safetyTipText} isLoading={safetyTips.isPending} />
           </div>
         </div>
 
-        <div className="mt-8 space-y-8 border-t border-border/70 pt-6 sm:mt-10 sm:pt-8">
+        <div className="mt-4 space-y-4 border-t border-border/70 pt-3 sm:mt-6 sm:space-y-5 sm:pt-5">
           <ListingCardsSection
-            title={sellerName ? `More from ${sellerName}` : "More from this seller"}
+            title={sellerName ? `More from ${sellerName}` : tGenerated("moreFromThisSeller")}
             listings={moreFromSeller}
             viewAllHref={listing.seller ? `/seller/${listing.seller.id}` : undefined}
           />
-          <ListingCardsSection title="Related listings" listings={related} viewAllHref={categoryHref} />
+          <ListingCardsSection title={tGenerated("relatedPosts")} listings={related} viewAllHref={categoryHref} />
         </div>
+
       </Container>
 
-      <ListingMobileActionBar listing={listing} />
+      <ListingMobileActionBar listing={listing} hasContacts={hasContacts} />
     </div>
   )
 }

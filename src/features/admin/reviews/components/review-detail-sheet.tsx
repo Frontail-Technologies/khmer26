@@ -73,9 +73,9 @@ export function ReviewDetailSheet({
                 size="sm"
               />
             </div>
-            <span className="font-mono text-[11px] text-muted-foreground">{review.id}</span>
+            <span className="font-mono text-xxs text-muted-foreground">{review.displayId}</span>
           </div>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xxs text-muted-foreground">
             Submitted on {review.createdAt}
           </span>
         </SheetHeader>
@@ -100,7 +100,7 @@ export function ReviewDetailSheet({
               {review.reportsCount > 0 && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] font-bold px-1.5 py-0 h-5 border-destructive/30 text-destructive bg-destructive/5"
+                  className="text-2xs font-bold px-1.5 py-0 h-5 border-destructive/30 text-destructive bg-destructive/5"
                 >
                   <WarningCircle size={11} className="mr-1" weight="fill" />
                   {review.reportsCount} {review.reportsCount === 1 ? "Report" : "Reports"}
@@ -124,7 +124,7 @@ export function ReviewDetailSheet({
                   <Button
                     variant="outline"
                     size="xs"
-                    className="h-6 text-[10px] border-destructive/30 text-destructive hover:bg-destructive/10 cursor-pointer"
+                    className="h-6 text-2xs border-destructive/30 text-destructive hover:bg-destructive/10 cursor-pointer"
                     onClick={() => onDismissReports(review.id)}
                   >
                     <CheckCircle size={12} className="mr-1" />
@@ -134,10 +134,10 @@ export function ReviewDetailSheet({
               </div>
               {review.reportReasons && review.reportReasons.length > 0 && (
                 <div className="space-y-1 pt-1">
-                  <span className="text-[11px] text-muted-foreground block font-medium">
+                  <span className="text-xxs text-muted-foreground block font-medium">
                     Reported reasons:
                   </span>
-                  <ul className="space-y-1 pl-3 text-[11px] text-muted-foreground list-disc">
+                  <ul className="space-y-1 pl-3 text-xxs text-muted-foreground list-disc">
                     {review.reportReasons.map((reason, idx) => (
                       <li key={idx}>{reason}</li>
                     ))}
@@ -149,14 +149,14 @@ export function ReviewDetailSheet({
 
           <div className="p-3.5 rounded-xl bg-background border border-border/70 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <User size={13} />
                 Reviewer
               </span>
               <Button
                 variant="ghost"
                 size="xs"
-                className="h-6 text-[11px] text-primary"
+                className="h-6 text-xxs text-primary"
                 render={
                   <Link href={`/admin/users/${review.reviewer.id}`}>
                     <ArrowSquareOut size={12} className="mr-1" />
@@ -168,7 +168,7 @@ export function ReviewDetailSheet({
             <div className="flex items-center gap-2.5 pt-0.5">
               <Avatar className="size-8.5 rounded-full border border-border/60">
                 <AvatarImage src={review.reviewer.avatarUrl} alt={review.reviewer.name} />
-                <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">
+                <AvatarFallback className="text-2xs font-bold bg-muted text-muted-foreground">
                   {reviewerInitials}
                 </AvatarFallback>
               </Avatar>
@@ -179,14 +179,13 @@ export function ReviewDetailSheet({
                 >
                   {review.reviewer.name}
                 </Link>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <span className="font-mono">{review.reviewer.id}</span>
-                  {review.reviewer.phone && <span>• {review.reviewer.phone}</span>}
+                <div className="flex items-center gap-1.5 text-2xs text-muted-foreground">
+                  <span>{review.reviewer.phone || "User account"}</span>
                 </div>
               </div>
             </div>
             {review.reviewer.email && (
-              <span className="text-[11px] text-muted-foreground block truncate pt-0.5">
+              <span className="text-xxs text-muted-foreground block truncate pt-0.5">
                 Email: {review.reviewer.email}
               </span>
             )}
@@ -194,14 +193,14 @@ export function ReviewDetailSheet({
 
           <div className="p-3.5 rounded-xl bg-background border border-border/70 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <Storefront size={13} />
                 Seller
               </span>
               <Button
                 variant="ghost"
                 size="xs"
-                className="h-6 text-[11px] text-primary"
+                className="h-6 text-xxs text-primary"
                 render={
                   <Link href={`/admin/users/${review.seller.id}`}>
                     <ArrowSquareOut size={12} className="mr-1" />
@@ -213,7 +212,7 @@ export function ReviewDetailSheet({
             <div className="flex items-center gap-2.5 pt-0.5">
               <Avatar className="size-8.5 rounded-full border border-border/60">
                 <AvatarImage src={review.seller.avatarUrl} alt={review.seller.name} />
-                <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">
+                <AvatarFallback className="text-2xs font-bold bg-muted text-muted-foreground">
                   {sellerInitials}
                 </AvatarFallback>
               </Avatar>
@@ -224,33 +223,38 @@ export function ReviewDetailSheet({
                 >
                   {review.seller.businessName || review.seller.name}
                 </Link>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <span className="font-mono">{review.seller.id}</span>
-                  {review.seller.businessName && <span>• {review.seller.name}</span>}
+                <div className="flex items-center gap-1.5 text-2xs text-muted-foreground">
+                  <span>{review.seller.businessName ? review.seller.name : "Seller account"}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground pt-0.5">
-              <span className="flex items-center text-accent font-semibold">
-                <Star size={11} weight="fill" className="mr-0.5" />
-                {review.seller.rating}
-              </span>
-              <span>•</span>
-              <span>{review.seller.totalReviewsCount} Total Reviews</span>
-            </div>
+            {review.seller.rating !== undefined && (
+              <div className="flex items-center gap-2 text-xxs text-muted-foreground pt-0.5">
+                <span className="flex items-center text-accent font-semibold">
+                  <Star size={11} weight="fill" className="mr-0.5" />
+                  {review.seller.rating}
+                </span>
+                {review.seller.totalReviewsCount !== undefined && (
+                  <>
+                    <span>•</span>
+                    <span>{review.seller.totalReviewsCount} Total Reviews</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {review.listing && (
             <div className="p-3.5 rounded-xl bg-background border border-border/70 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <ShoppingBag size={13} />
                   Linked Listing
                 </span>
                 <Button
                   variant="ghost"
                   size="xs"
-                  className="h-6 text-[11px] text-primary"
+                  className="h-6 text-xxs text-primary"
                   render={
                     <Link href={`/admin/listings/${review.listing.id}`}>
                       <ArrowSquareOut size={12} className="mr-1" />
@@ -277,7 +281,7 @@ export function ReviewDetailSheet({
                   >
                     {review.listing.title}
                   </Link>
-                  <span className="font-bold text-[11px] text-primary block">
+                  <span className="font-bold text-xxs text-primary block">
                     ${review.listing.price.toLocaleString()} {review.listing.currency}
                   </span>
                 </div>

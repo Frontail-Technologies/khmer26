@@ -13,8 +13,9 @@ vi.mock("next/image", () => ({
 }))
 const push = vi.fn()
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push, back: vi.fn() }),
+  useRouter: () => ({ push, back: vi.fn(), replace: vi.fn() }),
   usePathname: () => "/seller/x",
+  useSearchParams: () => new URLSearchParams(),
 }))
 vi.mock("@/features/auth/hooks/use-current-user", () => ({
   useCurrentUser: () => ({ user: null, isAuthenticated: true, isLoading: false }),
@@ -26,6 +27,7 @@ vi.mock("@/features/auth/hooks/use-require-auth", () => ({
 const getSeller = vi.fn()
 const getSellerListingsPage = vi.fn()
 const getSellerReviewsPage = vi.fn()
+const getReviewEligibility = vi.fn()
 const createReview = vi.fn()
 const getSellerReportReasons = vi.fn()
 const reportSeller = vi.fn()
@@ -34,6 +36,7 @@ vi.mock("../api/sellers.api", async (orig) => ({
   getSeller: (...a: unknown[]) => getSeller(...a),
   getSellerListingsPage: (...a: unknown[]) => getSellerListingsPage(...a),
   getSellerReviewsPage: (...a: unknown[]) => getSellerReviewsPage(...a),
+  getReviewEligibility: (...a: unknown[]) => getReviewEligibility(...a),
   createReview: (...a: unknown[]) => createReview(...a),
   getSellerReportReasons: (...a: unknown[]) => getSellerReportReasons(...a),
   reportSeller: (...a: unknown[]) => reportSeller(...a),
@@ -57,15 +60,26 @@ function setup({
   listings = [makeListing("l1"), makeListing("l2")],
   listingTotal = listings.length,
   reviews = [makeReview("r1"), makeReview("r2", { rating: 3, comment: "Okay" })],
+  eligibility = {
+    eligible: true,
+    reason: null,
+    deal: { listingId: "l1", listingTitle: "Listing l1", offerId: "o1" },
+  },
 }: {
   seller?: ReturnType<typeof makeSeller>
   listings?: ReturnType<typeof makeListing>[]
   listingTotal?: number
   reviews?: ReturnType<typeof makeReview>[]
+  eligibility?: {
+    eligible: boolean
+    reason: "AUTH_REQUIRED" | "OWN_PROFILE" | "NO_COMPLETED_DEAL" | null
+    deal: { listingId: string; listingTitle: string; offerId: string } | null
+  }
 } = {}) {
   getSeller.mockResolvedValue(seller)
   getSellerListingsPage.mockResolvedValue({ items: listings, pagination: pagination(1, listingTotal) })
   getSellerReviewsPage.mockResolvedValue({ items: reviews, pagination: pagination(1, reviews.length, 10) })
+  getReviewEligibility.mockResolvedValue(eligibility)
   return renderWithProviders(<SellerProfileContent id={seller.id} />)
 }
 
@@ -86,6 +100,7 @@ beforeEach(() => {
     getSeller,
     getSellerListingsPage,
     getSellerReviewsPage,
+    getReviewEligibility,
     createReview,
     getSellerReportReasons,
     reportSeller,
@@ -113,10 +128,9 @@ describe("seller header", () => {
     const { container } = setup()
     await findShopHeading("Angkor Motors")
     const text = container.textContent ?? ""
-    for (const fake of [/follower/i, /response/i, /\bphone\b/i, /\bsold\b/i, /\bviews\b/i, /Follow\b/]) {
+    for (const fake of [/follower/i, /response/i, /\bphone\b/i, /\bsold\b/i, /\bviews\b/i]) {
       expect(text).not.toMatch(fake)
     }
-    expect(screen.queryByRole("button", { name: /follow/i })).toBeNull()
   })
 
   it("hides the verified badge, rating and bio when the backend does not return them, and falls back to initials", async () => {
@@ -133,6 +147,23 @@ describe("seller header", () => {
     const longName = "The Extraordinarily Long Named Premium Automotive Trading Company of Cambodia Limited"
     setup({ seller: makeSeller({ shopName: longName }) })
     expect(await findShopHeading(longName)).toBeInTheDocument()
+  })
+})
+
+describe("seller cover image", () => {
+  it("shows the backend cover image behind the header", async () => {
+    const { container } = setup()
+    await findShopHeading("Angkor Motors")
+    const cover = container.querySelector('img[src="https://cdn.test/sellers/angkor-cover.jpg"]')
+    expect(cover).not.toBeNull()
+    expect(cover).toHaveAttribute("alt", "")
+  })
+
+  it("falls back to the brand gradient when the seller has no cover", async () => {
+    const { container } = setup({ seller: makeSeller({ coverR2Key: null }) })
+    await findShopHeading("Angkor Motors")
+    expect(container.querySelector('img[src*="cover"]')).toBeNull()
+    expect(container.querySelector(".bg-linear-to-r")).not.toBeNull()
   })
 })
 
@@ -158,7 +189,7 @@ describe("seller listings", () => {
     setup({ listings: [makeListing("l1", "Prius"), makeListing("l2", "Camry")], listingTotal: 2 })
     expect((await screen.findAllByText("Prius")).length).toBeGreaterThan(0)
     expect(screen.getAllByText("Camry").length).toBeGreaterThan(0)
-    expect(screen.getByText("Showing 2 of 2 active listings")).toBeInTheDocument()
+    expect(screen.getByText("Showing 2 of 2 listings")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /load more listings/i })).toBeNull()
   })
 
@@ -173,11 +204,11 @@ describe("seller listings", () => {
       .mockResolvedValueOnce({ items: [makeListing("b0", "Thirteenth")], pagination: pagination(2, 13) })
     renderWithProviders(<SellerProfileContent id={SELLER.id} />)
 
-    expect(await screen.findByText("Showing 12 of 13 active listings")).toBeInTheDocument()
+    expect(await screen.findByText("Showing 12 of 13 listings")).toBeInTheDocument()
     fireEvent.click(screen.getByRole("button", { name: /load more listings/i }))
     expect((await screen.findAllByText("Thirteenth")).length).toBeGreaterThan(0)
-    expect(getSellerListingsPage).toHaveBeenLastCalledWith(SELLER.id, { page: 2, limit: 12 })
-    expect(screen.getByText("Showing 13 of 13 active listings")).toBeInTheDocument()
+    expect(getSellerListingsPage).toHaveBeenLastCalledWith(SELLER.id, { page: 2, limit: 12 }, expect.any(Object))
+    expect(screen.getByText("Showing 13 of 13 listings")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /load more listings/i })).toBeNull()
   })
 
@@ -239,6 +270,8 @@ describe("review submission", () => {
     await waitFor(() =>
       expect(createReview).toHaveBeenCalledWith({
         sellerProfileId: SELLER.id,
+        listingId: "l1",
+        offerId: "o1",
         rating: 4,
         comment: "Fast and honest",
       })
@@ -255,13 +288,13 @@ describe("review submission", () => {
     createReview.mockRejectedValue(
       new ApiError(409, {
         code: "CONFLICT",
-        message: "You have already reviewed this seller",
+        message: "You have already reviewed this transaction",
         details: { code: "DUPLICATE_REVIEW" },
       })
     )
     setup()
     await fillAndSubmit()
-    expect(await screen.findByRole("alert")).toHaveTextContent("You have already reviewed this seller.")
+    expect(await screen.findByRole("alert")).toHaveTextContent("You have already reviewed this transaction.")
   })
 
   it("blocks self-review: the form is not offered on your own profile", async () => {
@@ -270,6 +303,13 @@ describe("review submission", () => {
     await screen.findByText(/Based on/)
     expect(screen.queryByRole("form", { name: "Write a review" })).toBeNull()
     expect(screen.queryByRole("button", { name: /chat with seller/i })).toBeNull()
+  })
+
+  it("does not offer a review form without a completed verified deal", async () => {
+    setup({ eligibility: { eligible: false, reason: "NO_COMPLETED_DEAL", deal: null } })
+    await openReviews()
+    expect(await screen.findByText(/accepted offer on a sold listing/i)).toBeInTheDocument()
+    expect(screen.queryByRole("form", { name: "Write a review" })).toBeNull()
   })
 
   it("also surfaces the backend self-review error if it ever comes back", async () => {
@@ -287,12 +327,12 @@ describe("review submission", () => {
 })
 
 describe("chat CTA", () => {
-  it("starts the real conversation from the seller's first listing and never navigates to the messages page", async () => {
+  it("starts the real conversation from the seller's first listing and opens the thread", async () => {
     startConversation.mockResolvedValue({ id: "conv-1" })
     setup()
     fireEvent.click(await screen.findByRole("button", { name: /chat with seller/i }))
     await waitFor(() => expect(startConversation).toHaveBeenCalledWith("l1"))
-    expect(push).not.toHaveBeenCalledWith(expect.stringContaining("/messages"))
+    expect(push).toHaveBeenCalledWith("/messages/conv-1")
   })
 })
 

@@ -29,7 +29,7 @@ export function VerificationDocuments({ documents }: VerificationDocumentsProps)
             </p>
           </div>
 
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+          <div className="flex items-center gap-1 text-xxs text-muted-foreground shrink-0">
             <ShieldCheck size={16} className="text-primary shrink-0" />
             <span>Admin-only access</span>
           </div>
@@ -49,7 +49,7 @@ export function VerificationDocuments({ documents }: VerificationDocumentsProps)
                     {isPdf ? (
                       <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
                         <FilePdf size={40} className="text-destructive" />
-                        <span className="text-[10px] font-semibold uppercase">PDF Document</span>
+                        <span className="text-2xs font-semibold uppercase">PDF Document</span>
                       </div>
                     ) : (
                       <Image
@@ -57,6 +57,7 @@ export function VerificationDocuments({ documents }: VerificationDocumentsProps)
                         alt={doc.title}
                         width={400}
                         height={200}
+                        unoptimized
                         className="h-full w-full object-cover group-hover/doc:scale-105 transition-transform duration-300"
                       />
                     )}
@@ -80,13 +81,13 @@ export function VerificationDocuments({ documents }: VerificationDocumentsProps)
                       </span>
                       <Badge
                         variant="secondary"
-                        className="text-[9px] font-semibold uppercase px-1.5 py-0 h-4 shrink-0"
+                        className="text-3xs font-semibold uppercase px-1.5 py-0 h-4 shrink-0"
                       >
                         {doc.status}
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <div className="flex items-center justify-between text-xxs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         {isPdf ? <FilePdf size={13} /> : <FileImage size={13} />}
                         <span>{doc.fileSize}</span>

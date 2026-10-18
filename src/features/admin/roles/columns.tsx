@@ -61,7 +61,7 @@ export function createStaffColumns({
           <div className="flex items-center gap-2.5 min-w-[200px]">
             <Avatar className="size-8 rounded-full shrink-0 border border-border/60">
               <AvatarImage src={staff.avatarUrl} alt={staff.name} />
-              <AvatarFallback className="text-[11px] font-bold bg-muted text-muted-foreground">
+              <AvatarFallback className="text-xxs font-bold bg-muted text-muted-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -69,7 +69,7 @@ export function createStaffColumns({
               <span className="font-semibold text-xs text-foreground block truncate">
                 {staff.name}
               </span>
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
+              <div className="flex items-center gap-1.5 text-2xs text-muted-foreground truncate">
                 <span className="truncate">{staff.email}</span>
               </div>
             </div>
@@ -89,7 +89,7 @@ export function createStaffColumns({
         return (
           <Badge
             variant="outline"
-            className={`text-[10px] px-2 py-0.5 h-5 ${conf.badgeClass}`}
+            className={`text-2xs px-2 py-0.5 h-5 ${conf.badgeClass}`}
           >
             {conf.label}
           </Badge>

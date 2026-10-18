@@ -63,6 +63,12 @@ export function ReportedChatDetailSheet({
   }
 
   const messages = context ? normalizeChatMessages(context) : report.messages
+  const linkedListing = context?.conversation.listing
+    ? {
+        ...context.conversation.listing,
+        price: Number(context.conversation.listing.price),
+      }
+    : report.listing
   const participants = context?.conversation.participants ?? []
   const reportedParticipant = participants.find((p) => p.userId !== report.reporterId)
   const reportedUserName = reportedParticipant?.shopName || report.reportedUserName
@@ -92,22 +98,22 @@ export function ReportedChatDetailSheet({
               </div>
               <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
             </div>
-            <span className="font-mono text-[11px] text-muted-foreground block pt-1">
-              Report ID: {report.id} • Conversation: {report.conversationId}
+            <span className="font-mono text-xxs text-muted-foreground block pt-1">
+              {report.displayId} · {report.conversationDisplayId}
             </span>
           </SheetHeader>
 
           <div className="p-3.5 rounded-xl bg-destructive/5 border border-destructive/20 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+              <span className="text-2xs font-bold uppercase tracking-wider text-destructive">
                 Violation Reason
               </span>
-              <Badge variant="outline" className="text-[10px] font-semibold border-destructive/30 text-destructive">
+              <Badge variant="outline" className="text-2xs font-semibold border-destructive/30 text-destructive">
                 {report.reason}
               </Badge>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[10px] text-muted-foreground">Reported Message:</span>
+              <span className="text-2xs text-muted-foreground">Reported Message:</span>
               <p className="text-xs font-semibold text-foreground leading-relaxed bg-background/80 p-2.5 rounded-lg border border-destructive/20">
                 &quot;{report.reportedMessageText}&quot;
               </p>
@@ -115,12 +121,12 @@ export function ReportedChatDetailSheet({
           </div>
 
           <div className="space-y-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <span className="text-xxs font-bold uppercase tracking-wider text-muted-foreground px-1">
               Conversation Context
             </span>
             <div className="p-3 rounded-xl bg-muted/20 border border-border/70 space-y-2.5 max-h-[260px] overflow-y-auto">
               {messages.length === 0 && (
-                <p className="text-[11px] text-muted-foreground text-center py-4">
+                <p className="text-xxs text-muted-foreground text-center py-4">
                   Loading conversation context...
                 </p>
               )}
@@ -135,7 +141,7 @@ export function ReportedChatDetailSheet({
                       isReportedUser ? "mr-auto items-start" : "ml-auto items-end"
                     )}
                   >
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground px-1 pb-0.5">
+                    <div className="flex items-center gap-1 text-2xs text-muted-foreground px-1 pb-0.5">
                       <span className="font-semibold">{msg.senderName}</span>
                       <span>•</span>
                       <span>{msg.createdAt}</span>
@@ -153,7 +159,7 @@ export function ReportedChatDetailSheet({
                     >
                       <p>{msg.text}</p>
                       {msg.isReported && (
-                        <div className="flex items-center gap-1 text-[9px] font-bold text-destructive pt-0.5">
+                        <div className="flex items-center gap-1 text-3xs font-bold text-destructive pt-0.5">
                           <WarningCircle size={10} weight="fill" />
                           <span>Flagged by Reporter</span>
                         </div>
@@ -167,37 +173,37 @@ export function ReportedChatDetailSheet({
 
           <div className="space-y-3 pt-1">
             <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <User size={13} />
                 Participant Summary
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2 rounded-lg bg-muted/30 border border-border/50 space-y-1">
-                  <span className="text-[10px] text-muted-foreground block">Reporter</span>
+                  <span className="text-2xs text-muted-foreground block">Reporter</span>
                   <span className="font-semibold text-foreground block truncate">{report.reporterName}</span>
-                  <span className="font-mono text-[9px] text-muted-foreground">{report.reporterId}</span>
+                  <span className="text-3xs text-muted-foreground">Reporter account</span>
                 </div>
                 <div className="p-2 rounded-lg bg-destructive/10 border border-destructive/20 space-y-1">
-                  <span className="text-[10px] font-bold text-destructive block">Reported User</span>
+                  <span className="text-2xs font-bold text-destructive block">Reported User</span>
                   <span className="font-semibold text-foreground block truncate">{reportedUserName}</span>
-                  <span className="font-mono text-[9px] text-muted-foreground">{reportedUserId}</span>
+                  <span className="text-3xs text-muted-foreground">Reported account</span>
                 </div>
               </div>
             </div>
 
-            {report.listing && (
+            {linkedListing && (
               <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Storefront size={13} />
                   Linked Listing
                 </span>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    {report.listing.imageUrl && (
+                    {linkedListing.imageUrl && (
                       <div className="relative size-9 rounded overflow-hidden shrink-0 border border-border/60 bg-muted">
                         <Image
-                          src={report.listing.imageUrl}
-                          alt={report.listing.title}
+                          src={linkedListing.imageUrl}
+                          alt={linkedListing.title}
                           fill
                           className="object-cover"
                         />
@@ -205,10 +211,10 @@ export function ReportedChatDetailSheet({
                     )}
                     <div className="min-w-0">
                       <span className="font-semibold text-xs text-foreground block truncate">
-                        {report.listing.title}
+                        {linkedListing.title}
                       </span>
-                      <span className="font-bold text-[11px] text-primary">
-                        ${report.listing.price.toLocaleString()} {report.listing.currency}
+                      <span className="font-bold text-xxs text-primary">
+                        ${linkedListing.price.toLocaleString()} {linkedListing.currency}
                       </span>
                     </div>
                   </div>
@@ -217,7 +223,7 @@ export function ReportedChatDetailSheet({
                     size="xs"
                     className="text-xs text-primary shrink-0"
                     render={
-                      <Link href={`/admin/listings/${report.listing.id}`}>
+                      <Link href={`/admin/listings/${linkedListing.id}`}>
                         <ArrowSquareOut size={12} className="mr-1" />
                         View
                       </Link>
@@ -285,7 +291,7 @@ export function ReportedChatDetailSheet({
             <DialogTitle className="text-base font-bold">Resolve Reported Chat</DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Are you sure you want to mark report <span className="font-mono font-semibold text-foreground">{report.id}</span> as resolved?
+            Are you sure you want to mark report <span className="font-mono font-semibold text-foreground">{report.displayId}</span> as resolved?
           </p>
           <DialogFooter className="gap-2">
             <Button
@@ -315,7 +321,7 @@ export function ReportedChatDetailSheet({
             <DialogTitle className="text-base font-bold">Dismiss Reported Chat</DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Are you sure you want to dismiss report <span className="font-mono font-semibold text-foreground">{report.id}</span> without taking action?
+            Are you sure you want to dismiss report <span className="font-mono font-semibold text-foreground">{report.displayId}</span> without taking action?
           </p>
           <DialogFooter className="gap-2">
             <Button

@@ -10,7 +10,8 @@ export function useRequireAuth() {
   return function requireAuth<T>(action: () => T): T | undefined {
     if (isLoading) return undefined;
     if (!isAuthenticated) {
-      const returnTo = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const returnTo =
+        typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
       const safeReturn = returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
       router.push(`/login?next=${encodeURIComponent(safeReturn)}`);
       return undefined;

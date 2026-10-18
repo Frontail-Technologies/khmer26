@@ -1,8 +1,13 @@
+import { getTranslations } from "next-intl/server"
+import type { Metadata } from "next"
 import { AccountFavoritesView } from "@/features/account/favorites/components/account-favorites-view"
 
-export const metadata = {
-  title: "Saved Listings",
-  description: "View and manage your saved marketplace listings on Khmer26",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.favorites")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function AccountFavoritesPage() {

@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   const meta = await lookupListingMeta(slug)
 
   if (!meta) {
-    return { title: "Listing — Khmer26" }
+    return { title: "Listing — Khmer26", robots: { index: false, follow: false } }
   }
 
   return {

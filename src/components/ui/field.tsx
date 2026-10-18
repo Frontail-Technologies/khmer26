@@ -40,7 +40,7 @@ function FieldDescription({
   return (
     <p
       data-slot="field-description"
-      className={cn("text-[11px] text-muted-foreground", className)}
+      className={cn("text-xxs text-muted-foreground", className)}
       {...props}
     />
   )
@@ -53,7 +53,8 @@ function FieldError({
   return (
     <p
       data-slot="field-error"
-      className={cn("text-[11px] font-medium text-destructive", className)}
+      role="alert"
+      className={cn("text-xxs font-medium text-destructive", className)}
       {...props}
     />
   )

@@ -29,6 +29,7 @@ import { ListingBreadcrumbs } from "../components/detail/listing-breadcrumbs"
 import { ListingSpecifications } from "../components/detail/listing-specifications"
 import { ListingGallery } from "../components/detail/listing-gallery"
 import { ListingPrimaryPanel } from "../components/detail/listing-primary-panel"
+import { ListingActionRow } from "../components/detail/listing-action-row"
 import { ListingSellerCard } from "../components/detail/listing-seller-card"
 import { ListingDescription } from "../components/detail/listing-description"
 import { ListingLocation } from "../components/detail/listing-location"
@@ -114,9 +115,9 @@ describe("<ListingDescription />", () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it("renders the description text under a Description heading", () => {
+  it("renders the description text in its own labelled region", () => {
     renderWithProviders(<ListingDescription description="First. Second." />)
-    expect(screen.getByRole("heading", { name: "Description" })).toBeInTheDocument()
+    expect(screen.getByRole("region", { name: "Description" })).toBeInTheDocument()
     expect(screen.getByText(/First\./)).toBeInTheDocument()
     expect(screen.getByText(/Second\./)).toBeInTheDocument()
   })
@@ -141,12 +142,12 @@ describe("<ListingPrimaryPanel /> basic info", () => {
     expect(screen.queryByRole("button", { name: /make offer/i })).toBeNull()
   })
 
-  it("offers chat, offer, report and favorite to a visitor", () => {
+  it("offers Make Offer to a visitor; chat lives in the seller card and actions in the action row", () => {
     renderWithProviders(<ListingPrimaryPanel listing={makeDetail()} />)
-    expect(screen.getByRole("button", { name: /chat with seller/i })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /chat/i })).toBeNull()
     expect(screen.getByRole("button", { name: /make offer/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Report" })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Report" })).toBeNull()
+    expect(screen.queryByRole("button", { name: /save/i })).toBeNull()
   })
 
   it("owner view: no self-contact, offer, report or favorite; links to manage listings", () => {
@@ -163,28 +164,34 @@ describe("<ListingPrimaryPanel /> basic info", () => {
 })
 
 describe("<ListingSellerCard />", () => {
-  it("shows only real seller fields, links to the seller route, and has no chat button", () => {
-    renderWithProviders(<ListingSellerCard seller={makeDetail().seller!} />)
+  it("shows only real seller fields, links to the seller route, and offers chat to a visitor", () => {
+    renderWithProviders(<ListingSellerCard seller={makeDetail().seller!} listingId="l1" isOwner={false} />)
 
     expect(screen.getByText("Angkor Auto & Bikes")).toBeInTheDocument()
-    expect(screen.getByText("Dealer")).toBeInTheDocument()
-    expect(screen.getByText("Member since Mar 2026")).toBeInTheDocument()
+    expect(screen.getByText(/Dealer/)).toBeInTheDocument()
+    expect(screen.getByText(/Member since Mar 2026/)).toBeInTheDocument()
     expect(getMediaUrl).toHaveBeenCalledWith("avatars/s1.png")
-    expect(screen.queryByRole("button", { name: /chat/i })).toBeNull()
+    expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument()
     expect(screen.queryByText(/replies|active listings|verified|review|call/i)).toBeNull()
-    expect(screen.getByText("View Store Profile").closest("a")).toHaveAttribute("href", "/seller/s1")
+    expect(screen.getAllByRole("link").some((a) => a.getAttribute("href") === "/seller/s1")).toBe(true)
+    expect(screen.getByRole("button", { name: "Follow" })).toBeInTheDocument()
+  })
+
+  it("does not offer chat to the listing owner", () => {
+    renderWithProviders(<ListingSellerCard seller={makeDetail().seller!} listingId="l1" isOwner />)
+    expect(screen.queryByRole("button", { name: /chat/i })).toBeNull()
   })
 
   it("shows the verified badge and rating only when the backend says so", () => {
     const base = makeDetail().seller!
     const { rerender } = renderWithProviders(
-      <ListingSellerCard seller={{ ...base, isVerified: true, rating: { average: 4.5, count: 2 } }} />
+      <ListingSellerCard seller={{ ...base, isVerified: true, rating: { average: 4.5, count: 2 } }} listingId="l1" isOwner={false} />
     )
     expect(screen.getByLabelText("Verified seller")).toBeInTheDocument()
     expect(screen.getByText("4.5")).toBeInTheDocument()
     expect(screen.getByText("(2 reviews)")).toBeInTheDocument()
 
-    rerender(<ListingSellerCard seller={{ ...base, rating: { average: 5, count: 1 } }} />)
+    rerender(<ListingSellerCard seller={{ ...base, rating: { average: 5, count: 1 } }} listingId="l1" isOwner={false} />)
     expect(screen.getByText("(1 review)")).toBeInTheDocument()
     expect(screen.queryByLabelText("Verified seller")).toBeNull()
   })
@@ -193,8 +200,8 @@ describe("<ListingSellerCard />", () => {
 const RAW_DESCRIPTION = ["Line one", "Line <b>two</b>", "", "Call 012 345 678"].join("\n")
 
 describe("listing detail polish", () => {
-  it("groups Save, Share and Report in the main action card (once each)", () => {
-    renderWithProviders(<ListingPrimaryPanel listing={makeDetail()} />)
+  it("groups Save, Share and Report in one action row (once each)", () => {
+    renderWithProviders(<ListingActionRow listing={makeDetail()} />)
     expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Share" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Report" })).toBeInTheDocument()
@@ -216,15 +223,22 @@ describe("listing detail polish", () => {
     expect(screen.getByText("1 / 2")).toBeInTheDocument()
   })
 
-  it("renders specs as a compact grid, or a single slim line when only the category is known", () => {
+  it("renders category levels from the real ancestry, then the dynamic specs, as label/value pairs", () => {
     const { container, rerender } = renderWithProviders(<ListingSpecifications listing={makeDetail()} />)
     expect(container.querySelector("dl")).not.toBeNull()
-    expect(screen.getByText("Listing Details")).toBeInTheDocument()
+    // Vehicles > Cars > Toyota > Hybrid: root = Main Category, middle = Sub Category, last = Category.
+    expect(screen.getByText("Main Category").nextElementSibling).toHaveTextContent("Vehicles")
+    expect(screen.getByText("Sub Category").nextElementSibling).toHaveTextContent("Cars › Toyota")
+    expect(screen.getByText("Category").nextElementSibling).toHaveTextContent("Hybrid")
 
-    rerender(<ListingSpecifications listing={makeDetail({ specs: [] })} />)
-    expect(container.querySelector("dl")).toBeNull()
-    expect(screen.queryByText("Listing Details")).toBeNull()
-    expect(screen.getByText("Category:")).toBeInTheDocument()
+    const shallow = makeDetail({ specs: [] })
+    rerender(
+      <ListingSpecifications
+        listing={{ ...shallow, category: { ...shallow.category, breadcrumb: [shallow.category.breadcrumb[0]!] } }}
+      />
+    )
+    expect(screen.queryByText("Main Category")).toBeNull()
+    expect(screen.getByText("Category")).toBeInTheDocument()
   })
 
   it("preserves description line breaks as plain text (nothing is rendered as HTML)", () => {
@@ -248,10 +262,33 @@ describe("listing detail polish", () => {
     expect(container.querySelector('[class*="radial-gradient"]')).toBeNull()
   })
 
-  it("keeps the safety card short and links to a page that exists", () => {
-    renderWithProviders(<ListingSafetyCard />)
+  it("shows a seller-provided Google Maps link", () => {
+    renderWithProviders(
+      <ListingLocation
+        location={{
+          ...makeDetail().location,
+          map: null,
+          googleMapsUrl: "https://maps.app.goo.gl/example",
+        }}
+      />
+    )
+
+    expect(screen.getByRole("link", { name: /open in google maps/i })).toHaveAttribute(
+      "href",
+      "https://maps.app.goo.gl/example"
+    )
+    expect(screen.getByText(/exact location provided by the seller/i)).toBeInTheDocument()
+  })
+
+  it("shows four numbered buyer safety tips", () => {
+    renderWithProviders(<ListingSafetyCard tips={["One", "Two", "Three", "Four"]} />)
     expect(screen.getAllByRole("listitem")).toHaveLength(4)
-    expect(screen.getByText("View Safety Tips").closest("a")).toHaveAttribute("href", "/posting-rules")
+    expect(screen.getByRole("heading", { name: "Safety Tips for Buyers" })).toBeInTheDocument()
+  })
+
+  it("does not render an empty safety card", () => {
+    const { container } = renderWithProviders(<ListingSafetyCard tips={[]} />)
+    expect(container).toBeEmptyDOMElement()
   })
 
   it("pluralizes views correctly", () => {

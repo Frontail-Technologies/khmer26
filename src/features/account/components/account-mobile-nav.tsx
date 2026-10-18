@@ -1,51 +1,74 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import type { GeneratedMessageKey } from "@/i18n/message-types"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   ListBullets,
   Heart,
+  BookmarkSimple,
   User,
   Gear,
   Crown,
   CreditCard,
+  Bell,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
-const NAV_ITEMS = [
+const NAV_ITEMS: Array<{ label: string; messageKey: GeneratedMessageKey; href: string; icon: typeof ListBullets }> = [
   {
     label: "Listings",
+    messageKey: "listings",
     href: "/account/listings",
     icon: ListBullets,
   },
   {
     label: "Favorites",
+    messageKey: "favorites",
     href: "/account/favorites",
     icon: Heart,
   },
   {
+    label: "Searches",
+    messageKey: "savedSearches",
+    href: "/account/saved-searches",
+    icon: BookmarkSimple,
+  },
+  {
+    label: "Alerts",
+    messageKey: "notifications",
+    href: "/account/notifications",
+    icon: Bell,
+  },
+  {
     label: "Profile",
+    messageKey: "profile",
     href: "/account/profile",
     icon: User,
   },
   {
     label: "Settings",
+    messageKey: "settings",
     href: "/account/settings",
     icon: Gear,
   },
   {
     label: "Subscription",
+    messageKey: "subscription",
     href: "/account/subscription",
     icon: Crown,
   },
   {
     label: "Payments",
+    messageKey: "payments",
     href: "/account/payments",
     icon: CreditCard,
   },
 ]
 
 export function AccountMobileNav() {
+  const tGenerated = useTranslations("generated")
   const pathname = usePathname()
 
   return (
@@ -73,7 +96,7 @@ export function AccountMobileNav() {
                 weight={isActive ? "fill" : "regular"}
                 className="shrink-0"
               />
-              <span>{item.label}</span>
+              <span>{tGenerated(item.messageKey)}</span>
             </Link>
           )
         })}

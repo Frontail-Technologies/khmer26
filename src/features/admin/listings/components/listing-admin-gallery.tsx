@@ -22,7 +22,7 @@ export function ListingAdminGallery({ images, title }: ListingAdminGalleryProps)
       <Card className="rounded-xl border border-border/70 bg-card p-6 text-center">
         <Images size={36} className="mx-auto text-muted-foreground/60 mb-2" />
         <p className="text-xs font-semibold text-foreground">No images submitted</p>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xxs text-muted-foreground">
           This listing does not have any attached photographs.
         </p>
       </Card>
@@ -46,7 +46,7 @@ export function ListingAdminGallery({ images, title }: ListingAdminGalleryProps)
             />
 
             <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-              <span className="bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-black/70 backdrop-blur-xs text-white text-2xs font-bold px-2 py-0.5 rounded-md">
                 {selectedIndex + 1} / {images.length}
               </span>
               <Button
@@ -62,7 +62,7 @@ export function ListingAdminGallery({ images, title }: ListingAdminGalleryProps)
 
             {currentImage.isPrimary && (
               <div className="absolute bottom-2.5 left-2.5">
-                <span className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                <span className="bg-primary text-primary-foreground text-2xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
                   Cover Photo
                 </span>
               </div>

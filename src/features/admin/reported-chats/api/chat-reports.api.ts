@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import type { ReportedChatRecord, ReportedChatStatus, ReportedChatMessage } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface RawChatReportRow {
   report: {
@@ -16,6 +17,17 @@ export interface RawChatReportRow {
   reason?: { id: string; label: string } | null;
 }
 
+interface AdminChatReportDto {
+  id: string;
+  displayId: string;
+  target: { id: string; displayId?: string; title: string };
+  reporter: { id?: string; name: string; accountType: string };
+  reasonLabel: string;
+  statement: string;
+  status: string;
+  createdAt: string;
+}
+
 export interface ChatReportsQueryParams {
   page?: number;
   limit?: number;
@@ -23,11 +35,34 @@ export interface ChatReportsQueryParams {
   [key: string]: string | number | undefined;
 }
 
-export function normalizeChatReport(row: RawChatReportRow): ReportedChatRecord {
+export function normalizeChatReport(row: RawChatReportRow | AdminChatReportDto): ReportedChatRecord {
+  if ('target' in row) {
+    return {
+      id: row.id,
+      displayId: row.displayId,
+      conversationId: row.target.id,
+      conversationDisplayId: row.target.displayId || 'CHAT',
+      reportedUserId: '',
+      reportedUserName: 'See conversation context',
+      reportedUserAccountType: 'user',
+      reporterId: row.reporter.id || '',
+      reporterName: row.reporter.name,
+      reason: row.reasonLabel,
+      status: (row.status as ReportedChatStatus) || 'open',
+      createdAt: row.createdAt,
+      participantA: { id: row.reporter.id || '', name: row.reporter.name },
+      participantB: { id: '', name: 'Other participant' },
+      reportedMessageText: row.statement || '(no message excerpt provided)',
+      messages: [],
+    };
+  }
+
   const r = row.report;
   return {
     id: r.id,
+    displayId: 'RPT',
     conversationId: r.conversationId || '',
+    conversationDisplayId: 'CHAT',
     reportedUserId: '',
     reportedUserName: 'See conversation context',
     reportedUserAccountType: 'user',
@@ -53,7 +88,7 @@ export async function getAdminChatReports(params: ChatReportsQueryParams): Promi
   };
   if (params.status && params.status !== 'all') queryParams.status = params.status;
 
-  const res = await apiClient.get<RawChatReportRow[]>('/admin/moderation/chat-reports', { params: queryParams });
+  const res = await apiClient.get<Array<RawChatReportRow | AdminChatReportDto>>('/admin/moderation/chat-reports', { params: queryParams });
   const rawList = res.data || [];
   return {
     items: rawList.map(normalizeChatReport),
@@ -69,6 +104,7 @@ export async function getAdminChatReports(params: ChatReportsQueryParams): Promi
 export interface ChatReportContext {
   report: {
     id: string;
+    displayId: string;
     reasonId: string;
     details: string | null;
     status: string;
@@ -76,7 +112,14 @@ export interface ChatReportContext {
   };
   conversation: {
     id: string;
-    listing: unknown;
+    displayId: string;
+    listing: {
+      id: string;
+      title: string;
+      price: string | number;
+      currency: string;
+      imageUrl?: string;
+    };
     participants: { userId: string; shopName: string }[];
   };
   messages: {
@@ -101,7 +144,7 @@ export function normalizeChatMessages(context: ChatReportContext): ReportedChatM
     senderId: m.senderUserId,
     senderName: nameByUserId.get(m.senderUserId) || m.senderUserId,
     text: m.body,
-    createdAt: new Date(m.createdAt).toLocaleString(),
+    createdAt: formatAdminDateTime(m.createdAt),
   }));
 }
 

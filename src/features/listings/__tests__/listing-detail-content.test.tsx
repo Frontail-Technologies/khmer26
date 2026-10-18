@@ -93,13 +93,13 @@ describe("<ListingDetailContent />", () => {
     const { unmount } = renderWithProviders(<ListingDetailContent id="x" />)
 
     expect(await screen.findByRole("heading", { name: "Backend related Prius" })).toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "Related listings" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Related Posts" })).toBeInTheDocument()
     unmount()
 
     getSimilarListings.mockResolvedValue([])
     renderWithProviders(<ListingDetailContent id="x" />)
     await screen.findAllByRole("heading", { name: "Toyota Prius 2018 - Hybrid" })
-    expect(screen.queryByRole("heading", { name: "Related listings" })).toBeNull()
+    expect(screen.queryByRole("heading", { name: "Related Posts" })).toBeNull()
   })
 
   it("tolerates missing optional data (no description, no seller, no media, no specs)", async () => {
@@ -111,8 +111,8 @@ describe("<ListingDetailContent />", () => {
     expect((await screen.findAllByRole("heading", { name: "Toyota Prius 2018 - Hybrid" })).length).toBeGreaterThan(0)
     expect(screen.getAllByText("Contact for price").length).toBeGreaterThan(0)
     expect(screen.getAllByText("No photos available").length).toBeGreaterThan(0)
-    expect(screen.queryByText("Description")).toBeNull()
-    expect(screen.queryByText("View Store Profile")).toBeNull()
+    expect(screen.queryByRole("region", { name: "Description" })).toBeNull()
+    expect(screen.queryByRole("link", { name: /\/seller\// })).toBeNull()
   })
 
   it("renders the owner's view without contact actions", async () => {

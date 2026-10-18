@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useMemo } from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import {
@@ -22,58 +26,68 @@ interface PaymentTableProps {
   onSelectPayment: (payment: AccountPaymentRecord) => void
 }
 
-function getPaymentStatusConfig(status: PaymentStatus): {
+type Translate = ReturnType<typeof useTranslations<"ui.account">>
+
+function getPaymentStatusConfig(status: PaymentStatus, t: Translate): {
   label: string
   tone: StatusTone
   icon: typeof CheckCircle
 } {
   switch (status) {
     case "paid":
-      return { label: "Paid", tone: "success", icon: CheckCircle }
+      return { label: t("paymentPaid"), tone: "success", icon: CheckCircle }
     case "pending":
-      return { label: "Pending", tone: "warning", icon: Clock }
+      return { label: t("paymentPending"), tone: "warning", icon: Clock }
     case "failed":
-      return { label: "Failed", tone: "destructive", icon: XCircle }
+      return { label: t("paymentFailed"), tone: "destructive", icon: XCircle }
+    case "expired":
+      return { label: t("paymentExpired"), tone: "neutral", icon: Clock }
+    case "cancelled":
+      return { label: t("paymentCancelled"), tone: "neutral", icon: XCircle }
     case "refunded":
-      return { label: "Refunded", tone: "neutral", icon: ArrowCounterClockwise }
+      return { label: t("paymentRefunded"), tone: "neutral", icon: ArrowCounterClockwise }
     default:
       return { label: status, tone: "neutral", icon: Clock }
   }
 }
 
-function getTypeLabel(type: AccountPaymentRecord["type"]): string {
+function getTypeLabel(type: AccountPaymentRecord["type"], t: Translate): string {
   switch (type) {
     case "featured_listing":
-      return "Featured Listing"
+      return t("typeFeatured")
     case "top_listing":
-      return "Top Listing"
+      return t("typeTop")
     case "subscription":
-      return "Subscription"
+      return t("typeSubscription")
     case "promotion":
-      return "Promotion"
+      return t("typePromotion")
     default:
       return type
   }
 }
 
 export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
+  const tGenerated = useTranslations("generated")
+  const t = useTranslations("ui.account")
   const columns = useMemo<ColumnDef<AccountPaymentRecord>[]>(
     () => [
       {
-        accessorKey: "date",
+        accessorKey: "createdAt",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Date" />
+          <DataTableColumnHeader column={column} title={tGenerated("date")} />
         ),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-            {row.original.date}
+            {row.original.createdAt
+              ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(row.original.createdAt))
+              : "—"}
           </span>
         ),
       },
       {
         accessorKey: "description",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Description" />
+          <DataTableColumnHeader column={column} title={tGenerated("description")} />
         ),
         cell: ({ row }) => (
           <span className="text-xs font-bold text-foreground max-w-55 truncate block">
@@ -83,16 +97,16 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
       },
       {
         accessorKey: "type",
-        header: "Type",
+        header: t("columnType"),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {getTypeLabel(row.original.type)}
+            {getTypeLabel(row.original.type, t)}
           </span>
         ),
       },
       {
         accessorKey: "paymentMethod",
-        header: "Method",
+        header: t("columnMethod"),
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground whitespace-nowrap">
             {row.original.paymentMethod}
@@ -102,7 +116,7 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
       {
         accessorKey: "amount",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Amount" />
+          <DataTableColumnHeader column={column} title={tGenerated("amount")} />
         ),
         cell: ({ row }) => (
           <span className="text-xs font-black text-foreground whitespace-nowrap">
@@ -112,9 +126,9 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t("columnStatus"),
         cell: ({ row }) => {
-          const cfg = getPaymentStatusConfig(row.original.status)
+          const cfg = getPaymentStatusConfig(row.original.status, t)
           const StatusIcon = cfg.icon
           return (
             <StatusBadge
@@ -127,7 +141,7 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
       },
       {
         id: "actions",
-        header: () => <div className="text-right">Receipt</div>,
+        header: () => <div className="text-right"><LocalizedText id="receipt" /></div>,
         cell: ({ row }) => (
           <div className="text-right">
             <Button
@@ -141,13 +155,13 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
               className="h-8 px-2.5 text-xs text-primary font-semibold gap-1"
             >
               <Receipt size={14} />
-              <span>View</span>
+              <span><LocalizedText id="view" /></span>
             </Button>
           </div>
         ),
       },
     ],
-    [onSelectPayment]
+    [onSelectPayment, tGenerated, t]
   )
 
   return (
@@ -158,15 +172,15 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
           data={payments}
           pageSize={10}
           onRowClick={onSelectPayment}
-          emptyTitle="No payment records"
-          emptyDescription="You don't have any billing or payment transactions yet."
+          emptyTitle={t("noPaymentRecords")}
+          emptyDescription={t("noPaymentRecordsDescription")}
         />
       </div>
 
       <div className="md:hidden space-y-3">
         {payments.length > 0 ? (
           payments.map((payment) => {
-            const cfg = getPaymentStatusConfig(payment.status)
+            const cfg = getPaymentStatusConfig(payment.status, t)
             const StatusIcon = cfg.icon
 
             return (
@@ -177,8 +191,10 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-[11px] text-muted-foreground block">
-                      {payment.date}
+                    <span className="text-xxs text-muted-foreground block">
+                      {payment.createdAt
+                        ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(payment.createdAt))
+                        : "—"}
                     </span>
                     <h4 className="font-bold text-xs text-foreground mt-0.5">
                       {payment.description}
@@ -191,7 +207,7 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
-                  <span className="text-muted-foreground text-[11px]">
+                  <span className="text-muted-foreground text-xxs">
                     {payment.paymentMethod}
                   </span>
                   <StatusBadge
@@ -206,9 +222,9 @@ export function PaymentTable({ payments, onSelectPayment }: PaymentTableProps) {
           })
         ) : (
           <Card className="rounded-xl border border-border/80 bg-card p-8 text-center">
-            <p className="text-xs font-bold text-foreground">No payments found</p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              You don&apos;t have any payment transactions yet.
+            <p className="text-xs font-bold text-foreground"><LocalizedText id="noPaymentsFound" /></p>
+            <p className="text-xxs text-muted-foreground mt-1">
+              <LocalizedText id="youDonTHaveAnyPaymentTransactionsYet" />
             </p>
           </Card>
         )}

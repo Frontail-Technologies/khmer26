@@ -1,8 +1,13 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Check } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import type { PostAdStep } from "../types"
+import type { GeneratedMessageKey } from "@/i18n/message-types"
 
 interface PostAdProgressProps {
   currentStep: PostAdStep
@@ -10,13 +15,13 @@ interface PostAdProgressProps {
   completedSteps: Set<PostAdStep>
 }
 
-const STEPS: { step: PostAdStep; title: string; subtitle: string }[] = [
-  { step: 1, title: "Category", subtitle: "Choose listing category" },
-  { step: 2, title: "Details", subtitle: "Title, specs & description" },
-  { step: 3, title: "Photos", subtitle: "Upload clear images" },
-  { step: 4, title: "Price & Location", subtitle: "Pricing & area" },
-  { step: 5, title: "Contact", subtitle: "Buyer contact mode" },
-  { step: 6, title: "Preview & Publish", subtitle: "Final review & post" },
+const STEPS: { step: PostAdStep; titleKey: GeneratedMessageKey; subtitleKey: GeneratedMessageKey }[] = [
+  { step: 1, titleKey: "category", subtitleKey: "chooseListingCategory" },
+  { step: 2, titleKey: "details", subtitleKey: "titleSpecsDescription" },
+  { step: 3, titleKey: "photos", subtitleKey: "uploadClearImages" },
+  { step: 4, titleKey: "priceLocation", subtitleKey: "pricingArea" },
+  { step: 5, titleKey: "contact", subtitleKey: "buyerContactMode" },
+  { step: 6, titleKey: "previewPublish", subtitleKey: "finalReviewPost" },
 ]
 
 export function PostAdProgress({
@@ -24,6 +29,8 @@ export function PostAdProgress({
   onStepClick,
   completedSteps,
 }: PostAdProgressProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
   const currentStepData = STEPS.find((s) => s.step === currentStep) || STEPS[0]
   const progressPercent = Math.round(((currentStep - 1) / (STEPS.length - 1)) * 100)
 
@@ -32,10 +39,10 @@ export function PostAdProgress({
       <div className="md:hidden mb-4 p-3 rounded-xl border border-border/80 bg-card shadow-2xs space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-bold text-primary">
-            Step {currentStep} of {STEPS.length}
+            {tDynamic("stepOf", { step: currentStep, total: STEPS.length })}
           </span>
           <span className="font-semibold text-foreground">
-            {currentStepData?.title}
+            {currentStepData ? tGenerated(currentStepData.titleKey) : null}
           </span>
         </div>
         <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
@@ -48,10 +55,10 @@ export function PostAdProgress({
 
       <div className="hidden md:block rounded-xl border border-border/80 bg-card p-4 shadow-2xs">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 px-1">
-          Listing Steps
+          <LocalizedText id="listingSteps" />
         </h2>
 
-        <nav aria-label="Post ad progress" className="space-y-1.5">
+        <nav aria-label={tGenerated("postAdProgress")} className="space-y-1.5">
           {STEPS.map((s) => {
             const isCompleted = completedSteps.has(s.step)
             const isActive = currentStep === s.step
@@ -95,10 +102,10 @@ export function PostAdProgress({
                       isUpcoming && "text-muted-foreground"
                     )}
                   >
-                    {s.title}
+                    {tGenerated(s.titleKey)}
                   </span>
-                  <span className="block text-[10px] text-muted-foreground truncate leading-tight mt-0.5">
-                    {s.subtitle}
+                  <span className="block text-2xs text-muted-foreground truncate leading-tight mt-0.5">
+                    {tGenerated(s.subtitleKey)}
                   </span>
                 </div>
               </button>

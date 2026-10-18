@@ -18,10 +18,75 @@ export function getSelectOptionLabel(
 ): string {
   if (!value) return placeholder
   const found = options.find((opt) => opt.value === value)
-  return found ? found.label : value
+  return found ? found.label : placeholder
 }
 
-const Select = SelectPrimitive.Root
+const SelectOptionsContext = React.createContext<ReadonlyArray<SelectOption>>([])
+
+function getNodeText(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node)
+  if (Array.isArray(node)) return node.map(getNodeText).join("").trim()
+  if (React.isValidElement(node)) {
+    return getNodeText((node.props as { children?: React.ReactNode }).children)
+  }
+  return ""
+}
+
+function collectSelectOptions(node: React.ReactNode, options: SelectOption[] = []): SelectOption[] {
+  React.Children.forEach(node, (child) => {
+    if (!React.isValidElement(child)) return
+    const props = child.props as { value?: unknown; children?: React.ReactNode; disabled?: boolean }
+    if (child.type === SelectItem && typeof props.value === "string") {
+      const label = getNodeText(props.children)
+      if (label) options.push({ value: props.value, label, disabled: props.disabled })
+      return
+    }
+    collectSelectOptions(props.children, options)
+  })
+  return options
+}
+
+function collectItemOptions(items: unknown, options: SelectOption[] = []): SelectOption[] {
+  if (!items) return options
+  if (Array.isArray(items)) {
+    for (const item of items) {
+      if (!item || typeof item !== "object") continue
+      const candidate = item as {
+        value?: unknown
+        label?: React.ReactNode
+        disabled?: boolean
+        items?: unknown
+      }
+      if (Array.isArray(candidate.items)) {
+        collectItemOptions(candidate.items, options)
+      } else if (typeof candidate.value === "string") {
+        const label = getNodeText(candidate.label)
+        if (label) options.push({ value: candidate.value, label, disabled: candidate.disabled })
+      }
+    }
+    return options
+  }
+  if (typeof items === "object") {
+    for (const [value, labelNode] of Object.entries(items)) {
+      const label = getNodeText(labelNode)
+      if (label) options.push({ value, label })
+    }
+  }
+  return options
+}
+
+function Select<Value, Multiple extends boolean | undefined = false>(
+  props: SelectPrimitive.Root.Props<Value, Multiple>
+) {
+  const explicitOptions = collectItemOptions(props.items)
+  const options = explicitOptions.length ? explicitOptions : collectSelectOptions(props.children)
+
+  return (
+    <SelectOptionsContext.Provider value={options}>
+      <SelectPrimitive.Root {...props} />
+    </SelectOptionsContext.Provider>
+  )
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -33,13 +98,17 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   )
 }
 
-function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
+function SelectValue({ className, children, placeholder, ...props }: SelectPrimitive.Value.Props) {
+  const options = React.useContext(SelectOptionsContext)
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
       className={cn("flex flex-1 text-left truncate", className)}
+      placeholder={placeholder}
       {...props}
-    />
+    >
+      {children ?? ((value) => getSelectOptionLabel(options, typeof value === "string" ? value : null, String(placeholder ?? "")))}
+    </SelectPrimitive.Value>
   )
 }
 
@@ -120,7 +189,7 @@ function SelectLabel({
   return (
     <SelectPrimitive.GroupLabel
       data-slot="select-label"
-      className={cn("px-2.5 py-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider", className)}
+      className={cn("px-2.5 py-1.5 text-xxs font-bold text-muted-foreground uppercase tracking-wider", className)}
       {...props}
     />
   )

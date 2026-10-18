@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { CaretDown, Check, CurrencyDollar, MapPin, Sliders, Tag } from "@phosphor-icons/react"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -22,6 +26,7 @@ import {
 } from "./filter-section"
 import { CategoryTreeNav } from "./category-tree-nav"
 import { PriceRangeFilter } from "./price-range-filter"
+import { useLocalizedLabel, useLocalizedName } from "@/lib/i18n/localized"
 
 export interface CategoryNavData {
   roots: CategoryNode[]
@@ -64,8 +69,9 @@ function OptionButton({
 }
 
 function CategorySection({ nav, selected }: { nav: CategoryNavData; selected?: string }) {
+  const tGenerated = useTranslations("generated")
   return (
-    <FilterSection title="Category" icon={<Tag size={14} className="text-primary" />}>
+    <FilterSection title={tGenerated("category")} icon={<Tag size={14} className="text-primary" />}>
       <div>
         <CategoryTreeNav
           roots={nav.roots}
@@ -95,8 +101,10 @@ function LocationList({
   isError: boolean
   onSelect: (id: number | null) => void
 }) {
-  if (isLoading) return <p className="px-1 py-1 text-xs text-muted-foreground">Loading {label}…</p>
-  if (isError) return <p className="px-1 py-1 text-xs text-destructive">Couldn&apos;t load {label}.</p>
+  const tDynamic = useTranslations("dynamic")
+  const getLocalizedName = useLocalizedName()
+  if (isLoading) return <p className="px-1 py-1 text-xs text-muted-foreground">{tDynamic("loadingNamed", { name: label })}</p>
+  if (isError) return <p className="px-1 py-1 text-xs text-destructive">{tDynamic("couldNotLoadNamed", { name: label })}</p>
 
   return (
     <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
@@ -109,7 +117,7 @@ function LocationList({
           selected={selectedId === option.id}
           onClick={() => onSelect(option.id)}
         >
-          {option.nameEn}
+          {getLocalizedName(option)}
         </OptionButton>
       ))}
     </div>
@@ -117,6 +125,8 @@ function LocationList({
 }
 
 function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters" | "onChange">) {
+  const tGenerated = useTranslations("generated")
+  const getLocalizedName = useLocalizedName()
   const provinces = useProvinces()
   const districts = useDistricts(filters.provinceId)
   const communes = useCommunes(filters.districtId)
@@ -127,7 +137,7 @@ function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters"
   const collapseProvinces = filters.provinceId !== undefined && !showAllProvinces
 
   return (
-    <FilterSection title="Location" icon={<MapPin size={14} className="text-primary" />}>
+    <FilterSection title={tGenerated("location")} icon={<MapPin size={14} className="text-primary" />}>
       <div className="space-y-2">
         {collapseProvinces ? (
           <div className="space-y-1">
@@ -135,21 +145,21 @@ function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters"
               selected={true}
               onClick={() => onChange(applyLocationChange(filters, { provinceId: null }))}
             >
-              {selectedProvince?.nameEn ?? "Selected province"}
+              {selectedProvince ? getLocalizedName(selectedProvince) : tGenerated("selectedProvince")}
             </OptionButton>
             <button
               type="button"
               onClick={() => setShowAllProvinces(true)}
-              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-primary hover:underline"
+              className="flex items-center gap-1 px-2.5 py-1 text-xxs font-semibold text-primary hover:underline"
             >
               <CaretDown size={10} weight="bold" />
-              Other provinces
+              <LocalizedText id="otherProvinces" />
             </button>
           </div>
         ) : (
           <LocationList
-            label="provinces"
-            allLabel="All Locations"
+            label={tGenerated("provinces")}
+            allLabel={tGenerated("allLocations")}
             options={provinces.data}
             selectedId={filters.provinceId}
             isLoading={provinces.isLoading}
@@ -163,12 +173,12 @@ function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters"
 
         {filters.provinceId !== undefined && (
           <div className="space-y-1 border-l-2 border-border/60 pl-2">
-            <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              District
+            <span className="px-1 text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+              <LocalizedText id="district" />
             </span>
             <LocationList
-              label="districts"
-              allLabel="All Districts"
+              label={tGenerated("districts")}
+              allLabel={tGenerated("allDistricts")}
               options={districts.data}
               selectedId={filters.districtId}
               isLoading={districts.isLoading}
@@ -180,12 +190,12 @@ function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters"
 
         {filters.districtId !== undefined && (
           <div className="space-y-1 border-l-2 border-border/60 pl-2 ml-2">
-            <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Commune
+            <span className="px-1 text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+              <LocalizedText id="commune" />
             </span>
             <LocationList
-              label="communes"
-              allLabel="All Communes"
+              label={tGenerated("communes")}
+              allLabel={tGenerated("allCommunes")}
               options={communes.data}
               selectedId={filters.communeId}
               isLoading={communes.isLoading}
@@ -243,6 +253,9 @@ function DynamicFieldFilter({
   onChange: (value: string | undefined) => void
 }) {
   const { field } = definition
+  const tDynamic = useTranslations("dynamic")
+  const getLocalizedLabel = useLocalizedLabel()
+  const fieldLabel = getLocalizedLabel(field)
 
   switch (field.fieldType) {
     case "select":
@@ -258,7 +271,7 @@ function DynamicFieldFilter({
                 onClick={() => onChange(selected ? undefined : option.value)}
                 className={cn(PILL_BASE, selected ? PILL_ACTIVE : PILL_IDLE)}
               >
-                {option.labelEn}
+                {getLocalizedLabel(option)}
               </button>
             )
           })}
@@ -271,7 +284,7 @@ function DynamicFieldFilter({
             checked={value === "true"}
             onCheckedChange={(checked) => onChange(checked ? "true" : undefined)}
           />
-          <span>Yes</span>
+          <span><LocalizedText id="yes" /></span>
         </label>
       )
     case "number":
@@ -280,8 +293,8 @@ function DynamicFieldFilter({
           key={value ?? ""}
           type="number"
           value={value ?? ""}
-          placeholder={`Enter ${field.labelEn.toLowerCase()}`}
-          label={field.labelEn}
+          placeholder={tDynamic("enterNamed", { name: fieldLabel.toLocaleLowerCase() })}
+          label={fieldLabel}
           onCommit={(next) => onChange(next || undefined)}
         />
       )
@@ -292,8 +305,8 @@ function DynamicFieldFilter({
           key={value ?? ""}
           type="text"
           value={value ?? ""}
-          placeholder={`Search ${field.labelEn.toLowerCase()}`}
-          label={field.labelEn}
+          placeholder={tDynamic("searchNamed", { name: fieldLabel.toLocaleLowerCase() })}
+          label={fieldLabel}
           onCommit={(next) => onChange(next || undefined)}
         />
       )
@@ -307,6 +320,8 @@ export function FilterPanel({
   fieldsLoading,
   categoryNav,
 }: FilterPanelProps) {
+  const tGenerated = useTranslations("generated")
+  const getLocalizedLabel = useLocalizedLabel()
   const setField = (name: string, value: string | undefined) => {
     const fields = { ...filters.fields }
     if (value === undefined) delete fields[name]
@@ -320,7 +335,7 @@ export function FilterPanel({
 
       <LocationSection filters={filters} onChange={onChange} />
 
-      <FilterSection title="BUDGET" icon={<CurrencyDollar size={14} className="text-primary" />}>
+      <FilterSection title={tGenerated("budget")} icon={<CurrencyDollar size={14} className="text-primary" />}>
         <PriceRangeFilter
           key={`${filters.minPrice ?? ""}-${filters.maxPrice ?? ""}-${filters.currency ?? ""}`}
           minPrice={filters.minPrice}
@@ -333,13 +348,13 @@ export function FilterPanel({
       </FilterSection>
 
       {filters.category && fieldsLoading && (
-        <p className="px-1 text-xs text-muted-foreground">Loading category filters…</p>
+        <p className="px-1 text-xs text-muted-foreground"><LocalizedText id="loadingCategoryFilters" /></p>
       )}
 
       {definitions?.map((definition) => (
         <FilterSection
           key={definition.field.id}
-          title={definition.field.labelEn}
+          title={getLocalizedLabel(definition.field)}
           icon={<Sliders size={14} className="text-primary" />}
         >
           <DynamicFieldFilter

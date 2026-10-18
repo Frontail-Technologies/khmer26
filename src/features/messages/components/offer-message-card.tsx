@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Tag, CheckCircle, XCircle, ArrowCounterClockwise } from "@phosphor-icons/react"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
@@ -12,6 +14,7 @@ interface OfferMessageCardProps {
   onAcceptOffer?: (offerId: string) => void
   onDeclineOffer?: (offerId: string) => void
   onWithdrawOffer?: (offerId: string) => void
+  onCounterOffer?: (offerId: string) => void
 }
 
 function getOfferStatusConfig(status: ConversationOffer["status"]): { label: string; tone: StatusTone } {
@@ -40,6 +43,7 @@ export function OfferMessageCard({
   onAcceptOffer,
   onDeclineOffer,
   onWithdrawOffer,
+  onCounterOffer,
 }: OfferMessageCardProps) {
   const isSeller = role === "seller"
   const { label, tone } = getOfferStatusConfig(offer.status)
@@ -50,7 +54,7 @@ export function OfferMessageCard({
         <div className="flex items-center gap-1.5 text-primary">
           <Tag size={18} weight="fill" />
           <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-            Price Offer
+            <LocalizedText id="priceOffer" />
           </span>
         </div>
         <StatusBadge label={label} tone={tone} size="sm" />
@@ -73,10 +77,10 @@ export function OfferMessageCard({
         )}
       </div>
 
-      {offer.status === "pending" && (
+      {(offer.status === "pending" || offer.status === "countered") && (
         <div className="pt-2 border-t border-border/60">
-          {isSeller && !isCurrentUserSender ? (
-            <div className="flex items-center gap-2">
+          {((offer.status === "pending" && isSeller && !isCurrentUserSender) || (offer.status === "countered" && !isSeller && isCurrentUserSender)) ? (
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
                 size="sm"
@@ -84,7 +88,7 @@ export function OfferMessageCard({
                 className="flex-1 h-8 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs gap-1"
               >
                 <CheckCircle size={14} weight="bold" />
-                <span>Accept</span>
+                <span><LocalizedText id="accept" /></span>
               </Button>
               <Button
                 type="button"
@@ -94,8 +98,14 @@ export function OfferMessageCard({
                 className="flex-1 h-8 text-xs font-semibold text-destructive hover:bg-destructive/10 gap-1"
               >
                 <XCircle size={14} />
-                <span>Decline</span>
+                <span><LocalizedText id="decline" /></span>
               </Button>
+              {offer.status === "pending" && isSeller && (
+                <Button type="button" variant="outline" size="sm" onClick={() => onCounterOffer?.(offer.id)} className="col-span-2 h-8 text-xs font-semibold gap-1">
+                  <ArrowCounterClockwise size={14} />
+                  <span><LocalizedText id="counterOffer_c66250" /></span>
+                </Button>
+              )}
             </div>
           ) : isCurrentUserSender ? (
             <Button
@@ -106,7 +116,7 @@ export function OfferMessageCard({
               className="w-full h-8 text-xs font-semibold text-muted-foreground hover:text-foreground gap-1"
             >
               <ArrowCounterClockwise size={14} />
-              <span>Withdraw Offer</span>
+              <span><LocalizedText id="withdrawOffer" /></span>
             </Button>
           ) : null}
         </div>

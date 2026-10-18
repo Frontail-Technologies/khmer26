@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
+import { renderWithProviders } from "@/test/test-utils"
 import type { CategoryNode } from "@/features/categories/api/categories.api"
 import { buildCategoryIndex, getCategoryPath } from "@/features/categories/lib/category-tree"
 import { linkTree, node } from "@/features/categories/__tests__/fixtures"
@@ -21,7 +22,7 @@ function renderTree(selectedSlug: string | undefined, onSelect = vi.fn()) {
   const index = buildCategoryIndex(roots)
   const target = selectedSlug ? index.bySlug.get(selectedSlug) : undefined
   const ancestorIds = target ? getCategoryPath(index, target).map((n) => n.id) : []
-  const utils = render(
+  const utils = renderWithProviders(
     <CategoryTreeNav
       roots={roots}
       selectedSlug={selectedSlug}

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { CaretRight } from "@phosphor-icons/react/dist/ssr"
 import { formatAdCount } from "@/features/search/lib/format-count"
@@ -9,9 +10,10 @@ interface CategoryPageHeaderProps {
 }
 
 export function CategoryPageHeader({ title, breadcrumbs, totalCount }: CategoryPageHeaderProps) {
+  const tGenerated = useTranslations("generated")
   return (
     <div className="pb-3 pt-2 mb-2 border-b border-border/70">
-      <nav aria-label="Breadcrumb" className="mb-2">
+      <nav aria-label={tGenerated("breadcrumb")} className="mb-2">
         <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
@@ -43,7 +45,7 @@ export function CategoryPageHeader({ title, breadcrumbs, totalCount }: CategoryP
           {title}
         </h1>
         {totalCount !== undefined && (
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-primary shrink-0">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xxs sm:text-xs font-bold text-primary shrink-0">
             {formatAdCount(totalCount)}
           </span>
         )}

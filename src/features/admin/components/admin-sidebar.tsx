@@ -66,7 +66,7 @@ function AdminSidebarInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const currentSection = searchParams.get("section")
-  const { isMobile, setOpenMobile } = useSidebar()
+  const { isMobile, setOpenMobile, state } = useSidebar()
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     Listings: true,
@@ -106,11 +106,11 @@ function AdminSidebarInner() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-16 border-b border-border/70 flex justify-center px-4 bg-card/60">
+      <SidebarHeader className="h-16 border-b border-border/70 flex justify-center px-4 bg-card/60 group-data-[collapsible=icon]:px-2">
         <Link
           href="/admin"
           onClick={handleLinkClick}
-          className="flex items-center gap-2.5 min-w-0"
+          className="flex items-center justify-center gap-2.5 min-w-0"
           aria-label="Khmer26 Admin Dashboard"
         >
           <Image
@@ -120,11 +120,17 @@ function AdminSidebarInner() {
             height={26}
             priority
             style={{ width: "auto" }}
-            className="h-6 w-auto object-contain"
+            className="h-6 w-auto object-contain group-data-[collapsible=icon]:hidden"
           />
+          <span
+            aria-hidden="true"
+            className="hidden size-8 items-center justify-center rounded-md bg-primary text-2xs font-extrabold text-primary-foreground group-data-[collapsible=icon]:inline-flex"
+          >
+            K26
+          </span>
           <Badge
             variant="secondary"
-            className="h-4.5 px-2 text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/20 shrink-0 group-data-[collapsible=icon]:hidden rounded-md"
+            className="h-4.5 px-2 text-3xs font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/20 shrink-0 group-data-[collapsible=icon]:hidden rounded-md"
           >
             Admin
           </Badge>
@@ -155,7 +161,9 @@ function AdminSidebarInner() {
                       )}
                     >
                       <Icon size={18} weight={isActive ? "fill" : "duotone"} />
-                      <span>{item.title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {item.title}
+                      </span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -165,7 +173,7 @@ function AdminSidebarInner() {
 
           return (
             <SidebarGroup key={group.id} className="py-1">
-              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-3 pb-1">
+              <SidebarGroupLabel className="text-2xs font-bold uppercase tracking-wider text-muted-foreground/60 px-3 pb-1">
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -183,7 +191,16 @@ function AdminSidebarInner() {
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton
-                            onClick={() => toggleExpand(item.title)}
+                            render={
+                              state === "collapsed" ? (
+                                <Link href={item.href} onClick={handleLinkClick} />
+                              ) : undefined
+                            }
+                            onClick={
+                              state === "expanded"
+                                ? () => toggleExpand(item.title)
+                                : undefined
+                            }
                             isActive={isAnyChildActive}
                             tooltip={item.title}
                             className={cn(
@@ -193,19 +210,21 @@ function AdminSidebarInner() {
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                             )}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex min-w-0 items-center gap-2 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center">
                               <Icon
                                 size={17}
                                 weight={isAnyChildActive ? "fill" : "duotone"}
                               />
-                              <span className="truncate">{item.title}</span>
+                              <span className="truncate group-data-[collapsible=icon]:hidden">
+                                {item.title}
+                              </span>
                             </div>
 
                             <div className="flex items-center gap-1.5 shrink-0 group-data-[collapsible=icon]:hidden">
                               {item.badge !== undefined && (
                                 <span
                                   className={cn(
-                                    "text-[10px] font-bold px-1.5 py-0 h-4 rounded-md inline-flex items-center justify-center",
+                                    "text-2xs font-bold px-1.5 py-0 h-4 rounded-md inline-flex items-center justify-center",
                                     isAnyChildActive
                                       ? "bg-primary/20 text-primary"
                                       : "bg-muted text-muted-foreground"
@@ -281,13 +300,15 @@ function AdminSidebarInner() {
                             size={17}
                             weight={isActive ? "fill" : "duotone"}
                           />
-                          <span>{item.title}</span>
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {item.title}
+                          </span>
                         </SidebarMenuButton>
 
                         {item.badge !== undefined && (
                           <SidebarMenuBadge
                             className={cn(
-                              "text-[10px] font-bold px-1.5 py-0 h-4.5 rounded-md",
+                              "text-2xs font-bold px-1.5 py-0 h-4.5 rounded-md",
                               isActive
                                 ? "bg-primary/20 text-primary"
                                 : item.badgeVariant === "destructive"
@@ -326,7 +347,9 @@ function AdminSidebarInner() {
               className="h-9 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             >
               <ArrowSquareOut size={16} weight="duotone" />
-              <span>View Marketplace</span>
+              <span className="group-data-[collapsible=icon]:hidden">
+                View Marketplace
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

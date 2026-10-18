@@ -348,7 +348,7 @@ export function SidebarGroupLabel({
       data-sidebar="group-label"
       data-slot="sidebar-group-label"
       className={cn(
-        "duration-200 flex h-7 shrink-0 items-center rounded-md px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 outline-none transition-[margin,opacity] ease-linear focus-visible:ring-2",
+        "duration-200 flex h-7 shrink-0 items-center rounded-md px-2 text-xxs font-semibold uppercase tracking-wider text-muted-foreground/70 outline-none transition-[margin,opacity] ease-linear focus-visible:ring-2",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -376,7 +376,10 @@ export function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">)
     <ul
       data-sidebar="menu"
       data-slot="sidebar-menu"
-      className={cn("flex w-full min-w-0 flex-col gap-0.5", className)}
+      className={cn(
+        "flex w-full min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:items-center",
+        className
+      )}
       {...props}
     />
   )
@@ -415,7 +418,7 @@ export function SidebarMenuButton({
       ? "bg-primary/10 text-primary font-semibold hover:bg-primary/15 hover:text-primary"
       : "text-muted-foreground font-medium",
     size === "default" && "h-8.5 text-xs",
-    size === "sm" && "h-7.5 text-[11px]",
+    size === "sm" && "h-7.5 text-xxs",
     size === "lg" && "h-11 text-xs",
     "group-data-[collapsible=icon]:!size-8.5 group-data-[collapsible=icon]:!p-2 group-data-[collapsible=icon]:justify-center",
     className
@@ -490,7 +493,7 @@ export function SidebarMenuBadge({
       data-sidebar="menu-badge"
       data-slot="sidebar-menu-badge"
       className={cn(
-        "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold select-none",
+        "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-2xs font-bold select-none",
         "group-data-[collapsible=icon]:hidden",
         className
       )}
@@ -535,7 +538,7 @@ export function SidebarMenuSubButton({
     isActive
       ? "bg-primary/10 text-primary font-semibold"
       : "text-muted-foreground font-medium",
-    size === "sm" && "text-[11px]",
+    size === "sm" && "text-xxs",
     className
   )
 

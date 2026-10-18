@@ -14,6 +14,10 @@ import {
   createAdminSafetyTip,
   updateAdminSafetyTip,
   deleteAdminSafetyTip,
+  updateAdminContentPage,
+  createAdminModerationKeyword,
+  updateAdminModerationKeyword,
+  deleteAdminModerationKeyword,
 } from '../api/content.api';
 import { toast } from 'sonner';
 
@@ -23,6 +27,9 @@ export function useUpdateHomepageConfig() {
     mutationFn: updateAdminHomepageConfig,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.homeConfig() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.featuredSections() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.banners() });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Homepage layout saved');
     },
     onError: (err: unknown) => {
@@ -119,6 +126,8 @@ export function useCreateFeaturedSection() {
     mutationFn: createAdminFeaturedSection,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.featuredSections() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.homeConfig() });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Featured section created');
     },
     onError: (err: unknown) => {
@@ -135,6 +144,8 @@ export function useUpdateFeaturedSection() {
       updateAdminFeaturedSection(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.featuredSections() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.homeConfig() });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Featured section updated');
     },
     onError: (err: unknown) => {
@@ -150,6 +161,8 @@ export function useDeleteFeaturedSection() {
     mutationFn: deleteAdminFeaturedSection,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.content.featuredSections() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.homeConfig() });
+      queryClient.invalidateQueries({ queryKey: marketplaceKeys.home() });
       toast.success('Featured section deleted');
     },
     onError: (err: unknown) => {
@@ -202,6 +215,63 @@ export function useDeleteSafetyTip() {
       const msg = err instanceof Error ? err.message : 'Failed to delete safety tip';
       toast.error(msg);
     },
+  });
+}
+
+export function useUpdateContentPage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ slug, data }: { slug: Parameters<typeof updateAdminContentPage>[0]; data: Parameters<typeof updateAdminContentPage>[1] }) =>
+      updateAdminContentPage(slug, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.content.pages() });
+      toast.success('Page saved');
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to save page');
+    },
+  });
+}
+
+function invalidateModerationKeywords(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: adminKeys.content.moderationKeywords() });
+  queryClient.invalidateQueries({ queryKey: marketplaceKeys.content.moderationKeywords() });
+}
+
+export function useCreateModerationKeyword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAdminModerationKeyword,
+    onSuccess: () => {
+      invalidateModerationKeywords(queryClient);
+      toast.success('Review keyword added');
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to add keyword'),
+  });
+}
+
+export function useUpdateModerationKeyword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateAdminModerationKeyword>[1] }) =>
+      updateAdminModerationKeyword(id, data),
+    onSuccess: () => {
+      invalidateModerationKeywords(queryClient);
+      toast.success('Review keyword updated');
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to update keyword'),
+  });
+}
+
+export function useDeleteModerationKeyword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminModerationKeyword,
+    onSuccess: () => {
+      invalidateModerationKeywords(queryClient);
+      toast.success('Review keyword deleted');
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : 'Failed to delete keyword'),
   });
 }
 

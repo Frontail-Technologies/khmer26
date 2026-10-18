@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -23,6 +27,7 @@ function parseAmount(raw: string): ParsedAmount {
 
 /** Remount with a changing `key` to resync the draft with the URL. */
 export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: PriceRangeFilterProps) {
+  const tGenerated = useTranslations("generated")
   const [min, setMin] = useState(minPrice !== undefined ? String(minPrice) : "")
   const [max, setMax] = useState(maxPrice !== undefined ? String(maxPrice) : "")
   const [draftCurrency, setDraftCurrency] = useState<Currency | undefined>(currency)
@@ -59,7 +64,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Currency">
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label={tGenerated("currency")}>
         {CURRENCIES.map((code) => (
           <button
             key={code}
@@ -78,8 +83,8 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
           type="number"
           inputMode="decimal"
           min={0}
-          placeholder="Min"
-          aria-label="Minimum price"
+          placeholder={tGenerated("min")}
+          aria-label={tGenerated("minimumPrice")}
           aria-invalid={error ? true : undefined}
           value={min}
           onChange={(e) => setMin(e.target.value)}
@@ -91,8 +96,8 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
           type="number"
           inputMode="decimal"
           min={0}
-          placeholder="Max"
-          aria-label="Maximum price"
+          placeholder={tGenerated("max")}
+          aria-label={tGenerated("maximumPrice")}
           aria-invalid={error ? true : undefined}
           value={max}
           onChange={(e) => setMax(e.target.value)}
@@ -102,7 +107,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
       </div>
 
       {error && (
-        <p role="alert" className="text-[11px] font-medium text-destructive">
+        <p role="alert" className="text-xxs font-medium text-destructive">
           {error}
         </p>
       )}
@@ -114,7 +119,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
           onClick={apply}
           className="flex-1 h-8 text-xs font-semibold cursor-pointer"
         >
-          Apply
+          <LocalizedText id="apply" />
         </Button>
         {hasAppliedPrice && (
           <Button
@@ -124,7 +129,7 @@ export function PriceRangeFilter({ minPrice, maxPrice, currency, onChange }: Pri
             onClick={clear}
             className="h-8 text-xs font-semibold cursor-pointer"
           >
-            Clear
+            <LocalizedText id="clear" />
           </Button>
         )}
       </div>

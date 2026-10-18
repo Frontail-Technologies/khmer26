@@ -6,6 +6,7 @@ import {
   activateAdminPromotionPackage,
   deactivateAdminPromotionPackage,
   deleteAdminPromotionPackage,
+  endAdminPromotion,
 } from '../api/promotions.api';
 import { toast } from 'sonner';
 
@@ -20,6 +21,20 @@ export function useCreatePromotionPackage() {
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to create package';
       toast.error(msg);
+    },
+  });
+}
+
+export function useEndPromotion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: endAdminPromotion,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.promotions.all });
+      toast.success('Promotion ended');
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to end promotion');
     },
   });
 }

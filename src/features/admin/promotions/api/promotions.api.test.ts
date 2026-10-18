@@ -1,5 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { activateAdminPromotionPackage, deactivateAdminPromotionPackage } from './promotions.api';
+import {
+  activateAdminPromotionPackage,
+  deactivateAdminPromotionPackage,
+  endAdminPromotion,
+} from './promotions.api';
 
 function mockFetchOnce(body: unknown = { success: true, data: {} }) {
   const fetchMock = vi.fn().mockImplementation(async (url: string | URL) => {
@@ -43,6 +47,16 @@ describe('promotion package activate/deactivate contract', () => {
     const targetCall = fetchMock.mock.calls.find(([u]) => !String(u).includes('/auth/csrf'))!;
     const [url, config] = targetCall;
     expect(String(url)).toContain('/admin/promotions/packages/pkg-1/deactivate');
+    expect(config?.method).toBe('POST');
+  });
+
+  it('ends an active promotion via the admin endpoint', async () => {
+    const fetchMock = mockFetchOnce();
+    await endAdminPromotion('promo-1');
+
+    const targetCall = fetchMock.mock.calls.find(([u]) => !String(u).includes('/auth/csrf'))!;
+    const [url, config] = targetCall;
+    expect(String(url)).toContain('/admin/promotions/promo-1/end');
     expect(config?.method).toBe('POST');
   });
 });

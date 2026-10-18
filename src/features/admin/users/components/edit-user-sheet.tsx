@@ -6,7 +6,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -203,9 +202,6 @@ export function EditUserSheet({
           <SheetTitle className="text-sm font-bold text-foreground">
             Edit Account
           </SheetTitle>
-          <SheetDescription className="text-xs text-muted-foreground">
-            Update account information for {user.name}
-          </SheetDescription>
         </SheetHeader>
 
         {open && (

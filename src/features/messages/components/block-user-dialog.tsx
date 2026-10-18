@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Prohibit, Warning } from "@phosphor-icons/react"
 import {
   Dialog,
@@ -17,6 +21,7 @@ interface BlockUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirmBlock: () => void
+  isBlocked?: boolean
 }
 
 export function BlockUserDialog({
@@ -24,7 +29,9 @@ export function BlockUserDialog({
   open,
   onOpenChange,
   onConfirmBlock,
+  isBlocked = false,
 }: BlockUserDialogProps) {
+  const tGenerated = useTranslations("generated")
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -33,10 +40,12 @@ export function BlockUserDialog({
             <Warning size={22} weight="bold" />
           </div>
           <DialogTitle className="text-lg font-bold">
-            Block {participant.name}?
+            {isBlocked ? tGenerated("unblock") : tGenerated("block")} {participant.name}?
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            They will no longer be able to message you or send offers. You can unblock this user anytime from your account settings.
+            {isBlocked
+              ? tGenerated("youWillBothBeAbleToMessageEachOther")
+              : tGenerated("theyWillNoLongerBeAbleToMessageYou")}
           </DialogDescription>
         </DialogHeader>
 
@@ -47,11 +56,11 @@ export function BlockUserDialog({
             onClick={() => onOpenChange(false)}
             className="w-full sm:flex-1 text-xs font-semibold h-9.5"
           >
-            Cancel
+            <LocalizedText id="cancel" />
           </Button>
           <Button
             type="button"
-            variant="destructive"
+            variant={isBlocked ? "default" : "destructive"}
             onClick={() => {
               onConfirmBlock()
               onOpenChange(false)
@@ -59,7 +68,7 @@ export function BlockUserDialog({
             className="w-full sm:flex-1 text-xs font-bold h-9.5 gap-1.5"
           >
             <Prohibit size={16} />
-            <span>Block User</span>
+            <span>{isBlocked ? tGenerated("unblockUser") : tGenerated("blockUser")}</span>
           </Button>
         </DialogFooter>
       </DialogContent>

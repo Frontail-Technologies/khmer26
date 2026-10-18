@@ -1,5 +1,19 @@
 import { z } from "zod"
 
+function isGoogleMapsUrl(value: string) {
+  if (!value) return true
+  try {
+    const url = new URL(value)
+    const host = url.hostname.toLowerCase()
+    return host === "maps.app.goo.gl" ||
+      (host === "goo.gl" && url.pathname.startsWith("/maps")) ||
+      ((host === "google.com" || host === "www.google.com" || host === "maps.google.com") &&
+        (host === "maps.google.com" || url.pathname.startsWith("/maps")))
+  } catch {
+    return false
+  }
+}
+
 export const categoryStepSchema = z.object({
   categoryId: z.string().min(1, "Please choose a category for your listing"),
   categorySlug: z.string().min(1, "Category is required"),
@@ -22,7 +36,11 @@ export const detailsStepSchema = z.object({
 export const photosStepSchema = z.object({
   photos: z
     .array(z.any())
-    .min(1, "Please add at least 1 clear photo of your item"),
+    .min(1, "Please add at least 1 clear photo of your item")
+    .refine(
+      (photos) => photos.every((photo) => photo?.uploadStatus === "done" && Boolean(photo?.mediaId)),
+      "Wait for every photo to finish uploading before continuing"
+    ),
 })
 
 export const priceLocationStepSchema = z.object({
@@ -32,17 +50,16 @@ export const priceLocationStepSchema = z.object({
   currency: z.string().default("USD"),
   negotiable: z.boolean().default(false),
   location: z.object({
+    provinceId: z.number().int().positive("Please select a province or city"),
+    districtId: z.number().int().positive("Please select a district or khan"),
+    communeId: z.number().int().positive().optional(),
     province: z.string().min(1, "Please select a province or city"),
     district: z.string().min(1, "Please enter your district or area"),
     label: z.string().min(1, "Location label is required"),
+    googleMapsUrl: z.string().trim().max(2000).refine(isGoogleMapsUrl, "Enter a valid Google Maps link").optional(),
   }),
 })
 
 export const contactStepSchema = z.object({
   contactMethod: z.enum(["chat", "phone", "both"]),
-  phoneNumber: z
-    .string()
-    .min(8, "Please enter a valid phone number")
-    .max(20, "Phone number is too long"),
-  hidePhoneUntilClick: z.boolean().default(false),
 })

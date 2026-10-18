@@ -3,11 +3,12 @@
 import { useState } from "react"
 import { Sparkle, Star, Lightning, PencilSimple, Plus, Power, Trash } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
+import { BilingualField } from "@/components/admin/bilingual-field"
+import { ConfirmationDialog } from "@/components/admin/confirmation-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -48,7 +49,9 @@ const TYPE_BADGE_CLASS: Record<string, string> = {
 interface PackageFormState {
   promotionType: "featured" | "top_listing" | "urgent"
   name: string
+  nameKm: string
   description: string
+  descriptionKm: string
   durationDays: string
   price: string
   currency: "USD" | "KHR"
@@ -58,7 +61,9 @@ interface PackageFormState {
 const EMPTY_FORM: PackageFormState = {
   promotionType: "featured",
   name: "",
+  nameKm: "",
   description: "",
+  descriptionKm: "",
   durationDays: "7",
   price: "",
   currency: "USD",
@@ -69,7 +74,9 @@ function toFormState(pkg: AdminPromotionPackageRow): PackageFormState {
   return {
     promotionType: pkg.promotionType,
     name: pkg.name,
+    nameKm: pkg.nameKm ?? "",
     description: pkg.description ?? "",
+    descriptionKm: pkg.descriptionKm ?? "",
     durationDays: String(pkg.durationDays),
     price: String(pkg.price),
     currency: pkg.currency,
@@ -88,6 +95,7 @@ export function PackageCatalog() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingPkg, setEditingPkg] = useState<AdminPromotionPackageRow | null>(null)
   const [form, setForm] = useState<PackageFormState>(EMPTY_FORM)
+  const [packageToDelete, setPackageToDelete] = useState<AdminPromotionPackageRow | null>(null)
 
   const handleOpenCreate = () => {
     setEditingPkg(null)
@@ -106,7 +114,9 @@ export function PackageCatalog() {
     const payload = {
       promotionType: form.promotionType,
       name: form.name.trim(),
+      nameKm: form.nameKm.trim() || null,
       description: form.description.trim() || null,
+      descriptionKm: form.descriptionKm.trim() || null,
       durationDays: Number(form.durationDays),
       price: Number(form.price),
       currency: form.currency,
@@ -128,12 +138,7 @@ export function PackageCatalog() {
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/60">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Ad Packages</h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Configure packages sellers can purchase to boost their listings.
-            </p>
-          </div>
+          <h3 className="text-sm font-semibold text-foreground">Ad Packages</h3>
           <Button size="sm" className="text-xs font-semibold gap-1.5" onClick={handleOpenCreate}>
             <Plus size={13} />
             New Package
@@ -160,16 +165,16 @@ export function PackageCatalog() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-semibold text-foreground">{pkg.name}</span>
-                      <Badge variant="outline" className={`text-[10px] border ${badgeClass}`}>
+                      <Badge variant="outline" className={`text-2xs border ${badgeClass}`}>
                         {TYPE_LABELS[pkg.promotionType] ?? pkg.promotionType}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-xxs text-muted-foreground">
                         {pkg.durationDays}d · {pkg.currency} {Number(pkg.price).toFixed(2)}
                       </span>
                       {pkg.description && (
-                        <span className="text-[11px] text-muted-foreground truncate max-w-[200px]">
+                        <span className="text-xxs text-muted-foreground truncate max-w-[200px]">
                           {pkg.description}
                         </span>
                       )}
@@ -207,7 +212,7 @@ export function PackageCatalog() {
                       className="size-7 text-destructive hover:bg-destructive/10"
                       aria-label="Delete package"
                       disabled={deletePackage.isPending}
-                      onClick={() => deletePackage.mutate(pkg.id)}
+                      onClick={() => setPackageToDelete(pkg)}
                     >
                       <Trash size={14} />
                     </Button>
@@ -221,29 +226,25 @@ export function PackageCatalog() {
 
 
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) setDialogOpen(false) }}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-card">
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-card">
           <DialogHeader className="p-4 sm:p-5 border-b border-border/60">
             <DialogTitle className="text-sm font-bold">
               {editingPkg ? "Edit Package" : "New Ad Package"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              {editingPkg
-                ? "Update the details for this promotion package."
-                : "Create a new package sellers can purchase to promote their listings."}
-            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-3.5 p-4 sm:p-5">
-            <Field>
-              <FieldLabel required>Package Name</FieldLabel>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Featured Listing — 7 Days"
-                className="h-9 text-xs"
-                required
-              />
-            </Field>
+            <BilingualField
+              id="package-name"
+              label="Name"
+              required
+              valueEn={form.name}
+              valueKm={form.nameKm}
+              onChangeEn={(value) => setForm((f) => ({ ...f, name: value }))}
+              onChangeKm={(value) => setForm((f) => ({ ...f, nameKm: value }))}
+              placeholderEn="e.g. Featured Listing - 7 Days"
+              maxLength={120}
+            />
 
             <Field>
               <FieldLabel required>Type</FieldLabel>
@@ -305,16 +306,17 @@ export function PackageCatalog() {
               </Field>
             </div>
 
-            <Field>
-              <FieldLabel>Description</FieldLabel>
-              <Textarea
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                placeholder="Optional short description shown to sellers."
-                rows={2}
-                className="text-xs resize-none"
-              />
-            </Field>
+            <BilingualField
+              id="package-description"
+              label="Description"
+              multiline
+              rows={2}
+              valueEn={form.description}
+              valueKm={form.descriptionKm}
+              onChangeEn={(value) => setForm((f) => ({ ...f, description: value }))}
+              onChangeKm={(value) => setForm((f) => ({ ...f, descriptionKm: value }))}
+              maxLength={1000}
+            />
 
             <DialogFooter className="pt-4 border-t border-border/60 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 py-3 bg-muted/20 flex flex-row items-center justify-end gap-2">
               <Button
@@ -338,6 +340,19 @@ export function PackageCatalog() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmationDialog
+        open={Boolean(packageToDelete)}
+        onOpenChange={(open) => !open && setPackageToDelete(null)}
+        title="Delete promotion package?"
+        description={`"${packageToDelete?.name ?? "This package"}" will be permanently removed. Promotions already bought with it stay active.`}
+        confirmLabel="Delete package"
+        variant="destructive"
+        isPending={deletePackage.isPending}
+        onConfirm={() => {
+          if (!packageToDelete) return
+          deletePackage.mutate(packageToDelete.id, { onSuccess: () => setPackageToDelete(null) })
+        }}
+      />
     </div>
   )
 }

@@ -1,9 +1,10 @@
-export type PaymentStatus = "successful" | "pending" | "failed"
+export type PaymentStatus = "successful" | "pending" | "failed" | "expired" | "cancelled"
 
 export type PaymentPurpose = "promotion" | "subscription"
 
 export interface AdminPaymentTransaction {
   id: string
+  displayId: string
   transactionReference: string
   payerId: string
   payerName: string

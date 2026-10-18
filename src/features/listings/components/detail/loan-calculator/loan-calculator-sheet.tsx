@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState, useMemo } from "react"
 import { CaretLeft } from "@phosphor-icons/react"
 import {
@@ -28,6 +32,7 @@ export function LoanCalculatorSheet({
   initialPrice,
   currency = "USD",
 }: LoanCalculatorSheetProps) {
+  const tGenerated = useTranslations("generated")
   const [input, setInput] = useState<LoanInputState>(() =>
     getDefaultLoanInput(initialPrice)
   )
@@ -50,12 +55,12 @@ export function LoanCalculatorSheet({
               type="button"
               onClick={() => onOpenChange(false)}
               className="p-1.5 -ml-1.5 rounded-lg text-primary-foreground/90 hover:text-primary-foreground hover:bg-white/10 transition-colors cursor-pointer"
-              aria-label="Back to listing"
+              aria-label={tGenerated("backToListing")}
             >
               <CaretLeft size={22} weight="bold" />
             </button>
             <DialogTitle className="text-base sm:text-lg font-bold text-primary-foreground tracking-tight">
-              Loan Calculator
+              <LocalizedText id="loanCalculator" />
             </DialogTitle>
           </div>
 
@@ -65,7 +70,7 @@ export function LoanCalculatorSheet({
             onClick={handleReset}
             className="h-8 px-3 text-xs font-bold text-primary-foreground hover:bg-white/15 hover:text-primary-foreground rounded-lg cursor-pointer"
           >
-            Clear
+            <LocalizedText id="clear" />
           </Button>
         </DialogHeader>
 
@@ -78,7 +83,7 @@ export function LoanCalculatorSheet({
 
           <div className="space-y-3 pt-2 border-t border-border/60">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Calculation Summary
+              <LocalizedText id="calculationSummary" />
             </h3>
             <LoanCalculatorDonut result={result} input={input} currency={currency} />
           </div>

@@ -6,6 +6,7 @@ import type {
   AdminReportTargetType,
   RawReportRow,
 } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface AdminReportsQueryParams {
   page?: number;
@@ -80,11 +81,7 @@ export function normalizeReport(row: RawReportRow | AdminReport | Record<string,
       : typeof rawReason === 'string'
       ? rawReason
       : 'Unspecified';
-  const createdDate = new Date(r.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const createdDate = formatAdminDateTime(r.createdAt);
 
   return {
     id: r.id,
@@ -101,7 +98,7 @@ export function normalizeReport(row: RawReportRow | AdminReport | Record<string,
     createdAt: r.createdAt,
     createdDate,
     timestamp: new Date(r.createdAt).getTime(),
-    resolvedAt: r.resolvedAt ? new Date(r.resolvedAt).toLocaleDateString() : undefined,
+    resolvedAt: r.resolvedAt ? formatAdminDateTime(r.resolvedAt) : undefined,
     resolutionNote: undefined,
   };
 }
@@ -147,7 +144,9 @@ export function dismissReport(id: string, notes?: string) {
 interface RawReportReason {
   id: string;
   label: string;
+  labelKm?: string | null;
   description: string | null;
+  descriptionKm?: string | null;
   isActive: boolean;
   appliesTo: AdminReportTargetType[];
   createdAt: string;
@@ -157,10 +156,12 @@ function normalizeReportReason(r: RawReportReason): AdminReportReasonItem {
   return {
     id: r.id,
     label: r.label,
+    labelKm: r.labelKm ?? null,
     description: r.description ?? undefined,
+    descriptionKm: r.descriptionKm ?? null,
     appliesTo: r.appliesTo,
     isActive: r.isActive,
-    createdAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : undefined,
+    createdAt: r.createdAt ? formatAdminDateTime(r.createdAt) : undefined,
   };
 }
 
@@ -171,7 +172,9 @@ export async function getAdminReportReasons(): Promise<AdminReportReasonItem[]> 
 
 export async function createAdminReportReason(data: {
   label: string;
+  labelKm?: string | null;
   description?: string;
+  descriptionKm?: string | null;
   appliesTo: AdminReportTargetType[];
 }): Promise<AdminReportReasonItem> {
   const res = await apiClient.post<{ reason: RawReportReason }>('/admin/report-reasons', data);
@@ -180,7 +183,14 @@ export async function createAdminReportReason(data: {
 
 export async function updateAdminReportReason(
   id: string,
-  data: { label?: string; description?: string; isActive?: boolean; appliesTo?: AdminReportTargetType[] }
+  data: {
+    label?: string;
+    labelKm?: string | null;
+    description?: string;
+    descriptionKm?: string | null;
+    isActive?: boolean;
+    appliesTo?: AdminReportTargetType[];
+  }
 ): Promise<AdminReportReasonItem> {
   const res = await apiClient.patch<{ reason: RawReportReason }>(`/admin/report-reasons/${id}`, data);
   return normalizeReportReason(res.data!.reason);

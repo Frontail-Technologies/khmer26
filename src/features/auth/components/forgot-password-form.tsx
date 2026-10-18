@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import Link from "next/link"
 import { EnvelopeSimple, SpinnerGap, ArrowRight } from "@phosphor-icons/react"
@@ -16,6 +20,9 @@ import {
 import { useForgotPassword, friendlyAuthError, clearResetToken } from "../hooks/use-auth"
 
 export function ForgotPasswordForm() {
+  const tGenerated = useTranslations("generated")
+  const tValidation = useTranslations("ui.auth.validation")
+  const validationMessage = (key: string) => tValidation(key as Parameters<typeof tValidation>[0])
   const [formData, setFormData] = useState<ForgotPasswordFormData>({ email: "" })
   const [errors, setErrors] = useState<Partial<Record<keyof ForgotPasswordFormData, string>>>({})
   const [apiError, setApiError] = useState<string | null>(null)
@@ -32,7 +39,7 @@ export function ForgotPasswordForm() {
     const result = forgotPasswordSchema.safeParse(formData)
 
     if (!result.success) {
-      setErrors({ email: result.error.issues[0]?.message ?? "Please enter your email address" })
+      setErrors({ email: validationMessage(result.error.issues[0]?.message ?? "enterEmail") })
       return
     }
 
@@ -51,7 +58,7 @@ export function ForgotPasswordForm() {
           htmlFor="email"
           className="block text-xs sm:text-sm font-semibold text-foreground"
         >
-          Email Address <span className="text-destructive">*</span>
+          <LocalizedText id="emailAddress" /> <span className="text-destructive">*</span>
         </label>
 
         <InputGroup className="h-11 sm:h-12 rounded-lg" aria-invalid={!!errors.email}>
@@ -65,7 +72,7 @@ export function ForgotPasswordForm() {
             type="email"
             value={formData.email}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder="Enter your email address"
+            placeholder={tGenerated("enterYourEmailAddress")}
             autoComplete="email"
             className="text-xs sm:text-sm text-foreground placeholder:text-muted-foreground"
           />
@@ -93,11 +100,11 @@ export function ForgotPasswordForm() {
           {forgot.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Sending code...</span>
+              <span><LocalizedText id="sendingCode" /></span>
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <span>Send verification code</span>
+              <span><LocalizedText id="sendVerificationCode" /></span>
               <ArrowRight size={18} weight="bold" />
             </span>
           )}
@@ -105,12 +112,12 @@ export function ForgotPasswordForm() {
       </div>
 
       <div className="pt-4 text-center text-xs sm:text-sm text-muted-foreground">
-        <span>Remember your password? </span>
+        <span><LocalizedText id="rememberYourPassword" /> </span>
         <Link
           href="/login"
           className="font-bold text-primary hover:underline transition-colors ml-1"
         >
-          Back to sign in
+          <LocalizedText id="backToSignIn" />
         </Link>
       </div>
     </form>

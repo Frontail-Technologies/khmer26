@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAdminDashboard } from "../hooks/dashboard.queries"
 import { normalizeChatReport } from "@/features/admin/reported-chats/api/chat-reports.api"
+import { formatAdminDateTime } from "@/lib/formatters/date"
 
 export function AdminReportedChatsCard() {
   const { data } = useAdminDashboard()
@@ -33,7 +34,7 @@ export function AdminReportedChatsCard() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Reported Messages
           </CardTitle>
-          <Badge variant="secondary" className="h-4.5 px-2 text-[9px] font-bold rounded-md bg-accent/10 text-accent border-accent/20">
+          <Badge variant="secondary" className="h-4.5 px-2 text-3xs font-bold rounded-md bg-accent/10 text-accent border-accent/20">
             {recentChats.length} In Review
           </Badge>
         </div>
@@ -65,21 +66,21 @@ export function AdminReportedChatsCard() {
                   </span>
                   <Badge
                     variant="outline"
-                    className="text-[9px] px-1.5 py-0 font-medium h-4 rounded border-destructive/30 text-destructive bg-destructive/5"
+                    className="text-3xs px-1.5 py-0 font-medium h-4 rounded border-destructive/30 text-destructive bg-destructive/5"
                   >
                     {chat.reason}
                   </Badge>
                 </div>
 
-                <p className="text-[11px] text-muted-foreground truncate italic">
+                <p className="text-xxs text-muted-foreground truncate italic">
                   &ldquo;{chat.reportedMessageText}&rdquo;
                 </p>
               </div>
             </div>
 
             <div className="text-right shrink-0">
-              <span className="text-[10px] text-muted-foreground block font-medium">
-                {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(chat.createdAt))}
+              <span className="text-2xs text-muted-foreground block font-medium">
+                {formatAdminDateTime(chat.createdAt)}
               </span>
               <Link
                 href={`/admin/reported-chats?search=${encodeURIComponent(chat.id)}`}

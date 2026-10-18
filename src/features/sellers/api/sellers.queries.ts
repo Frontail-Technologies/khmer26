@@ -3,11 +3,14 @@ import { marketplaceKeys } from '@/lib/query/keys';
 import {
   createReview,
   getSeller,
+  getSellerCategories,
   getSellerListingsPage,
   getSellerReportReasons,
   getSellerReviewsPage,
+  getReviewEligibility,
   reportSeller,
   type CreateReviewInput,
+  type SellerListingFilters,
 } from './sellers.api';
 
 export const SELLER_LISTINGS_PAGE_SIZE = 12;
@@ -25,17 +28,33 @@ export function useSeller(id: string) {
   return useQuery(sellerQueryOptions(id));
 }
 
-export function useSellerListingsInfinite(id: string, enabled = true) {
-  const params = { limit: SELLER_LISTINGS_PAGE_SIZE };
+export function useSellerListingsInfinite(id: string, enabled = true, filters: SellerListingFilters = {}) {
+  // Only non-default filters go into the key, so the unfiltered inventory keeps one cache entry.
+  const params = {
+    limit: SELLER_LISTINGS_PAGE_SIZE,
+    ...(filters.q?.trim() ? { q: filters.q.trim() } : {}),
+    ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+    ...(filters.sort && filters.sort !== 'newest' ? { sort: filters.sort } : {}),
+  };
   return useInfiniteQuery({
     queryKey: marketplaceKeys.sellers.listings(id, params),
-    queryFn: ({ pageParam }) => getSellerListingsPage(id, { page: pageParam, limit: params.limit }),
+    queryFn: ({ pageParam }) =>
+      getSellerListingsPage(id, { page: pageParam, limit: SELLER_LISTINGS_PAGE_SIZE }, filters),
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.totalPages ? last.pagination.page + 1 : undefined,
     enabled,
     staleTime: 60_000,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useSellerCategories(id: string, enabled = true) {
+  return useQuery({
+    queryKey: marketplaceKeys.sellers.categories(id),
+    queryFn: () => getSellerCategories(id),
+    enabled,
+    staleTime: 60_000,
   });
 }
 
@@ -49,6 +68,16 @@ export function useSellerReviewsInfinite(id: string, enabled = true) {
       last.pagination.page < last.pagination.totalPages ? last.pagination.page + 1 : undefined,
     enabled,
     staleTime: 30_000,
+  });
+}
+
+export function useReviewEligibility(sellerId: string, enabled = true) {
+  return useQuery({
+    queryKey: marketplaceKeys.sellers.reviewEligibility(sellerId),
+    queryFn: () => getReviewEligibility(sellerId),
+    enabled,
+    staleTime: 30_000,
+    retry: false,
   });
 }
 
@@ -72,6 +101,9 @@ export function useSubmitReview(sellerId: string) {
         queryClient.invalidateQueries({ queryKey: marketplaceKeys.sellers.detail(sellerId) }),
         queryClient.invalidateQueries({
           queryKey: [...marketplaceKeys.sellers.all, 'reviews', sellerId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: marketplaceKeys.sellers.reviewEligibility(sellerId),
         }),
       ]);
     },

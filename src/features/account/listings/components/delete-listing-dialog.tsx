@@ -1,5 +1,8 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Trash, Warning } from "@phosphor-icons/react"
 import {
   Dialog,
@@ -25,6 +28,7 @@ export function DeleteListingDialog({
   onOpenChange,
   onConfirm,
 }: DeleteListingDialogProps) {
+  const tDynamic = useTranslations("dynamic")
   if (!listing) return null
 
   return (
@@ -35,10 +39,10 @@ export function DeleteListingDialog({
             <Warning size={22} weight="bold" />
           </div>
           <DialogTitle className="text-lg font-bold">
-            Delete Listing?
+            <LocalizedText id="deleteListing_3090bd" />
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            Are you sure you want to delete &quot;{listing.title}&quot;? This action cannot be undone and will remove the item from your marketplace listings.
+            {tDynamic("deleteListingNamed", { title: listing.title })}
           </DialogDescription>
         </DialogHeader>
 
@@ -49,7 +53,7 @@ export function DeleteListingDialog({
             onClick={() => onOpenChange(false)}
             className="w-full sm:flex-1 text-xs font-semibold h-10"
           >
-            Cancel
+            <LocalizedText id="cancel" />
           </Button>
           <Button
             type="button"
@@ -61,7 +65,7 @@ export function DeleteListingDialog({
             className="w-full sm:flex-1 text-xs font-semibold h-10 gap-1.5"
           >
             <Trash size={16} />
-            <span>Delete Listing</span>
+            <span><LocalizedText id="deleteListing" /></span>
           </Button>
         </DialogFooter>
       </DialogContent>

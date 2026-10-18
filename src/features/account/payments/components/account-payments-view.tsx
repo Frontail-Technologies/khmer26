@@ -1,85 +1,50 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
-import { CreditCard, Receipt } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Receipt } from "@phosphor-icons/react"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { AccountPageHeader } from "../../components/account-page-header"
+import type { AccountPaymentRecord } from "../../types"
+import { useAccountPayments } from "../api/payments.queries"
+import { PaymentDetailsDialog } from "./payment-details-dialog"
 import { PaymentSummary } from "./payment-summary"
 import { PaymentTable } from "./payment-table"
-import { PaymentDetailsDialog } from "./payment-details-dialog"
-import { DEMO_PAYMENTS } from "../../data/demo-account-data"
-import type { AccountPaymentRecord } from "../../types"
 
 export function AccountPaymentsView() {
-  const [payments] = useState<AccountPaymentRecord[]>(DEMO_PAYMENTS)
+  const tGenerated = useTranslations("generated")
+  const tAccount = useTranslations("ui.account")
+  const tDynamic = useTranslations("dynamic")
   const [selectedPayment, setSelectedPayment] = useState<AccountPaymentRecord | null>(null)
+  const query = useAccountPayments(1, 100)
+  const payments = query.data?.items ?? []
 
   return (
     <div className="space-y-6">
-      <AccountPageHeader
-        title="Payments & Invoices"
-        description="View your marketplace transaction history, receipts, and invoices."
-      />
-
-      <div className="space-y-6">
-        <PaymentSummary payments={payments} />
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-foreground">
-              Transaction History
-            </h3>
-            <span className="text-xs text-muted-foreground font-semibold">
-              {payments.length} Transactions
-            </span>
-          </div>
-
-          {payments.length > 0 ? (
-            <PaymentTable
-              payments={payments}
-              onSelectPayment={(p) => setSelectedPayment(p)}
-            />
-          ) : (
-            <div className="rounded-2xl border border-dashed border-border/80 p-8 bg-card/40">
-              <EmptyState
-                icon={<Receipt size={32} className="text-muted-foreground" />}
-                title="No payment history"
-                description="Your transaction receipts and invoices will appear here once you purchase listing promotions or memberships."
-              />
-            </div>
-          )}
+      <AccountPageHeader title={tGenerated("paymentsReceipts")} />
+      {query.isLoading ? (
+        <div className="space-y-6"><div className="grid gap-4 sm:grid-cols-3"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-24" /></div><Skeleton className="h-72" /></div>
+      ) : query.isError ? (
+        <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="paymentHistoryCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{query.error instanceof Error ? query.error.message : tGenerated("pleaseTryAgain")}</p><Button variant="outline" className="mt-4" onClick={() => query.refetch()}><LocalizedText id="tryAgain" /></Button></div>
+      ) : (
+        <div className="space-y-6">
+          <PaymentSummary payments={payments} summary={query.data?.summary ?? { totalPaid: 0, primaryMethod: null }} />
+          <section className="space-y-3">
+            <div className="flex items-center justify-between"><h2 className="text-base font-bold"><LocalizedText id="transactionHistory" /></h2><span className="text-xs font-semibold text-muted-foreground">{tDynamic("transactionCount", { count: query.data?.pagination.total ?? 0 })}</span></div>
+            {payments.length > 0 ? (
+              <PaymentTable payments={payments} onSelectPayment={setSelectedPayment} />
+            ) : (
+              <div className="rounded-lg border border-dashed bg-card/40 p-8"><EmptyState icon={<Receipt size={32} className="text-muted-foreground" />} title={tGenerated("noPaymentHistory")} description={tAccount("noPaymentsYetDescription")} /></div>
+            )}
+          </section>
         </div>
-
-        <Card className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-2xs">
-          <CardHeader className="p-0 pb-4">
-            <div className="flex items-center gap-2 text-primary">
-              <CreditCard size={18} weight="bold" />
-              <CardTitle className="text-base font-bold text-foreground">
-                Saved Payment Methods
-              </CardTitle>
-            </div>
-            <CardDescription className="text-xs text-muted-foreground">
-              Direct debit cards and digital wallets saved for fast one-tap checkout.
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            <div className="py-6 text-center text-xs text-muted-foreground border border-dashed border-border/70 rounded-xl bg-muted/20">
-              <p className="font-semibold text-foreground">No payment methods saved</p>
-              <p className="text-[11px] mt-0.5">
-                Payment methods will be saved securely when you complete your next checkout.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <PaymentDetailsDialog
-        payment={selectedPayment}
-        open={Boolean(selectedPayment)}
-        onOpenChange={(open) => !open && setSelectedPayment(null)}
-      />
+      )}
+      <PaymentDetailsDialog payment={selectedPayment} open={Boolean(selectedPayment)} onOpenChange={(open) => !open && setSelectedPayment(null)} />
     </div>
   )
 }

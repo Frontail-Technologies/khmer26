@@ -19,7 +19,7 @@ export function AdminRecentReportsCard() {
           <CardTitle className="text-sm sm:text-base font-bold text-foreground">
             Recent Safety Reports
           </CardTitle>
-          <Badge variant="destructive" className="h-4.5 px-2 text-[9px] font-bold rounded-md">
+          <Badge variant="destructive" className="h-4.5 px-2 text-3xs font-bold rounded-md">
             {recentReports.length} Flagged
           </Badge>
         </div>
@@ -56,15 +56,15 @@ export function AdminRecentReportsCard() {
                   />
                 </div>
 
-                <p className="text-[11px] text-muted-foreground truncate">
+                <p className="text-xxs text-muted-foreground truncate">
                   {rpt.reasonLabel} • Reported by <span className="font-medium text-foreground">{rpt.reporter.name}</span>
                 </p>
               </div>
             </div>
 
             <div className="text-right shrink-0">
-              <span className="text-[10px] text-muted-foreground block font-medium">
-                {rpt.createdAt}
+              <span className="text-2xs text-muted-foreground block font-medium">
+                {rpt.createdDate}
               </span>
               <Link
                 href={`/admin/reports/${rpt.id}`}

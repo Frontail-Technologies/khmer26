@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useEffect, useRef, useState } from "react"
 import { SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
@@ -199,6 +201,10 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
     return () => observer.disconnect()
   }, [gsiLoaded])
 
+  // When Google's own button is rendered it is the real control: it is exposed to assistive tech
+  // and our styled button is only its visual skin. Otherwise our button is the (fallback) control.
+  const googleActive = gsiLoaded && Boolean(GOOGLE_CLIENT_ID)
+
   const handleGoogleFallbackClick = () => {
     if (!GOOGLE_CLIENT_ID) {
       setGoogleError("Google sign-in is not configured.")
@@ -240,29 +246,34 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
   return (
     <div className="space-y-2.5">
       <div className="space-y-1">
-        <div ref={googleWrapRef} className="group relative mx-auto h-11 w-full max-w-100 sm:h-12">
+        <div
+          ref={googleWrapRef}
+          className="group relative mx-auto h-11 w-full max-w-100 rounded-lg focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background sm:h-12"
+        >
           <Button
             type="button"
             variant="outline"
             onClick={handleGoogleFallbackClick}
             disabled={googlePending}
+            aria-hidden={googleActive || undefined}
+            tabIndex={googleActive ? -1 : undefined}
             className="w-full h-full border-border/90 bg-card text-foreground group-hover:bg-muted font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
           >
             {googlePending ? (
               <span className="flex items-center gap-2">
                 <SpinnerGap size={18} className="animate-spin" />
-                <span>Signing in...</span>
+                <span><LocalizedText id="signingIn" /></span>
               </span>
             ) : (
               <>
                 <GoogleIcon />
-                <span>Continue with Google</span>
+                <span><LocalizedText id="continueWithGoogle" /></span>
               </>
             )}
           </Button>
           <div
             ref={googleSlotRef}
-            aria-hidden="true"
+            inert={!googleActive}
             className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-lg opacity-0 ${
               googlePending ? "pointer-events-none" : ""
             }`}
@@ -283,12 +294,12 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
           {telegramPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Signing in...</span>
+              <span><LocalizedText id="signingIn" /></span>
             </span>
           ) : (
             <>
               <TelegramIcon />
-              <span>Continue with Telegram</span>
+              <span><LocalizedText id="continueWithTelegram" /></span>
             </>
           )}
         </Button>

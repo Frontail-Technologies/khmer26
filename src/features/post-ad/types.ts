@@ -8,7 +8,7 @@ export interface CategoryFieldDef {
   type: CategoryFieldType
   required?: boolean
   placeholder?: string
-  options?: string[]
+  options?: Array<string | { value: string; label: string }>
   unit?: string
 }
 
@@ -19,12 +19,20 @@ export interface UploadedPhoto {
   name: string
   size: number
   isCover: boolean
+  mediaId?: string
+  uploadProgress?: number
+  uploadStatus?: "uploading" | "done" | "error"
+  uploadError?: string
 }
 
 export interface PostAdLocation {
+  provinceId?: number
+  districtId?: number
+  communeId?: number
   province: string
   district: string
   label: string
+  googleMapsUrl?: string
 }
 
 export interface ListingDraft {

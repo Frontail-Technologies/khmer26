@@ -17,12 +17,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAdminUsers } from "@/features/admin/users/hooks/users.queries"
+import { ImageMessage } from "@/features/messages/components/image-message"
 import { useAdminChatConversations, useAdminChatConversationMessages } from "../hooks/chats.queries"
 import type {
   AdminChatParticipant,
   AdminChatConversation,
 } from "../types"
 import { cn } from "@/lib/utils"
+import { formatAdminDate } from "@/lib/formatters/date"
 
 function fmtTime(iso: string) {
   if (!iso) return ""
@@ -34,7 +36,7 @@ function fmtTime(iso: string) {
   const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   if (d.toDateString() === todayStr) return time
   if (d.toDateString() === yestStr) return `Yesterday`
-  return d.toLocaleDateString([], { month: "short", day: "numeric" })
+  return formatAdminDate(d)
 }
 
 interface AdminChatsWorkspaceProps {
@@ -86,6 +88,7 @@ export function AdminChatsWorkspace({
     return allForUser.filter((c) => {
       const other = c.participantA.id === selectedUser?.id ? c.participantB : c.participantA
       return (
+        c.displayId.toLowerCase().includes(q) ||
         other.name.toLowerCase().includes(q) ||
         (c.listing && c.listing.title.toLowerCase().includes(q)) ||
         c.lastMessage.toLowerCase().includes(q)
@@ -111,10 +114,10 @@ export function AdminChatsWorkspace({
     if (!selectedConversationSummary && selectedConversationId && messageData) {
       const participants = messageData.participants.map((participant) => ({
         id: participant.id,
-        name: participant.shopName || `User ${participant.id.slice(0, 8)}`,
+        name: participant.shopName || participant.email?.split('@')[0] || 'User account',
         businessName: participant.shopName || undefined,
         phone: "",
-        email: "",
+        email: participant.email || "",
         accountType: participant.shopName ? ("seller" as const) : ("buyer" as const),
       }))
       const participantA = participants[0]
@@ -123,6 +126,7 @@ export function AdminChatsWorkspace({
 
       return {
         id: selectedConversationId,
+        displayId: messageData.displayId,
         participantA,
         participantB,
         listing: messageData.listing,
@@ -207,7 +211,7 @@ export function AdminChatsWorkspace({
                     )}
                   >
                     <Avatar className="size-8.5 shrink-0 rounded-full border border-border/60">
-                      <AvatarFallback className="text-[11px] font-bold">
+                      <AvatarFallback className="text-xxs font-bold">
                         {user.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -217,7 +221,7 @@ export function AdminChatsWorkspace({
                           {user.name}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                      <div className="flex items-center justify-between text-2xs text-muted-foreground">
                         <span className="capitalize">{user.accountType}</span>
                         <span className="truncate">{user.phone}</span>
                       </div>
@@ -252,7 +256,7 @@ export function AdminChatsWorkspace({
                   <ArrowLeft size={16} />
                 </button>
                 <div className="min-w-0">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground block">
+                  <span className="text-2xs uppercase font-bold tracking-wider text-muted-foreground block">
                     Conversations
                   </span>
                   <h4 className="font-bold text-xs text-foreground truncate">
@@ -261,7 +265,7 @@ export function AdminChatsWorkspace({
                 </div>
               </div>
               {selectedUser && (
-                <Badge variant="outline" className="text-[10px] font-semibold capitalize shrink-0">
+                <Badge variant="outline" className="text-2xs font-semibold capitalize shrink-0">
                   {selectedUser.accountType}
                 </Badge>
               )}
@@ -304,7 +308,7 @@ export function AdminChatsWorkspace({
                     )}
                   >
                     <Avatar className="size-8.5 shrink-0 rounded-full border border-border/60 mt-0.5">
-                      <AvatarFallback className="text-[11px] font-bold">
+                      <AvatarFallback className="text-xxs font-bold">
                         {other.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -313,18 +317,18 @@ export function AdminChatsWorkspace({
                         <span className="font-semibold text-xs text-foreground truncate">
                           {other.name}
                         </span>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        <span className="text-2xs text-muted-foreground whitespace-nowrap">
                           {fmtTime(conv.lastMessageAt)}
                         </span>
                       </div>
 
                       {conv.listing && (
-                        <span className="text-[10px] font-medium text-primary block truncate">
+                        <span className="text-2xs font-medium text-primary block truncate">
                           {conv.listing.title}
                         </span>
                       )}
 
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                      <p className="text-xxs text-muted-foreground line-clamp-1">
                         {conv.lastMessage}
                       </p>
 
@@ -332,7 +336,7 @@ export function AdminChatsWorkspace({
                         <div className="pt-0.5">
                           <Badge
                             variant="outline"
-                            className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] font-bold px-1.5 py-0 h-4 flex items-center gap-1 w-fit"
+                            className="bg-destructive/10 text-destructive border-destructive/20 text-3xs font-bold px-1.5 py-0 h-4 flex items-center gap-1 w-fit"
                           >
                             <WarningCircle size={10} weight="fill" />
                             <span>Reported</span>
@@ -373,7 +377,7 @@ export function AdminChatsWorkspace({
                       <ArrowLeft size={16} />
                     </button>
                     <Avatar className="size-8 shrink-0 rounded-full border border-border/60">
-                      <AvatarFallback className="text-[10px] font-bold">
+                      <AvatarFallback className="text-2xs font-bold">
                         {otherParticipant.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -381,8 +385,8 @@ export function AdminChatsWorkspace({
                       <h3 className="font-bold text-xs text-foreground truncate">
                         {otherParticipant.name}
                       </h3>
-                      <span className="font-mono text-[10px] text-muted-foreground block">
-                        {activeUser?.name} ↔ {otherParticipant.name}
+                      <span className="text-2xs text-muted-foreground block">
+                        {selectedConversation.displayId} · {activeUser?.name} ↔ {otherParticipant.name}
                       </span>
                     </div>
                   </div>
@@ -391,7 +395,7 @@ export function AdminChatsWorkspace({
                     <Button
                       variant="outline"
                       size="xs"
-                      className="text-[11px] h-7"
+                      className="text-xxs h-7"
                       render={
                         <Link href={`/admin/users/${otherParticipant.id}`}>
                           <User size={12} className="mr-1" />
@@ -403,7 +407,7 @@ export function AdminChatsWorkspace({
                       <Button
                         variant="outline"
                         size="xs"
-                        className="text-[11px] h-7 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20"
+                        className="text-xxs h-7 bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20"
                         render={
                           <Link href={`/admin/reported-chats?search=${selectedConversation.reportId}`}>
                             <WarningCircle size={12} className="mr-1" />
@@ -429,10 +433,10 @@ export function AdminChatsWorkspace({
                         </div>
                       )}
                       <div className="min-w-0">
-                        <span className="font-semibold text-[11px] text-foreground block truncate">
+                        <span className="font-semibold text-xxs text-foreground block truncate">
                           {selectedConversation.listing.title}
                         </span>
-                        <span className="font-bold text-[10px] text-primary">
+                        <span className="font-bold text-2xs text-primary">
                           ${selectedConversation.listing.price.toLocaleString()}{" "}
                           {selectedConversation.listing.currency}
                         </span>
@@ -442,7 +446,7 @@ export function AdminChatsWorkspace({
                     <Button
                       variant="ghost"
                       size="xs"
-                      className="h-6 text-[10px] text-primary shrink-0"
+                      className="h-6 text-2xs text-primary shrink-0"
                       render={
                         <Link href={`/admin/listings/${selectedConversation.listing.id}`}>
                           <Storefront size={11} className="mr-1" />
@@ -469,7 +473,7 @@ export function AdminChatsWorkspace({
                         isFromSelectedUser ? "ml-auto items-end" : "mr-auto items-start"
                       )}
                     >
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground px-1 pb-0.5">
+                      <div className="flex items-center gap-1 text-2xs text-muted-foreground px-1 pb-0.5">
                         <span className="font-semibold">{msg.senderName}</span>
                         <span>•</span>
                         <span>{fmtTime(msg.createdAt)}</span>
@@ -477,17 +481,31 @@ export function AdminChatsWorkspace({
 
                       <div
                         className={cn(
-                          "p-3 rounded-xl text-xs leading-relaxed shadow-2xs space-y-1",
-                          msg.isReported
-                            ? "bg-destructive/10 border border-destructive/40 text-foreground"
-                            : isFromSelectedUser
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-background border border-border/70 text-foreground"
+                          "rounded-xl text-xs leading-relaxed space-y-1",
+                          msg.type === "image" && msg.imageUrl
+                            ? msg.isReported && "p-1.5 bg-destructive/10 border border-destructive/40"
+                            : cn(
+                                "p-3 shadow-2xs",
+                                msg.isReported
+                                  ? "bg-destructive/10 border border-destructive/40 text-foreground"
+                                  : isFromSelectedUser
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background border border-border/70 text-foreground"
+                              )
                         )}
                       >
-                        <p className="whitespace-pre-wrap">{msg.text}</p>
+                        {msg.type === "image" && msg.imageUrl ? (
+                          <ImageMessage
+                            imageUrl={msg.imageUrl}
+                            imageAlt={msg.imageAlt}
+                            content={msg.text || undefined}
+                            isCurrentUser={isFromSelectedUser}
+                          />
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.text}</p>
+                        )}
                         {msg.isReported && (
-                          <div className="flex items-center gap-1 text-[10px] font-semibold text-destructive pt-1 border-t border-destructive/20">
+                          <div className="flex items-center gap-1 text-2xs font-semibold text-destructive pt-1 border-t border-destructive/20">
                             <WarningCircle size={11} weight="fill" />
                             <span>Reported Message: {msg.flagReason || "Flagged by user"}</span>
                           </div>
@@ -507,7 +525,7 @@ export function AdminChatsWorkspace({
             <div className="min-h-0 flex-1 flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground space-y-2">
               <ChatTeardropText size={36} className="text-muted-foreground/40" />
               <p className="font-semibold text-foreground">Select a conversation to inspect</p>
-              <p className="text-[11px] text-muted-foreground max-w-xs">
+              <p className="text-xxs text-muted-foreground max-w-xs">
                 Review message history, participant details, and linked marketplace listings.
               </p>
             </div>

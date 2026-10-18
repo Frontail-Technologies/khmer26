@@ -1,15 +1,20 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { CaretDown, CaretUp } from "@phosphor-icons/react"
-import { Button } from "@/components/ui/button"
+import { splitLinks } from "../../lib/linkify"
 
 interface ListingDescriptionProps {
   description: string | null
 }
 
-/** Plain text only: line breaks are preserved and nothing is interpreted as HTML. */
+/** Plain text: line breaks are preserved, web addresses become links, nothing is interpreted as HTML. */
 export function ListingDescription({ description }: ListingDescriptionProps) {
+  const tGenerated = useTranslations("generated")
   const [isExpanded, setIsExpanded] = useState(false)
   const text = description?.trim()
 
@@ -18,35 +23,47 @@ export function ListingDescription({ description }: ListingDescriptionProps) {
   const isLong = text.length > 700 || text.split("\n").length > 14
 
   return (
-    <section aria-label="Description" className="space-y-2.5">
-      <h2 className="text-sm sm:text-base font-bold text-foreground">Description</h2>
+    <section aria-label={tGenerated("description")} className="space-y-1">
       <p
-        className={`wrap-break-word whitespace-pre-line text-sm leading-relaxed text-foreground/90 sm:text-[15px] ${
+        className={`max-w-3xl wrap-break-word whitespace-pre-line text-sm leading-6 text-foreground/90 ${
           !isExpanded && isLong ? "line-clamp-10" : ""
         }`}
       >
-        {text}
+        {splitLinks(text).map((part, index) =>
+          part.type === "link" ? (
+            <a
+              key={index}
+              href={part.href}
+              target="_blank"
+              rel="noopener noreferrer nofollow ugc"
+              className="break-all text-primary hover:underline"
+            >
+              {part.value}
+            </a>
+          ) : (
+            part.value
+          )
+        )}
       </p>
 
       {isLong && (
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
+          type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 gap-1 px-2 text-xs font-semibold text-primary"
+          className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary hover:underline"
         >
           {isExpanded ? (
             <>
-              <span>Show less</span>
-              <CaretUp size={14} weight="bold" />
+              <span><LocalizedText id="showLess" /></span>
+              <CaretUp size={13} weight="bold" />
             </>
           ) : (
             <>
-              <span>Read more</span>
-              <CaretDown size={14} weight="bold" />
+              <span><LocalizedText id="readMore" /></span>
+              <CaretDown size={13} weight="bold" />
             </>
           )}
-        </Button>
+        </button>
       )}
     </section>
   )

@@ -5,7 +5,6 @@ import { PaperPlaneTilt, Info } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { useCreateBroadcast } from "../hooks/notifications.mutations"
 import type { NotificationAudience } from "../types"
+import { BilingualField } from "@/components/admin/bilingual-field"
 
 const AUDIENCE_OPTIONS: SelectOption[] = [
   { value: "all_users", label: "All Users" },
@@ -30,7 +30,9 @@ export function NotificationComposer() {
   const [audience, setAudience] = useState("all_users")
   const [targetUser, setTargetUser] = useState("")
   const [title, setTitle] = useState("")
+  const [titleKm, setTitleKm] = useState("")
   const [message, setMessage] = useState("")
+  const [messageKm, setMessageKm] = useState("")
   const createBroadcast = useCreateBroadcast()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,14 +43,18 @@ export function NotificationComposer() {
     createBroadcast.mutate(
       {
         title: title.trim(),
+        titleKm: titleKm.trim() || null,
         body: message.trim(),
+        bodyKm: messageKm.trim() || null,
         audience: audience as NotificationAudience,
         specificUserId: audience === "specific_user" ? targetUser.trim() : undefined,
       },
       {
         onSuccess: () => {
           setTitle("")
+          setTitleKm("")
           setMessage("")
+          setMessageKm("")
           setTargetUser("")
         },
       }
@@ -56,7 +62,7 @@ export function NotificationComposer() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-2xl">
+    <div className="p-4 sm:p-6 max-w-4xl">
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         <Field className="gap-2">
           <FieldLabel className="text-xs font-semibold text-foreground">Audience</FieldLabel>
@@ -92,29 +98,34 @@ export function NotificationComposer() {
           </Field>
         )}
 
-        <Field className="gap-2">
-          <FieldLabel className="text-xs font-semibold text-foreground">Title</FieldLabel>
-          <Input
-            placeholder="Enter notification title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="h-9 text-xs font-medium"
-          />
-        </Field>
+        <BilingualField
+          id="broadcast-title"
+          label="Title"
+          required
+          valueEn={title}
+          valueKm={titleKm}
+          onChangeEn={setTitle}
+          onChangeKm={setTitleKm}
+          placeholderEn="Enter notification title"
+          maxLength={200}
+        />
 
-        <Field className="gap-2">
-          <FieldLabel className="text-xs font-semibold text-foreground">Message</FieldLabel>
-          <Textarea
-            placeholder="Write your message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            className="text-xs min-h-[110px] resize-none leading-relaxed"
-          />
-        </Field>
+        <BilingualField
+          id="broadcast-message"
+          label="Message"
+          required
+          multiline
+          rows={4}
+          valueEn={message}
+          valueKm={messageKm}
+          onChangeEn={setMessage}
+          onChangeKm={setMessageKm}
+          placeholderEn="Write your message..."
+          maxLength={2000}
+        />
 
         <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
             <Info size={14} className="shrink-0 text-muted-foreground" />
             <span>Delivery is processed in bounded background batches, not instantly.</span>
           </div>

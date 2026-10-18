@@ -20,7 +20,6 @@ export interface AdminPageHeaderProps {
 
 export function AdminPageHeader({
   title,
-  description,
   breadcrumbs,
   actions,
   className,
@@ -28,7 +27,7 @@ export function AdminPageHeader({
   return (
     <div className={cn('space-y-2 pb-5 border-b border-border/60 mb-6', className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground mb-1">
+        <nav className="flex items-center gap-1.5 text-xxs font-medium text-muted-foreground mb-1">
           {breadcrumbs.map((item, index) => {
             const isLast = index === breadcrumbs.length - 1;
             return (
@@ -57,11 +56,6 @@ export function AdminPageHeader({
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
-          {description && (
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              {description}
-            </p>
-          )}
         </div>
         {actions && (
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">

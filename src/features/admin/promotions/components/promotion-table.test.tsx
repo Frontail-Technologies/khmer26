@@ -7,7 +7,9 @@ import type { ActivePromotionItem } from '../types';
 const mockPromotions: ActivePromotionItem[] = [
   {
     id: 'promo-1',
+    displayId: 'PRO-100001',
     listingId: 'listing-1',
+    listingDisplayId: 'LST-100001',
     listingTitle: 'Toyota Prius 2015 Silver',
     listingPrice: 12500,
     currency: 'USD',
@@ -22,7 +24,9 @@ const mockPromotions: ActivePromotionItem[] = [
   },
   {
     id: 'promo-2',
+    displayId: 'PRO-100002',
     listingId: 'listing-2',
+    listingDisplayId: 'LST-100002',
     listingTitle: 'Modern Villa Sen Sok',
     listingPrice: 180000,
     currency: 'USD',
@@ -37,6 +41,8 @@ const mockPromotions: ActivePromotionItem[] = [
   },
 ];
 
+const endPromotion = vi.fn();
+
 vi.mock('../hooks/promotions.queries', () => ({
   useAdminPromotions: () => ({
     data: { items: mockPromotions },
@@ -47,6 +53,7 @@ vi.mock('../hooks/promotions.queries', () => ({
 vi.mock('../hooks/promotions.mutations', () => ({
   useActivatePromotionPackage: () => ({ mutate: vi.fn(), isPending: false }),
   useDeactivatePromotionPackage: () => ({ mutate: vi.fn(), isPending: false }),
+  useEndPromotion: () => ({ mutate: endPromotion, isPending: false }),
 }));
 
 describe('<PromotionTable />', () => {
@@ -70,6 +77,16 @@ describe('<PromotionTable />', () => {
     fireEvent.change(searchInput, { target: { value: 'Nonexistent Listing XYZ' } });
 
     expect(screen.getAllByText(/no promotions found/i)[0]).toBeInTheDocument();
+  });
+
+  it('ends an active promotion through the mutation', () => {
+    renderWithProviders(<PromotionTable initialPromotions={mockPromotions} />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /end promotion/i })[0]);
+
+    expect(endPromotion).toHaveBeenCalledWith('promo-1', expect.objectContaining({
+      onSuccess: expect.any(Function),
+    }));
   });
 });
 

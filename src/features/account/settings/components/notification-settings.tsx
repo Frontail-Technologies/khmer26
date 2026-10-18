@@ -1,5 +1,8 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import {
   Bell,
   ChatCircleDots,
@@ -8,54 +11,51 @@ import {
   Sparkle,
   Megaphone,
 } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import type { AccountSettingsData } from "../../types"
 
 interface NotificationSettingsProps {
   settings: AccountSettingsData["notifications"]
   onChange: (key: keyof AccountSettingsData["notifications"], value: boolean) => void
+  disabled?: boolean
 }
 
 export function NotificationSettings({
   settings,
   onChange,
+  disabled = false,
 }: NotificationSettingsProps) {
+  const t = useTranslations("ui.account")
   const items = [
     {
       key: "newMessages" as const,
-      label: "New Messages & Inquiries",
-      description: "Get notified immediately when buyers or sellers send you direct messages.",
+      label: t("notifNewMessages"),
       icon: ChatCircleDots,
     },
     {
       key: "listingFavorites" as const,
-      label: "Listing Favorites",
-      description: "Receive updates when other users add your items to their saved favorites.",
+      label: t("notifFavorites"),
       icon: Heart,
     },
     {
       key: "listingStatusUpdates" as const,
-      label: "Listing Status & Approvals",
-      description: "Notifications when your ads are approved, published, expired, or reviewed.",
+      label: t("notifListingStatus"),
       icon: Bell,
     },
     {
       key: "priceOffers" as const,
-      label: "Price Offers & Bids",
-      description: "Alerts when a buyer submits a direct price offer or negotiation request.",
+      label: t("notifOffers"),
       icon: Tag,
     },
     {
       key: "promotions" as const,
-      label: "Discounts & Promotion Credits",
-      description: "Special seller boost discounts, seasonal events, and platform credits.",
+      label: t("notifPromotions"),
       icon: Sparkle,
     },
     {
       key: "marketplaceAnnouncements" as const,
-      label: "Platform Updates & Safety Notices",
-      description: "Important security alerts and system announcements from the Khmer26 team.",
+      label: t("notifPlatform"),
       icon: Megaphone,
     },
   ]
@@ -66,12 +66,9 @@ export function NotificationSettings({
         <div className="flex items-center gap-2 text-primary">
           <Bell size={20} weight="fill" />
           <CardTitle className="text-base font-bold text-foreground">
-            Notification Preferences
+            <LocalizedText id="notificationPreferences" />
           </CardTitle>
         </div>
-        <CardDescription className="text-xs text-muted-foreground">
-          Choose which notifications you receive across email and in-app alerts.
-        </CardDescription>
       </CardHeader>
 
       <CardContent className="p-0 divide-y divide-border/60">
@@ -88,18 +85,14 @@ export function NotificationSettings({
                 <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
                   <Icon size={16} />
                 </div>
-                <div>
-                  <span className="font-bold text-xs sm:text-sm text-foreground block">
-                    {item.label}
-                  </span>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-normal mt-0.5">
-                    {item.description}
-                  </p>
-                </div>
+                <span className="font-bold text-xs sm:text-sm text-foreground block">
+                  {item.label}
+                </span>
               </div>
 
               <Switch
                 checked={isChecked}
+                disabled={disabled}
                 onCheckedChange={(checked) => onChange(item.key, checked)}
                 aria-label={item.label}
               />

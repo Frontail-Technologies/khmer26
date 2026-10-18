@@ -99,7 +99,8 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
-        const matchesId = tx.id.toLowerCase().includes(q)
+        const matchesId =
+          tx.displayId.toLowerCase().includes(q) || tx.id.toLowerCase().includes(q)
         const matchesRef = tx.transactionReference.toLowerCase().includes(q)
         const matchesPayer = tx.payerName.toLowerCase().includes(q)
         const matchesPayerId = tx.payerId.toLowerCase().includes(q)
@@ -165,7 +166,7 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"
@@ -187,7 +188,7 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
             />
             <input
               type="text"
-              placeholder="Search payment ID, reference, or payer..."
+              placeholder="Search payment reference or payer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
@@ -271,7 +272,6 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                 <DataTableEmpty
                   colSpan={columns.length}
                   title="No payment transactions found"
-                  description="Try adjusting your search criteria or active filters."
                 />
               )}
             </TableBody>
@@ -295,12 +295,12 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="font-mono font-bold text-xs text-foreground block">
-                        {tx.id}
+                        {tx.displayId}
                       </span>
-                      <span className="text-[11px] font-semibold text-foreground block">
+                      <span className="text-xxs font-semibold text-foreground block">
                         {tx.payerName}
                       </span>
-                      <span className="font-mono text-[10px] text-muted-foreground block">
+                      <span className="font-mono text-2xs text-muted-foreground block">
                         {tx.transactionReference}
                       </span>
                     </div>
@@ -316,15 +316,15 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                     <div className="flex items-center gap-1.5 min-w-0">
                       <Badge
                         variant={tx.purpose === "subscription" ? "default" : "secondary"}
-                        className="text-[9px] uppercase font-bold px-1.5 py-0 h-4 shrink-0"
+                        className="text-3xs uppercase font-bold px-1.5 py-0 h-4 shrink-0"
                       >
                         {tx.purpose}
                       </Badge>
-                      <span className="text-[11px] text-muted-foreground truncate">
+                      <span className="text-xxs text-muted-foreground truncate">
                         {tx.purposeTitle}
                       </span>
                     </div>
-                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                    <span className="text-xxs text-muted-foreground whitespace-nowrap">
                       {tx.createdAt}
                     </span>
                   </div>
@@ -346,7 +346,6 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
           ) : (
             <DataTableEmpty
               title="No payment transactions found"
-              description="Try adjusting your search criteria or active filters."
             />
           )}
         </div>

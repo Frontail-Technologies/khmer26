@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import {
   ChatCircleDots,
@@ -7,6 +11,8 @@ import {
   ShareNetwork,
   Flag,
   Check,
+  UserCheck,
+  UserPlus,
 } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +22,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { useRequireAuth } from "@/features/auth/hooks/use-require-auth"
+import { useFollowSeller } from "@/features/listings/hooks/use-follow-seller"
 import { useStartConversation } from "@/features/listings/hooks/use-start-conversation"
 import type { SellerProfile } from "../api/sellers.api"
 import { useShareSeller } from "../hooks/use-share-seller"
@@ -28,11 +35,13 @@ interface SellerActionsProps {
 }
 
 export function SellerActions({ seller, contactListingId, isOwnProfile }: SellerActionsProps) {
+  const tGenerated = useTranslations("generated")
   const requireAuth = useRequireAuth()
   const [reportOpen, setReportOpen] = useState(false)
   const { share, copied } = useShareSeller(seller.id, seller.shopName)
   // Chat can only be started from a listing; with none there is nothing to talk about.
   const chat = useStartConversation(contactListingId ?? "")
+  const follow = useFollowSeller(seller.id)
   const canContact = !isOwnProfile && Boolean(contactListingId)
 
   return (
@@ -45,7 +54,31 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
             disabled={chat.isPending}
           >
             <ChatCircleDots size={18} weight="fill" />
-            <span>{chat.isPending ? "Starting chat…" : "Chat with seller"}</span>
+            <span>{chat.isPending ? tGenerated("startingChat") : tGenerated("chatWithSeller")}</span>
+          </Button>
+        )}
+
+        {!isOwnProfile && seller.allowBuyersFollow && (
+          <Button
+            variant={seller.isFollowing ? "outline" : "secondary"}
+            className={`h-10 gap-1.5 rounded-lg px-3.5 text-xs font-semibold sm:text-sm ${
+              seller.isFollowing ? "border-primary text-primary hover:bg-primary/5" : ""
+            }`}
+            onClick={() => follow.toggle(seller.isFollowing)}
+            disabled={follow.isPending}
+            aria-pressed={seller.isFollowing}
+          >
+            {seller.isFollowing ? (
+              <>
+                <UserCheck size={16} weight="bold" />
+                <span><LocalizedText id="following" /></span>
+              </>
+            ) : (
+              <>
+                <UserPlus size={16} weight="bold" />
+                <span><LocalizedText id="follow" /></span>
+              </>
+            )}
           </Button>
         )}
 
@@ -55,7 +88,7 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
               <Button
                 variant="outline"
                 size="icon-sm"
-                aria-label="More seller options"
+                aria-label={tGenerated("moreSellerOptions")}
                 className="h-10 w-10 border-border hover:bg-muted"
               >
                 <DotsThreeVertical size={18} weight="bold" />
@@ -65,7 +98,7 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={share} className="gap-2 text-xs">
               {copied ? <Check size={16} className="text-primary" /> : <ShareNetwork size={16} />}
-              <span>{copied ? "Link copied!" : "Share profile"}</span>
+              <span>{copied ? tGenerated("linkCopied") : tGenerated("shareProfile")}</span>
             </DropdownMenuItem>
 
             {!isOwnProfile && (
@@ -74,7 +107,7 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
                 className="gap-2 text-xs text-destructive focus:text-destructive"
               >
                 <Flag size={16} />
-                <span>Report seller</span>
+                <span><LocalizedText id="reportSeller" /></span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

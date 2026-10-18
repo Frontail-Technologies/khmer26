@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import Image from "next/image"
 import {
   DotsThreeVertical,
   Flag,
@@ -27,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ListingImageAvatars } from "./components/listing-image-avatars"
 import type { AdminListing, AdminListingStatus } from "./types"
 
 const STATUS_TONE_MAP: Record<AdminListingStatus, StatusTone> = {
@@ -94,25 +94,9 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
     ),
     cell: ({ row }) => {
       const listing = row.original
-      const primaryImage = listing.images[0]?.url
-
       return (
         <div className="flex items-center gap-3 min-w-0 max-w-72 lg:max-w-80 py-1">
-          <div className="relative size-11 rounded-lg overflow-hidden border border-border/70 bg-muted/40 shrink-0">
-            {primaryImage ? (
-              <Image
-                src={primaryImage}
-                alt={listing.title}
-                fill
-                sizes="44px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="size-full flex items-center justify-center text-[10px] text-muted-foreground font-bold">
-                NO IMG
-              </div>
-            )}
-          </div>
+          <ListingImageAvatars images={listing.images} title={listing.title} />
           <div className="min-w-0 flex-1 space-y-0.5">
             <Tooltip>
               <TooltipTrigger className="block truncate text-left w-full">
@@ -125,12 +109,12 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
               </TooltipTrigger>
               <TooltipContent>{listing.title}</TooltipContent>
             </Tooltip>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
               <span className="capitalize">{listing.condition}</span>
               {listing.reports.length > 0 && (
                 <>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-0.5 text-destructive font-bold text-[10px]">
+                  <span className="inline-flex items-center gap-0.5 text-destructive font-bold text-2xs">
                     <Flag size={10} weight="fill" />
                     <span>{listing.reports.length}</span>
                   </span>
@@ -155,7 +139,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
         <div className="flex items-center gap-2.5 min-w-0 max-w-44 py-1">
           <Avatar className="size-7 rounded-full border border-border/70 shrink-0">
             <AvatarImage src={seller.avatar} alt={seller.name} />
-            <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+            <AvatarFallback className="text-2xs font-bold bg-primary/10 text-primary">
               {seller.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -168,7 +152,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
               </TooltipTrigger>
               <TooltipContent>{seller.name}</TooltipContent>
             </Tooltip>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-2xs text-muted-foreground">
               <span className="capitalize">{seller.sellerType}</span>
               {seller.verified && (
                 <SealCheck size={12} weight="fill" className="text-primary shrink-0" />
@@ -227,7 +211,7 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
             size="sm"
           />
           {reports.length > 0 && status === "flagged" && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-0.5 text-2xs font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
               <Flag size={10} weight="fill" />
               <span>{reports.length}</span>
             </span>

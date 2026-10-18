@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Gear,
   ClockCounterClockwise,
+  Headset,
 } from "@phosphor-icons/react"
 
 export interface AdminNavSubItem {
@@ -143,6 +144,14 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
             title: "Safety Tips",
             href: "/admin/content/tips",
           },
+          {
+            title: "Policy Pages",
+            href: "/admin/content/pages",
+          },
+          {
+            title: "Review Keywords",
+            href: "/admin/content/keywords",
+          },
         ],
       },
     ],
@@ -152,7 +161,7 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     label: "Monetization",
     items: [
       {
-        title: "Ads",
+        title: "Promotions",
         href: "/admin/promotions",
         icon: Megaphone,
       },
@@ -172,6 +181,11 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     id: "communication",
     label: "Communication",
     items: [
+      {
+        title: "Support Inbox",
+        href: "/admin/support",
+        icon: Headset,
+      },
       {
         title: "Notifications",
         href: "/admin/notifications",

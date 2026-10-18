@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { SellerProfileContent } from "@/features/sellers/components/seller-profile-content"
 import { lookupSellerMeta } from "@/features/sellers/api/sellers.server"
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
   const meta = await lookupSellerMeta(slug)
 
   if (!meta) {
-    return { title: "Seller — Khmer26" }
+    return { title: "Seller — Khmer26", robots: { index: false, follow: false } }
   }
 
   return {
@@ -27,5 +28,9 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
 
 export default async function SellerPage({ params }: SellerPageProps) {
   const { slug } = await params
-  return <SellerProfileContent id={slug} />
+  return (
+    <Suspense fallback={null}>
+      <SellerProfileContent id={slug} />
+    </Suspense>
+  )
 }

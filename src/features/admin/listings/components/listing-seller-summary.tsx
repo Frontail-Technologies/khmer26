@@ -51,11 +51,11 @@ export function ListingSellerSummary({ seller }: ListingSellerSummaryProps) {
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm sm:text-base font-bold text-foreground">{seller.name}</h3>
-              <Badge variant="secondary" className="text-[10px] font-semibold uppercase px-2 h-5">
+              <Badge variant="secondary" className="text-2xs font-semibold uppercase px-2 h-5">
                 {seller.sellerType}
               </Badge>
               {seller.verified && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xxs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   <SealCheck size={13} weight="fill" />
                   <span>Verified</span>
                 </span>
@@ -84,7 +84,7 @@ export function ListingSellerSummary({ seller }: ListingSellerSummaryProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/60 text-xs">
           {seller.phone && (
             <div className="space-y-1 p-2.5 rounded-lg bg-muted/20">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                 <Phone size={12} />
                 <span>Contact Phone</span>
               </span>
@@ -94,7 +94,7 @@ export function ListingSellerSummary({ seller }: ListingSellerSummaryProps) {
 
           {seller.email && (
             <div className="space-y-1 p-2.5 rounded-lg bg-muted/20">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                 <EnvelopeSimple size={12} />
                 <span>Email Address</span>
               </span>

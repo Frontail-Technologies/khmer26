@@ -1,11 +1,14 @@
 import { apiClient } from '@/lib/api/client';
 import type { SubscriberRecord, SubscriptionPlan, SubscriptionPlanTier } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface BackendSubscriptionPlanDto {
   id: string;
   name: string;
+  nameKm?: string | null;
   slug: string;
   description: string | null;
+  descriptionKm?: string | null;
   price: string | number | null;
   currency?: string | null;
   billingInterval: string | null;
@@ -41,8 +44,10 @@ export function normalizeSubscriptionPlan(p: BackendSubscriptionPlanDto): Subscr
   return {
     id: p.id,
     name: p.name,
+    nameKm: p.nameKm ?? null,
     tier,
     description: p.description || '',
+    descriptionKm: p.descriptionKm ?? null,
     price: Number(p.price) || 0,
     currency: p.currency || 'USD',
     billingInterval: (p.billingInterval === 'annual' ? 'Annual' : 'Monthly') as 'Monthly' | 'Annual',
@@ -65,8 +70,8 @@ function normalizeSubscriber(s: BackendSubscriberDto): SubscriberRecord {
     businessName: s.businessName ?? undefined,
     planTier: tierFromSlug(s.planSlug),
     planName: s.planName,
-    startedAt: new Date(s.startedAt).toLocaleDateString(),
-    expiresAt: s.expiresAt ? new Date(s.expiresAt).toLocaleDateString() : 'No expiry',
+    startedAt: formatAdminDateTime(s.startedAt),
+    expiresAt: s.expiresAt ? formatAdminDateTime(s.expiresAt) : 'No expiry',
     status: s.status,
     listingUsage: {
       used: 0,
@@ -89,8 +94,10 @@ export async function getAdminSubscribers(): Promise<SubscriberRecord[]> {
 
 export async function createAdminSubscriptionPlan(data: {
   name: string;
+  nameKm?: string | null;
   slug: string;
   description?: string;
+  descriptionKm?: string | null;
   price: number;
   currency?: 'USD' | 'KHR';
   billingInterval?: string;
@@ -108,7 +115,9 @@ export async function updateAdminSubscriptionPlan(
   id: string,
   data: Partial<{
     name: string;
+    nameKm: string | null;
     description: string;
+    descriptionKm: string | null;
     price: number;
     currency: 'USD' | 'KHR';
     billingInterval: string;

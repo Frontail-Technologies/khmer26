@@ -66,11 +66,11 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
         <div className="space-y-0.5 min-w-[90px]">
           <Link
             href={`/admin/reports/${report.id}`}
-            className="font-mono text-xs font-bold text-foreground hover:text-primary transition-colors block"
+            className="text-xs font-bold text-foreground hover:text-primary transition-colors block"
           >
-            {report.id}
+            {report.displayId ?? "Review report"}
           </Link>
-          <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 h-4 capitalize">
+          <Badge variant="outline" className="text-2xs font-medium px-1.5 py-0 h-4 capitalize">
             {TARGET_TYPE_LABELS[report.targetType] || report.targetType}
           </Badge>
         </div>
@@ -108,11 +108,9 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
             >
               {target.title}
             </Link>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-              <span className="font-mono text-[10px] text-muted-foreground/80">{target.id}</span>
+            <div className="flex items-center gap-1.5 text-xxs text-muted-foreground truncate">
               {target.sellerName && (
                 <>
-                  <span>·</span>
                   <span className="truncate">{target.sellerName}</span>
                 </>
               )}
@@ -133,7 +131,7 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
         <span className="text-xs text-foreground font-medium block truncate">
           {row.original.reasonLabel}
         </span>
-        <span className="text-[11px] text-muted-foreground block truncate">
+        <span className="text-xxs text-muted-foreground block truncate">
           {row.original.statement}
         </span>
       </div>
@@ -152,7 +150,7 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
           <span className="text-xs font-medium text-foreground block truncate">
             {reporter.name}
           </span>
-          <span className="text-[10px] text-muted-foreground block capitalize">
+          <span className="text-2xs text-muted-foreground block capitalize">
             {reporter.accountType}
           </span>
         </div>
@@ -178,14 +176,9 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
       <DataTableColumnHeader column={column} title="Reported At" />
     ),
     cell: ({ row }) => (
-      <div className="space-y-0.5 min-w-[100px]">
-        <span className="text-xs text-foreground block whitespace-nowrap">
-          {row.original.createdAt}
-        </span>
-        <span className="text-[10px] text-muted-foreground block whitespace-nowrap">
-          {row.original.createdDate}
-        </span>
-      </div>
+      <span className="text-xs text-foreground block whitespace-nowrap">
+        {row.original.createdDate}
+      </span>
     ),
     sortingFn: "basic",
   },

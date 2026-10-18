@@ -62,6 +62,7 @@ export interface AdminListingSpecification {
 
 export interface AdminListing {
   id: string
+  displayId: string
   slug?: string
   title: string
   price: number
@@ -93,6 +94,7 @@ export interface AdminListing {
   rejectionReason?: string
   rejectionNote?: string
   removalReason?: string
+  moderationMatches?: import("@/features/content/types").ListingModerationMatch[]
 }
 
 export interface AdminListingStats {

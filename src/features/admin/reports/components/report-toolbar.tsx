@@ -296,7 +296,7 @@ export function ReportToolbar({
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
+      <div className="flex items-center justify-between text-xxs text-muted-foreground px-0.5">
         <span>
           Showing <span className="font-semibold text-foreground">{filteredCount}</span> of{" "}
           <span className="font-semibold text-foreground">{totalCount}</span> reports

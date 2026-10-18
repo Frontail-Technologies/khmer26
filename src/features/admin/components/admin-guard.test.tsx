@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { AdminGuard } from './admin-guard';
 
-const pushMock = vi.fn();
+const replaceMock = vi.fn();
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: pushMock }),
+  useRouter: () => ({ replace: replaceMock }),
 }));
 
 vi.mock('@/hooks/use-admin-auth', () => ({
@@ -24,6 +24,6 @@ describe('AdminGuard', () => {
       </AdminGuard>
     );
 
-    expect(pushMock).toHaveBeenCalledWith('/admin/login');
+    expect(replaceMock).toHaveBeenCalledWith('/admin/login');
   });
 });

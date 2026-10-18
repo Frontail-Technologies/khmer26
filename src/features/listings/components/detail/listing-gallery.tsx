@@ -1,6 +1,10 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
+import { useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import Image from "next/image"
 import {
   CaretLeft,
@@ -17,9 +21,12 @@ import type { GalleryImage } from "@/features/listings/lib/listing-detail-format
 interface ListingGalleryProps {
   images: GalleryImage[]
   title: string
+  /** Mobile overlay (Back / Save / Share), rendered over the main image. */
+  mobileControls?: ReactNode
 }
 
-export function ListingGallery({ images, title }: ListingGalleryProps) {
+export function ListingGallery({ images, title, mobileControls }: ListingGalleryProps) {
+  const tGenerated = useTranslations("generated")
   const [activeIndex, setActiveIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const touchStartX = useRef<number | null>(null)
@@ -66,7 +73,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
   }, [isFullscreen, handlePrev, handleNext])
 
   return (
-    <div className="space-y-3">
+    <div>
       <div
         role="group"
         aria-roledescription="carousel"
@@ -87,7 +94,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className={cn("relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden rounded-2xl border border-border/80 bg-muted select-none group shadow-2xs focus-visible:outline-2 focus-visible:outline-primary", images.length > 0 && "cursor-zoom-in")}
+        className={cn("relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden bg-muted select-none group shadow-2xs focus-visible:outline-2 focus-visible:outline-primary", images.length > 0 && "cursor-zoom-in")}
       >
         {activeImage ? (
           <Image
@@ -101,12 +108,14 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/60">
             <ImageSquare size={56} weight="light" aria-hidden="true" />
-            <span className="text-xs font-medium">No photos available</span>
+            <span className="text-xs font-medium"><LocalizedText id="noPhotosAvailable" /></span>
           </div>
         )}
 
+        {mobileControls}
+
         {images.length > 0 && (
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-foreground shadow-xs pointer-events-none">
+          <div className="absolute bottom-2 left-2 sm:bottom-auto sm:top-3 sm:left-3 z-10 flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-foreground shadow-xs pointer-events-none">
             <Images size={14} weight="bold" />
             <span>
               {activeIndex + 1} / {images.length}
@@ -121,7 +130,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
               e.stopPropagation()
               setIsFullscreen(true)
             }}
-            aria-label="View fullscreen photo"
+            aria-label={tGenerated("viewFullscreenPhoto")}
             className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-md shadow-xs hover:bg-background transition-transform active:scale-95 cursor-pointer"
           >
             <ArrowsOutSimple size={16} weight="bold" />
@@ -136,8 +145,8 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                 e.stopPropagation()
                 handlePrev()
               }}
-              aria-label="Previous photo"
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-md shadow-md transition-all hover:bg-background hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer z-10 opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+              aria-label={tGenerated("previousPhoto")}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-background/70 text-foreground backdrop-blur-md shadow-md transition-all hover:bg-background hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer z-10 opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
             >
               <CaretLeft size={20} weight="bold" />
             </button>
@@ -148,8 +157,8 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                 e.stopPropagation()
                 handleNext()
               }}
-              aria-label="Next photo"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-md shadow-md transition-all hover:bg-background hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer z-10 opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+              aria-label={tGenerated("nextPhoto")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-background/70 text-foreground backdrop-blur-md shadow-md transition-all hover:bg-background hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer z-10 opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
             >
               <CaretRight size={20} weight="bold" />
             </button>
@@ -158,7 +167,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
       </div>
 
       {images.length > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto py-1.5 px-0.5 -mx-0.5 scrollbar-thin snap-x snap-mandatory scroll-smooth">
+        <div className="flex items-center gap-0.5 sm:gap-1.5 overflow-x-auto border-t border-border/60 bg-card px-0 py-0.5 sm:px-3 sm:py-2 scrollbar-thin snap-x snap-mandatory scroll-smooth">
           {images.map((img, idx) => {
             const isSelected = idx === activeIndex
             return (
@@ -169,7 +178,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                 aria-label={`Select photo ${idx + 1}`}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative h-16 w-20 sm:h-20 sm:w-24 shrink-0 overflow-hidden rounded-xl border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary snap-start scroll-mx-1",
+                  "relative h-[4.25rem] w-[31%] sm:h-14 sm:w-[4.5rem] shrink-0 overflow-hidden rounded-none sm:rounded-sm border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary snap-start scroll-mx-1",
                   isSelected
                     ? "border-primary ring-2 ring-primary/60 shadow-xs scale-102"
                     : "border-border/80 opacity-70 hover:opacity-100"
@@ -208,7 +217,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
               <button
                 type="button"
                 onClick={() => setIsFullscreen(false)}
-                aria-label="Close fullscreen gallery"
+                aria-label={tGenerated("closeFullscreenGallery")}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shrink-0"
               >
                 <X size={20} weight="bold" />
@@ -234,7 +243,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                   <button
                     type="button"
                     onClick={handlePrev}
-                    aria-label="Previous photo in fullscreen"
+                    aria-label={tGenerated("previousPhotoInFullscreen")}
                     className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white/15 hover:bg-white/30 text-white backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer z-20"
                   >
                     <CaretLeft size={28} weight="bold" />
@@ -243,7 +252,7 @@ export function ListingGallery({ images, title }: ListingGalleryProps) {
                   <button
                     type="button"
                     onClick={handleNext}
-                    aria-label="Next photo in fullscreen"
+                    aria-label={tGenerated("nextPhotoInFullscreen")}
                     className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white/15 hover:bg-white/30 text-white backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer z-20"
                   >
                     <CaretRight size={28} weight="bold" />

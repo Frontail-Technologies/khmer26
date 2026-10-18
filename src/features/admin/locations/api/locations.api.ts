@@ -36,7 +36,7 @@ export interface AdminCommuneRow {
 export async function getAdminProvinces(): Promise<CambodiaProvince[]> {
   const [provincesRes, districtsRes, communesRes] = await Promise.all([
     apiClient.get<AdminProvinceRow[]>('/admin/locations/provinces', { params: { limit: 100 } }),
-    apiClient.get<AdminDistrictRow[]>('/admin/locations/districts', { params: { limit: 500 } }),
+    apiClient.get<AdminDistrictRow[]>('/admin/locations/districts', { params: { limit: 200 } }),
     apiClient.get<AdminCommuneRow[]>('/admin/locations/communes', { params: { limit: 200 } }),
   ]);
 

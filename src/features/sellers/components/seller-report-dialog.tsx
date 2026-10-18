@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
 import { CheckCircle, Flag } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +26,8 @@ interface SellerReportDialogProps {
 }
 
 export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }: SellerReportDialogProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
   const [reasonId, setReasonId] = useState("")
   const [details, setDetails] = useState("")
   const reasons = useSellerReportReasons(open)
@@ -48,10 +54,10 @@ export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }:
         <DialogHeader>
           <div className="flex items-center gap-2 text-destructive">
             <Flag size={20} weight="bold" />
-            <DialogTitle>Report seller</DialogTitle>
+            <DialogTitle><LocalizedText id="reportSeller" /></DialogTitle>
           </div>
           <DialogDescription>
-            Help keep the Khmer26 community safe. Select the reason you are reporting &quot;{sellerName}&quot;.
+            {tDynamic("reportSellerNamed", { name: sellerName })}
           </DialogDescription>
         </DialogHeader>
 
@@ -61,30 +67,30 @@ export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }:
               <CheckCircle size={28} weight="fill" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-base font-bold text-foreground">Report received</h4>
+              <h4 className="text-base font-bold text-foreground"><LocalizedText id="reportReceived" /></h4>
               <p className="text-xs text-muted-foreground max-w-xs">
-                Thank you. Our team will review this seller.
+                <LocalizedText id="thankYouOurTeamWillReviewThisSeller" />
               </p>
             </div>
             <Button onClick={() => handleClose(false)} className="mt-2 h-9 text-xs font-semibold">
-              Done
+              <LocalizedText id="done" />
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {reasons.isPending ? (
-              <p className="text-xs text-muted-foreground">Loading reasons…</p>
+              <p className="text-xs text-muted-foreground"><LocalizedText id="loadingReasons" /></p>
             ) : reasons.isError ? (
               <div className="space-y-2">
-                <p className="text-xs text-destructive">Couldn&apos;t load the report reasons.</p>
+                <p className="text-xs text-destructive"><LocalizedText id="couldnTLoadTheReportReasons" /></p>
                 <Button type="button" size="sm" variant="outline" onClick={() => reasons.refetch()}>
-                  Try again
+                  <LocalizedText id="tryAgain" />
                 </Button>
               </div>
             ) : reasons.data.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Reporting is currently unavailable.</p>
+              <p className="text-xs text-muted-foreground"><LocalizedText id="reportingIsCurrentlyUnavailable" /></p>
             ) : (
-              <div className="space-y-2" role="radiogroup" aria-label="Report reason">
+              <div className="space-y-2" role="radiogroup" aria-label={tGenerated("reportReason")}>
                 {reasons.data.map((reason) => {
                   const isSelected = reasonId === reason.id
                   return (
@@ -107,7 +113,7 @@ export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }:
                       <span>
                         {reason.label}
                         {reason.description && (
-                          <span className="block text-[11px] font-normal text-muted-foreground">
+                          <span className="block text-xxs font-normal text-muted-foreground">
                             {reason.description}
                           </span>
                         )}
@@ -123,8 +129,8 @@ export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }:
               onChange={(e) => setDetails(e.target.value)}
               maxLength={2000}
               rows={3}
-              placeholder="Additional details (optional)"
-              aria-label="Additional details"
+              placeholder={tGenerated("additionalDetailsOptional")}
+              aria-label={tGenerated("additionalDetails")}
               className="w-full resize-none rounded-lg border border-border bg-background p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
 
@@ -136,10 +142,10 @@ export function SellerReportDialog({ open, onOpenChange, sellerId, sellerName }:
 
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => handleClose(false)}>
-                Cancel
+                <LocalizedText id="cancel" />
               </Button>
               <Button type="submit" variant="destructive" disabled={!reasonId || report.isPending}>
-                {report.isPending ? "Submitting…" : "Submit report"}
+                {report.isPending ? tGenerated("submitting") : tGenerated("submitReport")}
               </Button>
             </DialogFooter>
           </form>

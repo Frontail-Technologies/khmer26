@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowRight, SpinnerGap } from "@phosphor-icons/react"
@@ -13,6 +17,10 @@ import {
 import { useResetPassword, getResetToken, friendlyAuthError } from "../hooks/use-auth"
 
 export function ResetPasswordForm() {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
+  const tValidation = useTranslations("ui.auth.validation")
+  const validationMessage = (key: string) => tValidation(key as Parameters<typeof tValidation>[0])
   const router = useRouter()
   const [formData, setFormData] = useState<ResetPasswordFormData>({
     password: "",
@@ -47,7 +55,7 @@ export function ResetPasswordForm() {
       for (const issue of result.error.issues) {
         const field = issue.path[0] as keyof ResetPasswordFormData
         if (field && !fieldErrors[field]) {
-          fieldErrors[field] = issue.message
+          fieldErrors[field] = validationMessage(issue.message)
         }
       }
       setErrors(fieldErrors)
@@ -73,9 +81,9 @@ export function ResetPasswordForm() {
   if (isSuccess) {
     return (
       <AuthSuccessState
-        title="Password updated"
-        description="Your password has been changed successfully."
-        actionLabel="Back to Sign In"
+        title={tGenerated("passwordUpdated")}
+        description={tGenerated("passwordChangedSuccessfully")}
+        actionLabel={tAuth("backToSignInAction")}
         actionHref="/login"
       />
     )
@@ -85,8 +93,8 @@ export function ResetPasswordForm() {
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <PasswordField
         id="newPassword"
-        label="New Password"
-        placeholder="Enter new password"
+        label={tGenerated("newPassword")}
+        placeholder={tGenerated("enterNewPassword")}
         value={formData.password}
         onChange={(e) => handleChange("password", e.target.value)}
         error={errors.password}
@@ -95,8 +103,8 @@ export function ResetPasswordForm() {
 
       <PasswordField
         id="confirmNewPassword"
-        label="Confirm New Password"
-        placeholder="Confirm new password"
+        label={tGenerated("confirmNewPassword")}
+        placeholder={tGenerated("confirmNewPassword")}
         value={formData.confirmPassword}
         onChange={(e) => handleChange("confirmPassword", e.target.value)}
         error={errors.confirmPassword}
@@ -118,11 +126,11 @@ export function ResetPasswordForm() {
           {resetPassword.isPending ? (
             <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
-              <span>Updating password...</span>
+              <span><LocalizedText id="updatingPassword" /></span>
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <span>Reset Password</span>
+              <span><LocalizedText id="resetPassword" /></span>
               <ArrowRight size={18} weight="bold" />
             </span>
           )}

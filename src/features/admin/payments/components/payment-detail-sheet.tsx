@@ -53,8 +53,8 @@ export function PaymentDetailSheet({
             </div>
             <StatusBadge label={conf.label} tone={conf.tone} size="sm" />
           </div>
-          <span className="font-mono text-[11px] text-muted-foreground block pt-1">
-            {transaction.id}
+          <span className="font-mono text-xxs text-muted-foreground block pt-1">
+            {transaction.displayId}
           </span>
         </SheetHeader>
 
@@ -68,24 +68,24 @@ export function PaymentDetailSheet({
 
           <div className="flex items-center justify-between pt-2 border-t border-border/40">
             <span className="text-muted-foreground">Payment Purpose</span>
-            <Badge variant="outline" className="text-[10px] uppercase font-bold">
+            <Badge variant="outline" className="text-2xs uppercase font-bold">
               {transaction.purpose}
             </Badge>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-[10px] text-muted-foreground">Purpose Details</span>
+            <span className="text-2xs text-muted-foreground">Purpose Details</span>
             <span className="font-semibold text-foreground block">{transaction.purposeTitle}</span>
           </div>
         </div>
 
         <div className="space-y-3 pt-1">
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <QrCode size={13} />
               Payment Method & Reference
             </span>
-            <div className="space-y-1.5 text-[11px]">
+            <div className="space-y-1.5 text-xxs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Payment Method</span>
                 <span className="font-semibold text-foreground">{transaction.paymentMethod}</span>
@@ -110,16 +110,15 @@ export function PaymentDetailSheet({
           </div>
 
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <User size={13} />
               Payer Account
             </span>
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-foreground">{transaction.payerName}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">{transaction.payerId}</span>
               </div>
-              <div className="text-[11px] text-muted-foreground space-y-0.5">
+              <div className="text-xxs text-muted-foreground space-y-0.5">
                 <span className="block truncate">Phone: {transaction.payerPhone}</span>
                 <span className="block truncate">Email: {transaction.payerEmail}</span>
               </div>
@@ -142,7 +141,7 @@ export function PaymentDetailSheet({
           {transaction.notes && (
             <div className="p-3 rounded-lg bg-muted/40 border border-border/60 text-xs text-muted-foreground flex items-start gap-2">
               <Info size={15} className="shrink-0 mt-0.5 text-muted-foreground" />
-              <p className="leading-relaxed text-[11px]">{transaction.notes}</p>
+              <p className="leading-relaxed text-xxs">{transaction.notes}</p>
             </div>
           )}
         </div>

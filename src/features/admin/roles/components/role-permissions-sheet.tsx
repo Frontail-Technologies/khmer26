@@ -102,15 +102,15 @@ function RolePermissionsContent({
               {role.name} Permissions
             </SheetTitle>
             {isSuperAdmin && (
-              <Badge variant="outline" className="text-[10px] font-bold bg-primary/10 text-primary border-primary/20">
+              <Badge variant="outline" className="text-2xs font-bold bg-primary/10 text-primary border-primary/20">
                 <LockSimple size={10} className="mr-1" />
                 System Locked
               </Badge>
             )}
           </div>
-          <span className="text-[11px] text-muted-foreground">{role.staffCount} staff assigned</span>
+          <span className="text-xxs text-muted-foreground">{role.staffCount} staff assigned</span>
         </div>
-        <p className="text-[11px] text-muted-foreground">{role.description}</p>
+        <p className="text-xxs text-muted-foreground">{role.description}</p>
       </SheetHeader>
 
       {isSuperAdmin && (
@@ -138,7 +138,7 @@ function RolePermissionsContent({
                   <span className="font-bold text-xs text-foreground block">
                     {group.name}
                   </span>
-                  <span className="text-[10px] text-muted-foreground block">
+                  <span className="text-2xs text-muted-foreground block">
                     {group.description}
                   </span>
                 </div>
@@ -148,7 +148,7 @@ function RolePermissionsContent({
                     variant="ghost"
                     size="xs"
                     onClick={() => toggleGroup(group.id)}
-                    className="text-[10px] h-6 text-primary"
+                    className="text-2xs h-6 text-primary"
                   >
                     {isAllGroupSelected ? "Deselect All" : "Select All"}
                   </Button>
@@ -175,7 +175,7 @@ function RolePermissionsContent({
                         <span className="font-medium text-xs text-foreground block">
                           {perm.name}
                         </span>
-                        <span className="text-[11px] text-muted-foreground block leading-relaxed">
+                        <span className="text-xxs text-muted-foreground block leading-relaxed">
                           {perm.description}
                         </span>
                       </div>

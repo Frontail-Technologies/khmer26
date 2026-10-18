@@ -1,14 +1,15 @@
-export type MapPrecision = "commune" | "district" | "province"
+export type MapPrecision = "exact" | "commune" | "district" | "province"
 
 /** Wide, administrative-level views only: never street or house level. */
 export const MAP_ZOOM: Record<MapPrecision, number> = {
+  exact: 16,
   commune: 13,
   district: 11,
   province: 8.5,
 }
 
 /** Radius of the "approximate area" circle drawn around the area's centre. */
-export const MAP_AREA_RADIUS_M: Record<MapPrecision, number> = {
+export const MAP_AREA_RADIUS_M: Record<Exclude<MapPrecision, "exact">, number> = {
   commune: 1200,
   district: 4000,
   province: 20000,

@@ -10,6 +10,7 @@ export type AuditModule =
 
 export interface AdminAuditEntry {
   id: string
+  displayId: string
   timestamp: string
   rawTimestamp?: string
   actorName: string
@@ -18,6 +19,7 @@ export interface AdminAuditEntry {
   module: AuditModule
   targetName: string
   targetId: string
+  targetDisplayId: string
   targetType: string
   details?: string
 }

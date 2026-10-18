@@ -36,6 +36,7 @@ export interface ConversationMessage {
   senderId: string
   type: MessageType
   content?: string
+  contentKm?: string
   imageUrl?: string
   imageAlt?: string
   offer?: ConversationOffer
@@ -75,6 +76,7 @@ export interface Conversation {
   listing: ConversationListing
   messages: ConversationMessage[]
   lastMessage: string
+  lastMessageKm?: string
   updatedAt: string
   unreadCount: number
   archived: boolean

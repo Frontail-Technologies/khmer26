@@ -229,7 +229,7 @@ export function RolesWorkspace({
                   <Badge
                     variant="outline"
                     className={cn(
-                      "px-1.5 py-0 h-4 text-[10px] font-bold rounded-md border",
+                      "px-1.5 py-0 h-4 text-2xs font-bold rounded-md border",
                       isActive
                         ? "bg-muted text-foreground border-border"
                         : "bg-background/80 text-muted-foreground border-border/60"
@@ -328,7 +328,6 @@ export function RolesWorkspace({
                     <DataTableEmpty
                       colSpan={columns.length}
                       title="No staff members found"
-                      description="Try clearing search or filter parameters."
                     />
                   )}
                 </TableBody>
@@ -359,7 +358,7 @@ export function RolesWorkspace({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <Avatar className="size-8.5 rounded-full shrink-0 border border-border/60">
                             <AvatarImage src={staff.avatarUrl} alt={staff.name} />
-                            <AvatarFallback className="text-[11px] font-bold bg-muted text-muted-foreground">
+                            <AvatarFallback className="text-xxs font-bold bg-muted text-muted-foreground">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -367,7 +366,7 @@ export function RolesWorkspace({
                             <span className="font-semibold text-xs text-foreground block truncate">
                               {staff.name}
                             </span>
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground truncate">
+                            <div className="flex items-center gap-1.5 text-2xs text-muted-foreground truncate">
                               <span className="truncate">{staff.email}</span>
                             </div>
                           </div>
@@ -398,14 +397,14 @@ export function RolesWorkspace({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                      <div className="flex items-center justify-between text-xxs text-muted-foreground pt-1 border-t border-border/40">
                         <Badge
                           variant="outline"
-                          className={`text-[10px] px-2 py-0.5 h-5 ${roleConf.badgeClass}`}
+                          className={`text-2xs px-2 py-0.5 h-5 ${roleConf.badgeClass}`}
                         >
                           {roleConf.label}
                         </Badge>
-                        <span className="text-[10px]">Active: {staff.lastActiveAt}</span>
+                        <span className="text-2xs">Active: {staff.lastActiveAt}</span>
                       </div>
                     </div>
                   )
@@ -413,7 +412,6 @@ export function RolesWorkspace({
               ) : (
                 <DataTableEmpty
                   title="No staff members found"
-                  description="Try clearing search or filter parameters."
                 />
               )}
             </div>
@@ -457,7 +455,7 @@ export function RolesWorkspace({
                     <p className="text-xs text-foreground font-medium">
                       {role.accessSummary}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xxs text-muted-foreground">
                       {role.description}
                     </p>
                   </div>

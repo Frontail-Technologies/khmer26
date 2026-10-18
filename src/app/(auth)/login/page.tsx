@@ -1,20 +1,27 @@
+import { getTranslations } from "next-intl/server"
+import { useTranslations } from "next-intl"
 import { AuthCard } from "@/features/auth/components/auth-card"
 import { AuthHeader } from "@/features/auth/components/auth-header"
 import { LoginForm } from "@/features/auth/components/login-form"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Sign in to your Khmer26 account to manage ads, chat with buyers, and explore listings.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.login")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export default function LoginPage() {
+  const tGenerated = useTranslations("generated")
+  const tAuth = useTranslations("ui.authPages")
   return (
-    <AuthCard maxWidth="sm" backHref="/" backLabel="Back to marketplace">
+    <AuthCard maxWidth="sm" backHref="/" backLabel={tAuth("backToMarketplace")}>
       <AuthHeader
-        eyebrow="WELCOME BACK"
-        title="Sign in to Khmer26"
-        subtitle="Manage your ads, chat with buyers, and make the most of your marketplace experience."
+        eyebrow={tAuth("eyebrowWelcomeBack")}
+        title={tGenerated("signInToKhmer26")}
+        subtitle={tAuth("subtitleLogin")}
         align="center"
       />
       <LoginForm />

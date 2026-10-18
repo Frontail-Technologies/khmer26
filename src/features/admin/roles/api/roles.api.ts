@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import type { AdminStaffMember, RoleDefinition, PermissionModuleGroup, AdminStaffRole } from '../types';
+import { formatAdminDateTime } from '@/lib/formatters/date';
 
 export interface BackendRoleDto {
   id: string;
@@ -92,7 +93,7 @@ export async function getAdminStaff(): Promise<AdminStaffMember[]> {
     roleId: s.roles[0]?.roleId,
     status: 'active',
     lastActiveAt: 'Active recently',
-    joinedAt: s.roles[0]?.assignedAt ? new Date(s.roles[0].assignedAt).toLocaleDateString() : 'Unknown',
+    joinedAt: s.roles[0]?.assignedAt ? formatAdminDateTime(s.roles[0].assignedAt) : 'Unknown',
   }));
 }
 

@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Link from "next/link"
 import { House, Compass } from "@phosphor-icons/react"
 import { Container } from "@/components/layout/Container"
@@ -108,13 +110,13 @@ export default function NotFound() {
 
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold font-mono tracking-wider uppercase">
-            Error 404
+            <LocalizedText id="error404" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Page Not Found
+            <LocalizedText id="pageNotFound" />
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            The page or listing you are looking for has been removed, renamed, or is temporarily unavailable.
+            <LocalizedText id="thePageOrListingYouAreLookingForHas" />
           </p>
         </div>
 
@@ -125,7 +127,7 @@ export default function NotFound() {
             render={
               <Link href="/">
                 <House size={15} weight="bold" />
-                Go to Homepage
+                <LocalizedText id="goToHomepage" />
               </Link>
             }
           />
@@ -136,15 +138,15 @@ export default function NotFound() {
             render={
               <Link href="/categories">
                 <Compass size={15} weight="bold" />
-                Browse Categories
+                <LocalizedText id="browseCategories" />
               </Link>
             }
           />
         </div>
 
         <div className="pt-6 border-t border-border/70 w-full">
-          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-2.5">
-            Looking for something specific?
+          <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider block mb-2.5">
+            <LocalizedText id="lookingForSomethingSpecific" />
           </span>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[

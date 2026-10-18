@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowRight, Clock } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAdminDashboard } from "../hooks/dashboard.queries"
+import { formatAdminDateTime } from "@/lib/formatters/date"
 
 const formatAction = (value: string) => value.replace(/[._-]/g, " ")
 
@@ -42,13 +43,8 @@ export function AdminRecentActivityList() {
                 <span className="text-muted-foreground">{formatAction(activity.action)}</span>{" "}
                 <span className="font-semibold text-primary">{activity.targetType} {activity.targetId ?? ""}</span>
               </p>
-              <span className="text-[10px] text-muted-foreground/80 font-medium">
-                {new Intl.DateTimeFormat("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }).format(new Date(activity.createdAt))}
+              <span className="text-2xs text-muted-foreground/80 font-medium">
+                {formatAdminDateTime(activity.createdAt)}
               </span>
             </div>
           </div>

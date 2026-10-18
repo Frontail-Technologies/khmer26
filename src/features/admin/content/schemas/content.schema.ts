@@ -39,6 +39,7 @@ export const featuredSectionFormSchema = z.object({
 
 export const safetyTipFormSchema = z.object({
   tip: z.string().trim().min(1, 'Tip content is required').max(500),
+  tipKm: z.string().trim().max(500).nullable().optional(),
   context: z.string().trim().min(1, 'Context is required').max(80),
   isActive: z.boolean(),
   sortOrder: z.number().int(),

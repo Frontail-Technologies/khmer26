@@ -101,7 +101,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
             <div className="space-y-0.5">
               <span className="font-bold text-foreground text-xs">{field.label}</span>
               {field.options && (
-                <p className="text-[11px] text-muted-foreground line-clamp-1">
+                <p className="text-xxs text-muted-foreground line-clamp-1">
                   {field.options.slice(0, 4).join(", ")}
                   {field.options.length > 4 && ` +${field.options.length - 4} more`}
                 </p>
@@ -114,7 +114,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
         accessorKey: "key",
         header: "Internal Key",
         cell: ({ row }) => (
-          <span className="font-mono text-[11px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
+          <span className="font-mono text-xxs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
             {row.original.key}
           </span>
         ),
@@ -142,7 +142,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
           return (
             <Badge
               variant="secondary"
-              className="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-primary/10 text-primary border-primary/20"
+              className="text-2xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-primary/10 text-primary border-primary/20"
             >
               {type}
             </Badge>
@@ -184,7 +184,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
           return (
             <Badge
               variant="secondary"
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+              className={`text-2xs font-bold px-2 py-0.5 rounded-md ${
                 active
                   ? "bg-success/10 text-success border-success/20"
                   : "bg-muted text-muted-foreground"

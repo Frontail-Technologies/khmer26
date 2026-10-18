@@ -282,7 +282,7 @@ export function VerificationToolbar({
           </SheetContent>
         </Sheet>
 
-        <span className="text-[11px] text-muted-foreground shrink-0">
+        <span className="text-xxs text-muted-foreground shrink-0">
           Showing {filteredCount} of {totalCount}
         </span>
       </div>

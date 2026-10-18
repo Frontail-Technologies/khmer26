@@ -87,11 +87,11 @@ export function AssignedFieldsList({
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-foreground">{categoryName}</h2>
-            <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.2 rounded-md">
+            <Badge variant="secondary" className="text-2xs font-bold px-2 py-0.2 rounded-md">
               {assignments.length} {assignments.length === 1 ? "field assigned" : "fields assigned"}
             </Badge>
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xxs text-muted-foreground">
             {parentCategoryName} / {categoryName}
           </p>
         </div>
@@ -111,7 +111,7 @@ export function AssignedFieldsList({
           <div className="p-10 text-center border border-dashed border-border/70 rounded-xl space-y-2">
             <Sliders size={28} weight="duotone" className="mx-auto text-muted-foreground/60" />
             <p className="text-xs font-bold text-foreground">No listing fields assigned yet</p>
-            <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
+            <p className="text-xxs text-muted-foreground max-w-sm mx-auto">
               Assign fields from the reusable field library to build the Post Ad form for this category.
             </p>
             <Button
@@ -148,7 +148,7 @@ export function AssignedFieldsList({
                       <DotsSixVertical size={16} weight="bold" />
                     </div>
 
-                    <div className="size-6 rounded-md bg-muted/70 flex items-center justify-center font-mono text-[10px] font-bold text-muted-foreground shrink-0">
+                    <div className="size-6 rounded-md bg-muted/70 flex items-center justify-center font-mono text-2xs font-bold text-muted-foreground shrink-0">
                       #{index + 1}
                     </div>
 
@@ -176,13 +176,13 @@ export function AssignedFieldsList({
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-bold text-foreground">{field.label}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-muted/80 text-muted-foreground">
+                        <span className="text-2xs font-mono px-1.5 py-0.2 rounded bg-muted/80 text-muted-foreground">
                           {field.key}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground flex-wrap">
-                        <span className="uppercase font-semibold text-[10px] tracking-wider px-1.5 py-0.2 rounded bg-primary/10 text-primary">
+                      <div className="flex items-center gap-1.5 text-xxs text-muted-foreground flex-wrap">
+                        <span className="uppercase font-semibold text-2xs tracking-wider px-1.5 py-0.2 rounded bg-primary/10 text-primary">
                           {field.type}
                         </span>
                         {field.options && (
@@ -198,7 +198,7 @@ export function AssignedFieldsList({
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-center pl-7 sm:pl-0">
                     <Badge
                       variant="secondary"
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                      className={`text-2xs font-bold px-2 py-0.5 rounded-md ${
                         assignment.required
                           ? "bg-destructive/10 text-destructive border-destructive/20"
                           : "bg-muted text-muted-foreground"
@@ -209,7 +209,7 @@ export function AssignedFieldsList({
 
                     {assignment.filterable && (
                       <span
-                        className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary"
+                        className="inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary"
                         title="Available in search filters"
                       >
                         <Funnel size={10} weight="fill" />
@@ -220,7 +220,7 @@ export function AssignedFieldsList({
                     <button
                       type="button"
                       onClick={() => handleToggleActive(index)}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
+                      className={`text-2xs font-bold px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
                         assignment.active
                           ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground line-through"
@@ -248,7 +248,6 @@ export function AssignedFieldsList({
       <AssignFieldDialog
         open={isAssignDialogOpen}
         onOpenChange={setIsAssignDialogOpen}
-        categoryName={categoryName}
         categoryId={categoryId}
         availableFields={allFields}
         assignedFieldIds={assignments.map((a) => a.field.id)}

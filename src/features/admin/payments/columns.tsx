@@ -33,10 +33,7 @@ export function createPaymentColumns({
         return (
           <div className="space-y-0.5">
             <span className="font-mono font-bold text-xs text-foreground block">
-              {tx.id}
-            </span>
-            <span className="font-mono text-[10px] text-muted-foreground block truncate">
-              {tx.transactionReference}
+              {tx.displayId}
             </span>
           </div>
         )
@@ -59,8 +56,8 @@ export function createPaymentColumns({
             >
               {tx.payerName}
             </Link>
-            <span className="font-mono text-[10px] text-muted-foreground block">
-              {tx.payerId}
+            <span className="text-2xs text-muted-foreground block truncate">
+              {tx.payerEmail}
             </span>
           </div>
         )
@@ -79,7 +76,7 @@ export function createPaymentColumns({
             <div className="flex items-center gap-1.5">
               <Badge
                 variant={tx.purpose === "subscription" ? "default" : "secondary"}
-                className="text-[9px] uppercase font-bold px-1.5 py-0 h-4"
+                className="text-3xs uppercase font-bold px-1.5 py-0 h-4"
               >
                 {tx.purpose}
               </Badge>

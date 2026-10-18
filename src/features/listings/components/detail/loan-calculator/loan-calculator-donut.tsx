@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { formatPriceWithCurrency } from "@/lib/formatters/currency"
 import type { LoanCalculationResult, LoanInputState } from "./types"
 
@@ -12,6 +14,7 @@ export function LoanCalculatorDonut({
   input,
   currency = "USD",
 }: LoanCalculatorDonutProps) {
+  const tDynamic = useTranslations("dynamic")
   const { downPayment, loanAmount, totalInterest, totalPayment, monthlyPayment, totalMonths } =
     result
 
@@ -35,8 +38,8 @@ export function LoanCalculatorDonut({
 
   const termDisplay =
     input.termUnit === "year"
-      ? `${input.term} ${input.term === 1 ? "year" : "years"}`
-      : `${totalMonths} ${totalMonths === 1 ? "month" : "months"}`
+      ? tDynamic("yearCount", { count: input.term })
+      : tDynamic("monthCount", { count: totalMonths })
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-4 sm:p-5 rounded-2xl border border-border/80 bg-muted/20">
@@ -99,10 +102,8 @@ export function LoanCalculatorDonut({
           <span className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
             {formatPriceWithCurrency(Math.round(monthlyPayment), currency)}
           </span>
-          <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground leading-tight mt-0.5">
-            Per month
-            <br />
-            over {termDisplay}
+          <span className="text-2xs sm:text-xxs font-medium text-muted-foreground leading-tight mt-0.5">
+            {tDynamic("perMonthOver", { term: termDisplay })}
           </span>
         </div>
       </div>
@@ -111,7 +112,7 @@ export function LoanCalculatorDonut({
         <div className="flex items-center justify-between pb-2 border-b border-border/60">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-success shrink-0" />
-            <span className="text-muted-foreground font-medium">Down Payment:</span>
+            <span className="text-muted-foreground font-medium"><LocalizedText id="downPayment_e919cc" /></span>
           </div>
           <span className="font-bold text-foreground">
             {formatPriceWithCurrency(Math.round(downPayment), currency)}
@@ -121,7 +122,7 @@ export function LoanCalculatorDonut({
         <div className="flex items-center justify-between pb-2 border-b border-border/60">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-primary shrink-0" />
-            <span className="text-muted-foreground font-medium">Loan Amount:</span>
+            <span className="text-muted-foreground font-medium"><LocalizedText id="loanAmount" /></span>
           </div>
           <span className="font-bold text-foreground">
             {formatPriceWithCurrency(Math.round(loanAmount), currency)}
@@ -131,7 +132,7 @@ export function LoanCalculatorDonut({
         <div className="flex items-center justify-between pb-2 border-b border-border/60">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-accent shrink-0" />
-            <span className="text-muted-foreground font-medium">Total Interest:</span>
+            <span className="text-muted-foreground font-medium"><LocalizedText id="totalInterest_a03ace" /></span>
           </div>
           <span className="font-bold text-foreground">
             {formatPriceWithCurrency(Math.round(totalInterest), currency)}
@@ -141,7 +142,7 @@ export function LoanCalculatorDonut({
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-foreground shrink-0" />
-            <span className="text-foreground font-bold">Total Payment:</span>
+            <span className="text-foreground font-bold"><LocalizedText id="totalPayment" /></span>
           </div>
           <span className="font-black text-sm text-foreground">
             {formatPriceWithCurrency(Math.round(totalPayment), currency)}

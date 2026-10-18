@@ -54,8 +54,8 @@ export function PromotionDetailSheet({
             </div>
             <StatusBadge label={statusConf.label} tone={statusConf.tone} size="sm" />
           </div>
-          <span className="font-mono text-[11px] text-muted-foreground block pt-1">
-            {promotion.id}
+          <span className="font-mono text-xxs text-muted-foreground block pt-1">
+            {promotion.displayId}
           </span>
         </SheetHeader>
 
@@ -72,10 +72,10 @@ export function PromotionDetailSheet({
               </div>
             )}
             <div className="min-w-0 flex-1 space-y-0.5">
-              <span className="text-[10px] uppercase font-semibold text-muted-foreground">Marketplace Listing</span>
+              <span className="text-2xs uppercase font-semibold text-muted-foreground">Marketplace Listing</span>
               <h4 className="font-bold text-xs text-foreground truncate">{promotion.listingTitle}</h4>
-              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                <span className="font-mono text-[10px]">{promotion.listingId}</span>
+              <div className="flex items-center gap-2 text-xxs text-muted-foreground">
+                <span className="font-mono text-2xs">{promotion.listingDisplayId}</span>
                 <span>•</span>
                 <span className="font-semibold text-foreground">${promotion.listingPrice.toLocaleString()} {promotion.currency}</span>
               </div>
@@ -99,14 +99,14 @@ export function PromotionDetailSheet({
 
         <div className="space-y-3 pt-1">
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <Sparkle size={13} />
               Promotion Specification
             </span>
-            <div className="space-y-1.5 text-[11px]">
+            <div className="space-y-1.5 text-xxs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Promotion Type</span>
-                <Badge variant="outline" className={`text-[10px] font-semibold ${typeConf.badgeClass}`}>
+                <Badge variant="outline" className={`text-2xs font-semibold ${typeConf.badgeClass}`}>
                   {typeConf.label}
                 </Badge>
               </div>
@@ -124,11 +124,11 @@ export function PromotionDetailSheet({
           </div>
 
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <CalendarBlank size={13} />
               Validity Period
             </span>
-            <div className="space-y-1.5 text-[11px]">
+            <div className="space-y-1.5 text-xxs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Started Date</span>
                 <span className="font-medium text-foreground">{promotion.startedAt}</span>
@@ -141,14 +141,14 @@ export function PromotionDetailSheet({
           </div>
 
           <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <User size={13} />
               Seller
             </span>
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-semibold text-foreground block">{promotion.sellerName}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">{promotion.sellerId}</span>
+                <span className="text-2xs text-muted-foreground">Seller account</span>
               </div>
               <Button
                 variant="outline"
@@ -166,7 +166,7 @@ export function PromotionDetailSheet({
 
           {promotion.paymentReference && (
             <div className="p-3 rounded-lg bg-background border border-border/70 space-y-2">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xxs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <CreditCard size={13} />
                 Payment Reference
               </span>

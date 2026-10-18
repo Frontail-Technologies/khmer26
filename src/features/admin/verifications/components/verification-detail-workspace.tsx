@@ -62,7 +62,7 @@ export function VerificationDetailWorkspace({ verificationId }: VerificationDeta
                 <SealCheck size={16} weight="fill" />
               </div>
               <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-mono">
-                {request.id}
+                {request.displayId}
               </h1>
             </div>
 

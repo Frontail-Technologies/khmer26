@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api/client';
+import { getMediaUrl } from '@/lib/media/get-media-url';
 import type {
   AdminCategoryItem,
   AdminSubcategoryItem,
@@ -15,6 +16,7 @@ export interface BackendCategoryDto {
   slug: string;
   iconMediaId?: string | null;
   imageMediaId?: string | null;
+  imageR2Key?: string | null;
   displayOrder?: number;
   isActive: boolean;
   listingsCount?: number;
@@ -58,6 +60,7 @@ export function normalizeCategoryTree(rawList: BackendCategoryDto[]): AdminCateg
       slug: s.slug,
       parentId: s.parentId ?? cat.id,
       imageMediaId: s.imageMediaId ?? null,
+      imageUrl: getMediaUrl(s.imageR2Key) ?? undefined,
       description: s.nameKm || '',
       listingCount: s.listingsCount || 0,
       isActive: s.isActive,
@@ -72,8 +75,9 @@ export function normalizeCategoryTree(rawList: BackendCategoryDto[]): AdminCateg
       slug: cat.slug,
       parentId: cat.parentId ?? null,
       imageMediaId: cat.imageMediaId ?? null,
+      imageUrl: getMediaUrl(cat.imageR2Key) ?? undefined,
       description: cat.nameKm || '',
-      listingCount: cat.listingsCount || 0,
+      listingCount: (cat.listingsCount || 0) + subcategories.reduce((sum, sub) => sum + sub.listingCount, 0),
       isActive: cat.isActive,
       sortOrder: cat.displayOrder ?? 0,
       subcategories,

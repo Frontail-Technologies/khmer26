@@ -64,14 +64,18 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
       updateReason.mutate({
         id: selectedReason.id,
         label: saved.label,
+        labelKm: saved.labelKm ?? null,
         description: saved.description,
+        descriptionKm: saved.descriptionKm ?? null,
         appliesTo: saved.appliesTo,
         isActive: saved.isActive,
       })
     } else {
       createReason.mutate({
         label: saved.label,
+        labelKm: saved.labelKm ?? null,
         description: saved.description,
+        descriptionKm: saved.descriptionKm ?? null,
         appliesTo: saved.appliesTo,
       })
     }
@@ -129,16 +133,16 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/60 dark:bg-muted/90 hover:bg-muted/60 dark:hover:bg-muted/90 border-b border-border/80 select-none">
-                <TableHead className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80">
+                <TableHead className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80">
                   Reason
                 </TableHead>
-                <TableHead className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80">
+                <TableHead className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80">
                   Applies To
                 </TableHead>
-                <TableHead className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80">
+                <TableHead className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80">
                   Status
                 </TableHead>
-                <TableHead className="py-2.5 px-3.5 text-[11px] font-bold text-muted-foreground dark:text-foreground/80 text-right">
+                <TableHead className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80 text-right">
                   Actions
                 </TableHead>
               </TableRow>
@@ -156,7 +160,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                           {reason.label}
                         </span>
                         {reason.description && (
-                          <span className="text-[11px] text-muted-foreground block truncate">
+                          <span className="text-xxs text-muted-foreground block truncate">
                             {reason.description}
                           </span>
                         )}
@@ -169,7 +173,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                           <Badge
                             key={target}
                             variant="secondary"
-                            className="text-[10px] font-medium px-1.5 py-0 h-4.5"
+                            className="text-2xs font-medium px-1.5 py-0 h-4.5"
                           >
                             {TARGET_LABEL_MAP[target] || target}
                           </Badge>
@@ -242,7 +246,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                     {reason.label}
                   </span>
                   {reason.description && (
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    <p className="text-xxs text-muted-foreground leading-relaxed">
                       {reason.description}
                     </p>
                   )}
@@ -260,7 +264,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                     <Badge
                       key={target}
                       variant="secondary"
-                      className="text-[10px] font-medium px-1.5 py-0 h-4.5"
+                      className="text-2xs font-medium px-1.5 py-0 h-4.5"
                     >
                       {TARGET_LABEL_MAP[target] || target}
                     </Badge>
@@ -272,7 +276,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                     variant="outline"
                     size="xs"
                     onClick={() => handleOpenEdit(reason)}
-                    className="h-7 px-2 text-[11px] cursor-pointer"
+                    className="h-7 px-2 text-xxs cursor-pointer"
                   >
                     <PencilSimple size={12} className="mr-1" />
                     Edit
@@ -281,7 +285,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                     variant="ghost"
                     size="xs"
                     onClick={() => handleToggleStatus(reason)}
-                    className="h-7 px-2 text-[11px] cursor-pointer"
+                    className="h-7 px-2 text-xxs cursor-pointer"
                   >
                     {reason.isActive ? "Disable" : "Enable"}
                   </Button>
@@ -289,7 +293,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
                     variant="ghost"
                     size="xs"
                     onClick={() => setReasonToDelete(reason)}
-                    className="h-7 px-2 text-[11px] text-destructive cursor-pointer"
+                    className="h-7 px-2 text-xxs text-destructive cursor-pointer"
                   >
                     <Trash size={12} className="mr-1" />
                     Delete
@@ -300,7 +304,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
           ))}
         </div>
 
-        <div className="border-t border-border/60 bg-muted/10 p-3 text-[11px] text-muted-foreground">
+        <div className="border-t border-border/60 bg-muted/10 p-3 text-xxs text-muted-foreground">
           Showing <span className="font-semibold text-foreground">{filteredReasons.length}</span> of{" "}
           <span className="font-semibold text-foreground">{reasons.length}</span> report reasons
         </div>

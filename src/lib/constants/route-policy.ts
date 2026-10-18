@@ -43,10 +43,14 @@ export function shouldShowAppFooter(pathname: string): boolean {
     pathname.startsWith("/forgot-password") ||
     pathname === "/reset-password" ||
     pathname === "/post-ad" ||
-    pathname.startsWith("/messages") ||
-    pathname.startsWith("/listing/")
+    pathname.startsWith("/messages")
   ) {
     return false
   }
   return true
+}
+
+/** Mobile-only: listing detail starts directly with the gallery (Back/Save/Share overlay it). */
+export function shouldHideAppHeaderOnMobile(pathname: string): boolean {
+  return pathname.startsWith("/listing/")
 }

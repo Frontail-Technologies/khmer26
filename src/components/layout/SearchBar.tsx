@@ -1,5 +1,10 @@
 "use client"
 
+import { CategoryThumb } from "@/features/categories/components/category-thumb"
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import {
   Suspense,
   useState,
@@ -9,10 +14,8 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react"
-import Image from "next/image"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { getMediaUrl } from "@/lib/media/get-media-url"
 import { CaretDown, Check, MagnifyingGlass, SquaresFour, Tag } from "@phosphor-icons/react"
 import { useCategoryTree } from "@/features/categories/api/categories.queries"
 import type { CategoryNode } from "@/features/categories/api/categories.api"
@@ -23,6 +26,7 @@ import {
 } from "@/features/categories/lib/category-tree"
 import { useSearchSuggestions } from "@/features/search/hooks/use-search-suggestions"
 import { formatPriceWithCurrency } from "@/lib/formatters/currency"
+import { useLocalizedName } from "@/lib/i18n/localized"
 
 interface SearchBarProps {
   placeholder?: string
@@ -38,26 +42,9 @@ interface InnerProps extends SearchBarProps {
 }
 
 type Suggestion =
+  | { kind: "keyword"; id: string; label: string; context: string; href: string }
   | { kind: "category"; id: string; label: string; context: string; href: string }
   | { kind: "listing"; id: string; label: string; context: string; href: string }
-
-function CategoryThumb({ node, size }: { node: CategoryNode; size: number }) {
-  const url = getMediaUrl(node.imageR2Key)
-  if (url) {
-    return (
-      <Image
-        src={url}
-        alt=""
-        width={size}
-        height={size}
-        loading="eager"
-        className="shrink-0 rounded bg-muted object-cover"
-        style={{ width: size, height: size }}
-      />
-    )
-  }
-  return <Tag size={size - 4} weight="regular" className="shrink-0 text-primary/80" aria-hidden="true" />
-}
 
 function CategoryOptions({
   nodes,
@@ -70,6 +57,7 @@ function CategoryOptions({
   selectedSlug?: string
   onSelect: (node: CategoryNode) => void
 }) {
+  const getLocalizedName = useLocalizedName()
   return (
     <ul className="space-y-0.5" role="group">
       {nodes.map((node) => {
@@ -88,8 +76,8 @@ function CategoryOptions({
                 selected && "bg-primary/10 text-primary font-semibold"
               )}
             >
-              <CategoryThumb node={node} size={depth === 0 ? 22 : 18} />
-              <span className="flex-1 truncate">{node.nameEn}</span>
+              <CategoryThumb imageR2Key={node.imageR2Key} name={node.nameEn} size={depth === 0 ? 22 : 18} className="rounded" />
+              <span className="flex-1 truncate">{getLocalizedName(node)}</span>
               {selected && <Check size={12} weight="bold" className="shrink-0" />}
             </button>
             {node.children.length > 0 && (
@@ -116,6 +104,9 @@ function SearchBarInner({
   urlQuery,
   urlCategory,
 }: InnerProps) {
+  const tGenerated = useTranslations("generated")
+  const tUi = useTranslations("ui.common")
+  const getLocalizedName = useLocalizedName()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   // undefined = follow the URL; a value is a pending pick in the dropdown (resets when the URL changes).
@@ -135,12 +126,29 @@ function SearchBarInner({
   const suggestions = useSearchSuggestions({ query: inputValue, categorySlug: selectedSlug, index })
 
   const items = useMemo<Suggestion[]>(() => {
-    if (!index) return []
-    const categoryItems: Suggestion[] = suggestions.categories.map(({ node, path }) => ({
+    const query = inputValue.trim()
+    const keywordLabels = query.length >= 2
+      ? [...new Map(
+          [query, ...suggestions.listings.map((listing) => listing.title)]
+            .map((label) => [label.trim().toLocaleLowerCase(), label.trim()] as const)
+        ).values()].filter(Boolean).slice(0, 4)
+      : []
+    const keywordItems: Suggestion[] = keywordLabels.map((label) => ({
+          kind: "keyword",
+          id: label.toLocaleLowerCase(),
+          label,
+          context: selectedNode ? `${tGenerated("searchIn")} ${getLocalizedName(selectedNode)}` : tGenerated("searchAllListings"),
+          href: (() => {
+            const params = new URLSearchParams({ q: label })
+            if (selectedSlug) params.set("category", selectedSlug)
+            return `/search?${params.toString()}`
+          })(),
+        }))
+    const categoryItems: Suggestion[] = (index ? suggestions.categories : []).map(({ node, path }) => ({
       kind: "category",
       id: node.id,
-      label: node.nameEn,
-      context: path.slice(0, -1).map((p) => p.nameEn).join(" › "),
+      label: getLocalizedName(node),
+      context: path.slice(0, -1).map(getLocalizedName).join(" › "),
       href: getCategoryHref(path),
     }))
     const listingItems: Suggestion[] = suggestions.listings.map((listing) => ({
@@ -149,12 +157,12 @@ function SearchBarInner({
       label: listing.title,
       context:
         listing.price !== null && listing.currency
-          ? `${formatPriceWithCurrency(Number(listing.price), listing.currency)} · ${listing.location.province.nameEn}`
-          : listing.location.province.nameEn,
+          ? `${formatPriceWithCurrency(Number(listing.price), listing.currency)} · ${getLocalizedName(listing.location.province)}`
+          : getLocalizedName(listing.location.province),
       href: `/listing/${listing.id}`,
     }))
-    return [...categoryItems, ...listingItems]
-  }, [index, suggestions.categories, suggestions.listings])
+    return [...keywordItems, ...categoryItems, ...listingItems]
+  }, [getLocalizedName, index, inputValue, selectedNode, selectedSlug, suggestions.categories, suggestions.listings, tGenerated])
 
   const showSuggestions = suggestOpen && suggestions.eligible && (items.length > 0 || suggestions.isLoading)
 
@@ -251,10 +259,10 @@ function SearchBarInner({
           }}
           className="flex h-full shrink-0 items-center gap-1.5 px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted/60 rounded-l-lg focus:outline-none"
           aria-expanded={isOpen}
-          aria-label="Select category"
+          aria-label={tGenerated("selectCategory")}
         >
           <span className="max-w-27.5 sm:max-w-32.5 truncate">
-            {selectedNode ? selectedNode.nameEn : "All Categories"}
+            {selectedNode ? getLocalizedName(selectedNode) : tGenerated("allCategories")}
           </span>
           <CaretDown
             size={12}
@@ -282,7 +290,7 @@ function SearchBarInner({
           onFocus={() => setSuggestOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          aria-label="Search listings"
+          aria-label={tGenerated("searchListings")}
           role="combobox"
           aria-expanded={showSuggestions}
           aria-controls={listId}
@@ -295,7 +303,7 @@ function SearchBarInner({
         <button
           type="submit"
           className="inline-flex h-full w-10 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-primary focus:outline-none"
-          aria-label="Submit search"
+          aria-label={tGenerated("submitSearch")}
         >
           <MagnifyingGlass size={size === "lg" ? 22 : 18} weight="bold" aria-hidden="true" />
         </button>
@@ -305,18 +313,22 @@ function SearchBarInner({
         <div
           id={listId}
           role="listbox"
-          aria-label="Search suggestions"
+          aria-label={tGenerated("searchSuggestions")}
           className="absolute left-0 right-0 top-full mt-1.5 z-50 max-h-96 overflow-y-auto rounded-lg border border-border bg-popover p-1.5 shadow-xl text-popover-foreground"
         >
-          {(["category", "listing"] as const).map((kind) => {
+          {(["keyword", "category", "listing"] as const).map((kind) => {
             const group = items
               .map((item, i) => ({ item, i }))
               .filter(({ item }) => item.kind === kind)
             if (group.length === 0) return null
             return (
-              <div key={kind} role="group" aria-label={kind === "category" ? "Categories" : "Listings"}>
-                <div className="px-2.5 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {kind === "category" ? "Categories" : "Listings"}
+              <div
+                key={kind}
+                role="group"
+                aria-label={kind === "keyword" ? tGenerated("searchTerms") : kind === "category" ? tUi("categories") : tUi("listings")}
+              >
+                <div className="px-2.5 pb-0.5 pt-1.5 text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+                  {kind === "keyword" ? tGenerated("search") : kind === "category" ? tUi("categories") : tUi("listings")}
                 </div>
                 {group.map(({ item, i }) => (
                   <button
@@ -341,7 +353,7 @@ function SearchBarInner({
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium text-foreground">{item.label}</span>
                       {item.context && (
-                        <span className="block truncate text-[11px] text-muted-foreground">
+                        <span className="block truncate text-xxs text-muted-foreground">
                           {item.context}
                         </span>
                       )}
@@ -352,8 +364,8 @@ function SearchBarInner({
             )
           })}
           {suggestions.isLoading && (
-            <div className="px-2.5 py-1.5 text-[11px] text-muted-foreground" aria-live="polite">
-              Searching…
+            <div className="px-2.5 py-1.5 text-xxs text-muted-foreground" aria-live="polite">
+              <LocalizedText id="searching" />
             </div>
           )}
         </div>
@@ -363,7 +375,7 @@ function SearchBarInner({
         <div
           className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 max-h-105 overflow-y-auto rounded-lg border border-border bg-popover p-1.5 shadow-xl text-popover-foreground animate-in fade-in-0 zoom-in-95"
           role="listbox"
-          aria-label="Categories"
+          aria-label={tGenerated("categories")}
         >
           <button
             type="button"
@@ -376,16 +388,16 @@ function SearchBarInner({
             )}
           >
             <SquaresFour size={16} weight="bold" className="shrink-0" />
-            <span className="flex-1">All Categories</span>
+            <span className="flex-1"><LocalizedText id="allCategories" /></span>
             {!selectedSlug && <Check size={12} weight="bold" className="shrink-0" />}
           </button>
 
           <div className="my-1 h-px bg-border" />
 
           {tree.isPending ? (
-            <p className="px-3 py-2 text-xs text-muted-foreground">Loading categories…</p>
+            <p className="px-3 py-2 text-xs text-muted-foreground"><LocalizedText id="loadingCategories" /></p>
           ) : tree.isError ? (
-            <p className="px-3 py-2 text-xs text-destructive">Couldn&apos;t load categories.</p>
+            <p className="px-3 py-2 text-xs text-destructive"><LocalizedText id="couldnTLoadCategories" /></p>
           ) : (
             <CategoryOptions
               nodes={tree.data ?? []}

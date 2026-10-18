@@ -10,7 +10,6 @@ interface SectionHeaderProps {
 
 export function SectionHeader({
   title,
-  description,
   action,
   className,
 }: SectionHeaderProps) {
@@ -20,9 +19,6 @@ export function SectionHeader({
         <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
           {title}
         </h2>
-        {description && (
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{description}</p>
-        )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>

@@ -4,15 +4,16 @@ import { ImageMessage } from "./image-message"
 import { OfferMessageCard } from "./offer-message-card"
 import { SystemMessage } from "./system-message"
 import type { ConversationMessage, ConversationRole, MessageStatus } from "../types"
-import { CURRENT_USER_ID } from "../data/demo-conversations"
 
 interface MessageBubbleProps {
   message: ConversationMessage
   role: ConversationRole
+  currentUserId: string
   showTimestamp?: boolean
   onAcceptOffer?: (offerId: string) => void
   onDeclineOffer?: (offerId: string) => void
   onWithdrawOffer?: (offerId: string) => void
+  onCounterOffer?: (offerId: string) => void
 }
 
 function formatMessageTime(isoString: string): string {
@@ -31,16 +32,18 @@ function StatusIcon({ status }: { status: MessageStatus }) {
 export function MessageBubble({
   message,
   role,
+  currentUserId,
   showTimestamp = true,
   onAcceptOffer,
   onDeclineOffer,
   onWithdrawOffer,
+  onCounterOffer,
 }: MessageBubbleProps) {
   if (message.type === "system" && message.content) {
-    return <SystemMessage content={message.content} />
+    return <SystemMessage content={message.content} contentKm={message.contentKm} />
   }
 
-  const isCurrentUser = message.senderId === CURRENT_USER_ID
+  const isCurrentUser = message.senderId === currentUserId
 
   return (
     <div
@@ -57,6 +60,7 @@ export function MessageBubble({
           onAcceptOffer={onAcceptOffer}
           onDeclineOffer={onDeclineOffer}
           onWithdrawOffer={onWithdrawOffer}
+          onCounterOffer={onCounterOffer}
         />
       ) : message.type === "image" && message.imageUrl ? (
         <ImageMessage
@@ -81,7 +85,7 @@ export function MessageBubble({
       {showTimestamp && (
         <div
           className={cn(
-            "flex items-center gap-1 text-[10px] text-muted-foreground px-1",
+            "flex items-center gap-1 text-2xs text-muted-foreground px-1",
             isCurrentUser ? "justify-end" : "justify-start"
           )}
         >

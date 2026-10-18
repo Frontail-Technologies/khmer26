@@ -1,5 +1,7 @@
 "use client"
 
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { Funnel } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import type { CategoryField } from "@/features/categories/api/categories.api"
@@ -37,9 +39,9 @@ export function DesktopFilterSidebar({
       <div className="flex shrink-0 items-center justify-between border-b border-border/80 px-3.5 py-2.5">
         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
           <Funnel size={16} className="text-primary" weight="bold" />
-          <span>Filters</span>
+          <span><LocalizedText id="filters" /></span>
           {activeCount > 0 && (
-            <span className="flex h-5 px-1.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+            <span className="flex h-5 px-1.5 items-center justify-center rounded-full bg-primary text-2xs font-bold text-primary-foreground">
               {activeCount}
             </span>
           )}
@@ -50,7 +52,7 @@ export function DesktopFilterSidebar({
             onClick={onClearAll}
             className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
           >
-            Reset
+            <LocalizedText id="reset" />
           </button>
         )}
       </div>

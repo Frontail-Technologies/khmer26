@@ -1,6 +1,11 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -25,16 +30,41 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import type { ListingDraft, PostAdStep } from "../../types"
+import { categoryFieldsQueryOptions } from "@/features/categories/api/categories.queries"
+import { buildCreateListingInput } from "../../api/post-ad.api"
+import { useCreateListing, useUpdateListing } from "../../api/post-ad.mutations"
+import type { ListingModerationMatch } from "@/features/content/types"
+import { HighlightedModerationText, ModerationKeywordNotice } from "@/features/content/components/moderation-keyword-notice"
 
 interface PreviewStepProps {
   draft: ListingDraft
+  listingId?: string
+  existingIsDraft: boolean
   onEditStep: (step: PostAdStep) => void
   onReset: () => void
+  moderationMatches: ListingModerationMatch[]
 }
 
-export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
+export function PreviewStep({
+  draft,
+  listingId,
+  existingIsDraft,
+  onEditStep,
+  onReset,
+  moderationMatches,
+}: PreviewStepProps) {
+  const tGenerated = useTranslations("generated")
+  const t = useTranslations("ui.postAd")
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [actionType, setActionType] = useState<"publish" | "draft">("publish")
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const createListing = useCreateListing()
+  const updateListing = useUpdateListing()
+  const isPending = createListing.isPending || updateListing.isPending
+  const { data: categoryFields = [] } = useQuery({
+    ...categoryFieldsQueryOptions(draft.categoryId),
+    enabled: Boolean(draft.categoryId),
+  })
 
   const coverPhoto = draft.photos.find((p) => p.isCover) || draft.photos[0]
   const formattedPrice =
@@ -46,34 +76,39 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
     ([, val]) => Boolean(val)
   )
 
-  const handlePublish = () => {
+  const submit = async (isDraft: boolean) => {
+    setSubmitError(null)
+    setActionType(isDraft ? "draft" : "publish")
     try {
+      const input = buildCreateListingInput(draft, categoryFields)
+      if (listingId) {
+        await updateListing.mutateAsync({
+          id: listingId,
+          input,
+          submit: existingIsDraft && !isDraft,
+        })
+      } else {
+        await createListing.mutateAsync({ input, isDraft })
+      }
       localStorage.removeItem("khmer26_post_ad_draft")
-    } catch {
+      setSuccessDialogOpen(true)
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : t("saveFailed"))
     }
-    setActionType("publish")
-    setSuccessDialogOpen(true)
   }
 
-  const handleSaveDraft = () => {
-    try {
-      localStorage.setItem("khmer26_post_ad_draft", JSON.stringify(draft))
-    } catch {
-    }
-    setActionType("draft")
-    setSuccessDialogOpen(true)
-  }
+  const handlePublish = () => submit(false)
+  const handleSaveDraft = () => submit(true)
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-base sm:text-lg font-bold text-foreground">
-          Review & Publish
+          <LocalizedText id="reviewPublish" />
         </h2>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Check all details below before publishing your marketplace listing
-        </p>
       </div>
+
+      <ModerationKeywordNotice matches={moderationMatches} />
 
       <Card className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
         <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
@@ -84,6 +119,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
                 alt={draft.title}
                 fill
                 sizes="200px"
+                unoptimized={coverPhoto.previewUrl.startsWith("blob:")}
                 className="object-cover"
               />
             ) : null}
@@ -96,13 +132,13 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               </span>
               {draft.negotiable && (
                 <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                  Negotiable
+                  <LocalizedText id="negotiable" />
                 </span>
               )}
             </div>
 
             <h3 className="text-sm sm:text-base font-bold text-foreground leading-snug">
-              {draft.title}
+              <HighlightedModerationText text={draft.title} matches={moderationMatches} field="title" />
             </h3>
 
             <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-muted-foreground pt-1">
@@ -124,7 +160,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
         <Card className="rounded-xl border border-border/80 bg-card p-4 shadow-2xs">
           <CardHeader className="p-0 pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Category
+              <LocalizedText id="category" />
             </CardTitle>
             <Button
               variant="ghost"
@@ -133,7 +169,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               className="h-7 px-2 text-xs font-semibold text-primary gap-1 p-0"
             >
               <PencilSimple size={14} />
-              <span>Edit</span>
+              <span><LocalizedText id="edit" /></span>
             </Button>
           </CardHeader>
           <CardContent className="p-0 text-xs sm:text-sm font-semibold text-foreground">
@@ -144,7 +180,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
         <Card className="rounded-xl border border-border/80 bg-card p-4 shadow-2xs">
           <CardHeader className="p-0 pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Specifications & Details
+              <LocalizedText id="specificationsDetails" />
             </CardTitle>
             <Button
               variant="ghost"
@@ -153,7 +189,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               className="h-7 px-2 text-xs font-semibold text-primary gap-1 p-0"
             >
               <PencilSimple size={14} />
-              <span>Edit</span>
+              <span><LocalizedText id="edit" /></span>
             </Button>
           </CardHeader>
           <CardContent className="p-0 space-y-3">
@@ -161,7 +197,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {attributeEntries.map(([key, val]) => (
                   <div key={key} className="p-2 rounded-lg bg-muted/40 text-xs">
-                    <span className="text-muted-foreground block text-[10px] capitalize">
+                    <span className="text-muted-foreground block text-2xs capitalize">
                       {key}
                     </span>
                     <span className="font-bold text-foreground block truncate">
@@ -173,10 +209,10 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
             )}
 
             <div className="pt-2 border-t border-border/50 text-xs text-foreground/90 leading-relaxed">
-              <span className="font-semibold text-muted-foreground block text-[11px] mb-1">
-                Description:
+              <span className="font-semibold text-muted-foreground block text-xxs mb-1">
+                <LocalizedText id="description_9b6f3f" />
               </span>
-              <p className="whitespace-pre-line">{draft.description}</p>
+              <p className="whitespace-pre-line"><HighlightedModerationText text={draft.description} matches={moderationMatches} field="description" /></p>
             </div>
           </CardContent>
         </Card>
@@ -193,7 +229,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               className="h-7 px-2 text-xs font-semibold text-primary gap-1 p-0"
             >
               <PencilSimple size={14} />
-              <span>Edit</span>
+              <span><LocalizedText id="edit" /></span>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -208,11 +244,12 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
                     alt={`Photo ${i + 1}`}
                     fill
                     sizes="100px"
+                    unoptimized={photo.previewUrl.startsWith("blob:")}
                     className="object-cover"
                   />
                   {photo.isCover && (
                     <span className="absolute bottom-1 left-1 rounded bg-primary text-primary-foreground text-[8px] font-bold px-1 py-0.5">
-                      Cover
+                      <LocalizedText id="cover" />
                     </span>
                   )}
                 </div>
@@ -224,7 +261,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
         <Card className="rounded-xl border border-border/80 bg-card p-4 shadow-2xs">
           <CardHeader className="p-0 pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Contact Preferences
+              <LocalizedText id="contactPreferences" />
             </CardTitle>
             <Button
               variant="ghost"
@@ -233,7 +270,7 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               className="h-7 px-2 text-xs font-semibold text-primary gap-1 p-0"
             >
               <PencilSimple size={14} />
-              <span>Edit</span>
+              <span><LocalizedText id="edit" /></span>
             </Button>
           </CardHeader>
           <CardContent className="p-0 flex items-center gap-4 text-xs text-foreground">
@@ -241,10 +278,10 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               <ChatCircleDots size={16} className="text-primary" />
               <span>
                 {draft.contactMethod === "chat"
-                  ? "In-App Chat Only"
+                  ? tGenerated("inAppChatOnly")
                   : draft.contactMethod === "both"
-                  ? "Chat & Phone Call"
-                  : "Phone Call Only"}
+                  ? t("contactBothTitle")
+                  : t("contactPhoneTitle")}
               </span>
             </div>
 
@@ -258,25 +295,39 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
         </Card>
       </div>
 
+      {submitError && (
+        <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs font-medium text-destructive">
+          {submitError}
+        </div>
+      )}
+
       <div className="pt-4 flex flex-col sm:flex-row items-center gap-3">
         <Button
           type="button"
           onClick={handlePublish}
+          disabled={isPending}
           className="w-full sm:flex-1 h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-sm sm:text-base rounded-xl shadow-sm gap-2"
         >
           <Rocket size={20} weight="bold" />
-          <span>Publish Listing</span>
+          <span>
+            {isPending && actionType === "publish"
+              ? listingId && !existingIsDraft ? t("submittingChanges") : t("publishing")
+              : listingId && !existingIsDraft ? t("submitChanges") : t("publishListing")}
+          </span>
         </Button>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleSaveDraft}
-          className="w-full sm:w-auto h-12 px-6 font-semibold text-xs sm:text-sm rounded-xl border-border gap-1.5"
-        >
-          <BookmarkSimple size={18} />
-          <span>Save as Draft</span>
-        </Button>
+        {(!listingId || existingIsDraft) && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSaveDraft}
+            disabled={isPending}
+            className="w-full sm:w-auto h-12 px-6 font-semibold text-xs sm:text-sm rounded-xl border-border gap-1.5"
+          >
+            <BookmarkSimple size={18} />
+            <span>{isPending && actionType === "draft" ? tGenerated("saving") : tGenerated("saveAsDraft")}</span>
+          </Button>
+        )}
       </div>
 
       <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
@@ -287,13 +338,15 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
             </div>
             <DialogTitle className="text-center text-lg font-bold">
               {actionType === "publish"
-                ? "Listing Published Successfully!"
-                : "Draft Saved Successfully!"}
+                ? listingId && !existingIsDraft
+                  ? t("changesSubmitted")
+                  : t("listingSubmitted")
+                : tGenerated("draftSavedSuccessfully")}
             </DialogTitle>
             <DialogDescription className="text-center text-xs text-muted-foreground">
               {actionType === "publish"
-                ? `Your ad "${draft.title}" is now live and ready for buyer inquiries.`
-                : `Your draft "${draft.title}" was safely saved to your account.`}
+                ? `Your ${listingId ? "listing" : "ad"} "${draft.title}" was submitted for review. You can track its status in My Listings.`
+                : `Your draft "${draft.title}" was saved to your account.`}
             </DialogDescription>
           </DialogHeader>
 
@@ -306,14 +359,14 @@ export function PreviewStep({ draft, onEditStep, onReset }: PreviewStepProps) {
               }}
               className="w-full sm:flex-1 text-xs font-semibold h-10"
             >
-              Post Another Ad
+              <LocalizedText id="postAnotherAd" />
             </Button>
 
             <Button
               className="w-full sm:flex-1 text-xs font-semibold h-10 bg-primary text-primary-foreground gap-1.5"
               render={
                 <Link href="/account/listings">
-                  <span>Go to My Listings</span>
+                  <span><LocalizedText id="goToMyListings" /></span>
                   <ArrowSquareOut size={16} />
                 </Link>
               }

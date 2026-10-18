@@ -47,7 +47,7 @@ export function AdminMetricItem({
   return (
     <div className="p-4 sm:p-5 flex flex-col justify-between space-y-3 min-w-0">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider truncate">
+        <span className="text-xxs font-bold text-muted-foreground uppercase tracking-wider truncate">
           {label}
         </span>
         {icon && (

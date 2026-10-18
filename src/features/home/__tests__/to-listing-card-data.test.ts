@@ -18,12 +18,12 @@ describe("toListingCardData", () => {
     expect(card.primaryImage?.url).toBe("https://cdn.test/listings/dream.jpg")
   })
 
-  it("does not fabricate badges or metadata", () => {
+  it("maps negotiability without fabricating badges or metadata", () => {
     const card = toListingCardData(makeListing())
     expect(card.featured).toBeUndefined()
     expect(card.urgent).toBeUndefined()
     expect(card.verified).toBeUndefined()
-    expect(card.negotiable).toBeUndefined()
+    expect(card.negotiable).toBe(true)
     expect(card.metadata).toBeUndefined()
   })
 

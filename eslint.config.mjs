@@ -8,12 +8,14 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react-hooks/incompatible-library": "off",
+      "no-console": ["error", { allow: ["warn", "error"] }],
     },
   },
   globalIgnores([
     ".next/**",
     "out/**",
     "build/**",
+    "public/maplibre/**",
     "next-env.d.ts",
   ]),
 ]);

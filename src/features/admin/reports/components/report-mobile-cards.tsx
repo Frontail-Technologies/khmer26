@@ -62,10 +62,10 @@ export function ReportMobileCards({ data }: ReportMobileCardsProps) {
             <Card className="p-3.5 bg-card shadow-2xs rounded-xl hover:bg-muted/20 transition-colors border-0">
               <div className="flex items-start justify-between gap-2.5 mb-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-foreground">
-                    {report.id}
+                  <span className="text-xs font-bold text-foreground">
+                    {report.displayId ?? "Review report"}
                   </span>
-                  <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 h-4">
+                  <Badge variant="outline" className="text-2xs font-medium px-1.5 py-0 h-4">
                     {TARGET_TYPE_LABELS[report.targetType] || report.targetType}
                   </Badge>
                 </div>
@@ -94,23 +94,20 @@ export function ReportMobileCards({ data }: ReportMobileCardsProps) {
                   <span className="font-semibold text-xs text-foreground block truncate group-hover:text-primary transition-colors">
                     {report.target.title}
                   </span>
-                  <span className="font-mono text-[10px] text-muted-foreground block">
-                    {report.target.id}
-                  </span>
                 </div>
               </div>
 
               <div className="space-y-1 text-xs">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-foreground truncate">{report.reasonLabel}</span>
-                  <span className="text-[10px] text-muted-foreground shrink-0">{report.createdAt}</span>
+                  <span className="text-2xs text-muted-foreground shrink-0">{report.createdDate}</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                <p className="text-xxs text-muted-foreground line-clamp-2 leading-relaxed">
                   {report.statement}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-2 mt-2 border-t border-border/40 text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between pt-2 mt-2 border-t border-border/40 text-2xs text-muted-foreground">
                 <span>Reporter: <strong className="text-foreground font-medium">{report.reporter.name}</strong></span>
                 <span className="capitalize">{report.reporter.accountType}</span>
               </div>

@@ -18,6 +18,13 @@ import { UserIdentityCard } from "./user-identity-card"
 import { UserDetailsPanel } from "./user-details-panel"
 import { UserActionDialogs } from "./user-action-dialogs"
 import { EditUserSheet } from "./edit-user-sheet"
+import {
+  UserActivityTab,
+  UserBillingTab,
+  UserConversationsTab,
+  UserListingsTab,
+  UserReportsTab,
+} from "./user-record-tabs"
 import type { AdminUserDetail } from "../types"
 import { useAdminUserDetail } from "../hooks/users.queries"
 import { useDeleteAdminUser, useUpdateAdminUser, useUpdateUserStatus, useResetUserPassword } from "../hooks/users.mutations"
@@ -123,6 +130,15 @@ export function UserDetailWorkspace({ userId, initialUser }: UserDetailWorkspace
         <div className="border-b border-border/60 bg-card rounded-t-xl px-3 sm:px-4 overflow-x-auto no-scrollbar shadow-2xs">
           <TabsList variant="line">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="listings">
+              Listings <span className="text-xxs text-muted-foreground">{user.listingsCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="conversations">Conversations</TabsTrigger>
+            <TabsTrigger value="reports">
+              Reports <span className="text-xxs text-muted-foreground">{user.reportsCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
         </div>
@@ -136,15 +152,32 @@ export function UserDetailWorkspace({ userId, initialUser }: UserDetailWorkspace
           />
         </TabsContent>
 
+        <TabsContent value="listings" className="mt-0">
+          <UserListingsTab user={user} />
+        </TabsContent>
+
+        <TabsContent value="conversations" className="mt-0">
+          <UserConversationsTab user={user} />
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-0">
+          <UserReportsTab user={user} />
+        </TabsContent>
+
+        <TabsContent value="billing" className="mt-0">
+          <UserBillingTab user={user} />
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-0">
+          <UserActivityTab user={user} />
+        </TabsContent>
+
         <TabsContent value="security" className="mt-0">
           <Card className="bg-card border-0 shadow-2xs rounded-b-xl p-5 space-y-5">
             <div>
               <h2 className="text-xs font-bold text-foreground uppercase tracking-wider mb-1">
                 Password Reset
               </h2>
-              <p className="text-xs text-muted-foreground mb-4">
-                Send a password reset email to this user. They will receive an OTP to set a new password.
-              </p>
               <Button
                 size="sm"
                 variant="outline"

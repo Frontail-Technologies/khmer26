@@ -7,6 +7,7 @@ import type { AdminPaymentTransaction } from '../types';
 const mockPayments: AdminPaymentTransaction[] = [
   {
     id: 'tx-1',
+    displayId: 'TXN-100001',
     transactionReference: 'PAY-10001',
     payerId: 'user-1',
     payerName: 'Chann Vanna',
@@ -22,6 +23,7 @@ const mockPayments: AdminPaymentTransaction[] = [
   },
   {
     id: 'tx-2',
+    displayId: 'TXN-100002',
     transactionReference: 'PAY-10002',
     payerId: 'user-2',
     payerName: 'Heng Piseth',
@@ -56,7 +58,7 @@ describe('<PaymentTable />', () => {
   it('filters payments when searching by payer name', () => {
     renderWithProviders(<PaymentTable initialPayments={mockPayments} />);
 
-    const searchInput = screen.getByPlaceholderText(/search payment id, reference, or payer/i);
+    const searchInput = screen.getByPlaceholderText(/search payment reference or payer/i);
     fireEvent.change(searchInput, { target: { value: 'Chann' } });
 
     expect(screen.getAllByText('Chann Vanna')[0]).toBeInTheDocument();

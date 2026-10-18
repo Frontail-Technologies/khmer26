@@ -1,13 +1,17 @@
 "use client"
 
-import { Star, ChatText } from "@phosphor-icons/react"
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
+import { SealCheck, Star, ChatText } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/shared/EmptyState"
 import type { Page, SellerProfile, SellerReview } from "../api/sellers.api"
-import { distributionPercent, formatReviewDate, pluralize, sellerInitials } from "../lib/seller-format"
+import { distributionPercent, formatReviewDate, sellerInitials } from "../lib/seller-format"
 import { SellerReviewForm } from "./seller-review-form"
 
 interface SellerReviewsTabProps {
@@ -43,6 +47,9 @@ export function SellerReviewsTab({
   onLoadMore,
   onRetry,
 }: SellerReviewsTabProps) {
+  const tGenerated = useTranslations("generated")
+  const tDynamic = useTranslations("dynamic")
+  const tUi = useTranslations("ui.common")
   const rating = seller.rating
   const reviews = (pages ?? []).flatMap((p) => p.items)
 
@@ -51,7 +58,7 @@ export function SellerReviewsTab({
       {rating ? (
         <Card className="rounded-xl border border-border/80 bg-card p-4 sm:p-6 shadow-xs">
           <CardHeader className="p-0 pb-4">
-            <CardTitle className="text-base sm:text-lg font-bold text-foreground">Ratings</CardTitle>
+            <CardTitle className="text-base sm:text-lg font-bold text-foreground"><LocalizedText id="ratings" /></CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -63,7 +70,7 @@ export function SellerReviewsTab({
                   <Stars value={rating.average} size={20} />
                 </div>
                 <span className="text-xs text-muted-foreground font-medium">
-                  Based on {pluralize(rating.count, "review")}
+                  {tDynamic("basedOnReviews", { count: rating.count })}
                 </span>
               </div>
 
@@ -93,21 +100,21 @@ export function SellerReviewsTab({
       <SellerReviewForm sellerId={seller.id} isOwnProfile={isOwnProfile} />
 
       {isPending ? (
-        <div aria-busy="true" aria-label="Loading reviews" className="space-y-3">
+        <div aria-busy="true" aria-label={tGenerated("loadingReviews")} className="space-y-3">
           <Skeleton className="h-24 w-full rounded-xl" />
           <Skeleton className="h-24 w-full rounded-xl" />
         </div>
       ) : isError && !pages ? (
         <EmptyState
           icon={<ChatText size={32} aria-hidden="true" />}
-          title="Couldn't load reviews"
-          description="Please check your connection and try again."
-          action={{ label: "Try again", onClick: onRetry }}
+          title={tGenerated("couldnTLoadReviews")}
+          description={tGenerated("checkConnectionTryAgain")}
+          action={{ label: tUi("tryAgain"), onClick: onRetry }}
         />
       ) : reviews.length === 0 ? (
         <EmptyState
           icon={<ChatText size={32} aria-hidden="true" />}
-          title="No reviews yet"
+          title={tGenerated("noReviewsYet")}
           description={`${seller.shopName} hasn't received any reviews yet.`}
         />
       ) : (
@@ -129,9 +136,15 @@ export function SellerReviewsTab({
                       <span className="block truncate text-xs sm:text-sm font-bold text-foreground">
                         {review.reviewer.name}
                       </span>
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-xxs text-muted-foreground">
                         {formatReviewDate(review.createdAt)}
                       </span>
+                      {review.isVerifiedTransaction && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-2xs font-semibold text-primary">
+                          <SealCheck size={12} weight="fill" />
+                          <LocalizedText id="verifiedTransaction" />
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="shrink-0" role="img" aria-label={`${review.rating} out of 5 stars`}>
@@ -150,7 +163,7 @@ export function SellerReviewsTab({
 
           {isError && (
             <p role="alert" className="text-center text-xs font-medium text-destructive">
-              Couldn&apos;t load more reviews.
+              <LocalizedText id="couldnTLoadMoreReviews" />
             </p>
           )}
 
@@ -162,7 +175,7 @@ export function SellerReviewsTab({
                 disabled={isFetchingNextPage}
                 className="h-10 px-6 text-xs sm:text-sm font-semibold rounded-lg border-border hover:bg-muted"
               >
-                {isFetchingNextPage ? "Loading…" : "Load more reviews"}
+                {isFetchingNextPage ? tGenerated("loading") : tGenerated("loadMoreReviews")}
               </Button>
             </div>
           )}

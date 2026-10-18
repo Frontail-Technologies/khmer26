@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl"
+import { LocalizedText } from "@/components/i18n/localized-text"
 import { formatPriceWithCurrency } from "@/lib/formatters/currency"
 import {
   Table,
@@ -18,6 +20,7 @@ export function PaymentScheduleTable({
   schedule,
   currency = "USD",
 }: PaymentScheduleTableProps) {
+  const tDynamic = useTranslations("dynamic")
   if (!schedule || schedule.length === 0) {
     return null
   }
@@ -26,22 +29,22 @@ export function PaymentScheduleTable({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm sm:text-base font-bold text-foreground">
-          Payment Schedule
+          <LocalizedText id="paymentSchedule" />
         </h3>
         <span className="text-xs text-muted-foreground font-medium">
-          {schedule.length} payments
+          {tDynamic("paymentCount", { count: schedule.length })}
         </span>
       </div>
 
       <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs max-h-80 overflow-y-auto">
         <Table className="text-xs">
-          <TableHeader className="sticky top-0 bg-muted/80 backdrop-blur-md z-10 border-b border-border/80 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+          <TableHeader className="sticky top-0 bg-muted/80 backdrop-blur-md z-10 border-b border-border/80 text-xxs font-bold text-muted-foreground uppercase tracking-wider">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-center">No</TableHead>
-              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right">Payment</TableHead>
-              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right">Interest</TableHead>
-              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right">Principal</TableHead>
-              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right">Balance</TableHead>
+              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-center"><LocalizedText id="no" /></TableHead>
+              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right"><LocalizedText id="payment" /></TableHead>
+              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right"><LocalizedText id="interest" /></TableHead>
+              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right"><LocalizedText id="principal" /></TableHead>
+              <TableHead className="h-9 py-2 px-3 whitespace-nowrap text-right"><LocalizedText id="balance" /></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border/50">

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   buildCategoryIndex,
+  collectCategoryIds,
   countDescendants,
   filterCategoryTree,
   findCategorySuggestions,
@@ -105,5 +106,32 @@ describe("category tree (arbitrary depth)", () => {
     expect(findCategorySuggestions(tree, "o", 2)).toHaveLength(2)
     expect(findCategorySuggestions(tree, "  ", 5)).toEqual([])
     expect(findCategorySuggestions(tree, "zzz", 5)).toEqual([])
+  })
+})
+
+describe("collectCategoryIds", () => {
+  const tree = deepTree()
+
+  it("returns the category and everything beneath it", () => {
+    const vehicles = tree.find((root) => root.slug === "vehicles")!
+    const ids = collectCategoryIds(tree, vehicles.id)
+    const expected = new Set<string>()
+    const walk = (n: typeof vehicles) => {
+      expected.add(n.id)
+      n.children.forEach(walk)
+    }
+    walk(vehicles)
+    expect(ids).toEqual(expected)
+    expect(ids.size).toBeGreaterThan(1)
+  })
+
+  it("does not include sibling branches", () => {
+    const vehicles = tree.find((root) => root.slug === "vehicles")!
+    const property = tree.find((root) => root.slug === "property")!
+    expect(collectCategoryIds(tree, vehicles.id).has(property.id)).toBe(false)
+  })
+
+  it("returns nothing for an unknown id", () => {
+    expect(collectCategoryIds(tree, "missing").size).toBe(0)
   })
 })

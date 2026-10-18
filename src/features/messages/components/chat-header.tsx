@@ -1,5 +1,9 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+
+import { LocalizedText } from "@/components/i18n/localized-text"
+
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -32,6 +36,8 @@ interface ChatHeaderProps {
   onArchiveConversation?: () => void
   onOpenBlockUser?: () => void
   onOpenReportUser?: () => void
+  isBlocked?: boolean
+  isArchived?: boolean
 }
 
 export function ChatHeader({
@@ -43,7 +49,10 @@ export function ChatHeader({
   onArchiveConversation,
   onOpenBlockUser,
   onOpenReportUser,
+  isBlocked = false,
+  isArchived = false,
 }: ChatHeaderProps) {
+  const tGenerated = useTranslations("generated")
   return (
     <div className="h-14 sm:h-16 px-3 sm:px-4 bg-card border-b border-border/70 flex items-center justify-between gap-3 shrink-0">
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -53,7 +62,7 @@ export function ChatHeader({
             variant="ghost"
             size="icon-sm"
             onClick={onBack}
-            aria-label="Back to conversations"
+            aria-label={tGenerated("backToConversations")}
             className="md:hidden size-8 rounded-lg text-muted-foreground hover:text-foreground shrink-0"
           >
             <ArrowLeft size={18} weight="bold" />
@@ -80,7 +89,7 @@ export function ChatHeader({
               {participant.name}
             </h2>
           </div>
-          <p className="text-[11px] text-muted-foreground truncate">
+          <p className="text-xxs text-muted-foreground truncate">
             {participant.responseTime || "Active on Khmer26"}
           </p>
         </div>
@@ -96,7 +105,7 @@ export function ChatHeader({
             className="h-8 px-2.5 rounded-lg text-xs font-bold gap-1 text-accent border-accent/30 hover:bg-accent/10 sm:hidden"
           >
             <Tag size={14} weight="bold" />
-            <span>Offer</span>
+            <span><LocalizedText id="offer" /></span>
           </Button>
         )}
 
@@ -106,7 +115,7 @@ export function ChatHeader({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="More options"
+                aria-label={tGenerated("moreOptions")}
                 className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
               >
                 <DotsThreeVertical size={18} weight="bold" />
@@ -121,7 +130,7 @@ export function ChatHeader({
                   className="flex items-center gap-2 text-xs font-medium w-full"
                 >
                   <User size={15} />
-                  <span>View Public Profile</span>
+                  <span><LocalizedText id="viewPublicProfile" /></span>
                 </Link>
               }
             />
@@ -133,7 +142,7 @@ export function ChatHeader({
                   className="flex items-center gap-2 text-xs font-medium w-full"
                 >
                   <ArrowSquareOut size={15} />
-                  <span>View Listing Details</span>
+                  <span><LocalizedText id="viewListingDetails" /></span>
                 </Link>
               }
             />
@@ -144,7 +153,7 @@ export function ChatHeader({
                 className="gap-2 text-xs font-medium cursor-pointer"
               >
                 <Tag size={15} />
-                <span>Make a Price Offer</span>
+                <span><LocalizedText id="makeAPriceOffer" /></span>
               </DropdownMenuItem>
             )}
 
@@ -156,7 +165,7 @@ export function ChatHeader({
                 className="gap-2 text-xs font-medium cursor-pointer"
               >
                 <Archive size={15} />
-                <span>Archive Conversation</span>
+                <span>{isArchived ? tGenerated("unarchiveConversation") : tGenerated("archiveConversation")}</span>
               </DropdownMenuItem>
             )}
 
@@ -166,7 +175,7 @@ export function ChatHeader({
                 className="gap-2 text-xs font-medium text-destructive cursor-pointer"
               >
                 <Prohibit size={15} />
-                <span>Block User</span>
+                <span>{isBlocked ? tGenerated("unblockUser") : tGenerated("blockUser")}</span>
               </DropdownMenuItem>
             )}
 
@@ -176,7 +185,7 @@ export function ChatHeader({
                 className="gap-2 text-xs font-medium text-destructive cursor-pointer"
               >
                 <Flag size={15} />
-                <span>Report User</span>
+                <span><LocalizedText id="reportUser" /></span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
