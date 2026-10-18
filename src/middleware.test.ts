@@ -74,14 +74,15 @@ describe("admin hostname routing", () => {
     )
   })
 
-  it("moves legacy marketplace admin URLs to the admin hostname", () => {
+  it("does not expose admin routes on the marketplace hostname", () => {
     const response = proxy(
       new NextRequest("http://localhost:3000/admin/verifications?status=pending")
     )
 
-    expect(response.status).toBe(307)
-    expect(response.headers.get("location")).toBe(
-      "http://admin.localhost:3000/verifications?status=pending"
+    expect(response.status).toBe(404)
+    expect(response.headers.get("location")).toBeNull()
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/_not-found"
     )
   })
 })

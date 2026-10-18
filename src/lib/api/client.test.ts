@@ -215,6 +215,22 @@ describe('apiClient access-token refresh flow', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('posts Google credentials directly without signed-in CSRF initialization or refresh', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(200, {
+        success: true,
+        data: { user: { id: 'google-user' }, csrfToken: 'google-session-csrf' },
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await apiClient.post('/auth/google', { idToken: 'google-id-token' });
+
+    expect(result.data).toMatchObject({ user: { id: 'google-user' } });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]![0])).toContain('/auth/google');
+  });
+
   it('does NOT loop when the retried request also returns 401', async () => {
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
       const u = String(url);

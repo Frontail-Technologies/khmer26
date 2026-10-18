@@ -26,27 +26,6 @@ function getRequestHostname(request: NextRequest): string {
   return normalizeHostname(host);
 }
 
-function getAdminOrigin(request: NextRequest): string {
-  const configuredUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-  if (configuredUrl) {
-    try {
-      return new URL(configuredUrl).origin;
-    } catch {
-      // Fall through to a request-derived admin hostname.
-    }
-  }
-
-  const hostname = getRequestHostname(request);
-  const protocol = request.nextUrl.protocol;
-  const port = request.nextUrl.port ? `:${request.nextUrl.port}` : '';
-
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${protocol}//admin.localhost${port}`;
-  }
-
-  return `${protocol}//admin.${hostname.replace(/^www\./, '')}${port}`;
-}
-
 function isLegacyAdminPath(pathname: string): boolean {
   return pathname === ADMIN_INTERNAL_PREFIX || pathname.startsWith(`${ADMIN_INTERNAL_PREFIX}/`);
 }
@@ -90,9 +69,10 @@ export function proxy(request: NextRequest) {
   }
 
   if (isLegacyAdminPath(pathname)) {
-    const adminUrl = new URL(getPublicAdminPath(pathname), getAdminOrigin(request));
-    adminUrl.search = request.nextUrl.search;
-    return NextResponse.redirect(adminUrl);
+    const notFoundUrl = request.nextUrl.clone();
+    notFoundUrl.pathname = '/_not-found';
+    notFoundUrl.search = '';
+    return NextResponse.rewrite(notFoundUrl, { status: 404 });
   }
 
   if (!isProtected(pathname)) {

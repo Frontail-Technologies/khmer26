@@ -51,6 +51,19 @@ const API_BASE_URL = getApiBaseUrl();
 
 const CSRF_STORAGE_KEY = 'k26_csrf';
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const PUBLIC_UNSAFE_PATHS = new Set([
+  '/auth/login',
+  '/auth/register',
+  '/auth/register/verify',
+  '/auth/register/resend',
+  '/auth/refresh',
+  '/auth/google',
+  '/auth/telegram',
+  '/auth/password/forgot',
+  '/auth/password/verify-reset-otp',
+  '/auth/password/reset',
+  '/support/contact',
+]);
 let csrfTokenCache: string | null = null;
 let csrfPromise: Promise<string | null> | null = null;
 let refreshPromise: Promise<boolean> | null = null;
@@ -104,16 +117,12 @@ export function getApiRequestUrl(endpoint: string): string {
 function csrfRequired(endpoint: string, method: string): boolean {
   if (!UNSAFE_METHODS.has(method.toUpperCase())) return false;
   const path = endpoint.startsWith('http') ? new URL(endpoint).pathname : `/${endpoint.replace(/^\//, '')}`;
-  return !['/auth/login', '/auth/register', '/auth/register/verify', '/auth/refresh', '/auth/csrf', '/support/contact'].some((publicPath) =>
-    path.endsWith(publicPath)
-  );
+  return ![...PUBLIC_UNSAFE_PATHS, '/auth/csrf'].some((publicPath) => path.endsWith(publicPath));
 }
 
 function authRefreshAllowed(endpoint: string): boolean {
   const path = endpoint.startsWith('http') ? new URL(endpoint).pathname : `/${endpoint.replace(/^\//, '')}`;
-  return !['/auth/login', '/auth/register', '/auth/register/verify', '/auth/refresh', '/auth/logout'].some((authPath) =>
-    path.endsWith(authPath)
-  );
+  return ![...PUBLIC_UNSAFE_PATHS, '/auth/logout'].some((authPath) => path.endsWith(authPath));
 }
 
 async function refreshAuthSession(): Promise<boolean> {

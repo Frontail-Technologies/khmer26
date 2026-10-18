@@ -123,15 +123,7 @@ export function AppFooter() {
 
           <div className="flex flex-col items-center justify-between gap-2 text-xs text-muted-foreground sm:flex-row">
             <p>{tShell("copyright", { year: currentYear, site: SITE.name })}</p>
-            <div className="flex items-center gap-4">
-              <p className="hidden sm:block">{SITE.tagline}</p>
-              <Link
-                href="/admin/login"
-                className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <LocalizedText id="adminSignIn" />
-              </Link>
-            </div>
+            <p className="hidden sm:block">{SITE.tagline}</p>
           </div>
         </div>
       </div>
