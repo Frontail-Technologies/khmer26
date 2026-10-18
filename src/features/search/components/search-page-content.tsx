@@ -10,16 +10,12 @@ import {
 import { useSearchPageState } from "../hooks/use-search-page-state"
 import { carryFiltersToCategory } from "../lib/carry-filters"
 import type { CategoryNavData } from "./filter-panel"
-import { ResultsHeader } from "./results-header"
 import { SearchResultsView } from "./search-results-view"
 import { SellerResults } from "./seller-results"
 import { SearchTabs } from "./search-tabs"
 import { useLocalizedName } from "@/lib/i18n/localized"
-import { useTranslations } from "next-intl"
 
 export function SearchPageContent({ showSellers = true }: { showSellers?: boolean } = {}) {
-  const tGenerated = useTranslations("generated")
-  const tDynamic = useTranslations("dynamic")
   const getLocalizedName = useLocalizedName()
   const state = useSearchPageState()
   const { filters, setFilters } = state
@@ -48,17 +44,8 @@ export function SearchPageContent({ showSellers = true }: { showSellers?: boolea
     [index, path, filters, setFilters, queryClient]
   )
 
-  const title = filters.q ? tDynamic("resultsFor", { query: filters.q }) : tGenerated("allMarketplaceListings")
-  const breadcrumbs = [
-    { label: tGenerated("home"), href: "/" },
-    { label: tGenerated("search"), href: filters.q || node ? "/search" : undefined },
-    ...(node ? [{ label: getLocalizedName(node) }] : []),
-    ...(filters.q ? [{ label: `“${filters.q}”` }] : []),
-  ]
-
   return (
     <>
-      <ResultsHeader title={title} totalCount={state.total} breadcrumbs={breadcrumbs} />
       {showSellers && filters.q && <SellerResults q={filters.q} />}
       {!showSellers && filters.q && <SearchTabs q={filters.q} />}
       <div id="posts" className="scroll-mt-32">
