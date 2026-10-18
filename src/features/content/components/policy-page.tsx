@@ -23,7 +23,7 @@ export function PolicyPage({ page: storedPage }: { page: ContentPage }) {
   const tDynamic = useTranslations("dynamic")
   return (
     <main className="border-t border-border/70 bg-background">
-      <Container className="max-w-6xl py-8 sm:py-12 lg:py-16">
+      <Container className="py-8 sm:py-12 lg:py-16">
         <header className="max-w-3xl border-b border-border pb-8">
           <p className="text-xs font-semibold uppercase text-primary">{page.eyebrow}</p>
           <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{page.title}</h1>

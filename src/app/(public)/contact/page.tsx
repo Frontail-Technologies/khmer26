@@ -248,7 +248,7 @@ function ContactForm() {
 export default function ContactPage() {
   return (
     <Container>
-      <div className="py-6 sm:py-10 max-w-4xl mx-auto space-y-6 pb-16 md:pb-12">
+      <div className="py-6 sm:py-10 space-y-6 pb-16 md:pb-12">
         <div className="space-y-1.5 text-center sm:text-left">
           <div className="flex items-center gap-2 justify-center sm:justify-start text-primary">
             <ChatCircleText size={22} weight="duotone" />
