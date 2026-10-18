@@ -131,6 +131,7 @@ export const customerKeys = {
   },
 
   verification: ['customer', 'verification'] as const,
+  postingEligibility: ['customer', 'posting-eligibility'] as const,
   blockedUsers: ['customer', 'blocked-users'] as const,
   privacy: ['customer', 'privacy'] as const,
   sessions: ['customer', 'sessions'] as const,

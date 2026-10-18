@@ -111,46 +111,53 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
 }
 
 export function getAdminRouteInfo(pathname: string): AdminRouteInfo {
-  if (ADMIN_ROUTE_METADATA[pathname]) {
-    return ADMIN_ROUTE_METADATA[pathname]
+  const internalPathname =
+    pathname === "/"
+      ? "/admin"
+      : pathname.startsWith("/admin")
+        ? pathname
+        : `/admin${pathname}`
+
+  if (ADMIN_ROUTE_METADATA[internalPathname]) {
+    return ADMIN_ROUTE_METADATA[internalPathname]
   }
 
-  if (pathname.startsWith("/admin/verifications/") && pathname !== "/admin/verifications") {
+  if (internalPathname.startsWith("/admin/verifications/") && internalPathname !== "/admin/verifications") {
     return {
       title: "Seller Verification",
       subtitle: "Review submitted seller verification information.",
     }
   }
 
-  if (pathname.startsWith("/admin/listings/") && pathname !== "/admin/listings") {
+  if (internalPathname.startsWith("/admin/listings/") && internalPathname !== "/admin/listings") {
     return {
       title: "Listing Review",
       subtitle: "Review marketplace listing content and moderation status.",
     }
   }
 
-  if (pathname.startsWith("/admin/users/") && pathname !== "/admin/users") {
+  if (internalPathname.startsWith("/admin/users/") && internalPathname !== "/admin/users") {
     return {
       title: "User Details",
       subtitle: "Review user account profile and moderation history.",
     }
   }
 
-  if (pathname.startsWith("/admin/reports/") && pathname !== "/admin/reports" && pathname !== "/admin/reports/reasons") {
+  if (internalPathname.startsWith("/admin/reports/") && internalPathname !== "/admin/reports" && internalPathname !== "/admin/reports/reasons") {
     return {
       title: "Report Review",
       subtitle: "Review reported content and resolution options.",
     }
   }
 
-  if (pathname.startsWith("/admin/payments/") && pathname !== "/admin/payments") {
+  if (internalPathname.startsWith("/admin/payments/") && internalPathname !== "/admin/payments") {
     return {
       title: "Payment Details",
       subtitle: "Review transaction details and payment receipt.",
     }
   }
 
-  const segments = pathname.replace("/admin/", "").split("/")
+  const segments = internalPathname.replace("/admin/", "").split("/")
   const last = segments[segments.length - 1] || "Overview"
   const formatted = last
     .split("-")

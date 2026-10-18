@@ -22,7 +22,7 @@ describe('<AdminLoginForm />', () => {
   it('renders login form inputs and actions', () => {
     renderWithProviders(<AdminLoginForm />);
 
-    expect(screen.getByText('Sign In', { selector: '[data-slot="card-title"]' })).toBeInTheDocument();
+    expect(screen.getByText('Admin Sign In', { selector: '[data-slot="card-title"]' })).toBeInTheDocument();
     expect(screen.getByLabelText(/^email$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument();

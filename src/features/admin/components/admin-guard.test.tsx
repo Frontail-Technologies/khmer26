@@ -17,13 +17,13 @@ vi.mock('@/hooks/use-admin-auth', () => ({
 }));
 
 describe('AdminGuard', () => {
-  it('redirects unauthenticated users to /admin/login, not /admin-login', () => {
+  it('redirects unauthenticated users to the admin hostname login path', () => {
     render(
       <AdminGuard>
         <div>secret admin content</div>
       </AdminGuard>
     );
 
-    expect(replaceMock).toHaveBeenCalledWith('/admin/login');
+    expect(replaceMock).toHaveBeenCalledWith('/login');
   });
 });

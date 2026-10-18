@@ -41,7 +41,7 @@ export interface AdminNavGroup {
   items: AdminNavItem[]
 }
 
-export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
+const ADMIN_NAV_CONFIG_WITH_INTERNAL_PATHS: AdminNavGroup[] = [
   {
     id: "overview",
     label: "Overview",
@@ -230,3 +230,21 @@ export const ADMIN_NAV_CONFIG: AdminNavGroup[] = [
     ],
   },
 ]
+
+function toAdminHostnamePath(href: string): string {
+  if (href === "/admin") return "/"
+  return href.startsWith("/admin/") ? href.slice("/admin".length) : href
+}
+
+export const ADMIN_NAV_CONFIG: AdminNavGroup[] =
+  ADMIN_NAV_CONFIG_WITH_INTERNAL_PATHS.map((group) => ({
+    ...group,
+    items: group.items.map((item) => ({
+      ...item,
+      href: toAdminHostnamePath(item.href),
+      subItems: item.subItems?.map((subItem) => ({
+        ...subItem,
+        href: toAdminHostnamePath(subItem.href),
+      })),
+    })),
+  }))

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import Image from "next/image"
 import {
   Lock,
@@ -20,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { useAdminAuth } from "@/hooks/use-admin-auth"
 
 export function AdminLoginForm() {
+  const marketplaceUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -48,7 +48,7 @@ export function AdminLoginForm() {
       <Card className="rounded-xl border border-border/70 bg-card p-0 shadow-sm text-foreground overflow-hidden">
         <CardHeader className="p-5 sm:p-7 pb-4 text-center border-b border-border/60 bg-muted/15">
           <div className="flex justify-center mb-2.5">
-            <Link href="/" className="inline-flex items-center gap-2">
+            <a href={marketplaceUrl} className="inline-flex items-center gap-2">
               <Image
                 src="/images/logo.png"
                 alt="Khmer26"
@@ -58,10 +58,10 @@ export function AdminLoginForm() {
                 style={{ width: "auto" }}
                 className="h-6 w-auto object-contain"
               />
-            </Link>
+            </a>
           </div>
           <CardTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-            Sign In
+            Admin Sign In
           </CardTitle>
         </CardHeader>
 
@@ -156,13 +156,13 @@ export function AdminLoginForm() {
           </form>
 
           <div className="pt-1 text-center">
-            <Link
-              href="/"
+            <a
+              href={marketplaceUrl}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors hover:underline"
             >
               <ArrowSquareOut size={13} />
               <span>Back to Khmer26 Marketplace</span>
-            </Link>
+            </a>
           </div>
         </CardContent>
       </Card>
