@@ -1108,6 +1108,13 @@
     "categoryPage": {
       "loadFailed": "Please check your connection and try again.",
       "notFound": "This category doesn't exist or is no longer available."
+    },
+    "filterBar": {
+      "price": "Price",
+      "moreFilters": "More filters",
+      "category": "Category",
+      "location": "Location",
+      "filters": "Filters"
     }
   },
   "meta": {

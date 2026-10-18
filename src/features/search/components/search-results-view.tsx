@@ -16,7 +16,7 @@ import { toListingCardData } from "@/features/listings/lib/to-listing-card-data"
 import { clearAllFilters, countActiveFilters } from "../lib/search-filters"
 import type { SearchPageState } from "../hooks/use-search-page-state"
 import { ActiveFilterChips } from "./active-filter-chips"
-import { DesktopFilterSidebar } from "./desktop-filter-sidebar"
+import { FilterBar } from "./filter-bar"
 import type { CategoryNavData } from "./filter-panel"
 import { MobileFilterSheet } from "./mobile-filter-sheet"
 import { ResultsToolbar } from "./results-toolbar"
@@ -32,7 +32,7 @@ interface SearchResultsViewProps {
 }
 
 const GRID_CLASS =
-  "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4"
+  "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
 
 function ResultsSkeleton() {
   const tGenerated = useTranslations("generated")
@@ -87,20 +87,8 @@ export function SearchResultsView({
     setFilters(clearAllFilters(filters, { preserveCategory: isCategoryRoute }))
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-      <div className="hidden lg:block shrink-0 sticky top-18 self-start">
-        <DesktopFilterSidebar
-          filters={filters}
-          onChange={setFilters}
-          onClearAll={handleClearAll}
-          activeCount={activeCount}
-          definitions={definitions}
-          fieldsLoading={fieldsLoading}
-          categoryNav={categoryNav}
-        />
-      </div>
-
-      <div className="flex-1 min-w-0">
+    <div className="flex flex-col gap-4">
+      <div className="min-w-0">
         <ResultsToolbar
           totalResults={total}
           sortBy={filters.sort}
@@ -110,6 +98,15 @@ export function SearchResultsView({
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           extraAction={<SaveSearchDialog filters={filters} />}
+          filterControls={
+            <FilterBar
+              filters={filters}
+              onChange={setFilters}
+              definitions={definitions}
+              fieldsLoading={fieldsLoading}
+              categoryNav={categoryNav}
+            />
+          }
         />
 
         <ActiveFilterChips

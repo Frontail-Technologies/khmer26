@@ -180,7 +180,7 @@ describe("<SearchResultsView />", () => {
     expect(screen.queryByText(/^1$/)).toBeNull()
   })
 
-  it("the sidebar badge, drawer button and chips use one count", () => {
+  it("the filter button badge and chips use one count", () => {
     renderWithProviders(
       <SearchResultsView
         state={makeState({
@@ -190,7 +190,7 @@ describe("<SearchResultsView />", () => {
         })}
       />
     )
-    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByRole("button", { name: /^Remove filter/ })).toHaveLength(3)
   })
 

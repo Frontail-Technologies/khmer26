@@ -68,10 +68,10 @@ function OptionButton({
   )
 }
 
-function CategorySection({ nav, selected }: { nav: CategoryNavData; selected?: string }) {
+export function CategorySection({ nav, selected, bare }: { nav: CategoryNavData; selected?: string; bare?: boolean }) {
   const tGenerated = useTranslations("generated")
   return (
-    <FilterSection title={tGenerated("category")} icon={<Tag size={14} className="text-primary" />}>
+    <FilterSection bare={bare} title={tGenerated("category")} icon={<Tag size={14} className="text-primary" />}>
       <div>
         <CategoryTreeNav
           roots={nav.roots}
@@ -124,7 +124,7 @@ function LocationList({
   )
 }
 
-function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters" | "onChange">) {
+export function LocationSection({ filters, onChange, bare }: Pick<FilterPanelProps, "filters" | "onChange"> & { bare?: boolean }) {
   const tGenerated = useTranslations("generated")
   const getLocalizedName = useLocalizedName()
   const provinces = useProvinces()
@@ -137,7 +137,7 @@ function LocationSection({ filters, onChange }: Pick<FilterPanelProps, "filters"
   const collapseProvinces = filters.provinceId !== undefined && !showAllProvinces
 
   return (
-    <FilterSection title={tGenerated("location")} icon={<MapPin size={14} className="text-primary" />}>
+    <FilterSection bare={bare} title={tGenerated("location")} icon={<MapPin size={14} className="text-primary" />}>
       <div className="space-y-2">
         {collapseProvinces ? (
           <div className="space-y-1">
@@ -243,7 +243,7 @@ function CommittedInput({
   )
 }
 
-function DynamicFieldFilter({
+export function DynamicFieldFilter({
   definition,
   value,
   onChange,

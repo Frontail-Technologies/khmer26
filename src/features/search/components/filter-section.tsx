@@ -17,11 +17,14 @@ interface FilterSectionProps {
   title: string
   icon?: ReactNode
   defaultOpen?: boolean
+  /** Render just the content (used inside the filter bar popovers, which have their own heading). */
+  bare?: boolean
   children: ReactNode
 }
 
-export function FilterSection({ title, icon, defaultOpen = true, children }: FilterSectionProps) {
+export function FilterSection({ title, icon, defaultOpen = true, bare, children }: FilterSectionProps) {
   const [open, setOpen] = useState(defaultOpen)
+  if (bare) return <>{children}</>
 
   return (
     <div className="border-b border-border/50 pb-3">

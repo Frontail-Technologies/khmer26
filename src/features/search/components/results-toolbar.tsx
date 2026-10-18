@@ -28,6 +28,8 @@ interface ResultsToolbarProps {
   viewMode?: ListingViewMode
   onViewModeChange?: (mode: ListingViewMode) => void
   extraAction?: ReactNode
+  /** Desktop filter controls shown on the left of the bar (below lg the filter button opens the sheet). */
+  filterControls?: ReactNode
 }
 
 export function ResultsToolbar({
@@ -39,12 +41,14 @@ export function ResultsToolbar({
   viewMode,
   onViewModeChange,
   extraAction,
+  filterControls,
 }: ResultsToolbarProps) {
   const tGenerated = useTranslations("generated")
   const tSort = useTranslations("ui.sort")
   return (
-    <div className="flex items-center justify-between gap-2 rounded-xl border border-border/80 bg-card px-3 sm:px-3.5 py-2 sm:py-2.5 shadow-2xs mb-3">
-      <div className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5 min-w-0">
+    <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-border/80 bg-card px-3 py-2 shadow-2xs sm:px-3.5 sm:py-2.5 lg:sticky lg:top-15 lg:z-30">
+      {filterControls && <div className="hidden min-w-0 lg:block">{filterControls}</div>}
+      <div className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-foreground sm:text-sm lg:ml-auto lg:mr-2">
         <span className="text-foreground font-bold">
           {totalResults === undefined ? "—" : totalResults.toLocaleString()}
         </span>
