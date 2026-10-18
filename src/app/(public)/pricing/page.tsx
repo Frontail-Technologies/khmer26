@@ -1,29 +1,29 @@
+import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { Container } from "@/components/layout/Container"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Section } from "@/components/layout/Section"
-import { EmptyState } from "@/components/shared/EmptyState"
-import { CurrencyDollar } from "@phosphor-icons/react/dist/ssr"
+import { PricingView } from "@/features/payments/components/pricing-view"
 
-export const metadata = {
-  title: "Pricing & Subscription Plans",
-  description: "Choose a plan to post more listings and grow your business on Khmer26.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta.pricing")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const t = await getTranslations("payments.pricing")
   return (
     <Container>
       <Section>
         <PageHeader
-          title="Subscription Plans"
-          description="Post more, sell more. Choose the plan that fits your needs."
+          title={t("title")}
+          description={t("description")}
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Pricing" }]}
         />
-        <EmptyState
-          icon={<CurrencyDollar size={32} aria-hidden="true" />}
-          title="Pricing Plans Coming Soon"
-          description="Subscription tiers and pricing will be fetched from the backend and displayed here."
-          action={{ label: "Post a Listing", href: "/post-ad" }}
-        />
+        <PricingView />
       </Section>
     </Container>
   )
