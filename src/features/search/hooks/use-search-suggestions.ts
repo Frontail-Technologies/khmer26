@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { marketplaceKeys } from "@/lib/query/keys"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { searchListings } from "@/features/listings/api/listings.api"
+import { searchSellers } from "@/features/sellers/api/sellers.api"
 import {
   findCategorySuggestions,
   type CategoryIndex,
@@ -40,6 +41,14 @@ export function useSearchSuggestions({ query, categorySlug, index }: Options) {
     placeholderData: keepPreviousData,
   })
 
+  const sellersQuery = useQuery({
+    queryKey: marketplaceKeys.search.suggestions({ q: debounced, kind: "sellers" }),
+    queryFn: () => searchSellers(debounced),
+    enabled: requestEnabled,
+    staleTime: 30_000,
+    placeholderData: keepPreviousData,
+  })
+
   const categories = useMemo(
     () => (eligible && index ? findCategorySuggestions(index, trimmed, CATEGORY_SUGGESTION_LIMIT) : []),
     [eligible, index, trimmed]
@@ -47,8 +56,9 @@ export function useSearchSuggestions({ query, categorySlug, index }: Options) {
 
   return {
     eligible,
-    isLoading: requestEnabled && listingsQuery.isFetching,
+    isLoading: requestEnabled && (listingsQuery.isFetching || sellersQuery.isFetching),
     categories,
     listings: hasCurrentResults ? (listingsQuery.data?.items ?? []) : [],
+    sellers: hasCurrentResults ? (sellersQuery.data ?? []) : [],
   }
 }

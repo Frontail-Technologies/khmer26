@@ -80,6 +80,20 @@ export interface SellerCategoryFacet {
   count: number;
 }
 
+export interface SellerSearchResult {
+  id: string;
+  shopName: string;
+  sellerType: SellerType;
+  avatarR2Key: string | null;
+  isVerified: boolean;
+  listingCount: number;
+}
+
+export async function searchSellers(q: string): Promise<SellerSearchResult[]> {
+  const res = await apiClient.get<SellerSearchResult[]>('/sellers/search', { params: { q } });
+  return res.data;
+}
+
 export async function getSeller(id: string): Promise<SellerProfile> {
   const res = await apiClient.get<{ profile: SellerProfile }>(`/sellers/${encodeURIComponent(id)}`);
   return res.data.profile;

@@ -1118,6 +1118,10 @@
     },
     "topAds": {
       "title": "Top Ads"
+    },
+    "searchBar": {
+      "sellers": "Sellers",
+      "adsCount": "{count} ads"
     }
   },
   "meta": {

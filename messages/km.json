@@ -1118,6 +1118,10 @@
     },
     "topAds": {
       "title": "ការផ្សាយពាណិជ្ជកម្មពិសេស"
+    },
+    "searchBar": {
+      "sellers": "អ្នកលក់",
+      "adsCount": "{count} ការផ្សាយ"
     }
   },
   "meta": {

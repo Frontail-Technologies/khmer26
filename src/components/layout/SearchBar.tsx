@@ -16,7 +16,7 @@ import {
 } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { CaretDown, Check, MagnifyingGlass, SquaresFour, Tag } from "@phosphor-icons/react"
+import { CaretDown, Check, MagnifyingGlass, SquaresFour, Storefront, Tag } from "@phosphor-icons/react"
 import { useCategoryTree } from "@/features/categories/api/categories.queries"
 import type { CategoryNode } from "@/features/categories/api/categories.api"
 import {
@@ -45,6 +45,7 @@ type Suggestion =
   | { kind: "keyword"; id: string; label: string; context: string; href: string }
   | { kind: "category"; id: string; label: string; context: string; href: string }
   | { kind: "listing"; id: string; label: string; context: string; href: string }
+  | { kind: "seller"; id: string; label: string; context: string; href: string }
 
 function CategoryOptions({
   nodes,
@@ -106,6 +107,7 @@ function SearchBarInner({
 }: InnerProps) {
   const tGenerated = useTranslations("generated")
   const tUi = useTranslations("ui.common")
+  const tSearch = useTranslations("ui.searchBar")
   const getLocalizedName = useLocalizedName()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -161,8 +163,15 @@ function SearchBarInner({
           : getLocalizedName(listing.location.province),
       href: `/listing/${listing.id}`,
     }))
-    return [...keywordItems, ...categoryItems, ...listingItems]
-  }, [getLocalizedName, index, inputValue, selectedNode, selectedSlug, suggestions.categories, suggestions.listings, tGenerated])
+    const sellerItems: Suggestion[] = suggestions.sellers.map((seller) => ({
+      kind: "seller",
+      id: seller.id,
+      label: seller.shopName,
+      context: tSearch("adsCount", { count: seller.listingCount }),
+      href: `/seller/${encodeURIComponent(seller.id)}`,
+    }))
+    return [...keywordItems, ...sellerItems, ...categoryItems, ...listingItems]
+  }, [tSearch, suggestions.sellers, getLocalizedName, index, inputValue, selectedNode, selectedSlug, suggestions.categories, suggestions.listings, tGenerated])
 
   const showSuggestions = suggestOpen && suggestions.eligible && (items.length > 0 || suggestions.isLoading)
 
@@ -316,7 +325,7 @@ function SearchBarInner({
           aria-label={tGenerated("searchSuggestions")}
           className="absolute left-0 right-0 top-full mt-1.5 z-50 max-h-96 overflow-y-auto rounded-lg border border-border bg-popover p-1.5 shadow-xl text-popover-foreground"
         >
-          {(["keyword", "category", "listing"] as const).map((kind) => {
+          {(["keyword", "seller", "category", "listing"] as const).map((kind) => {
             const group = items
               .map((item, i) => ({ item, i }))
               .filter(({ item }) => item.kind === kind)
@@ -325,10 +334,10 @@ function SearchBarInner({
               <div
                 key={kind}
                 role="group"
-                aria-label={kind === "keyword" ? tGenerated("searchTerms") : kind === "category" ? tUi("categories") : tUi("listings")}
+                aria-label={kind === "keyword" ? tGenerated("searchTerms") : kind === "seller" ? tSearch("sellers") : kind === "category" ? tUi("categories") : tUi("listings")}
               >
                 <div className="px-2.5 pb-0.5 pt-1.5 text-2xs font-bold uppercase tracking-wider text-muted-foreground">
-                  {kind === "keyword" ? tGenerated("search") : kind === "category" ? tUi("categories") : tUi("listings")}
+                  {kind === "keyword" ? tGenerated("search") : kind === "seller" ? tSearch("sellers") : kind === "category" ? tUi("categories") : tUi("listings")}
                 </div>
                 {group.map(({ item, i }) => (
                   <button
@@ -347,6 +356,8 @@ function SearchBarInner({
                   >
                     {item.kind === "category" ? (
                       <Tag size={14} className="shrink-0 text-primary/80" aria-hidden="true" />
+                    ) : item.kind === "seller" ? (
+                      <Storefront size={14} className="shrink-0 text-primary/80" aria-hidden="true" />
                     ) : (
                       <MagnifyingGlass size={14} className="shrink-0 text-muted-foreground" aria-hidden="true" />
                     )}
