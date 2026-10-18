@@ -72,35 +72,30 @@ export function AccountMobileNav() {
   const pathname = usePathname()
 
   return (
-    <div className="lg:hidden w-full overflow-x-auto no-scrollbar border-b border-border/70 bg-card/80 backdrop-blur-md -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 mb-4 sticky top-14 z-20">
-      <div className="flex items-center gap-1.5 min-w-max">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/account/listings" && pathname.startsWith(item.href))
+    <nav aria-label={tGenerated("account")} className="mb-4 grid grid-cols-4 gap-1.5 lg:hidden sm:flex sm:flex-wrap">
+      {NAV_ITEMS.map((item) => {
+        const Icon = item.icon
+        const isActive =
+          pathname === item.href ||
+          (item.href !== "/account/listings" && pathname.startsWith(item.href))
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none shrink-0",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-2xs font-bold"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <Icon
-                size={15}
-                weight={isActive ? "fill" : "regular"}
-                className="shrink-0"
-              />
-              <span>{tGenerated(item.messageKey)}</span>
-            </Link>
-          )
-        })}
-      </div>
-    </div>
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "flex min-w-0 select-none flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-center text-2xs font-semibold leading-tight transition-colors sm:flex-row sm:gap-1.5 sm:rounded-full sm:px-3 sm:py-1.5 sm:text-xs",
+              isActive
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <Icon size={18} weight={isActive ? "fill" : "regular"} className="shrink-0" />
+            <span className="w-full truncate sm:w-auto">{tGenerated(item.messageKey)}</span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }
