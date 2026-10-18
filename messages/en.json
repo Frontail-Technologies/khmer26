@@ -1115,6 +1115,9 @@
       "category": "Category",
       "location": "Location",
       "filters": "Filters"
+    },
+    "topAds": {
+      "title": "Top Ads"
     }
   },
   "meta": {

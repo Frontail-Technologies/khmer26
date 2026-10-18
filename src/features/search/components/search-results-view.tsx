@@ -17,6 +17,7 @@ import { clearAllFilters, countActiveFilters } from "../lib/search-filters"
 import type { SearchPageState } from "../hooks/use-search-page-state"
 import { ActiveFilterChips } from "./active-filter-chips"
 import { FilterBar } from "./filter-bar"
+import { TopAdsStrip } from "./top-ads-strip"
 import type { CategoryNavData } from "./filter-panel"
 import { MobileFilterSheet } from "./mobile-filter-sheet"
 import { ResultsToolbar } from "./results-toolbar"
@@ -116,6 +117,8 @@ export function SearchResultsView({
           definitions={definitions}
           categoryChipLabel={categoryChipLabel}
         />
+
+        <TopAdsStrip filters={filters} definitions={definitions} />
 
         <div className={cn("transition-opacity", isRefreshing && "opacity-60")}>
           {search.isPending ? (

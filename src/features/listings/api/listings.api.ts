@@ -58,6 +58,8 @@ export interface ListingSearchInput {
   currency?: string;
   sort: string;
   fields?: Record<string, string>;
+  /** Only listings with an active featured promotion. */
+  featuredOnly?: boolean;
 }
 
 export const SEARCH_PAGE_SIZE = 12;
@@ -76,6 +78,7 @@ export function buildListingsQuery(
   if (input.minPrice !== undefined) query.minPrice = input.minPrice;
   if (input.maxPrice !== undefined) query.maxPrice = input.maxPrice;
   if (input.currency) query.currency = input.currency;
+  if (input.featuredOnly) query.featuredOnly = 'true';
   if (input.category && input.fields) {
     for (const [name, value] of Object.entries(input.fields)) {
       query[`fields[${name}]`] = value;
