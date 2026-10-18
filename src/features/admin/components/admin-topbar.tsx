@@ -31,6 +31,7 @@ interface AdminTopbarProps {
 }
 
 export function AdminTopbar({ className }: AdminTopbarProps) {
+  const marketplaceUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   const pathname = usePathname()
   const routeInfo = getAdminRouteInfo(pathname)
   const { user, logout, isLoggingOut } = useAdminAuth()
@@ -77,7 +78,7 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
         </div>
 
         <Link
-          href="/admin/notifications"
+          href="/notifications"
           aria-label="Admin notifications (3 new)"
           className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
         >
@@ -128,7 +129,7 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               render={
-                <Link href="/admin/settings" className="flex items-center gap-2 text-xs font-medium w-full">
+                <Link href="/settings" className="flex items-center gap-2 text-xs font-medium w-full">
                   <User size={15} />
                   <span>Admin Profile & Settings</span>
                 </Link>
@@ -136,15 +137,15 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
             />
             <DropdownMenuItem
               render={
-                <Link
-                  href="/"
+                <a
+                  href={marketplaceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-xs font-medium w-full"
                 >
                   <ArrowSquareOut size={15} />
                   <span>View Public Marketplace</span>
-                </Link>
+                </a>
               }
             />
             <DropdownMenuSeparator />

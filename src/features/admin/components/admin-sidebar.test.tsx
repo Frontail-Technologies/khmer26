@@ -5,7 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from './admin-sidebar';
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/admin/listings',
+  usePathname: () => '/listings',
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -58,15 +58,15 @@ describe('<AdminSidebar />', () => {
 
     expect(screen.getByText('Listings').closest('a')).toHaveAttribute(
       'href',
-      '/admin/listings'
+      '/listings'
     );
     expect(screen.getByText('Reports').closest('a')).toHaveAttribute(
       'href',
-      '/admin/reports'
+      '/reports'
     );
     expect(screen.getByText('Content Management').closest('a')).toHaveAttribute(
       'href',
-      '/admin/content/homepage'
+      '/content/homepage'
     );
   });
 });

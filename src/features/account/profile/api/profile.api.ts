@@ -60,6 +60,11 @@ export interface VerificationState {
   }
 }
 
+export interface PostingEligibility {
+  canPost: boolean
+  status: "profile_required" | "not_submitted" | "pending" | "in_review" | "approved" | "rejected"
+}
+
 export async function getAccountProfile(): Promise<AccountProfile> {
   const [userResponse, sellerResponse] = await Promise.all([
     apiClient.get<{ user: AccountProfile["user"] }>("/users/me"),
@@ -77,6 +82,11 @@ export async function saveAccountProfile(profileId: string | null, input: SavePr
 
 export async function getMyVerification(): Promise<VerificationState> {
   const response = await apiClient.get<VerificationState>("/sellers/me/verification")
+  return response.data
+}
+
+export async function getPostingEligibility(): Promise<PostingEligibility> {
+  const response = await apiClient.get<PostingEligibility>("/sellers/me/posting-eligibility")
   return response.data
 }
 

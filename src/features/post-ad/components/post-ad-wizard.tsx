@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl"
 import { LocalizedText } from "@/components/i18n/localized-text"
 
 import { useCallback, useState } from "react"
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react"
+import { ArrowLeft, ArrowRight, ShieldCheck } from "@phosphor-icons/react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,7 @@ import type { ListingDraft, PostAdStep } from "../types"
 import { useEditableListing } from "../api/post-ad.queries"
 import { useModerationKeywords } from "@/features/content/hooks/content.queries"
 import { findModerationMatches } from "@/features/content/lib/moderation-keywords"
+import { usePostingEligibility } from "@/features/account/profile/api/profile.queries"
 
 const INITIAL_DRAFT: ListingDraft = {
   categoryId: "",
@@ -88,7 +90,50 @@ interface PostAdWizardProps {
 }
 
 export function PostAdWizard({ listingId }: PostAdWizardProps) {
+  const eligibility = usePostingEligibility()
   const listing = useEditableListing(listingId)
+
+  if (eligibility.isPending) {
+    return <div className="h-52 animate-pulse rounded-lg border border-border bg-muted/30" />
+  }
+
+  if (eligibility.isError) {
+    return (
+      <div role="alert" className="rounded-lg border border-destructive/30 bg-card p-8 text-center">
+        <p className="text-sm font-semibold text-destructive">We could not check your posting eligibility.</p>
+        <Button type="button" variant="outline" className="mt-4" onClick={() => eligibility.refetch()}>
+          Try again
+        </Button>
+      </div>
+    )
+  }
+
+  if (!eligibility.data?.canPost) {
+    const status = eligibility.data?.status
+    const title = status === "pending" || status === "in_review"
+      ? "Verification under review"
+      : status === "rejected"
+        ? "Verification needs attention"
+        : status === "profile_required"
+          ? "Complete your seller profile"
+          : "Verify your identity to post"
+    const description = status === "pending" || status === "in_review"
+      ? "You can start posting after an administrator approves your verification."
+      : "Complete seller verification from your profile before creating a listing."
+
+    return (
+      <div className="mx-auto max-w-xl rounded-lg border border-border bg-card p-6 text-center shadow-xs sm:p-8">
+        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <ShieldCheck size={24} weight="duotone" />
+        </div>
+        <h2 className="mt-4 text-lg font-bold text-foreground">{title}</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">{description}</p>
+        <Button className="mt-5" render={<Link href="/account/profile" />}>
+          Open profile verification
+        </Button>
+      </div>
+    )
+  }
 
   if (listingId && listing.isPending) {
     return (

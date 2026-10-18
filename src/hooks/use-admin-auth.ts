@@ -47,7 +47,7 @@ export function useAdminAuth() {
       }
       queryClient.setQueryData(adminKeys.auth(), loggedUser);
       toast.success('Signed in as administrator');
-      router.push('/admin');
+      router.push('/');
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Invalid credentials or login failed';
@@ -63,7 +63,7 @@ export function useAdminAuth() {
       queryClient.setQueryData(adminKeys.auth(), null);
       queryClient.clear();
       toast.success('Signed out successfully');
-      router.push('/admin/login');
+      router.push('/login');
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Failed to sign out';

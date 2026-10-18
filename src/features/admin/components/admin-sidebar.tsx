@@ -42,20 +42,20 @@ function checkSubItemActive(
     return currentSection === targetSection
   }
 
-  if (subHref === "/admin/listings") {
+  if (subHref === "/listings") {
     return (
-      currentPathname === "/admin/listings" ||
-      (currentPathname.startsWith("/admin/listings/") &&
-        !currentPathname.startsWith("/admin/categories") &&
-        !currentPathname.startsWith("/admin/listing-fields"))
+      currentPathname === "/listings" ||
+      (currentPathname.startsWith("/listings/") &&
+        !currentPathname.startsWith("/categories") &&
+        !currentPathname.startsWith("/listing-fields"))
     )
   }
 
-  if (subHref === "/admin/chats") {
+  if (subHref === "/chats") {
     return (
-      currentPathname === "/admin/chats" ||
-      (currentPathname.startsWith("/admin/chats/") &&
-        !currentPathname.startsWith("/admin/reported-chats"))
+      currentPathname === "/chats" ||
+      (currentPathname.startsWith("/chats/") &&
+        !currentPathname.startsWith("/reported-chats"))
     )
   }
 
@@ -63,6 +63,7 @@ function checkSubItemActive(
 }
 
 function AdminSidebarInner() {
+  const marketplaceUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const currentSection = searchParams.get("section")
@@ -108,7 +109,7 @@ function AdminSidebarInner() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="h-16 border-b border-border/70 flex justify-center px-4 bg-card/60 group-data-[collapsible=icon]:px-2">
         <Link
-          href="/admin"
+          href="/"
           onClick={handleLinkClick}
           className="flex items-center justify-center gap-2.5 min-w-0"
           aria-label="Khmer26 Admin Dashboard"
@@ -279,8 +280,8 @@ function AdminSidebarInner() {
                     }
 
                     const isActive =
-                      item.href === "/admin"
-                        ? pathname === "/admin"
+                      item.href === "/"
+                        ? pathname === "/"
                         : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
                     return (
@@ -336,8 +337,8 @@ function AdminSidebarInner() {
           <SidebarMenuItem>
             <SidebarMenuButton
               render={
-                <Link
-                  href="/"
+                <a
+                  href={marketplaceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleLinkClick}

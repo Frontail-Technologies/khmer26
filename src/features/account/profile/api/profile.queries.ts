@@ -5,6 +5,7 @@ import { authKeys, customerKeys, marketplaceKeys } from "@/lib/query/keys"
 import {
   getAccountProfile,
   getMyVerification,
+  getPostingEligibility,
   saveAccountProfile,
   submitVerification,
   type SaveProfileInput,
@@ -30,6 +31,7 @@ export function useSaveAccountProfile(profileId: string | null) {
         queryClient.invalidateQueries({ queryKey: authKeys.session() }),
         queryClient.invalidateQueries({ queryKey: marketplaceKeys.sellers.all }),
         queryClient.invalidateQueries({ queryKey: customerKeys.verification }),
+        queryClient.invalidateQueries({ queryKey: customerKeys.postingEligibility }),
       ])
     },
   })
@@ -44,10 +46,23 @@ export function useMyVerification(enabled: boolean) {
   })
 }
 
+export function usePostingEligibility() {
+  return useQuery({
+    queryKey: customerKeys.postingEligibility,
+    queryFn: getPostingEligibility,
+    staleTime: 30_000,
+  })
+}
+
 export function useSubmitVerification() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: submitVerification,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: customerKeys.verification }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: customerKeys.verification }),
+        queryClient.invalidateQueries({ queryKey: customerKeys.postingEligibility }),
+      ])
+    },
   })
 }

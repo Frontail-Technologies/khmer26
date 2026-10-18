@@ -10,10 +10,11 @@ import { AppFooter } from "@/components/layout/AppFooter"
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation"
 import { SEO } from "@/lib/constants/site"
 import { cn } from "@/lib/utils"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { dehydrate, QueryClient } from "@tanstack/react-query"
 import { authKeys } from "@/lib/query/keys"
 import { getServerCurrentUser } from "@/features/auth/api/auth.server"
+import { isAdminHostname, normalizeHostname } from "@/lib/admin-host"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -64,11 +65,16 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [locale, messages, cookieStore] = await Promise.all([
+  const [locale, messages, cookieStore, headerStore] = await Promise.all([
     getLocale(),
     getMessages(),
     cookies(),
+    headers(),
   ])
+  const requestHostname = normalizeHostname(
+    headerStore.get("x-forwarded-host") || headerStore.get("host")
+  )
+  const isAdminRequest = isAdminHostname(requestHostname)
   const queryClient = new QueryClient()
   const hasAccessCookie = cookieStore.has("k26_access_dev") || cookieStore.has("__Host-k26_access")
   const hasSessionCookie = cookieStore.has("k26_session_dev") || cookieStore.has("__Secure-k26_session")
@@ -100,10 +106,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AppProviders dehydratedState={dehydratedState}>
-            <AppHeader />
-            <main className="flex-1" suppressHydrationWarning>{children}</main>
-            <AppFooter />
-            <MobileBottomNavigation />
+            {isAdminRequest ? (
+              children
+            ) : (
+              <>
+                <AppHeader />
+                <main className="flex-1" suppressHydrationWarning>{children}</main>
+                <AppFooter />
+                <MobileBottomNavigation />
+              </>
+            )}
           </AppProviders>
         </NextIntlClientProvider>
       </body>

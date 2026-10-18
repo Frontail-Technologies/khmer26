@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { apiClient } from "@/lib/api/client"
-import { getAccountProfile, getMyVerification, saveAccountProfile, submitVerification } from "./profile.api"
+import { getAccountProfile, getMyVerification, getPostingEligibility, saveAccountProfile, submitVerification } from "./profile.api"
 
 vi.mock("@/lib/api/client", () => ({
   apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn() },
@@ -63,10 +63,13 @@ describe("account profile API", () => {
 
   it("uses the customer verification routes", async () => {
     get.mockResolvedValueOnce({ success: true, data: { status: "not_submitted", isVerified: false, request: null } })
+    get.mockResolvedValueOnce({ success: true, data: { canPost: false, status: "not_submitted" } })
     post.mockResolvedValueOnce({ success: true, data: {} })
     await getMyVerification()
+    await expect(getPostingEligibility()).resolves.toEqual({ canPost: false, status: "not_submitted" })
     await submitVerification({ verificationType: "individual", legalName: "Dara Example", mediaIds: ["media-1"] })
     expect(get).toHaveBeenCalledWith("/sellers/me/verification")
+    expect(get).toHaveBeenCalledWith("/sellers/me/posting-eligibility")
     expect(post).toHaveBeenCalledWith("/sellers/me/verification", {
       verificationType: "individual",
       legalName: "Dara Example",
