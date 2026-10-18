@@ -49,16 +49,19 @@ function SellerRow({ seller }: { seller: SellerSearchResult }) {
   )
 }
 
-function Group({ id, title, sellers }: { id: string; title: string; sellers: SellerSearchResult[] }) {
-  if (sellers.length === 0) return null
+function Group({ id, title, sellers, empty }: { id: string; title: string; sellers: SellerSearchResult[]; empty: string }) {
   return (
     <section id={id} aria-label={title} className="scroll-mt-32 overflow-hidden rounded-xl border border-border/80 bg-card shadow-2xs">
       <h2 className="border-b border-border/70 px-4 py-3 text-base font-bold text-foreground">{title}</h2>
+      {sellers.length === 0 ? (
+        <p className="px-4 py-5 text-sm text-muted-foreground">{empty}</p>
+      ) : (
       <ul>
         {sellers.map((seller) => (
           <SellerRow key={seller.id} seller={seller} />
         ))}
       </ul>
+      )}
     </section>
   )
 }
@@ -68,13 +71,11 @@ export function SellerResults({ q }: { q: string }) {
   const t = useTranslations("ui.searchBar")
   const users = useSellerGroup(q, "user")
   const companies = useSellerGroup(q, "company")
-  if (users.length === 0 && companies.length === 0) return null
-
   const tabs = [
-    users.length > 0 && { href: "#users", label: t("users") },
-    companies.length > 0 && { href: "#companies", label: t("companies") },
+    { href: "#users", label: t("users") },
+    { href: "#companies", label: t("companies") },
     { href: "#posts", label: t("posts") },
-  ].filter(Boolean) as { href: string; label: string }[]
+  ]
 
   return (
     <div className="mb-4 space-y-3">
@@ -89,8 +90,8 @@ export function SellerResults({ q }: { q: string }) {
           </a>
         ))}
       </nav>
-      <Group id="users" title={t("users")} sellers={users} />
-      <Group id="companies" title={t("companies")} sellers={companies} />
+      <Group id="users" title={t("users")} sellers={users} empty={t("noUsers")} />
+      <Group id="companies" title={t("companies")} sellers={companies} empty={t("noCompanies")} />
     </div>
   )
 }

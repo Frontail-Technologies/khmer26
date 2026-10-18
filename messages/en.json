@@ -1125,7 +1125,9 @@
       "users": "Users",
       "companies": "Companies",
       "posts": "Posts",
-      "noPosts": "No posts match your search"
+      "noPosts": "No posts match your search",
+      "noUsers": "No users found",
+      "noCompanies": "No companies found"
     }
   },
   "meta": {
