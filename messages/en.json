@@ -1121,7 +1121,11 @@
     },
     "searchBar": {
       "sellers": "Sellers",
-      "adsCount": "{count} ads"
+      "adsCount": "{count} ads",
+      "users": "Users",
+      "companies": "Companies",
+      "posts": "Posts",
+      "noPosts": "No posts match your search"
     }
   },
   "meta": {

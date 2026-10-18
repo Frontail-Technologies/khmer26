@@ -12,6 +12,7 @@ import { carryFiltersToCategory } from "../lib/carry-filters"
 import type { CategoryNavData } from "./filter-panel"
 import { ResultsHeader } from "./results-header"
 import { SearchResultsView } from "./search-results-view"
+import { SellerResults } from "./seller-results"
 import { useLocalizedName } from "@/lib/i18n/localized"
 import { useTranslations } from "next-intl"
 
@@ -57,11 +58,14 @@ export function SearchPageContent() {
   return (
     <>
       <ResultsHeader title={title} totalCount={state.total} breadcrumbs={breadcrumbs} />
-      <SearchResultsView
-        state={state}
-        categoryNav={categoryNav}
-        categoryChipLabel={filters.category ? (node ? getLocalizedName(node) : filters.category) : undefined}
-      />
+      {filters.q && <SellerResults q={filters.q} />}
+      <div id="posts" className="scroll-mt-32">
+        <SearchResultsView
+          state={state}
+          categoryNav={categoryNav}
+          categoryChipLabel={filters.category ? (node ? getLocalizedName(node) : filters.category) : undefined}
+        />
+      </div>
     </>
   )
 }

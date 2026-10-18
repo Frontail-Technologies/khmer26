@@ -83,14 +83,18 @@ export interface SellerCategoryFacet {
 export interface SellerSearchResult {
   id: string;
   shopName: string;
+  username: string | null;
   sellerType: SellerType;
   avatarR2Key: string | null;
   isVerified: boolean;
   listingCount: number;
 }
 
-export async function searchSellers(q: string): Promise<SellerSearchResult[]> {
-  const res = await apiClient.get<SellerSearchResult[]>('/sellers/search', { params: { q } });
+export async function searchSellers(
+  q: string,
+  options: { group?: 'user' | 'company'; limit?: number } = {}
+): Promise<SellerSearchResult[]> {
+  const res = await apiClient.get<SellerSearchResult[]>('/sellers/search', { params: { q, ...options } });
   return res.data;
 }
 

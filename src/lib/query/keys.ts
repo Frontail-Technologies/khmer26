@@ -25,7 +25,7 @@ export const marketplaceKeys = {
     all: ['marketplace', 'search'] as const,
     results: (params: Record<string, unknown>) =>
       [...marketplaceKeys.search.all, 'results', params] as const,
-    suggestions: (params: { q: string; category?: string; kind?: 'sellers' }) =>
+    suggestions: (params: { q: string; category?: string; kind?: 'sellers'; group?: 'user' | 'company' }) =>
       [...marketplaceKeys.search.all, 'suggestions', params] as const,
   },
 
