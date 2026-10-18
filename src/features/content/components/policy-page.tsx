@@ -24,7 +24,7 @@ export function PolicyPage({ page: storedPage }: { page: ContentPage }) {
   return (
     <main className="border-t border-border/70 bg-background">
       <Container className="py-8 sm:py-12 lg:py-16">
-        <header className="max-w-3xl border-b border-border pb-8">
+        <header className="border-b border-border pb-8">
           <p className="text-xs font-semibold uppercase text-primary">{page.eyebrow}</p>
           <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{page.title}</h1>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export function PolicyPage({ page: storedPage }: { page: ContentPage }) {
         <div className="grid gap-10 pt-8 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-14">
           <PolicySectionNav title={page.title} sections={page.sections} />
 
-          <article className="min-w-0 max-w-3xl space-y-10">
+          <article className="min-w-0 space-y-10">
             {page.sections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-24">
                 <h2 className="text-xl font-semibold text-foreground sm:text-2xl">{section.title}</h2>

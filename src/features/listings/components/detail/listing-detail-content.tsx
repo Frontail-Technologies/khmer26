@@ -119,7 +119,7 @@ export function ListingDetailContent({ id }: { id: string }) {
 
   return (
     <div className="min-h-dvh bg-background pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-12">
-      <Container className="max-w-6xl py-0 sm:py-4">
+      <Container className="py-0 sm:py-4">
         <ListingBreadcrumbs categoryPath={listing.category.breadcrumb} title={listing.title} />
 
         <div className="mt-0 grid grid-cols-1 items-start gap-2.5 sm:mt-2 sm:gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:gap-4">
