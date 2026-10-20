@@ -196,6 +196,11 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
     }
     render()
 
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", render)
+      return () => window.removeEventListener("resize", render)
+    }
+
     const observer = new ResizeObserver(render)
     observer.observe(wrap)
     return () => observer.disconnect()

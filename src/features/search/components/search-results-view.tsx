@@ -74,6 +74,8 @@ export function SearchResultsView({
   useEffect(() => {
     const target = observerTargetRef.current
     if (!target || !hasNextPage) return
+    // Older browsers can still paginate with the visible Load more button.
+    if (typeof IntersectionObserver === "undefined") return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting && !isFetchingNextPage) fetchNextPage()
