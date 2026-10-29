@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import {
   Lock,
   EnvelopeSimple,
@@ -17,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { useAdminAuth } from "@/hooks/use-admin-auth"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 export function AdminLoginForm() {
   const marketplaceUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
@@ -49,15 +49,7 @@ export function AdminLoginForm() {
         <CardHeader className="p-5 sm:p-7 pb-4 text-center border-b border-border/60 bg-muted/15">
           <div className="flex justify-center mb-2.5">
             <a href={marketplaceUrl} className="inline-flex items-center gap-2">
-              <Image
-                src="/images/logo.png"
-                alt="offerupkh"
-                width={110}
-                height={28}
-                priority
-                style={{ width: "auto" }}
-                className="h-6 w-auto object-contain"
-              />
+              <BrandLogo className="h-12" priority />
             </a>
           </div>
           <CardTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">

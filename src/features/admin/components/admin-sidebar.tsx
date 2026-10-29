@@ -3,7 +3,6 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import Image from "next/image"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import {
   Sidebar,
@@ -22,6 +21,7 @@ import { ADMIN_NAV_CONFIG, isNavItemActive } from "../navigation/admin-navigatio
 import { useAdminQueueCounts } from "../navigation/use-admin-queue-counts"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 /** Flat, short admin menu: daily work first, money second, everything occasional under Setup. */
 function AdminSidebarInner() {
@@ -43,15 +43,7 @@ function AdminSidebarInner() {
           className="flex items-center justify-center gap-2.5 min-w-0"
           aria-label="offerupkh Admin Dashboard"
         >
-          <Image
-            src="/images/logo.png"
-            alt="offerupkh"
-            width={100}
-            height={26}
-            priority
-            style={{ width: "auto" }}
-            className="h-6 w-auto object-contain group-data-[collapsible=icon]:hidden"
-          />
+          <BrandLogo className="h-9" priority />
           <span
             aria-hidden="true"
             className="hidden size-8 items-center justify-center rounded-md bg-primary text-2xs font-extrabold text-primary-foreground group-data-[collapsible=icon]:inline-flex"

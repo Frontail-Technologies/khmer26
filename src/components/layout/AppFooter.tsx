@@ -6,10 +6,10 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 import { Separator } from "@/components/ui/separator"
 import { FOOTER_NAV } from "@/lib/constants/navigation"
 import { SITE } from "@/lib/constants/site"
-import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { shouldShowAppFooter } from "@/lib/constants/route-policy"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 export function AppFooter() {
   const tGenerated = useTranslations("generated")
@@ -32,14 +32,7 @@ export function AppFooter() {
                 className="inline-block"
                 aria-label={tShell("homeLabel", { site: SITE.name })}
               >
-                <Image
-                  src="/images/logo.png"
-                  alt={SITE.name}
-                  width={120}
-                  height={30}
-                  style={{ width: "auto" }}
-                  className="h-7 w-auto object-contain"
-                />
+                <BrandLogo className="h-11" />
               </Link>
               <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
                 {tShell("tagline", { tagline: SITE.tagline })}

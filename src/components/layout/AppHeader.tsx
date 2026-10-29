@@ -25,7 +25,6 @@ import {
   MagnifyingGlass,
   Plus,
 } from "@phosphor-icons/react"
-import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
@@ -36,6 +35,7 @@ import { ThemeToggle } from "./ThemeToggle"
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 import { NotificationBell } from "@/features/notifications/components/notification-bell"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 export function AppHeader() {
   const tGenerated = useTranslations("generated")
@@ -74,15 +74,7 @@ export function AppHeader() {
           className="flex shrink-0 items-center min-w-0"
           aria-label={tShell("homeLabel", { site: SITE.name })}
         >
-          <Image
-            src="/images/logo.png"
-            alt={SITE.name}
-            width={120}
-            height={32}
-            priority
-            style={{ width: "auto" }}
-            className="h-6 sm:h-7 md:h-8 max-h-8 w-auto object-contain"
-          />
+          <BrandLogo className="h-9 sm:h-10 md:h-11" priority />
         </Link>
 
         <div className="hidden min-w-0 flex-1 items-center justify-center px-2 md:flex">
@@ -210,14 +202,7 @@ export function AppHeader() {
             <SheetContent side="left" className="w-72 p-0">
               <SheetHeader className="border-b border-border px-4 py-4">
                 <SheetTitle className="flex items-center text-left">
-                  <Image
-                    src="/images/logo.png"
-                    alt={SITE.name}
-                    width={110}
-                    height={30}
-                    style={{ width: "auto" }}
-                    className="h-7 w-auto object-contain"
-                  />
+                  <BrandLogo className="h-10" />
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col py-2">

@@ -2,11 +2,11 @@ import { getTranslations } from "next-intl/server"
 import { LocalizedText } from "@/components/i18n/localized-text"
 import type { Metadata } from "next"
 import Link from "next/link"
-import Image from "next/image"
 import { X } from "@phosphor-icons/react/dist/ssr"
 import { Container } from "@/components/layout/Container"
 import { PostAdWizard } from "@/features/post-ad/components/post-ad-wizard"
 import { Button } from "@/components/ui/button"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta.postAd")
@@ -29,14 +29,7 @@ export default async function PostAdPage({ searchParams }: PostAdPageProps) {
         <Container>
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center shrink-0" aria-label="offerupkh home">
-              <Image
-                src="/images/logo.png"
-                alt="offerupkh"
-                width={115}
-                height={30}
-                priority
-                className="h-7 w-auto object-contain"
-              />
+              <BrandLogo className="h-10" priority />
             </Link>
 
             <Button
