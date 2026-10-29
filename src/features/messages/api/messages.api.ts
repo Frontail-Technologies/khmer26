@@ -66,7 +66,7 @@ function toConversation(raw: RawConversation): Conversation {
     participant: {
       id: participant?.userId ?? "",
       slug: participant?.sellerProfileId ?? participant?.userId ?? "",
-      name: participant?.shopName ?? "Khmer26 User",
+      name: participant?.shopName ?? "offerupkh User",
       avatar: getMediaUrl(participant?.avatarR2Key) ?? "",
       verified: participant?.isVerified ?? false,
       role: raw.role === "buyer" ? "seller" : "buyer",

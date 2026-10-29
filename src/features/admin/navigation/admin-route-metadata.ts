@@ -74,7 +74,7 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   },
   "/admin/settings": {
     title: "Settings",
-    subtitle: "Manage Khmer26 marketplace settings.",
+    subtitle: "Manage offerupkh marketplace settings.",
   },
   "/admin/audit-log": {
     title: "Audit Log",
@@ -166,6 +166,6 @@ export function getAdminRouteInfo(pathname: string): AdminRouteInfo {
 
   return {
     title: formatted,
-    subtitle: "Khmer26 Administration Portal",
+    subtitle: "offerupkh Administration Portal",
   }
 }

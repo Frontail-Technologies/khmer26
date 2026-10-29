@@ -5,7 +5,7 @@ import { CategoriesExplorer } from "@/features/categories/components/categories-
 export const metadata: Metadata = {
   title: "All Categories — Browse Marketplace Classifieds in Cambodia",
   description:
-    "Explore all classified categories on Khmer26 and find what you need across Cambodia.",
+    "Explore all classified categories on offerupkh and find what you need across Cambodia.",
 }
 
 export default function CategoriesPage() {

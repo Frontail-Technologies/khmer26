@@ -13,7 +13,7 @@ import { AdminPlatformDistributionCard } from "@/features/admin/dashboard/compon
 
 export const metadata: Metadata = {
   title: "Dashboard Overview",
-  description: "Khmer26 Marketplace Administrator Operations and Overview.",
+  description: "offerupkh Marketplace Administrator Operations and Overview.",
 }
 
 export default function AdminDashboardPage() {

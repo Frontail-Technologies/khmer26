@@ -17,7 +17,7 @@ describe('<AdminSidebar />', () => {
       </SidebarProvider>
     );
 
-    expect(screen.getByLabelText(/khmer26 admin dashboard/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/offerupkh admin dashboard/i)).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Listings')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();

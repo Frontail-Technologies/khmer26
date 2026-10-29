@@ -4,8 +4,8 @@ import { AdminShell } from "@/features/admin/components/admin-shell"
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin Portal — Khmer26",
-    template: "%s | Khmer26 Admin",
+    default: "Admin Portal — offerupkh",
+    template: "%s | offerupkh Admin",
   },
   robots: {
     index: false,

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
   const meta = await lookupSellerMeta(slug)
 
   if (!meta) {
-    return { title: "Seller — Khmer26", robots: { index: false, follow: false } }
+    return { title: "Seller — offerupkh", robots: { index: false, follow: false } }
   }
 
   return {

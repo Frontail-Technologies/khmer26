@@ -1,5 +1,5 @@
 export const SITE = {
-  name: "Khmer26",
+  name: "offerupkh",
   tagline: "Cambodia's Modern Marketplace",
   description:
     "Buy and sell anything in Cambodia — vehicles, property, electronics, jobs, and more. Fast, simple, and trusted.",
@@ -10,8 +10,8 @@ export const SITE = {
 } as const
 
 export const SEO = {
-  titleTemplate: "%s | Khmer26",
-  defaultTitle: "Khmer26 — Cambodia's Modern Marketplace",
+  titleTemplate: "%s | offerupkh",
+  defaultTitle: "offerupkh — Cambodia's Modern Marketplace",
   defaultDescription: SITE.description,
 } as const
 

@@ -29,16 +29,16 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   if (lookup.status !== "found") {
     return {
-      title: locale === "km" ? "ប្រភេទទំនិញនៅកម្ពុជា — Khmer26" : "Category in Cambodia — Khmer26",
-      description: locale === "km" ? "ស្វែងរកការផ្សាយពាណិជ្ជកម្មដែលបានផ្ទៀងផ្ទាត់នៅកម្ពុជាលើ Khmer26។" : "Browse verified classified listings in Cambodia on Khmer26.",
+      title: locale === "km" ? "ប្រភេទទំនិញនៅកម្ពុជា — offerupkh" : "Category in Cambodia — offerupkh",
+      description: locale === "km" ? "ស្វែងរកការផ្សាយពាណិជ្ជកម្មដែលបានផ្ទៀងផ្ទាត់នៅកម្ពុជាលើ offerupkh។" : "Browse verified classified listings in Cambodia on offerupkh.",
     }
   }
 
   const categoryName = locale === "km" && lookup.nameKm?.trim() ? lookup.nameKm : lookup.nameEn
-  const title = locale === "km" ? `${categoryName} នៅកម្ពុជា — Khmer26` : `${categoryName} in Cambodia — Khmer26`
+  const title = locale === "km" ? `${categoryName} នៅកម្ពុជា — offerupkh` : `${categoryName} in Cambodia — offerupkh`
   const description = locale === "km"
-    ? `ស្វែងរកការផ្សាយ ${categoryName} ដែលបានផ្ទៀងផ្ទាត់ពីអ្នកលក់ដែលអាចទុកចិត្តបាននៅកម្ពុជាលើ Khmer26។`
-    : `Find verified ${categoryName} listings from trusted sellers across Cambodia on Khmer26.`
+    ? `ស្វែងរកការផ្សាយ ${categoryName} ដែលបានផ្ទៀងផ្ទាត់ពីអ្នកលក់ដែលអាចទុកចិត្តបាននៅកម្ពុជាលើ offerupkh។`
+    : `Find verified ${categoryName} listings from trusted sellers across Cambodia on offerupkh.`
   return { title, description, openGraph: { title, description, type: "website" } }
 }
 

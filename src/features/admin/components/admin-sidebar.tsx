@@ -112,11 +112,11 @@ function AdminSidebarInner() {
           href="/"
           onClick={handleLinkClick}
           className="flex items-center justify-center gap-2.5 min-w-0"
-          aria-label="Khmer26 Admin Dashboard"
+          aria-label="offerupkh Admin Dashboard"
         >
           <Image
             src="/images/logo.png"
-            alt="Khmer26"
+            alt="offerupkh"
             width={100}
             height={26}
             priority

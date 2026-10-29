@@ -240,7 +240,7 @@
     "contact": "Contact",
     "contactFeedback": "Contact & Feedback",
     "contactInformation": "Contact Information",
-    "contactKhmer26": "Contact Khmer26",
+    "contactKhmer26": "Contact offerupkh",
     "contactPhones": "Contact Phones",
     "contactPreferences": "Contact Preferences",
     "contactUs": "Contact Us",
@@ -270,7 +270,7 @@
     "createANewPassword": "Create a new password",
     "createAPassword8Characters": "Create a password (8+ characters)",
     "createProfile": "Create profile",
-    "createYourKhmer26Account": "Create your Khmer26 account",
+    "createYourKhmer26Account": "Create your offerupkh account",
     "creatingAccount": "Creating account...",
     "currency": "Currency",
     "currentSession": "Current session",
@@ -383,7 +383,7 @@
     "keepTheseFiltersAndRunTheSameSearchAgain": "Keep these filters and run the same search again from your account.",
     "khanChamkarmonPhnomPenhCambodia": "Khan Chamkarmon, Phnom Penh, Cambodia",
     "khmer": "ភាសាខ្មែរ (Khmer)",
-    "khmer26Support": "Khmer26 Support",
+    "khmer26Support": "offerupkh Support",
     "lastPage": "Last page",
     "lastPayment": "Last Payment",
     "legal": "Legal",
@@ -676,7 +676,7 @@
     "sellerPlans": "Seller Plans",
     "sellerProfile": "Seller profile",
     "sellerWizard": "Seller Wizard",
-    "sellOnKhmer26": "Sell on Khmer26",
+    "sellOnKhmer26": "Sell on offerupkh",
     "sendAMessage": "Send a Message",
     "sendAnotherMessage": "Send Another Message",
     "sendCounter": "Send counter",
@@ -705,7 +705,7 @@
     "signIn_f8492c": "Sign In",
     "signingIn": "Signing in...",
     "signingOut": "Signing out...",
-    "signInToKhmer26": "Sign in to Khmer26",
+    "signInToKhmer26": "Sign in to offerupkh",
     "signOut": "Sign Out",
     "signOutAction": "Sign out",
     "signOutOtherSessions": "Sign out other sessions",
@@ -743,8 +743,8 @@
     "termsOfService": "Terms of Service",
     "termsThatNeedModeratorReview": "Terms that need moderator review",
     "thanksYourReviewHasBeenPosted": "Thanks — your review has been posted.",
-    "thankYouForHelpingKeepKhmer26Safe": "Thank you for helping keep Khmer26 safe.",
-    "thankYouForReachingOutToKhmer26OurTeam": "Thank you for reaching out to Khmer26. Our team has received your note in the support inbox and will review it shortly.",
+    "thankYouForHelpingKeepKhmer26Safe": "Thank you for helping keep offerupkh safe.",
+    "thankYouForReachingOutToKhmer26OurTeam": "Thank you for reaching out to offerupkh. Our team has received your note in the support inbox and will review it shortly.",
     "thankYouOurModerationTeamWillReviewThisListing": "Thank you. Our moderation team will review this listing.",
     "thankYouOurTeamWillReviewThisSeller": "Thank you. Our team will review this seller.",
     "thePageOrListingYouAreLookingForHas": "The page or listing you are looking for has been removed, renamed, or is temporarily unavailable.",
@@ -775,7 +775,7 @@
     "unread": "Unread",
     "unverified": "Unverified",
     "updatePassword": "Update password",
-    "updatesFromKhmer26WillAppearHere": "Updates from Khmer26 will appear here.",
+    "updatesFromKhmer26WillAppearHere": "Updates from offerupkh will appear here.",
     "updating": "Updating...",
     "updatingPassword": "Updating password...",
     "uploadClearImages": "Upload clear images",
@@ -868,7 +868,7 @@
     "verificationSubmittedAt": "Submitted {date}. We will notify you when review is complete.",
     "profileComplete": "Profile {percent}% complete",
     "basedOnReviews": "Based on {count} reviews",
-    "reportSellerNamed": "Help keep the Khmer26 community safe. Select the reason you are reporting ?{name}?.",
+    "reportSellerNamed": "Help keep the offerupkh community safe. Select the reason you are reporting ?{name}?.",
     "memberSince": "Member since {date}",
     "allCount": "All ({count})",
     "showingListings": "Showing {shown} of {total} listings",
@@ -988,7 +988,7 @@
     "postAd": {
       "contactChatTitle": "In-App Chat Only",
       "contactChatBadge": "Recommended",
-      "contactChatDescription": "Fast, safe, and spam-free communication within Khmer26 messaging.",
+      "contactChatDescription": "Fast, safe, and spam-free communication within offerupkh messaging.",
       "contactBothTitle": "Chat & Phone Call",
       "contactBothDescription": "Receive instant chat messages plus direct phone calls from buyers.",
       "contactPhoneTitle": "Phone Call Only",
@@ -1094,14 +1094,14 @@
       "backToVerification": "Back to verification",
       "eyebrowRecovery": "ACCOUNT RECOVERY",
       "eyebrowWelcomeBack": "WELCOME BACK",
-      "eyebrowJoin": "JOIN KHMER26",
+      "eyebrowJoin": "JOIN OFFERUPKH",
       "eyebrowEmailVerification": "EMAIL VERIFICATION",
-      "subtitleForgot": "Enter the email address or phone number associated with your Khmer26 account.",
+      "subtitleForgot": "Enter the email address or phone number associated with your offerupkh account.",
       "subtitleForgotVerify": "We sent a verification code to the selected email address or phone number.",
       "subtitleLogin": "Manage your ads, chat with buyers, and make the most of your marketplace experience.",
       "subtitleRegister": "Join thousands of buyers and sellers across Cambodia. Post ads, save your favorites, and get more opportunities.",
       "subtitleRegisterVerify": "We sent a 6-digit verification code to your email address. Enter it below to complete your registration.",
-      "subtitleReset": "Choose a new password for your Khmer26 account.",
+      "subtitleReset": "Choose a new password for your offerupkh account.",
       "backToSignInAction": "Back to Sign In"
     },
     "categoryPage": {
@@ -1141,7 +1141,7 @@
   "meta": {
     "forgotPassword": {
       "title": "Forgot Password",
-      "description": "Recover your Khmer26 account password via email or phone number."
+      "description": "Recover your offerupkh account password via email or phone number."
     },
     "forgotPasswordVerify": {
       "title": "Verify Code",
@@ -1149,11 +1149,11 @@
     },
     "login": {
       "title": "Sign In",
-      "description": "Sign in to your Khmer26 account to manage ads, chat with buyers, and explore listings."
+      "description": "Sign in to your offerupkh account to manage ads, chat with buyers, and explore listings."
     },
     "register": {
       "title": "Create Account",
-      "description": "Create your free Khmer26 account to start posting ads and connecting with buyers across Cambodia."
+      "description": "Create your free offerupkh account to start posting ads and connecting with buyers across Cambodia."
     },
     "registerVerify": {
       "title": "Verify Your Email",
@@ -1161,23 +1161,23 @@
     },
     "resetPassword": {
       "title": "Reset Password",
-      "description": "Create a new password for your Khmer26 account."
+      "description": "Create a new password for your offerupkh account."
     },
     "favorites": {
       "title": "Saved Listings",
-      "description": "View and manage your saved marketplace listings on Khmer26"
+      "description": "View and manage your saved marketplace listings on offerupkh"
     },
     "myListings": {
       "title": "My Listings",
-      "description": "Manage your marketplace listings on Khmer26"
+      "description": "Manage your marketplace listings on offerupkh"
     },
     "notifications": {
       "title": "Notifications",
-      "description": "View updates about your Khmer26 account and marketplace activity"
+      "description": "View updates about your offerupkh account and marketplace activity"
     },
     "payments": {
       "title": "Payments",
-      "description": "View transaction receipts, invoices, and billing history on Khmer26"
+      "description": "View transaction receipts, invoices, and billing history on offerupkh"
     },
     "profile": {
       "title": "Profile",
@@ -1185,46 +1185,46 @@
     },
     "savedSearches": {
       "title": "Saved Searches",
-      "description": "Manage your saved Khmer26 marketplace searches."
+      "description": "Manage your saved offerupkh marketplace searches."
     },
     "settings": {
       "title": "Settings",
-      "description": "Manage notification, privacy, theme, and security settings on Khmer26"
+      "description": "Manage notification, privacy, theme, and security settings on offerupkh"
     },
     "subscription": {
       "title": "Subscription",
-      "description": "Manage your seller subscription and membership plan on Khmer26"
+      "description": "Manage your seller subscription and membership plan on offerupkh"
     },
     "checkout": {
       "title": "Checkout"
     },
     "messages": {
       "title": "Messages",
-      "description": "Marketplace buyer and seller messages on Khmer26"
+      "description": "Marketplace buyer and seller messages on offerupkh"
     },
     "conversation": {
       "title": "Conversation",
-      "description": "Marketplace chat on Khmer26"
+      "description": "Marketplace chat on offerupkh"
     },
     "postAd": {
-      "title": "Post an Ad — Khmer26",
-      "description": "Create and publish your marketplace listing in minutes on Khmer26."
+      "title": "Post an Ad — offerupkh",
+      "description": "Create and publish your marketplace listing in minutes on offerupkh."
     },
     "postingRules": {
       "title": "Posting Rules",
-      "description": "Rules for publishing safe, accurate listings on Khmer26."
+      "description": "Rules for publishing safe, accurate listings on offerupkh."
     },
     "pricing": {
       "title": "Pricing & Subscription Plans",
-      "description": "Choose a plan to post more listings and grow your business on Khmer26."
+      "description": "Choose a plan to post more listings and grow your business on offerupkh."
     },
     "privacy": {
       "title": "Privacy Policy",
-      "description": "How Khmer26 collects, uses, shares, and protects personal information."
+      "description": "How offerupkh collects, uses, shares, and protects personal information."
     },
     "terms": {
       "title": "Terms of Service",
-      "description": "The terms that apply when using the Khmer26 marketplace."
+      "description": "The terms that apply when using the offerupkh marketplace."
     },
     "search": {
       "title": "Search Marketplace Listings",

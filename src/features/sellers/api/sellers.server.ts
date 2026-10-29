@@ -21,8 +21,8 @@ export async function lookupSellerMeta(id: string): Promise<SellerMeta | null> {
     const seller = json.data?.profile;
     if (!seller) return null;
     return {
-      title: `${seller.shopName} — Khmer26 Seller`,
-      description: (seller.bio?.trim() || `${seller.shopName} on Khmer26`).slice(0, 160),
+      title: `${seller.shopName} — offerupkh Seller`,
+      description: (seller.bio?.trim() || `${seller.shopName} on offerupkh`).slice(0, 160),
       imageUrl: getMediaUrl(seller.avatarR2Key),
     };
   } catch {

@@ -28,10 +28,10 @@ export default async function PostAdPage({ searchParams }: PostAdPageProps) {
       <header className="sticky top-0 z-40 border-b border-border/80 bg-card/95 backdrop-blur-md py-3 sm:py-3.5">
         <Container>
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0" aria-label="Khmer26 home">
+            <Link href="/" className="flex items-center shrink-0" aria-label="offerupkh home">
               <Image
                 src="/images/logo.png"
-                alt="Khmer26"
+                alt="offerupkh"
                 width={115}
                 height={30}
                 priority

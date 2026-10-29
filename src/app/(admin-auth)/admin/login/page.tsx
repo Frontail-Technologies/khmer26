@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { AdminLoginForm } from "@/features/admin/auth/components/admin-login-form"
 
 export const metadata: Metadata = {
-  title: "Admin Portal Sign In — Khmer26",
-  description: "Secure internal management login for Khmer26 marketplace administrators.",
+  title: "Admin Portal Sign In — offerupkh",
+  description: "Secure internal management login for offerupkh marketplace administrators.",
   robots: {
     index: false,
     follow: false,

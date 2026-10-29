@@ -90,7 +90,7 @@ export function ChatHeader({
             </h2>
           </div>
           <p className="text-xxs text-muted-foreground truncate">
-            {participant.responseTime || "Active on Khmer26"}
+            {participant.responseTime || "Active on offerupkh"}
           </p>
         </div>
       </div>

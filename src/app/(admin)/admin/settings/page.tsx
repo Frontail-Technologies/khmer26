@@ -4,7 +4,7 @@ import { SettingsWorkspace } from "@/features/admin/settings/components/settings
 
 export const metadata: Metadata = {
   title: "Settings",
-  description: "Manage Khmer26 marketplace settings.",
+  description: "Manage offerupkh marketplace settings.",
 }
 
 export default function AdminSettingsPage() {

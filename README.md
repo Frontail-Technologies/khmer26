@@ -1,6 +1,6 @@
-# Khmer26 web
+# offerupkh web
 
-Next.js 16 storefront and admin panel for the Khmer26 marketplace. See `../../docs/ARCHITECTURE.md` for how it fits together.
+Next.js 16 storefront and admin panel for the offerupkh marketplace. See `../../docs/ARCHITECTURE.md` for how it fits together.
 
 ```bash
 pnpm install

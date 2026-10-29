@@ -33,7 +33,7 @@ describe('<AdminLoginForm />', () => {
 
     expect(screen.queryByRole('button', { name: /fill credentials/i })).toBeNull();
     expect(screen.queryByText(/demo account/i)).toBeNull();
-    expect(container.textContent).not.toMatch(/Admin@Khmer26/);
+    expect(container.textContent).not.toMatch(/Admin@offerupkh/);
     expect(screen.getByLabelText(/^email$/i)).toHaveValue('');
     expect(screen.getByLabelText(/^password$/i)).toHaveValue('');
   });

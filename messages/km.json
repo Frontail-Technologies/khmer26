@@ -240,7 +240,7 @@
     "contact": "ទំនាក់ទំនង",
     "contactFeedback": "ទំនាក់ទំនង & មតិកែលម្អ",
     "contactInformation": "ព័ត៌មានទំនាក់ទំនង",
-    "contactKhmer26": "ទាក់ទង Khmer26",
+    "contactKhmer26": "ទាក់ទង offerupkh",
     "contactPhones": "ទំនាក់ទំនងទូរស័ព្ទ",
     "contactPreferences": "ចំណូលចិត្តទំនាក់ទំនង",
     "contactUs": "ទាក់ទងមកយើងខ្ញុំ",
@@ -270,7 +270,7 @@
     "createANewPassword": "បង្កើតពាក្យសម្ងាត់ថ្មី។",
     "createAPassword8Characters": "បង្កើតពាក្យសម្ងាត់ (8+ តួអក្សរ)",
     "createProfile": "បង្កើតទម្រង់",
-    "createYourKhmer26Account": "បង្កើតគណនី Khmer26 របស់អ្នក។",
+    "createYourKhmer26Account": "បង្កើតគណនី offerupkh របស់អ្នក។",
     "creatingAccount": "កំពុង​បង្កើត​គណនី...",
     "currency": "រូបិយប័ណ្ណ",
     "currentSession": "សម័យបច្ចុប្បន្ន",
@@ -383,7 +383,7 @@
     "keepTheseFiltersAndRunTheSameSearchAgain": "រក្សាតម្រងទាំងនេះ ហើយដំណើរការការស្វែងរកដូចគ្នាម្តងទៀតពីគណនីរបស់អ្នក។",
     "khanChamkarmonPhnomPenhCambodia": "ខណ្ឌចំការមន រាជធានីភ្នំពេញ ប្រទេសកម្ពុជា",
     "khmer": "ភាសាខ្មែរ (ភាសាខ្មែរ)",
-    "khmer26Support": "ការគាំទ្រ Khmer26",
+    "khmer26Support": "ការគាំទ្រ offerupkh",
     "lastPage": "ទំព័រចុងក្រោយ",
     "lastPayment": "ការទូទាត់ចុងក្រោយ",
     "legal": "ផ្លូវច្បាប់",
@@ -676,7 +676,7 @@
     "sellerPlans": "ផែនការអ្នកលក់",
     "sellerProfile": "ប្រវត្តិរូបអ្នកលក់",
     "sellerWizard": "អ្នកជំនួយការអ្នកលក់",
-    "sellOnKhmer26": "លក់នៅលើ Khmer26",
+    "sellOnKhmer26": "លក់នៅលើ offerupkh",
     "sendAMessage": "ផ្ញើសារ",
     "sendAnotherMessage": "ផ្ញើសារផ្សេងទៀត។",
     "sendCounter": "ផ្ញើបញ្ជរ",
@@ -705,7 +705,7 @@
     "signIn_f8492c": "ចូល",
     "signingIn": "ចូល...",
     "signingOut": "កំពុងចេញ...",
-    "signInToKhmer26": "ចូល Khmer26",
+    "signInToKhmer26": "ចូល offerupkh",
     "signOut": "ចេញ",
     "signOutAction": "ចេញ",
     "signOutOtherSessions": "ចេញពីវគ្គផ្សេងទៀត។",
@@ -743,8 +743,8 @@
     "termsOfService": "លក្ខខណ្ឌនៃសេវាកម្ម",
     "termsThatNeedModeratorReview": "លក្ខខណ្ឌដែលត្រូវការការពិនិត្យអ្នកសម្របសម្រួល",
     "thanksYourReviewHasBeenPosted": "សូមអរគុណ — ការវាយតម្លៃរបស់អ្នកត្រូវបានបង្ហោះ។",
-    "thankYouForHelpingKeepKhmer26Safe": "សូមអរគុណចំពោះការជួយរក្សាសុវត្ថិភាព Khmer26 ។",
-    "thankYouForReachingOutToKhmer26OurTeam": "សូមអរគុណចំពោះការទាក់ទងទៅកាន់ Khmer26 ។ ក្រុមរបស់យើងបានទទួលកំណត់ចំណាំរបស់អ្នកនៅក្នុងប្រអប់ទទួលជំនួយ ហើយនឹងពិនិត្យមើលវាក្នុងពេលឆាប់ៗនេះ។",
+    "thankYouForHelpingKeepKhmer26Safe": "សូមអរគុណចំពោះការជួយរក្សាសុវត្ថិភាព offerupkh ។",
+    "thankYouForReachingOutToKhmer26OurTeam": "សូមអរគុណចំពោះការទាក់ទងទៅកាន់ offerupkh ។ ក្រុមរបស់យើងបានទទួលកំណត់ចំណាំរបស់អ្នកនៅក្នុងប្រអប់ទទួលជំនួយ ហើយនឹងពិនិត្យមើលវាក្នុងពេលឆាប់ៗនេះ។",
     "thankYouOurModerationTeamWillReviewThisListing": "សូមអរគុណ។ ក្រុមសម្របសម្រួលរបស់យើងនឹងពិនិត្យមើលបញ្ជីនេះ។",
     "thankYouOurTeamWillReviewThisSeller": "សូមអរគុណ។ ក្រុមរបស់យើងនឹងពិនិត្យមើលអ្នកលក់នេះ។",
     "thePageOrListingYouAreLookingForHas": "ទំព័រ ឬបញ្ជីដែលអ្នកកំពុងស្វែងរកត្រូវបានដកចេញ ប្តូរឈ្មោះ ឬមិនមានជាបណ្តោះអាសន្ន។",
@@ -775,7 +775,7 @@
     "unread": "មិនទាន់អាន",
     "unverified": "មិនបានផ្ទៀងផ្ទាត់",
     "updatePassword": "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់",
-    "updatesFromKhmer26WillAppearHere": "ការអាប់ដេតពី Khmer26 នឹងបង្ហាញនៅទីនេះ។",
+    "updatesFromKhmer26WillAppearHere": "ការអាប់ដេតពី offerupkh នឹងបង្ហាញនៅទីនេះ។",
     "updating": "កំពុងធ្វើបច្ចុប្បន្នភាព...",
     "updatingPassword": "កំពុងធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់...",
     "uploadClearImages": "បង្ហោះរូបភាពច្បាស់",
@@ -868,7 +868,7 @@
     "verificationSubmittedAt": "បានបញ្ជូន {date} ។ យើង​នឹង​ជូន​ដំណឹង​អ្នក​នៅ​ពេល​ដែល​ការ​ពិនិត្យ​ត្រូវ​បាន​បញ្ចប់។",
     "profileComplete": "ប្រវត្តិរូប {percent}% បានបញ្ចប់",
     "basedOnReviews": "ផ្អែកលើការពិនិត្យ {count}",
-    "reportSellerNamed": "ជួយរក្សាសហគមន៍ Khmer26 ឱ្យមានសុវត្ថិភាព។ ជ្រើសរើសហេតុផលដែលអ្នកកំពុងរាយការណ៍ «{name}»។",
+    "reportSellerNamed": "ជួយរក្សាសហគមន៍ offerupkh ឱ្យមានសុវត្ថិភាព។ ជ្រើសរើសហេតុផលដែលអ្នកកំពុងរាយការណ៍ «{name}»។",
     "memberSince": "សមាជិកតាំងពី {date}",
     "allCount": "ទាំងអស់ ({count})",
     "showingListings": "បង្ហាញបញ្ជី {shown} នៃ {total}",
@@ -988,7 +988,7 @@
     "postAd": {
       "contactChatTitle": "ជជែកក្នុងកម្មវិធីប៉ុណ្ណោះ",
       "contactChatBadge": "ណែនាំ",
-      "contactChatDescription": "ទំនាក់ទំនងលឿន សុវត្ថិភាព និងគ្មានសារឥតបានការ តាមរយៈសារក្នុង Khmer26។",
+      "contactChatDescription": "ទំនាក់ទំនងលឿន សុវត្ថិភាព និងគ្មានសារឥតបានការ តាមរយៈសារក្នុង offerupkh។",
       "contactBothTitle": "ជជែក និងហៅទូរស័ព្ទ",
       "contactBothDescription": "ទទួលសារជជែកភ្លាមៗ និងការហៅទូរស័ព្ទផ្ទាល់ពីអ្នកទិញ។",
       "contactPhoneTitle": "ហៅទូរស័ព្ទប៉ុណ្ណោះ",
@@ -1094,14 +1094,14 @@
       "backToVerification": "ត្រឡប់ទៅការផ្ទៀងផ្ទាត់",
       "eyebrowRecovery": "ការស្ដារគណនី",
       "eyebrowWelcomeBack": "សូមស្វាគមន៍ការត្រឡប់មកវិញ",
-      "eyebrowJoin": "ចូលរួមជាមួយ KHMER26",
+      "eyebrowJoin": "ចូលរួមជាមួយ OFFERUPKH",
       "eyebrowEmailVerification": "ការផ្ទៀងផ្ទាត់អ៊ីមែល",
-      "subtitleForgot": "បញ្ចូលអាសយដ្ឋានអ៊ីមែល ឬលេខទូរស័ព្ទដែលភ្ជាប់នឹងគណនី Khmer26 របស់អ្នក។",
+      "subtitleForgot": "បញ្ចូលអាសយដ្ឋានអ៊ីមែល ឬលេខទូរស័ព្ទដែលភ្ជាប់នឹងគណនី offerupkh របស់អ្នក។",
       "subtitleForgotVerify": "យើងបានផ្ញើលេខកូដផ្ទៀងផ្ទាត់ទៅអាសយដ្ឋានអ៊ីមែល ឬលេខទូរស័ព្ទដែលបានជ្រើសរើស។",
       "subtitleLogin": "គ្រប់គ្រងដំណឹងរបស់អ្នក ជជែកជាមួយអ្នកទិញ និងទទួលបានអត្ថប្រយោជន៍ពេញលេញពីទីផ្សារ។",
       "subtitleRegister": "ចូលរួមជាមួយអ្នកទិញ និងអ្នកលក់រាប់ពាន់នាក់នៅទូទាំងកម្ពុជា។ ចុះផ្សាយដំណឹង រក្សាទុកដំណឹងដែលអ្នកចូលចិត្ត និងទទួលបានឱកាសកាន់តែច្រើន។",
       "subtitleRegisterVerify": "យើងបានផ្ញើលេខកូដផ្ទៀងផ្ទាត់ ៦ ខ្ទង់ទៅអ៊ីមែលរបស់អ្នក។ បញ្ចូលវាខាងក្រោម ដើម្បីបញ្ចប់ការចុះឈ្មោះ។",
-      "subtitleReset": "ជ្រើសរើសពាក្យសម្ងាត់ថ្មីសម្រាប់គណនី Khmer26 របស់អ្នក។",
+      "subtitleReset": "ជ្រើសរើសពាក្យសម្ងាត់ថ្មីសម្រាប់គណនី offerupkh របស់អ្នក។",
       "backToSignInAction": "ត្រឡប់ទៅចូលគណនី"
     },
     "categoryPage": {
@@ -1141,7 +1141,7 @@
   "meta": {
     "forgotPassword": {
       "title": "ភ្លេចពាក្យសម្ងាត់",
-      "description": "ស្ដារពាក្យសម្ងាត់គណនី Khmer26 របស់អ្នកតាមអ៊ីមែល ឬលេខទូរស័ព្ទ។"
+      "description": "ស្ដារពាក្យសម្ងាត់គណនី offerupkh របស់អ្នកតាមអ៊ីមែល ឬលេខទូរស័ព្ទ។"
     },
     "forgotPasswordVerify": {
       "title": "ផ្ទៀងផ្ទាត់លេខកូដ",
@@ -1149,11 +1149,11 @@
     },
     "login": {
       "title": "ចូលគណនី",
-      "description": "ចូលគណនី Khmer26 របស់អ្នក ដើម្បីគ្រប់គ្រងដំណឹង ជជែកជាមួយអ្នកទិញ និងស្វែងរកដំណឹង។"
+      "description": "ចូលគណនី offerupkh របស់អ្នក ដើម្បីគ្រប់គ្រងដំណឹង ជជែកជាមួយអ្នកទិញ និងស្វែងរកដំណឹង។"
     },
     "register": {
       "title": "បង្កើតគណនី",
-      "description": "បង្កើតគណនី Khmer26 ឥតគិតថ្លៃ ដើម្បីចាប់ផ្តើមចុះផ្សាយដំណឹង និងទាក់ទងអ្នកទិញនៅទូទាំងកម្ពុជា។"
+      "description": "បង្កើតគណនី offerupkh ឥតគិតថ្លៃ ដើម្បីចាប់ផ្តើមចុះផ្សាយដំណឹង និងទាក់ទងអ្នកទិញនៅទូទាំងកម្ពុជា។"
     },
     "registerVerify": {
       "title": "ផ្ទៀងផ្ទាត់អ៊ីមែលរបស់អ្នក",
@@ -1161,23 +1161,23 @@
     },
     "resetPassword": {
       "title": "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
-      "description": "បង្កើតពាក្យសម្ងាត់ថ្មីសម្រាប់គណនី Khmer26 របស់អ្នក។"
+      "description": "បង្កើតពាក្យសម្ងាត់ថ្មីសម្រាប់គណនី offerupkh របស់អ្នក។"
     },
     "favorites": {
       "title": "ដំណឹងដែលបានរក្សាទុក",
-      "description": "មើល និងគ្រប់គ្រងដំណឹងទីផ្សារដែលអ្នកបានរក្សាទុកនៅលើ Khmer26"
+      "description": "មើល និងគ្រប់គ្រងដំណឹងទីផ្សារដែលអ្នកបានរក្សាទុកនៅលើ offerupkh"
     },
     "myListings": {
       "title": "ដំណឹងរបស់ខ្ញុំ",
-      "description": "គ្រប់គ្រងដំណឹងទីផ្សាររបស់អ្នកនៅលើ Khmer26"
+      "description": "គ្រប់គ្រងដំណឹងទីផ្សាររបស់អ្នកនៅលើ offerupkh"
     },
     "notifications": {
       "title": "ការជូនដំណឹង",
-      "description": "មើលព័ត៌មានថ្មីអំពីគណនី Khmer26 និងសកម្មភាពទីផ្សាររបស់អ្នក"
+      "description": "មើលព័ត៌មានថ្មីអំពីគណនី offerupkh និងសកម្មភាពទីផ្សាររបស់អ្នក"
     },
     "payments": {
       "title": "ការទូទាត់",
-      "description": "មើលបង្កាន់ដៃ វិក្កយបត្រ និងប្រវត្តិទូទាត់នៅលើ Khmer26"
+      "description": "មើលបង្កាន់ដៃ វិក្កយបត្រ និងប្រវត្តិទូទាត់នៅលើ offerupkh"
     },
     "profile": {
       "title": "ប្រវត្តិរូប",
@@ -1185,46 +1185,46 @@
     },
     "savedSearches": {
       "title": "ការស្វែងរកដែលបានរក្សាទុក",
-      "description": "គ្រប់គ្រងការស្វែងរកទីផ្សារ Khmer26 ដែលអ្នកបានរក្សាទុក។"
+      "description": "គ្រប់គ្រងការស្វែងរកទីផ្សារ offerupkh ដែលអ្នកបានរក្សាទុក។"
     },
     "settings": {
       "title": "ការកំណត់",
-      "description": "គ្រប់គ្រងការកំណត់ការជូនដំណឹង ឯកជនភាព រូបរាង និងសុវត្ថិភាពនៅលើ Khmer26"
+      "description": "គ្រប់គ្រងការកំណត់ការជូនដំណឹង ឯកជនភាព រូបរាង និងសុវត្ថិភាពនៅលើ offerupkh"
     },
     "subscription": {
       "title": "ការជាវ",
-      "description": "គ្រប់គ្រងការជាវអ្នកលក់ និងផែនការសមាជិករបស់អ្នកនៅលើ Khmer26"
+      "description": "គ្រប់គ្រងការជាវអ្នកលក់ និងផែនការសមាជិករបស់អ្នកនៅលើ offerupkh"
     },
     "checkout": {
       "title": "ការទូទាត់"
     },
     "messages": {
       "title": "សារ",
-      "description": "សាររវាងអ្នកទិញ និងអ្នកលក់នៅលើ Khmer26"
+      "description": "សាររវាងអ្នកទិញ និងអ្នកលក់នៅលើ offerupkh"
     },
     "conversation": {
       "title": "ការសន្ទនា",
-      "description": "ការជជែកទីផ្សារនៅលើ Khmer26"
+      "description": "ការជជែកទីផ្សារនៅលើ offerupkh"
     },
     "postAd": {
-      "title": "ចុះផ្សាយដំណឹង — Khmer26",
-      "description": "បង្កើត និងចុះផ្សាយដំណឹងទីផ្សាររបស់អ្នកក្នុងរយៈពេលប៉ុន្មាននាទីនៅលើ Khmer26។"
+      "title": "ចុះផ្សាយដំណឹង — offerupkh",
+      "description": "បង្កើត និងចុះផ្សាយដំណឹងទីផ្សាររបស់អ្នកក្នុងរយៈពេលប៉ុន្មាននាទីនៅលើ offerupkh។"
     },
     "postingRules": {
       "title": "ច្បាប់ចុះផ្សាយ",
-      "description": "ច្បាប់សម្រាប់ការចុះផ្សាយដំណឹងដែលមានសុវត្ថិភាព និងត្រឹមត្រូវនៅលើ Khmer26។"
+      "description": "ច្បាប់សម្រាប់ការចុះផ្សាយដំណឹងដែលមានសុវត្ថិភាព និងត្រឹមត្រូវនៅលើ offerupkh។"
     },
     "pricing": {
       "title": "តម្លៃ និងផែនការជាវ",
-      "description": "ជ្រើសរើសផែនការមួយ ដើម្បីចុះផ្សាយដំណឹងបានច្រើនជាងមុន និងពង្រីកអាជីវកម្មរបស់អ្នកនៅលើ Khmer26។"
+      "description": "ជ្រើសរើសផែនការមួយ ដើម្បីចុះផ្សាយដំណឹងបានច្រើនជាងមុន និងពង្រីកអាជីវកម្មរបស់អ្នកនៅលើ offerupkh។"
     },
     "privacy": {
       "title": "គោលការណ៍ឯកជនភាព",
-      "description": "របៀបដែល Khmer26 ប្រមូល ប្រើប្រាស់ ចែករំលែក និងការពារព័ត៌មានផ្ទាល់ខ្លួន។"
+      "description": "របៀបដែល offerupkh ប្រមូល ប្រើប្រាស់ ចែករំលែក និងការពារព័ត៌មានផ្ទាល់ខ្លួន។"
     },
     "terms": {
       "title": "លក្ខខណ្ឌប្រើប្រាស់",
-      "description": "លក្ខខណ្ឌដែលអនុវត្តនៅពេលប្រើប្រាស់ទីផ្សារ Khmer26។"
+      "description": "លក្ខខណ្ឌដែលអនុវត្តនៅពេលប្រើប្រាស់ទីផ្សារ offerupkh។"
     },
     "search": {
       "title": "ស្វែងរកដំណឹងក្នុងទីផ្សារ",

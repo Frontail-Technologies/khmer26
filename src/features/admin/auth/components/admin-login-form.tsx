@@ -51,7 +51,7 @@ export function AdminLoginForm() {
             <a href={marketplaceUrl} className="inline-flex items-center gap-2">
               <Image
                 src="/images/logo.png"
-                alt="Khmer26"
+                alt="offerupkh"
                 width={110}
                 height={28}
                 priority
@@ -161,7 +161,7 @@ export function AdminLoginForm() {
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors hover:underline"
             >
               <ArrowSquareOut size={13} />
-              <span>Back to Khmer26 Marketplace</span>
+              <span>Back to offerupkh Marketplace</span>
             </a>
           </div>
         </CardContent>

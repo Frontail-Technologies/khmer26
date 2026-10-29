@@ -26,6 +26,6 @@ describe("PolicyPage", () => {
     expect(screen.getByRole("heading", { name: "Posting Rules" })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Accurate listings" })).toHaveAttribute("href", "#accurate-listings")
     expect(screen.getByText("Use a genuine price.")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /contact khmer26/i })).toHaveAttribute("href", "/contact")
+    expect(screen.getByRole("link", { name: /contact offerupkh/i })).toHaveAttribute("href", "/contact")
   })
 })

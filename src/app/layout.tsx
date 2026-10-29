@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Khmer26",
+    siteName: "offerupkh",
   },
   robots: {
     index: true,

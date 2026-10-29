@@ -30,7 +30,7 @@ export function SafetyNotice() {
           <ShieldWarning size={16} weight="fill" className="text-accent shrink-0" />
           <div className="min-w-0">
             <span className="font-bold text-foreground text-xxs sm:text-xs">
-              Stay safe on Khmer26:{" "}
+              Stay safe on offerupkh:{" "}
             </span>
             <span className="text-xxs sm:text-xs text-muted-foreground truncate">
               <LocalizedText id="avoidAdvancePaymentsBeforeInPersonInspection" />
