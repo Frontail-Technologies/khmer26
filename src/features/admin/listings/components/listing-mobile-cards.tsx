@@ -1,5 +1,6 @@
-﻿"use client"
+"use client"
 
+import { ListingRowActions } from "./listing-row-actions"
 import Link from "next/link"
 import { CaretRight, Flag, Eye, ArrowsDownUp } from "@phosphor-icons/react"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -106,12 +107,8 @@ export function ListingMobileCards({
               : `${listing.price.toLocaleString("en-US")} KHR`
 
           return (
-            <Link
-              key={listing.id}
-              href={`/admin/listings/${listing.id}`}
-              className="block"
-            >
-              <Card className="rounded-xl border-0 bg-card p-3.5 shadow-2xs hover:bg-muted/10 transition-all active:scale-[0.99]">
+            <Card key={listing.id} className="gap-0 rounded-2xl border border-border/60 bg-card p-3.5 shadow-2xs">
+              <Link href={`/listings/${listing.id}`} className="pressable block">
                 <CardContent className="p-0 space-y-3">
                   <div className="flex items-start gap-3">
                     <ListingImageAvatars images={listing.images} title={listing.title} />
@@ -167,15 +164,22 @@ export function ListingMobileCards({
                         <Eye size={11} />
                         <span>{listing.viewCount}</span>
                       </span>
-                      <span className="inline-flex items-center gap-0.5 text-primary font-semibold text-2xs">
-                        <span>Review</span>
-                        <CaretRight size={10} weight="bold" />
-                      </span>
+                      {listing.status !== "pending" && listing.status !== "flagged" && (
+                        <span className="inline-flex items-center gap-0.5 text-primary font-semibold text-2xs">
+                          <span>Review</span>
+                          <CaretRight size={10} weight="bold" />
+                        </span>
+                      )}
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </Link>
+              </Link>
+              {(listing.status === "pending" || listing.status === "flagged") && (
+                <div className="mt-3 border-t border-border/60 pt-3">
+                  <ListingRowActions listing={listing} layout="card" />
+                </div>
+              )}
+            </Card>
           )
         })}
       </div>

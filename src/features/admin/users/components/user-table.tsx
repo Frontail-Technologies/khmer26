@@ -1,5 +1,7 @@
 "use client"
 
+import { actionColumnClass } from "@/components/data-table/pinned-actions"
+
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -235,7 +237,7 @@ export function UserTable({ initialData }: UserTableProps) {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
+                      className={cn("py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80", actionColumnClass(header.column.id, "head"))}
                     >
                       {header.isPlaceholder
                         ? null
@@ -258,7 +260,7 @@ export function UserTable({ initialData }: UserTableProps) {
                     className="transition-colors hover:bg-muted/30 border-b border-border/60 cursor-pointer h-16"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2.5 px-3.5 text-xs">
+                      <TableCell key={cell.id} className={cn("py-2.5 px-3.5 text-xs", actionColumnClass(cell.column.id))}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

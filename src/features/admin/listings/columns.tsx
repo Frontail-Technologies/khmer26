@@ -1,31 +1,18 @@
-﻿"use client"
+"use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
 import {
-  DotsThreeVertical,
   Flag,
   SealCheck,
-  CheckCircle,
-  XCircle,
-  Trash,
-  ArrowSquareOut,
-  Eye,
   MapPin,
 } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
+import { ListingRowActions } from "./components/listing-row-actions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { ListingImageAvatars } from "./components/listing-image-avatars"
 import type { AdminListing, AdminListingStatus } from "./types"
 
@@ -41,7 +28,7 @@ const STATUS_TONE_MAP: Record<AdminListingStatus, StatusTone> = {
 }
 
 const STATUS_LABEL_MAP: Record<AdminListingStatus, string> = {
-  pending: "Pending Review",
+  pending: "Pending",
   flagged: "Flagged",
   active: "Active",
   sold: "Sold",
@@ -258,110 +245,8 @@ export const listingColumns: ColumnDef<AdminListing>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const listing = row.original
-      const isPublic = listing.status === "active" && Boolean(listing.slug)
-
-      return (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg"
-                  aria-label="Listing options"
-                >
-                  <DotsThreeVertical size={16} weight="bold" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-48 shadow-md rounded-xl">
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={`/admin/listings/${listing.id}`}
-                    className="flex items-center gap-2 w-full text-xs font-medium"
-                  >
-                    <Eye size={14} />
-                    <span>Review Listing</span>
-                  </Link>
-                }
-              />
-              {isPublic && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/listing/${listing.slug}`}
-                      target="_blank"
-                      className="flex items-center gap-2 w-full text-xs font-medium text-muted-foreground"
-                    >
-                      <ArrowSquareOut size={14} />
-                      <span>View Public Listing</span>
-                    </Link>
-                  }
-                />
-              )}
-              {listing.seller.slug && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/seller/${listing.seller.slug}`}
-                      target="_blank"
-                      className="flex items-center gap-2 w-full text-xs font-medium text-muted-foreground"
-                    >
-                      <ArrowSquareOut size={14} />
-                      <span>View Seller Profile</span>
-                    </Link>
-                  }
-                />
-              )}
-              <DropdownMenuSeparator />
-              {listing.status === "pending" && (
-                <>
-                  <DropdownMenuItem
-                    render={
-                      <Link
-                        href={`/admin/listings/${listing.id}`}
-                        className="flex items-center gap-2 w-full text-xs font-medium text-success"
-                      >
-                        <CheckCircle size={14} />
-                        <span>Approve Listing</span>
-                      </Link>
-                    }
-                  />
-                  <DropdownMenuItem
-                    render={
-                      <Link
-                        href={`/admin/listings/${listing.id}`}
-                        className="flex items-center gap-2 w-full text-xs font-medium text-destructive"
-                      >
-                        <XCircle size={14} />
-                        <span>Reject Listing</span>
-                      </Link>
-                    }
-                  />
-                </>
-              )}
-              {listing.status === "active" && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/listings/${listing.id}`}
-                      className="flex items-center gap-2 w-full text-xs font-medium text-destructive"
-                    >
-                      <Trash size={14} />
-                      <span>Remove / Takedown</span>
-                    </Link>
-                  }
-                />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )
-    },
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <ListingRowActions listing={row.original} />,
     enableSorting: false,
   },
 ]

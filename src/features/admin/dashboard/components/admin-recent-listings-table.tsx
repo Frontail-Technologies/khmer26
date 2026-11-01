@@ -13,7 +13,7 @@ import {
   CaretUpDown,
 } from "@phosphor-icons/react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -21,7 +21,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
 import { useAdminDashboard } from "../hooks/dashboard.queries"
 import { formatAdminDateTime } from "@/lib/formatters/date"
 
@@ -161,7 +160,6 @@ export function AdminRecentListingsTable() {
             </thead>
             <tbody className="divide-y divide-border/60">
               {sortedListings.map((listing) => {
-                const isActive = listing.status === "active"
                 const isPending = listing.moderationStatus === "pending_review"
                 const statusLabel = isPending ? "pending" : listing.moderationStatus === "rejected" ? "rejected" : listing.status
 
@@ -198,19 +196,7 @@ export function AdminRecentListingsTable() {
                       {formatPrice(listing.price, listing.currency)}
                     </td>
                     <td className="py-3.5 px-3">
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-3xs font-bold px-2 py-0.5 h-5 uppercase rounded-md",
-                          isActive
-                            ? "bg-primary/10 text-primary border-primary/20"
-                            : isPending
-                            ? "bg-accent/10 text-accent border-accent/20"
-                            : "bg-muted text-muted-foreground border-border"
-                        )}
-                      >
-                          {statusLabel}
-                      </Badge>
+                      <StatusBadge label={statusLabel} size="sm" />
                     </td>
                     <td className="max-lg:hidden py-3.5 px-3 text-muted-foreground text-xxs">
                       {formatAdminDateTime(listing.createdAt)}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
 import {
   flexRender,
   getCoreRowModel,
@@ -34,6 +33,7 @@ import { ListingToolbar } from "./listing-toolbar"
 import { ListingMobileCards } from "./listing-mobile-cards"
 import { listingColumns } from "../columns"
 import type { AdminListing } from "../types"
+import { ListingQuickView } from "./listing-quick-view"
 import { cn } from "@/lib/utils"
 import { useAdminListings } from "../hooks/listings.queries"
 import { useApproveListing } from "../hooks/listings.mutations"
@@ -43,8 +43,18 @@ import { toast } from "sonner"
 
 type ListingTabKey = "all" | "active" | "pending" | "flagged" | "rejected" | "sold" | "expired"
 
+/**
+ * Low-priority columns step aside on narrower screens so the table fits without sideways scrolling,
+ * and the actions column is pinned to the right edge so it is always visible.
+ */
+const COLUMN_CLASS: Record<string, string> = {
+  categoryName: "max-2xl:hidden",
+  location: "max-2xl:hidden",
+  createdDate: "max-[1700px]:hidden",
+  actions: "sticky right-0 z-10 bg-card shadow-[inset_1px_0_0_var(--color-border)] w-px whitespace-nowrap",
+}
+
 export function ListingTable() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<ListingTabKey>("all")
   const [sorting, setSorting] = useState<SortingState>([])
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -52,6 +62,7 @@ export function ListingTable() {
   const [categoryFilter, setCategoryFilter] = useState("")
   const [sellerTypeFilter, setSellerTypeFilter] = useState("")
   const [provinceFilter, setProvinceFilter] = useState("")
+  const [quickView, setQuickView] = useState<AdminListing | null>(null)
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "price_asc" | "price_desc">("newest")
   const [mobileSort, setMobileSort] = useState("newest")
   const { data, isLoading } = useAdminListings({ page: 1, limit: 100, sort: sortOrder })
@@ -302,7 +313,7 @@ export function ListingTable() {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80"
+                      className={cn("py-2.5 px-3.5 text-xxs font-bold text-muted-foreground dark:text-foreground/80", COLUMN_CLASS[header.column.id], header.column.id === "actions" && "bg-muted")}
                     >
                       {header.isPlaceholder
                         ? null
@@ -321,11 +332,11 @@ export function ListingTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    onClick={() => router.push(`/admin/listings/${row.original.id}`)}
+                    onClick={() => setQuickView(row.original)}
                     className="transition-colors hover:bg-muted/30 border-b border-border/60 cursor-pointer h-16"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2.5 px-3.5 text-xs">
+                      <TableCell key={cell.id} className={cn("py-2.5 px-3.5 text-xs", COLUMN_CLASS[cell.column.id])}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -351,6 +362,12 @@ export function ListingTable() {
       <div className="border-t border-border/60 bg-muted/10 p-2 sm:p-3">
         <DataTablePagination table={table} />
       </div>
+
+      {/* Re-read from the live list so the panel reflects an approval/rejection immediately. */}
+      <ListingQuickView
+        listing={quickView ? initialData.find((item) => item.id === quickView.id) ?? quickView : null}
+        onOpenChange={(open) => !open && setQuickView(null)}
+      />
     </Card>
   )
 }

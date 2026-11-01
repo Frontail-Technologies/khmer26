@@ -1,5 +1,8 @@
 "use client"
 
+import { actionColumnClass } from "@/components/data-table/pinned-actions"
+import { cn } from "@/lib/utils"
+
 import { useState, useMemo, useCallback } from "react"
 import {
   useReactTable,
@@ -306,7 +309,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="text-xs font-bold text-foreground h-9">
+                    <TableHead key={header.id} className={cn("text-xs font-bold text-foreground h-9", actionColumnClass(header.column.id, "head"))}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -326,7 +329,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} className="hover:bg-muted/20">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2.5 text-xs">
+                      <TableCell key={cell.id} className={cn("py-2.5 text-xs", actionColumnClass(cell.column.id))}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

@@ -89,7 +89,8 @@ vi.mock('../hooks/listings.queries', () => ({
 }));
 
 vi.mock('../hooks/listings.mutations', () => ({
-  useApproveListing: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useApproveListing: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  useRejectListing: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/features/admin/categories/hooks/categories.queries', () => ({

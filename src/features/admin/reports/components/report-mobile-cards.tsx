@@ -1,5 +1,7 @@
 "use client"
 
+import { ReportRowActions } from "./report-row-actions"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Tag, User, Storefront, ChatCircle, CaretRight } from "@phosphor-icons/react"
@@ -54,12 +56,8 @@ export function ReportMobileCards({ data }: ReportMobileCardsProps) {
         const conf = STATUS_CONFIG[report.status] || { label: report.status, tone: "neutral" as StatusTone }
 
         return (
-          <Link
-            key={report.id}
-            href={`/admin/reports/${report.id}`}
-            className="block group"
-          >
-            <Card className="p-3.5 bg-card shadow-2xs rounded-xl hover:bg-muted/20 transition-colors border-0">
+          <Card key={report.id} className="gap-0 rounded-2xl border border-border/60 bg-card p-3.5 shadow-2xs">
+            <Link href={`/reports/${report.id}`} className="pressable group block">
               <div className="flex items-start justify-between gap-2.5 mb-2.5">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-foreground">
@@ -111,8 +109,13 @@ export function ReportMobileCards({ data }: ReportMobileCardsProps) {
                 <span>Reporter: <strong className="text-foreground font-medium">{report.reporter.name}</strong></span>
                 <span className="capitalize">{report.reporter.accountType}</span>
               </div>
-            </Card>
-          </Link>
+            </Link>
+            {(report.status === "open" || report.status === "in_review") && (
+              <div className="mt-3 border-t border-border/60 pt-3">
+                <ReportRowActions report={report} layout="card" />
+              </div>
+            )}
+          </Card>
         )
       })}
     </div>

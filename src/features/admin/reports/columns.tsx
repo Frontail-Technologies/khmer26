@@ -4,27 +4,15 @@ import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
 import Image from "next/image"
 import {
-  DotsThreeVertical,
   Tag,
   User,
   Storefront,
   ChatCircle,
-  Eye,
-  ArrowUpRight,
-  CheckCircle,
-  XCircle,
 } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
+import { ReportRowActions } from "./components/report-row-actions"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { AdminReport, AdminReportStatus, AdminReportTargetType } from "./types"
 
 const STATUS_CONFIG: Record<AdminReportStatus, { label: string; tone: StatusTone }> = {
@@ -184,78 +172,8 @@ export const reportColumns: ColumnDef<AdminReport>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const report = row.original
-      return (
-        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  className="size-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                  aria-label="Report actions"
-                >
-                  <DotsThreeVertical size={16} weight="bold" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={`/admin/reports/${report.id}`}
-                    className="flex items-center gap-2 w-full text-xs font-medium cursor-pointer"
-                  >
-                    <Eye size={14} />
-                    <span>View Report</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuItem
-                render={
-                  <Link
-                    href={report.target.href}
-                    className="flex items-center gap-2 w-full text-xs font-medium text-muted-foreground cursor-pointer"
-                  >
-                    <ArrowUpRight size={14} />
-                    <span>View Reported Item</span>
-                  </Link>
-                }
-              />
-              <DropdownMenuSeparator />
-              {report.status !== "resolved" && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/reports/${report.id}`}
-                      className="flex items-center gap-2 w-full text-xs font-medium text-success cursor-pointer"
-                    >
-                      <CheckCircle size={14} />
-                      <span>Resolve</span>
-                    </Link>
-                  }
-                />
-              )}
-              {report.status !== "dismissed" && (
-                <DropdownMenuItem
-                  render={
-                    <Link
-                      href={`/admin/reports/${report.id}`}
-                      className="flex items-center gap-2 w-full text-xs font-medium text-muted-foreground cursor-pointer"
-                    >
-                      <XCircle size={14} />
-                      <span>Dismiss</span>
-                    </Link>
-                  }
-                />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )
-    },
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <ReportRowActions report={row.original} />,
     enableSorting: false,
   },
 ]

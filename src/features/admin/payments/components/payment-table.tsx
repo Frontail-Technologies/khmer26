@@ -1,5 +1,7 @@
 "use client"
 
+import { actionColumnClass } from "@/components/data-table/pinned-actions"
+
 import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 
 import { useState, useMemo } from "react"
@@ -190,7 +192,7 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-3 px-4 text-xs font-bold text-muted-foreground dark:text-foreground/80"
+                      className={cn("py-3 px-4 text-xs font-bold text-muted-foreground dark:text-foreground/80", actionColumnClass(header.column.id, "head"))}
                     >
                       {header.isPlaceholder
                         ? null
@@ -212,7 +214,7 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
                     className="transition-colors hover:bg-muted/25 border-b border-border/60 h-14 cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3 px-4 text-xs">
+                      <TableCell key={cell.id} className={cn("py-3 px-4 text-xs", actionColumnClass(cell.column.id))}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

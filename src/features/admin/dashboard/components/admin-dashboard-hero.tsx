@@ -128,8 +128,8 @@ function AttentionTile({ href, label, value, icon: TileIcon, tone }: AttentionTi
 
 const SERIES: Array<{ key: SeriesKey; label: string; tone: ChartTone; format: (v: number) => string }> = [
   { key: "listings", label: "Listings", tone: "primary", format: count },
-  { key: "users", label: "Users", tone: "success", format: count },
-  { key: "revenue", label: "Revenue", tone: "accent", format: money },
+  { key: "users", label: "Users", tone: "accent", format: count },
+  { key: "revenue", label: "Revenue", tone: "success", format: money },
   { key: "messages", label: "Messages", tone: "info", format: count },
 ]
 
@@ -158,11 +158,11 @@ export function AdminDashboardHero() {
   const listings = data?.listings
   const slices: DonutSlice[] = [
     { label: "Active", value: listings?.active ?? 0, tone: "success" },
-    { label: "Pending", value: listings?.pendingReview ?? 0, tone: "warning" },
+    { label: "Pending", value: listings?.pendingReview ?? 0, tone: "accent" },
     { label: "Flagged", value: listings?.flagged ?? 0, tone: "destructive" },
     { label: "Sold", value: listings?.sold ?? 0, tone: "primary" },
     { label: "Expired", value: listings?.expired ?? 0, tone: "muted" },
-    { label: "Rejected", value: listings?.rejected ?? 0, tone: "accent" },
+    { label: "Rejected", value: listings?.rejected ?? 0, tone: "muted" },
   ]
   const sliceTotal = slices.reduce((sum, slice) => sum + slice.value, 0)
 
@@ -170,16 +170,16 @@ export function AdminDashboardHero() {
     <div className="space-y-3 sm:space-y-4">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
         <KpiCard href="/listings" label="Listings" value={count(listings?.total ?? 0)} icon={Storefront} tone="primary" series={series("listings")} delta={weekOverWeek(trends, "listings")} />
-        <KpiCard href="/users" label="Users" value={count(data?.users?.total ?? 0)} icon={UsersThree} tone="success" series={series("users")} delta={weekOverWeek(trends, "users")} />
-        <KpiCard href="/payments" label="Revenue · 30d" value={money(data?.revenue?.last30Days ?? 0)} icon={CurrencyDollar} tone="accent" series={series("revenue")} delta={weekOverWeek(trends, "revenue")} />
+        <KpiCard href="/users" label="Users" value={count(data?.users?.total ?? 0)} icon={UsersThree} tone="accent" series={series("users")} delta={weekOverWeek(trends, "users")} />
+        <KpiCard href="/payments" label="Revenue · 30d" value={money(data?.revenue?.last30Days ?? 0)} icon={CurrencyDollar} tone="success" series={series("revenue")} delta={weekOverWeek(trends, "revenue")} />
         <KpiCard href="/chats" label="Messages today" value={count(data?.chat?.messagesToday ?? 0)} icon={ChatCircleDots} tone="info" series={series("messages")} delta={weekOverWeek(trends, "messages")} />
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
-        <AttentionTile href="/listings" label="Pending review" value={listings?.pendingReview ?? 0} icon={Hourglass} tone="warning" />
+        <AttentionTile href="/listings" label="Pending review" value={listings?.pendingReview ?? 0} icon={Hourglass} tone="accent" />
         <AttentionTile href="/listings" label="Flagged" value={listings?.flagged ?? 0} icon={WarningOctagon} tone="destructive" />
         <AttentionTile href="/verifications" label="Verifications" value={data?.sellers?.pendingVerification ?? 0} icon={SealCheck} tone="primary" />
-        <AttentionTile href="/reports" label="Open reports" value={data?.reports?.open ?? 0} icon={Flag} tone="destructive" />
+        <AttentionTile href="/reports" label="Open reports" value={data?.reports?.open ?? 0} icon={Flag} tone="accent" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">

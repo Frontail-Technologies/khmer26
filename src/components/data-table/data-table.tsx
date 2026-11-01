@@ -1,5 +1,7 @@
 "use client"
 
+import { actionColumnClass } from "@/components/data-table/pinned-actions"
+
 import { useState } from "react"
 import {
   flexRender,
@@ -76,7 +78,7 @@ export function DataTable<TData, TValue>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="bg-muted/30 hover:bg-muted/30 border-b border-border/60 select-none">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="py-3 px-4 text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <TableHead key={header.id} className={cn("py-3 px-4 text-2xs font-bold uppercase tracking-wider text-muted-foreground", actionColumnClass(header.column.id, "head"))}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -101,7 +103,7 @@ export function DataTable<TData, TValue>({
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3.5 px-4 text-xs">
+                      <TableCell key={cell.id} className={cn("py-3.5 px-4 text-xs", actionColumnClass(cell.column.id))}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

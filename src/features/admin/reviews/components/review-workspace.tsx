@@ -1,5 +1,8 @@
 "use client"
 
+import { actionColumnClass } from "@/components/data-table/pinned-actions"
+import { cn } from "@/lib/utils"
+
 import { useState, useMemo, useCallback } from "react"
 import {
   useReactTable,
@@ -277,7 +280,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="py-3 px-4 text-xs font-bold text-muted-foreground dark:text-foreground/80"
+                      className={cn("py-3 px-4 text-xs font-bold text-muted-foreground dark:text-foreground/80", actionColumnClass(header.column.id, "head"))}
                     >
                       {header.isPlaceholder
                         ? null
@@ -299,7 +302,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
                     className="hover:bg-muted/40 transition-colors border-b border-border/50 cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3 px-4 text-xs">
+                      <TableCell key={cell.id} className={cn("py-3 px-4 text-xs", actionColumnClass(cell.column.id))}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

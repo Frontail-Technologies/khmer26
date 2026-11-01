@@ -2,6 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
+import { SITE } from "@/lib/constants/site"
+import { cn } from "@/lib/utils"
 import { IdentificationCard, Buildings, UserCircle, Eye, ArrowSquareOut } from "@phosphor-icons/react"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -180,27 +182,37 @@ export const verificationColumns: ColumnDef<VerificationRequest>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
-      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-        <Link
-          href={`/admin/verifications/${row.original.id}`}
-          className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-          aria-label="Review verification request"
-        >
-          <Eye size={14} />
-        </Link>
-        {row.original.seller.slug && (
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => {
+      const waiting = row.original.status === "pending" || row.original.status === "in_review"
+      return (
+        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
           <Link
-            href={`/seller/${row.original.seller.slug}`}
-            target="_blank"
-            className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-            aria-label="View public seller profile"
+            href={`/verifications/${row.original.id}`}
+            className={cn(
+              "inline-flex h-8 items-center gap-1 rounded-full px-3.5 text-xs font-bold transition-colors",
+              waiting
+                ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                : "border border-border text-foreground hover:bg-muted"
+            )}
           >
-            <ArrowSquareOut size={13} />
+            <Eye size={14} />
+            {waiting ? "Review" : "Open"}
           </Link>
-        )}
-      </div>
-    ),
+          {row.original.seller.slug && (
+            <a
+              href={`${SITE.url}/seller/${row.original.seller.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Public seller profile"
+            >
+              <ArrowSquareOut size={14} />
+            </a>
+          )}
+        </div>
+      )
+    },
     enableSorting: false,
   },
 ]
