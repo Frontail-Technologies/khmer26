@@ -176,10 +176,10 @@ export function AdminDashboardHero() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
-        <AttentionTile href="/listings" label="Pending review" value={listings?.pendingReview ?? 0} icon={Hourglass} tone="accent" />
-        <AttentionTile href="/listings" label="Flagged" value={listings?.flagged ?? 0} icon={WarningOctagon} tone="destructive" />
-        <AttentionTile href="/verifications" label="Verifications" value={data?.sellers?.pendingVerification ?? 0} icon={SealCheck} tone="primary" />
-        <AttentionTile href="/reports" label="Open reports" value={data?.reports?.open ?? 0} icon={Flag} tone="accent" />
+        <AttentionTile href="/queue?type=listing" label="Pending review" value={listings?.pendingReview ?? 0} icon={Hourglass} tone="accent" />
+        <AttentionTile href="/queue?type=listing" label="Flagged" value={listings?.flagged ?? 0} icon={WarningOctagon} tone="destructive" />
+        <AttentionTile href="/queue?type=verification" label="Verifications" value={data?.sellers?.pendingVerification ?? 0} icon={SealCheck} tone="primary" />
+        <AttentionTile href="/queue?type=report" label="Open reports" value={data?.reports?.open ?? 0} icon={Flag} tone="accent" />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">

@@ -4,6 +4,7 @@ import { AdminSidebar } from "./admin-sidebar"
 import { AdminTopbar } from "./admin-topbar"
 import { AdminGuard } from "./admin-guard"
 import { AdminBottomNav } from "./admin-bottom-nav"
+import { AdminCommandPalette } from "./admin-command-palette"
 
 interface AdminShellProps {
   children: ReactNode
@@ -21,6 +22,7 @@ export function AdminShell({ children }: AdminShellProps) {
           </main>
         </SidebarInset>
         <AdminBottomNav />
+        <AdminCommandPalette />
       </SidebarProvider>
     </AdminGuard>
   )

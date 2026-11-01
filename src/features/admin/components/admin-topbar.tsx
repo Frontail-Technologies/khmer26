@@ -25,6 +25,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { getAdminRouteInfo } from "../navigation/admin-route-metadata"
 import { cn } from "@/lib/utils"
 import { useAdminAuth } from "@/hooks/use-admin-auth"
+import { openAdminSearch } from "./admin-command-palette"
 
 interface AdminTopbarProps {
   className?: string
@@ -65,17 +66,15 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="relative hidden md:flex items-center">
-          <MagnifyingGlass
-            size={15}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Search listings, users, reports..."
-            className="h-9 w-64 lg:w-80 pl-9 pr-3 text-xs bg-muted/30 hover:bg-muted/50 focus:bg-background border border-border/70 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 transition-all"
-          />
-        </div>
+        <button
+          type="button"
+          onClick={openAdminSearch}
+          className="hidden h-9 w-64 items-center gap-2 rounded-xl border border-border/70 bg-muted/30 px-3.5 text-xs text-muted-foreground transition-colors hover:bg-muted/60 md:flex lg:w-80"
+        >
+          <MagnifyingGlass size={15} />
+          <span className="flex-1 text-left">Search users, listings, pages</span>
+          <kbd className="rounded-md border border-border bg-card px-1.5 py-0.5 text-2xs font-semibold">⌘K</kbd>
+        </button>
 
         <Link
           href="/notifications"

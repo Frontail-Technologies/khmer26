@@ -6,8 +6,16 @@ export interface AdminRouteInfo {
 }
 
 export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
+  "/admin/queue": {
+    title: "Queue",
+    subtitle: "",
+  },
+  "/admin/setup": {
+    title: "Setup",
+    subtitle: "",
+  },
   "/admin": {
-    title: "Dashboard Overview",
+    title: "Dashboard",
     subtitle: "Marketplace activity, listings, and moderation summary.",
   },
   "/admin/listings": {

@@ -43,7 +43,7 @@ describe('<AdminSidebar />', () => {
     expect(screen.getByText('Reports')).toHaveClass(
       'group-data-[collapsible=icon]:hidden'
     );
-    expect(screen.getByText('Content Management')).toHaveClass(
+    expect(screen.getByText('Setup')).toHaveClass(
       'group-data-[collapsible=icon]:hidden'
     );
     expect(screen.getByText('View Marketplace')).toHaveClass(
@@ -64,9 +64,7 @@ describe('<AdminSidebar />', () => {
       'href',
       '/reports'
     );
-    expect(screen.getByText('Content Management').closest('a')).toHaveAttribute(
-      'href',
-      '/content/homepage'
-    );
+    expect(screen.getByText('Setup').closest('a')).toHaveAttribute('href', '/setup');
+    expect(screen.getByText('Queue').closest('a')).toHaveAttribute('href', '/queue');
   });
 });

@@ -63,9 +63,14 @@ export function normalizeListing(raw: Record<string, unknown>): AdminListing {
     removed: 'removed',
   };
 
+  // Same precedence as the dashboard counters: sold/expired listings are not live, so they are not
+  // "pending" even if a review flag is still set (otherwise menu badges and lists disagree).
+  const endedStatus = listing.status === 'sold' || listing.status === 'expired';
   const status: AdminListingStatus =
     listing.isFlagged === true
       ? 'flagged'
+      : endedStatus
+      ? statusMapping[listing.status as string]
       : listing.moderationStatus === 'pending_review'
       ? 'pending'
       : listing.moderationStatus === 'rejected'
