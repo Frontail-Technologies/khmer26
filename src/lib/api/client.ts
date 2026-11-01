@@ -238,7 +238,14 @@ export async function apiRequest<T>(endpoint: string, options: RequestOptions = 
       ...baseHeaders,
     };
 
-    const csrfToken = csrfRequired(endpoint, method) ? await ensureCsrfToken() : getStoredCsrfToken();
+    // Only writes carry the CSRF header: the API ignores it on GET/HEAD, and any custom header turns a
+    // cross-origin read into a "non-simple" request that costs an extra CORS preflight round trip.
+    const isWrite = UNSAFE_METHODS.has(method.toUpperCase());
+    const csrfToken = csrfRequired(endpoint, method)
+      ? await ensureCsrfToken()
+      : isWrite
+        ? getStoredCsrfToken()
+        : null;
     if (csrfToken && !reqHeaders['x-csrf-token'] && !reqHeaders['X-CSRF-Token']) {
       reqHeaders['x-csrf-token'] = csrfToken;
     }

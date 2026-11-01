@@ -19,7 +19,7 @@ import { SellCtaBanner } from "./sell-cta-banner"
 
 const POPULAR_CATEGORIES_SLUG = "homepage-popular-categories"
 
-function HomeSkeleton() {
+export function HomeSkeleton() {
   const tGenerated = useTranslations("generated")
   return (
     <div aria-busy="true" aria-label={tGenerated("loadingHomepage")}>

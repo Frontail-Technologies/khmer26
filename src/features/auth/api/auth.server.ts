@@ -18,6 +18,9 @@ export async function getServerCurrentUser(cookieHeader: string): Promise<AuthUs
       Cookie: cookieHeader,
     },
     cache: "no-store",
+    // Every page waits on this lookup; never let a slow API hold the whole page. On timeout the
+    // prefetch is skipped and the browser resolves the user instead.
+    signal: AbortSignal.timeout(800),
   })
 
   if (!response.ok) {
