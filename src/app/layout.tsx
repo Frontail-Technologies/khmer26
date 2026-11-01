@@ -8,6 +8,7 @@ import { AppProviders } from "@/providers/AppProviders"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { AppFooter } from "@/components/layout/AppFooter"
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation"
+import { PwaShell } from "@/components/pwa/pwa-shell"
 import { SEO } from "@/lib/constants/site"
 import { cn } from "@/lib/utils"
 import { cookies, headers } from "next/headers"
@@ -62,6 +63,18 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  applicationName: "offerupkh",
+  appleWebApp: {
+    capable: true,
+    title: "offerupkh",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -114,6 +127,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <main className="flex-1" suppressHydrationWarning>{children}</main>
                 <AppFooter />
                 <MobileBottomNavigation />
+                <PwaShell />
               </>
             )}
           </AppProviders>

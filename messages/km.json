@@ -1231,5 +1231,17 @@
       "results": "លទ្ធផលសម្រាប់ \"{query}\"",
       "description": "ស្វែងរកដំណឹងទីផ្សារដែលបានផ្ទៀងផ្ទាត់នៅកម្ពុជា។"
     }
+  },
+  "pwa": {
+    "offline": "អ្នកកំពុងគ្មានអ៊ីនធឺណិត — យើងនឹងភ្ជាប់ឡើងវិញដោយស្វ័យប្រវត្តិ",
+    "backOnline": "បានភ្ជាប់អ៊ីនធឺណិតវិញ",
+    "updateReady": "កំណែថ្មីរបស់ offerupkh រួចរាល់ហើយ",
+    "updateAction": "ផ្ទុកឡើងវិញ",
+    "installTitle": "ដំឡើង offerupkh",
+    "installBody": "រុករកលឿនជាងមុន ចុចតែម្តងពីអេក្រង់ដើម។",
+    "installAction": "ដំឡើង",
+    "installIosBody": "ចុច Share រួចជ្រើស “Add to Home Screen”។",
+    "dismiss": "ពេលក្រោយ",
+    "navigating": "កំពុងផ្ទុកទំព័រ"
   }
 }

@@ -248,3 +248,177 @@
 }
 
 
+/* ───────────────────────── App feel: touch, scrolling, motion ───────────────────────── */
+
+@layer base {
+  html {
+    /* No grey flash on tap (iOS/Android) and no double-tap zoom delay on controls. */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+
+  img {
+    -webkit-user-drag: none;
+  }
+
+  /* Installed app (standalone): no rubber-band/pull-to-refresh yanking the whole shell. */
+  @media (display-mode: standalone) {
+    html {
+      overscroll-behavior-y: none;
+    }
+  }
+}
+
+/* Press feedback for anything tappable: a quick, springy dip like native lists and buttons. */
+@utility pressable {
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Momentum horizontal rails (category chips, carousels) with snap and no visible scrollbar. */
+@utility scroll-rail {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Off-screen sections skip layout/paint until scrolled near: big win on long listing feeds. */
+@utility content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+@keyframes k26-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Staggered reveal for grid items; set --i on each child for the delay step. */
+@utility reveal {
+  animation: k26-fade-up 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 35ms);
+}
+
+/* ───────────────────────── View transitions (route changes) ───────────────────────── */
+
+:root {
+  --vt-exit: 120ms;
+  --vt-enter: 240ms;
+  --vt-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Let taps pass through to the live page while a transition runs. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* The page wrapper animates; the root (header/footer chrome) swaps without a crossfade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(.page-exit) {
+  animation: var(--vt-exit) ease-in both k26-vt-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: var(--vt-enter) var(--vt-ease) var(--vt-exit) both k26-vt-in;
+}
+
+@keyframes k26-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes k26-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Header, bottom nav and progress bar stay anchored above the moving page. */
+::view-transition-group(site-header),
+::view-transition-group(bottom-nav),
+::view-transition-group(nav-progress) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(bottom-nav),
+::view-transition-old(nav-progress) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(bottom-nav),
+::view-transition-new(nav-progress) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .reveal {
+    animation: none;
+  }
+  .pressable:active {
+    transform: none;
+  }
+}
+
+/* Skeleton shimmer: a soft light sweep reads as "loading" better than a blink. */
+@keyframes k26-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--card) 65%, transparent), transparent);
+    animation: k26-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation: none;
+  }
+}

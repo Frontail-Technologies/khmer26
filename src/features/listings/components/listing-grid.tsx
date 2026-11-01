@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import type { ListingCardData } from "@/types"
 import { ListingCard } from "./listing-card"
@@ -20,11 +20,13 @@ export function ListingGrid({ listings, featured = false, className, leadingItem
       )}
     >
       {leadingItem}
-      {listings.map((listing) => (
+      {listings.map((listing, index) => (
         <ListingCard
           key={listing.id}
           listing={listing}
           featured={featured}
+          className="reveal"
+          style={{ "--i": index } as CSSProperties}
         />
       ))}
     </div>

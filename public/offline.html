@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1d26" media="(prefers-color-scheme: dark)">
+  <title>You're offline · offerupkh</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #f7f9fc; --fg: #141a24; --muted: #667085; --card: #fff; --border: #e4e8ef; --primary: #1f5fbf; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0f141d; --fg: #eef1f6; --muted: #98a2b3; --card: #161d29; --border: #263042; --primary: #3d7fe0; } }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Khmer", sans-serif; -webkit-font-smoothing: antialiased; }
+    main { width: 100%; max-width: 360px; text-align: center; background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px 24px; box-shadow: 0 10px 30px -12px rgb(0 0 0 / .15); animation: rise .4s cubic-bezier(.2,.8,.2,1) both; }
+    img { height: 32px; width: auto; margin-bottom: 20px; }
+    .dot { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 999px; display: grid; place-items: center;
+      background: color-mix(in oklab, var(--primary) 12%, transparent); color: var(--primary); }
+    h1 { font-size: 18px; margin: 0 0 6px; }
+    p { margin: 0 0 4px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+    button { margin-top: 20px; width: 100%; height: 44px; border: 0; border-radius: 12px; background: var(--primary); color: #fff;
+      font: inherit; font-weight: 700; cursor: pointer; transition: transform .12s ease; }
+    button:active { transform: scale(.97); }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { main { animation: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/images/logo.png" alt="offerupkh">
+    <div class="dot" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>Check your connection and try again.</p>
+    <p lang="km">សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។</p>
+    <button type="button" id="retry">Try again</button>
+  </main>
+  <script>
+    document.getElementById("retry").addEventListener("click", function () { location.reload() })
+    window.addEventListener("online", function () { location.reload() })
+  </script>
+</body>
+</html>

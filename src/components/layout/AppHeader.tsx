@@ -60,7 +60,8 @@ export function AppHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full max-w-full rounded-b-2xl md:rounded-none border-b border-border bg-card shadow-xs ${
+      style={{ viewTransitionName: "site-header" }}
+      className={`sticky top-0 z-50 w-full max-w-full rounded-b-2xl md:rounded-none border-b border-border/70 bg-card/85 shadow-xs backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(0))]:bg-card pt-[env(safe-area-inset-top,0px)] ${
         shouldHideAppHeaderOnMobile(pathname) ? "max-md:hidden" : ""
       }`}
     >

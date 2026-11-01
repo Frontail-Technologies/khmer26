@@ -6,6 +6,7 @@ import type { ListingCardData } from "@/types"
 import { ImageSquare, ShieldCheck } from "@phosphor-icons/react/dist/ssr"
 import Image from "next/image"
 import Link from "next/link"
+import type { CSSProperties } from "react"
 import { FavoriteButton } from "./favorite-button"
 
 interface ListingCardProps {
@@ -13,6 +14,7 @@ interface ListingCardProps {
   featured?: boolean
   compact?: boolean
   className?: string
+  style?: CSSProperties
 }
 
 import { formatPriceWithCurrency } from "@/lib/formatters/currency"
@@ -22,6 +24,7 @@ export function ListingCard({
   listing,
   compact = false,
   className,
+  style,
 }: ListingCardProps) {
   const tGenerated = useTranslations("generated")
   const tUi = useTranslations("ui.common")
@@ -37,9 +40,10 @@ export function ListingCard({
   return (
     <Card
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-0 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md cursor-pointer",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-0 shadow-2xs transition-[translate,scale,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md active:scale-[0.98] active:shadow-xs cursor-pointer",
         className
       )}
+      style={style}
     >
       <Link
         href={`/listing/${listing.slug}`}
@@ -56,7 +60,7 @@ export function ListingCard({
             alt={imageAlt}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/50" aria-hidden="true">

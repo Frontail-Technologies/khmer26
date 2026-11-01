@@ -1231,5 +1231,17 @@
       "results": "Results for \"{query}\"",
       "description": "Search verified marketplace listings in Cambodia."
     }
+  },
+  "pwa": {
+    "offline": "You're offline — we'll reconnect automatically",
+    "backOnline": "Back online",
+    "updateReady": "A new version of offerupkh is ready",
+    "updateAction": "Refresh",
+    "installTitle": "Install offerupkh",
+    "installBody": "Faster browsing, one tap from your home screen.",
+    "installAction": "Install",
+    "installIosBody": "Tap Share, then “Add to Home Screen”.",
+    "dismiss": "Not now",
+    "navigating": "Loading page"
   }
 }
