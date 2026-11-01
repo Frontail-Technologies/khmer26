@@ -120,7 +120,9 @@ describe("<ListingSellerCard /> structure", () => {
     renderWithProviders(<ListingSellerCard seller={seller(TWO)} listingId="l1" isOwner={false} />)
 
     const urlLinks = screen.getAllByRole("link").filter((a) => a.getAttribute("href") === "/seller/s1")
-    expect(urlLinks.some((a) => a.textContent === "khmer26.com/seller/s1")).toBe(true)
+    // Desktop shows the store address; phones show a "Public Store" label (CSS-switched, both in the DOM).
+    expect(urlLinks.some((a) => a.textContent?.includes("khmer26.com/seller/s1"))).toBe(true)
+    expect(urlLinks.some((a) => a.textContent?.includes("Public Store"))).toBe(true)
     expect(document.body.textContent).not.toMatch(/localhost/)
 
     expect(screen.getAllByRole("button", { name: "Chat" })).toHaveLength(1)

@@ -6,7 +6,7 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 
 import Link from "next/link"
 import { useState } from "react"
-import { ChatCircleDots, CurrencyDollar, Globe, ShieldCheck, Star, UserCheck, UserPlus } from "@phosphor-icons/react"
+import { CaretRight, ChatCircleDots, CurrencyDollar, Globe, ShieldCheck, Star, Storefront, UserCheck, UserPlus } from "@phosphor-icons/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -144,8 +144,12 @@ export function ListingSellerCard({ seller, listingId, isOwner, mobileOffer = nu
             className="flex items-center gap-2 text-sm text-primary hover:underline"
             aria-label={`Seller profile ${siteHost()}${profilePath}`}
           >
-            <Globe size={16} className="shrink-0 text-muted-foreground" />
-            <span className="truncate">{`${siteHost()}${profilePath}`}</span>
+            <Globe size={16} className="shrink-0 text-muted-foreground max-md:hidden" />
+            <Storefront size={16} className="shrink-0 text-muted-foreground md:hidden" />
+            {/* Phones: a plain "store" link; the raw profile address is desktop sidebar chrome. */}
+            <span className="truncate max-md:hidden">{`${siteHost()}${profilePath}`}</span>
+            <span className="flex-1 font-semibold md:hidden">{tGenerated("publicStore")}</span>
+            <CaretRight size={14} weight="bold" className="shrink-0 md:hidden" />
           </Link>
         )}
 
