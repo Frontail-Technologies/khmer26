@@ -81,8 +81,8 @@ export function NotificationSettings({
               key={item.key}
               className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
             >
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0">
                   <Icon size={16} />
                 </div>
                 <span className="font-bold text-xs sm:text-sm text-foreground block">

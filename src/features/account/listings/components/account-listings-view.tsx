@@ -8,8 +8,9 @@ import { useState, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus, ListBullets, MagnifyingGlass, BookmarkSimple, ShoppingBagOpen } from "@phosphor-icons/react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { AccountPageHeader } from "../../components/account-page-header"
 import { AccountListingCard } from "./account-listing-card"
@@ -100,10 +101,6 @@ export function AccountListingsView() {
     { value: "draft", label: t("statusDraft"), count: counts.draft },
     { value: "expired", label: t("statusExpired"), count: counts.expired },
   ] as const
-  const statusSelectItems = statusOptions.map((option) => ({
-    value: option.value,
-    label: `${option.label} (${option.count})`,
-  }))
 
   const categoryFilterIds = useMemo(() => collectCategoryIds(categoryTree, categoryFilter), [categoryTree, categoryFilter])
 
@@ -146,8 +143,9 @@ export function AccountListingsView() {
   }, [listings, statusFilter, searchQuery, categoryFilter, categoryFilterIds, sortOption])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <AccountPageHeader
+        className="max-lg:hidden"
         title={tGenerated("myListings")}
         action={
           <Button
@@ -172,36 +170,57 @@ export function AccountListingsView() {
           onSortOptionChange={setSortOption}
         />
 
-        <div className="flex">
-          <Select
-            value={statusFilter}
-            items={statusSelectItems}
-            onValueChange={(value) => setStatusFilter(value as AccountListingFilterStatus)}
-          >
-            <SelectTrigger className="h-10 w-full bg-background sm:w-56">
-              <SelectValue placeholder={tGenerated("listingStatus")} />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <span>{option.label}</span>
-                  <span className="text-muted-foreground">{option.count}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Status as swipeable chips with counts (like native marketplace apps), not a dropdown. */}
+        <div className="scroll-rail -mx-3 flex gap-2 px-3 pb-0.5 sm:mx-0 sm:flex-wrap sm:px-0" role="tablist" aria-label={tGenerated("listingStatus")}>
+          {statusOptions.map((option) => {
+            const active = statusFilter === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setStatusFilter(option.value as AccountListingFilterStatus)}
+                className={cn(
+                  "pressable inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors",
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/70 bg-card text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {option.label}
+                <span
+                  className={cn(
+                    "min-w-5 rounded-full px-1.5 py-px text-center text-2xs font-bold",
+                    active ? "bg-white/20" : "bg-muted text-foreground/70"
+                  )}
+                >
+                  {option.count}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-border/80 p-10 text-center text-sm text-muted-foreground bg-card">
-            <LocalizedText id="loadingYourListings" />
+          <div className="space-y-3" aria-busy="true" aria-label={tGenerated("loadingYourListings")}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex gap-3 rounded-2xl border border-border/70 bg-card p-3">
+                <Skeleton className="h-24 w-24 shrink-0 rounded-xl sm:w-36" />
+                <div className="flex-1 space-y-2 py-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : isError ? (
           <div className="rounded-2xl border border-destructive/30 p-10 text-center text-sm text-destructive bg-card">
             <LocalizedText id="weCouldnTLoadYourListingsPleaseRefreshAnd" />
           </div>
         ) : filteredListings.length > 0 ? (
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 sm:pt-2">
             {filteredListings.map((listing) => (
               <AccountListingCard
                 key={listing.id}
@@ -214,7 +233,7 @@ export function AccountListingsView() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-border/80 p-6 sm:p-10 bg-card/40">
+          <div className="rounded-2xl border border-dashed border-border/80 p-6 sm:p-10 bg-card/40 max-sm:border-0 max-sm:bg-transparent max-sm:py-10">
             {statusFilter === "draft" ? (
               <EmptyState
                 icon={<BookmarkSimple size={32} className="text-muted-foreground" />}

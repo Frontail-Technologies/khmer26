@@ -103,8 +103,9 @@ export function SavedSearchesView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <AccountPageHeader
+        className="max-lg:hidden"
         title={tGenerated("savedSearches")}
         action={
           <Button
@@ -172,7 +173,7 @@ export function SavedSearchesView() {
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-border/80 bg-card/40 p-8">
+        <div className="rounded-xl border border-dashed border-border/80 bg-card/40 p-8 max-sm:border-0 max-sm:bg-transparent max-sm:px-2 max-sm:py-10">
           <EmptyState
             icon={<BookmarkSimple size={32} className="text-muted-foreground" />}
             title={tGenerated("noSavedSearchesYet")}

@@ -11,9 +11,9 @@ export function CategoryTile({ name, href, imageUrl }: CategoryTileProps) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col items-center gap-3 rounded-lg border border-border/70 bg-card px-3 py-5 text-center shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="pressable group flex h-full flex-col items-center gap-2 rounded-2xl border border-border/70 bg-card px-1.5 py-3 text-center shadow-2xs transition-all sm:gap-3 sm:rounded-lg sm:px-3 sm:py-5 duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 sm:h-20 sm:w-20">
+      <span className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 sm:h-20 sm:w-20">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -31,7 +31,7 @@ export function CategoryTile({ name, href, imageUrl }: CategoryTileProps) {
           </span>
         )}
       </span>
-      <span className="line-clamp-2 text-sm font-medium leading-snug text-foreground transition-colors group-hover:text-primary sm:text-[15px]">
+      <span className="line-clamp-2 text-xs font-medium leading-snug text-foreground sm:text-sm transition-colors group-hover:text-primary sm:text-[15px]">
         {name}
       </span>
     </Link>

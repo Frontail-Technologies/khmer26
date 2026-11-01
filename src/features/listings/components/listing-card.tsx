@@ -133,6 +133,7 @@ export function ListingCard({
               listingId={listing.id}
               initialFavorited={listing.isFavorited}
               className="h-8 w-8 bg-transparent text-muted-foreground hover:bg-muted hover:text-destructive"
+              favoritedClassName="text-destructive"
             />
           </div>
         </div>

@@ -165,7 +165,7 @@ export function ProfileForm({ account }: ProfileFormProps) {
           <section className="space-y-4 max-sm:rounded-2xl max-sm:border max-sm:border-border/60 max-sm:bg-card max-sm:p-4">
             <h3 className="flex items-center gap-2 text-sm font-bold sm:text-base"><Storefront size={16} className="text-primary" /><LocalizedText id="sellerProfile" /></h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label={tGenerated("sellerType")}><Select value={sellerType} onValueChange={(value) => { setSellerType(value as SellerType); setIsDirty(true) }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual"><LocalizedText id="individualSeller" /></SelectItem><SelectItem value="business"><LocalizedText id="businessStore" /></SelectItem><SelectItem value="dealer"><LocalizedText id="dealer" /></SelectItem></SelectContent></Select></Field>
+              <Field label={tGenerated("sellerType")}><Select value={sellerType} onValueChange={(value) => { setSellerType(value as SellerType); setIsDirty(true) }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual">{tGenerated("individualSeller")}</SelectItem><SelectItem value="business">{tGenerated("businessStore")}</SelectItem><SelectItem value="dealer">{tGenerated("dealer")}</SelectItem></SelectContent></Select></Field>
               {sellerType !== "individual" && <Field label={tGenerated("businessStoreName")}><Input value={shopName} onChange={(event) => { setShopName(event.target.value); setIsDirty(true) }} minLength={2} maxLength={100} required /></Field>}
             </div>
           </section>

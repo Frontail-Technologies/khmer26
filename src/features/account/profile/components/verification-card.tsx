@@ -179,7 +179,7 @@ export function VerificationCard({ account }: { account: AccountProfile }) {
           </DialogHeader>
           <form className="min-w-0 space-y-4" onSubmit={handleSubmit}>
             <div className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              <div className="min-w-0 space-y-1.5"><label className="text-xs font-bold"><LocalizedText id="verificationType" /></label><Select value={type} onValueChange={(value) => setType(value as SellerType)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual"><LocalizedText id="individual" /></SelectItem><SelectItem value="business"><LocalizedText id="business" /></SelectItem><SelectItem value="dealer"><LocalizedText id="dealer" /></SelectItem></SelectContent></Select></div>
+              <div className="min-w-0 space-y-1.5"><label className="text-xs font-bold"><LocalizedText id="verificationType" /></label><Select value={type} onValueChange={(value) => setType(value as SellerType)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual">{tGenerated("individual")}</SelectItem><SelectItem value="business">{tGenerated("business")}</SelectItem><SelectItem value="dealer">{tGenerated("dealer")}</SelectItem></SelectContent></Select></div>
               <div className="min-w-0 space-y-1.5"><label className="text-xs font-bold"><LocalizedText id="legalName" /></label><Input value={legalName} onChange={(event) => setLegalName(event.target.value)} maxLength={200} required /></div>
             </div>
             <div className="space-y-2">

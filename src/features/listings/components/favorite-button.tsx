@@ -17,6 +17,8 @@ interface FavoriteButtonProps {
   showLabel?: boolean
   /** Icon shown next to the label; cards use the heart, the detail action row a bookmark. */
   icon?: "heart" | "bookmark"
+  /** Classes applied only while saved; they win over `className` (e.g. a muted card button turns red). */
+  favoritedClassName?: string
 }
 
 export function FavoriteButton({
@@ -25,6 +27,7 @@ export function FavoriteButton({
   className,
   showLabel = false,
   icon = "heart",
+  favoritedClassName,
 }: FavoriteButtonProps) {
   const tGenerated = useTranslations("generated")
   const router = useRouter()
@@ -72,7 +75,8 @@ export function FavoriteButton({
           : "flex h-7 w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-xs text-white transition-all hover:bg-black/65 active:scale-90",
         !showLabel && favorited && "bg-black/60 text-accent",
         showLabel && favorited && (icon === "bookmark" ? "text-primary" : "text-destructive"),
-        className
+        className,
+        favorited && favoritedClassName
       )}
     >
       <Icon

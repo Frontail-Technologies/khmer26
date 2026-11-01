@@ -92,6 +92,11 @@ export function AppearanceSettings() {
           <div className="w-full sm:w-44">
             <Select
               value={language}
+              // Without items Base UI cannot show the selected label until the menu has been opened once.
+              items={[
+                { value: "en", label: tGenerated("englishUs") },
+                { value: "km", label: tGenerated("khmer") },
+              ]}
               disabled={isLanguagePending}
               onValueChange={(value) => {
                 const locale = value as "en" | "km"
@@ -104,10 +109,10 @@ export function AppearanceSettings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en" className="text-xs">
-                  <LocalizedText id="englishUs" />
+                  {tGenerated("englishUs")}
                 </SelectItem>
                 <SelectItem value="km" className="text-xs">
-                  <LocalizedText id="khmer" />
+                  {tGenerated("khmer")}
                 </SelectItem>
               </SelectContent>
             </Select>

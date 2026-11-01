@@ -63,14 +63,14 @@ export function AccountListingsToolbar({
       <div className="relative flex-1">
         <MagnifyingGlass
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          className="absolute left-3 max-sm:left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
         />
         <Input
           type="search"
           placeholder={tGenerated("searchMyListings")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 h-9 text-xs sm:text-sm bg-background"
+          className="pl-9 h-9 text-xs sm:text-sm bg-background max-sm:h-11 max-sm:rounded-full max-sm:bg-card max-sm:pl-10 max-sm:text-sm"
         />
       </div>
 
@@ -81,7 +81,7 @@ export function AccountListingsToolbar({
             items={categoryOptions}
             onValueChange={(val) => onCategoryFilterChange(val as string)}
           >
-            <SelectTrigger className="h-9 text-xs sm:text-sm bg-background">
+            <SelectTrigger className="h-9 w-full text-xs sm:text-sm bg-background max-sm:rounded-full max-sm:bg-card">
               <div className="flex items-center gap-1.5 truncate">
                 <Funnel size={14} className="text-muted-foreground shrink-0" />
                 <SelectValue placeholder={tGenerated("category")} />
@@ -103,7 +103,7 @@ export function AccountListingsToolbar({
             items={sortOptions}
             onValueChange={(val) => onSortOptionChange(val as ListingSortOption)}
           >
-            <SelectTrigger className="h-9 text-xs sm:text-sm bg-background">
+            <SelectTrigger className="h-9 w-full text-xs sm:text-sm bg-background max-sm:rounded-full max-sm:bg-card">
               <div className="flex items-center gap-1.5 truncate">
                 <ArrowsDownUp size={14} className="text-muted-foreground shrink-0" />
                 <SelectValue placeholder={tGenerated("sortBy")} />

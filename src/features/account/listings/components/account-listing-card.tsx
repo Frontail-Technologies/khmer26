@@ -58,15 +58,16 @@ export function AccountListingCard({
   )
 
   return (
-    <Card className="rounded-xl border border-border/80 bg-card overflow-hidden transition-all hover:border-border hover:shadow-2xs">
-      <div className="flex flex-col sm:flex-row p-3.5 sm:p-4 gap-3.5 sm:gap-4 items-stretch sm:items-center">
-        <div className="relative w-full sm:w-36 md:w-44 h-36 sm:h-28 rounded-lg overflow-hidden bg-muted shrink-0">
+    <Card className="rounded-2xl border border-border/70 bg-card overflow-hidden transition-all hover:border-border hover:shadow-2xs">
+      {/* Phones: thumbnail-left row (grid); the stats/actions footer spans the full width underneath. */}
+      <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-x-3 gap-y-2 p-3 sm:flex sm:flex-row sm:p-4 sm:gap-4 sm:items-center">
+        <div className="relative row-span-2 h-24 w-24 sm:row-span-1 sm:w-36 md:w-44 sm:h-28 rounded-xl overflow-hidden bg-muted shrink-0">
           {listing.imageUrl ? (
             <Image
               src={listing.imageUrl}
               alt={listing.title}
               fill
-              sizes="(max-width: 640px) 100vw, 200px"
+              sizes="(max-width: 640px) 96px, 200px"
               className="object-cover"
             />
           ) : (
@@ -75,18 +76,18 @@ export function AccountListingCard({
             </div>
           )}
 
-          <div className="absolute top-2 left-2 sm:hidden">
+          <div className="absolute top-1 left-1 max-w-[calc(100%-0.5rem)] origin-top-left scale-[0.8] sm:hidden [&_*]:truncate">
             <ListingStatusBadge status={listing.status} />
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1 min-w-0">
+        <div className="contents sm:block sm:flex-1 sm:min-w-0 sm:space-y-2">
+          <div className="col-start-2 flex min-w-0 items-start justify-between gap-2 max-sm:flex-col max-sm:gap-1">
+            <div className="space-y-1 min-w-0 max-sm:w-full">
               <div className="hidden sm:inline-flex mb-1">
                 <ListingStatusBadge status={listing.status} />
               </div>
-              <h3 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-1">
+              <h3 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-2 sm:line-clamp-1">
                 {listing.title}
               </h3>
               {(listing.featured || listing.topListing || listing.urgent) && (
@@ -98,7 +99,7 @@ export function AccountListingCard({
               )}
             </div>
 
-            <div className="text-right shrink-0">
+            <div className="text-right shrink-0 max-sm:flex max-sm:items-baseline max-sm:gap-1.5 max-sm:text-left">
               <span className="text-base sm:text-lg font-black text-primary block">
                 {formattedPrice}
               </span>
@@ -110,7 +111,7 @@ export function AccountListingCard({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <div className="col-start-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground max-sm:text-xxs">
             <span className="inline-flex items-center gap-1 truncate">
               <MapPin size={13} className="text-primary shrink-0" />
               <span>{listing.location.label}</span>
@@ -121,16 +122,16 @@ export function AccountListingCard({
               <span>{createdDateFormatted}</span>
             </span>
 
-            <span className="truncate max-w-30 sm:max-w-none text-muted-foreground/80">
+            <span className="truncate max-w-30 sm:max-w-none text-muted-foreground/80 max-sm:hidden">
               {listing.categoryName}
             </span>
           </div>
 
           {listing.status === "pending" && (
-            <ModerationKeywordNotice matches={listing.moderationMatches ?? []} />
+            <div className="col-span-2"><ModerationKeywordNotice matches={listing.moderationMatches ?? []} /></div>
           )}
 
-          <div className="pt-2 border-t border-border/50 flex flex-wrap items-center justify-between gap-2">
+          <div className="col-span-2 pt-2 border-t border-border/50 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
               <span
                 className="inline-flex items-center gap-1"

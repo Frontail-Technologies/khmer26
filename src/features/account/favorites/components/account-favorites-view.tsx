@@ -7,6 +7,7 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 import { useDeferredValue, useMemo, useState } from "react"
 import { ArrowsDownUp, Funnel, Heart, MagnifyingGlass } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -45,18 +46,19 @@ export function AccountFavoritesView() {
     categoryId: categoryFilter === "all" ? undefined : categoryFilter,
     sort: sortOption,
   })
-  const cards = useMemo(() => (favorites.data?.items ?? []).map(toListingCardData), [favorites.data?.items])
+  // Everything on this page is saved by definition: show the filled heart even if the DTO omits the flag.
+  const cards = useMemo(() => (favorites.data?.items ?? []).map((item) => ({ ...toListingCardData(item), isFavorited: true })), [favorites.data?.items])
   const pagination = favorites.data?.pagination
   const hasFilters = Boolean(searchQuery.trim()) || categoryFilter !== "all"
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <AccountPageHeader title={tGenerated("savedListings_635379")} />
 
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <div className="relative flex-1">
-            <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <MagnifyingGlass size={16} className="absolute left-3 max-sm:left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
               placeholder={tGenerated("searchSavedListings")}
@@ -65,18 +67,18 @@ export function AccountFavoritesView() {
                 setSearchQuery(event.target.value)
                 setPage(1)
               }}
-              className="pl-9 h-9 text-xs sm:text-sm bg-background"
+              className="pl-9 h-9 text-xs sm:text-sm bg-background max-sm:h-11 max-sm:rounded-full max-sm:bg-card max-sm:pl-10 max-sm:text-sm"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <Select value={categoryFilter} onValueChange={(value) => { setCategoryFilter(value as string); setPage(1) }}>
-              <SelectTrigger className="h-9 flex-1 sm:w-44 text-xs sm:text-sm bg-background">
+              <SelectTrigger className="h-9 flex-1 sm:w-44 text-xs sm:text-sm bg-background max-sm:min-w-0 max-sm:rounded-full max-sm:bg-card">
                 <Funnel size={14} className="text-muted-foreground shrink-0" />
                 <SelectValue placeholder={tGenerated("category")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-xs"><LocalizedText id="allCategories" /></SelectItem>
+                <SelectItem value="all" className="text-xs">{tGenerated("allCategories")}</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id} className="text-xs">{getLocalizedName(category)}</SelectItem>
                 ))}
@@ -84,15 +86,15 @@ export function AccountFavoritesView() {
             </Select>
 
             <Select value={sortOption} onValueChange={(value) => { setSortOption(value as FavoriteSortOption); setPage(1) }}>
-              <SelectTrigger className="h-9 flex-1 sm:w-44 text-xs sm:text-sm bg-background">
+              <SelectTrigger className="h-9 flex-1 sm:w-44 text-xs sm:text-sm bg-background max-sm:min-w-0 max-sm:rounded-full max-sm:bg-card">
                 <ArrowsDownUp size={14} className="text-muted-foreground shrink-0" />
                 <SelectValue placeholder={tGenerated("sortBy")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="recent" className="text-xs"><LocalizedText id="recentlySaved" /></SelectItem>
-                <SelectItem value="newest" className="text-xs"><LocalizedText id="newestListing" /></SelectItem>
-                <SelectItem value="price_asc" className="text-xs"><LocalizedText id="priceLowToHigh" /></SelectItem>
-                <SelectItem value="price_desc" className="text-xs"><LocalizedText id="priceHighToLow" /></SelectItem>
+                <SelectItem value="recent" className="text-xs">{tGenerated("recentlySaved")}</SelectItem>
+                <SelectItem value="newest" className="text-xs">{tGenerated("newestListing")}</SelectItem>
+                <SelectItem value="price_asc" className="text-xs">{tGenerated("priceLowToHigh")}</SelectItem>
+                <SelectItem value="price_desc" className="text-xs">{tGenerated("priceHighToLow")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -101,7 +103,7 @@ export function AccountFavoritesView() {
         </div>
 
         {favorites.isPending ? (
-          <div className="rounded-xl border border-border/80 bg-card p-10 text-center text-sm text-muted-foreground"><LocalizedText id="loadingSavedListings" /></div>
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 lg:grid-cols-3" aria-busy="true" aria-label={tGenerated("loadingSavedListings")}>{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-[4/5] w-full rounded-xl" />)}</div>
         ) : favorites.isError ? (
           <div className="rounded-xl border border-destructive/30 bg-card p-10 text-center">
             <p className="text-sm font-semibold text-destructive"><LocalizedText id="weCouldnTLoadYourSavedListings" /></p>
@@ -110,7 +112,7 @@ export function AccountFavoritesView() {
         ) : cards.length > 0 ? (
           <>
             {viewMode === "grid" ? (
-              <ListingGrid listings={cards} className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" />
+              <ListingGrid listings={cards} className="grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5" />
             ) : (
               <div className="space-y-2.5 sm:space-y-3">{cards.map((listing) => <ListingListRow key={listing.id} listing={listing} />)}</div>
             )}
@@ -128,7 +130,7 @@ export function AccountFavoritesView() {
             )}
           </>
         ) : (
-          <div className="rounded-xl border border-dashed border-border/80 p-6 sm:p-10 bg-card/40">
+          <div className="rounded-xl border border-dashed border-border/80 p-6 sm:p-10 bg-card/40 max-sm:border-0 max-sm:bg-transparent max-sm:px-2 max-sm:py-10">
             <EmptyState
               icon={hasFilters ? <MagnifyingGlass size={32} className="text-muted-foreground" /> : <Heart size={32} className="text-muted-foreground" />}
               title={hasFilters ? tGenerated("noSavedListingsMatch") : tGenerated("noSavedListingsYet")}

@@ -27,13 +27,13 @@ export function NotificationsView() {
   const pagination = notifications.data?.pagination
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <AccountPageHeader
         title={tGenerated("notifications")}
         action={(unread.data ?? 0) > 0 ? <Button variant="outline" size="sm" disabled={markAll.isPending} onClick={() => markAll.mutate(undefined)} className="shrink-0 gap-1.5"><Check size={15} /><LocalizedText id="markAllRead" /></Button> : undefined}
       />
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card p-3 shadow-xs sm:p-5">
+      <div className="overflow-hidden rounded-lg border border-border bg-card p-3 shadow-xs sm:p-5 max-sm:-mx-3 max-sm:rounded-none max-sm:border-x-0 max-sm:border-t-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none">
         <Tabs value={unreadOnly ? "unread" : "all"} onValueChange={(value) => { setUnreadOnly(value === "unread"); setPage(1) }}>
           <TabsList variant="line" className="px-4">
             <TabsTrigger value="all"><LocalizedText id="all" /></TabsTrigger>

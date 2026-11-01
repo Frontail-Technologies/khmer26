@@ -45,7 +45,10 @@ export function AppHeader() {
   const logout = useLogout()
   // The mobile search bar is open only for the page it was opened on, so it closes on navigation.
   const [mobileSearchPath, setMobileSearchPath] = useState<string | null>(null)
-  const mobileSearchOpen = mobileSearchPath === pathname
+  // Browse screens keep search permanently visible on phones, like the Explore tab of marketplace apps.
+  const searchPinned =
+    pathname === "/search" || pathname.startsWith("/search/") || pathname === "/categories" || pathname.startsWith("/category/")
+  const mobileSearchOpen = searchPinned || mobileSearchPath === pathname
 
   if (!shouldShowAppHeader(pathname)) {
     return null
@@ -188,6 +191,7 @@ export function AppHeader() {
 
           <button
             type="button"
+            hidden={searchPinned}
             aria-label={tGenerated("search")}
             aria-expanded={mobileSearchOpen}
             onClick={() => setMobileSearchPath(mobileSearchOpen ? null : pathname)}
@@ -293,7 +297,7 @@ export function AppHeader() {
       </div>
 
       {mobileSearchOpen && (
-        <div className="border-t border-border px-3 py-2 sm:px-4 md:hidden">
+        <div className="border-t border-border/60 px-3 pb-2.5 pt-2 sm:px-4 md:hidden">
           <SearchBar />
         </div>
       )}

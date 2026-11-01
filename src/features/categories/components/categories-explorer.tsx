@@ -22,10 +22,10 @@ export function CategoriesExplorer() {
         <div
           aria-busy="true"
           aria-label={tGenerated("loadingCategories_4413ff")}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
+          className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4"
         >
           {Array.from({ length: 12 }).map((_, i) => (
-            <Skeleton key={i} className="h-44 w-full rounded-2xl" />
+            <Skeleton key={i} className="h-28 w-full rounded-2xl sm:h-44" />
           ))}
         </div>
       ) : tree.isError ? (

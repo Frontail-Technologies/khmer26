@@ -102,6 +102,7 @@ export function ListingListRow({
               listingId={listing.id}
               initialFavorited={listing.isFavorited}
               className="h-9 w-9 bg-transparent text-muted-foreground hover:bg-muted hover:text-destructive"
+              favoritedClassName="text-destructive"
             />
           </div>
         </div>

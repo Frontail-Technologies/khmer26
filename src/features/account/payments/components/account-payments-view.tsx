@@ -25,7 +25,7 @@ export function AccountPaymentsView() {
   const payments = query.data?.items ?? []
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <AccountPageHeader title={tGenerated("paymentsReceipts")} />
       {query.isLoading ? (
         <div className="space-y-6"><div className="grid gap-4 sm:grid-cols-3"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-24" /></div><Skeleton className="h-72" /></div>
@@ -39,7 +39,7 @@ export function AccountPaymentsView() {
             {payments.length > 0 ? (
               <PaymentTable payments={payments} onSelectPayment={setSelectedPayment} />
             ) : (
-              <div className="rounded-lg border border-dashed bg-card/40 p-8"><EmptyState icon={<Receipt size={32} className="text-muted-foreground" />} title={tGenerated("noPaymentHistory")} description={tAccount("noPaymentsYetDescription")} /></div>
+              <div className="rounded-lg border border-dashed bg-card/40 p-8 max-sm:border-0 max-sm:bg-transparent max-sm:px-2 max-sm:py-10"><EmptyState icon={<Receipt size={32} className="text-muted-foreground" />} title={tGenerated("noPaymentHistory")} description={tAccount("noPaymentsYetDescription")} /></div>
             )}
           </section>
         </div>
