@@ -1242,6 +1242,16 @@
     "installAction": "Install",
     "installIosBody": "Tap Share, then “Add to Home Screen”.",
     "dismiss": "Not now",
-    "navigating": "Loading page"
+    "navigating": "Loading page",
+    "pushTitle": "Phone notifications",
+    "pushDescription": "Get alerts for new messages and offers, even when offerupkh is closed.",
+    "pushEnable": "Turn on",
+    "pushDisable": "Turn off",
+    "pushOn": "On for this device",
+    "pushBlocked": "Notifications are blocked for this site. Allow them in your browser settings.",
+    "pushUnsupported": "This browser doesn't support notifications.",
+    "pushIosInstall": "On iPhone, add offerupkh to your Home Screen first, then turn notifications on from the installed app.",
+    "pushEnabledToast": "Notifications turned on",
+    "pushFailed": "Couldn't turn on notifications. Please try again."
   }
 }

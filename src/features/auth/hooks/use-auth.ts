@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authKeys } from '@/lib/query/keys';
 import * as authApi from '../api/auth.api';
 import { ApiError } from '@/lib/api/client';
+import { unsubscribeThisDevice } from '@/features/push/push.api';
 
 const PENDING_EMAIL_KEY = 'auth_pending_email';
 const RESET_TOKEN_KEY = 'auth_reset_token';
@@ -125,7 +126,11 @@ export function useLogout() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: () => authApi.logout(),
+    // Detach this device from the account first, so the next person using it gets no pushes.
+    mutationFn: async () => {
+      await unsubscribeThisDevice().catch(() => {});
+      return authApi.logout();
+    },
     onSettled: () => {
       queryClient.removeQueries({ queryKey: authKeys.all });
       router.push('/');

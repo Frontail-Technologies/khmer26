@@ -10,9 +10,12 @@
  * - everything else            untouched (API calls are cross-origin, RSC payloads, POSTs,
  *                              auth and admin routes go straight to the network).
  *
+ * Push: shows notifications sent by the API (title/body already localised), collapses bursts per
+ * conversation via `tag`, and on tap focuses an open tab or opens the target page.
+ *
  * Bump VERSION to invalidate every cache on the next activation.
  */
-const VERSION = "v1"
+const VERSION = "v2"
 const STATIC_CACHE = `k26-static-${VERSION}`
 const MEDIA_CACHE = `k26-media-${VERSION}`
 const SHELL_CACHE = `k26-shell-${VERSION}`
@@ -135,4 +138,64 @@ self.addEventListener("fetch", (event) => {
   ) {
     event.respondWith(staleWhileRevalidate(event))
   }
+})
+
+/* ───────────────────────── Push notifications ───────────────────────── */
+
+function safeTargetUrl(path) {
+  // Only same-origin paths: a push payload must never be able to open another site.
+  try {
+    const url = new URL(path || "/account/notifications", self.location.origin)
+    return url.origin === self.location.origin ? url.href : self.location.origin + "/account/notifications"
+  } catch {
+    return self.location.origin + "/account/notifications"
+  }
+}
+
+self.addEventListener("push", (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    data = { title: "offerupkh", body: event.data ? event.data.text() : "" }
+  }
+  const url = safeTargetUrl(data.url)
+
+  event.waitUntil(
+    (async () => {
+      // Already looking at this exact page (e.g. the open conversation): the live UI shows it.
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true })
+      const viewing = windows.some((client) => client.focused && client.visibilityState === "visible" && client.url === url)
+      if (viewing) return
+
+      await self.registration.showNotification(data.title || "offerupkh", {
+        body: data.body || "",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/badge-72.png",
+        tag: data.tag,
+        renotify: Boolean(data.tag),
+        timestamp: Date.now(),
+        data: { url, notificationId: data.notificationId },
+      })
+    })()
+  )
+})
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close()
+  const url = safeTargetUrl(event.notification.data && event.notification.data.url)
+
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true })
+      const same = windows.find((client) => client.url === url)
+      if (same) return same.focus()
+      const any = windows.find((client) => new URL(client.url).origin === self.location.origin)
+      if (any) {
+        await any.focus()
+        return any.navigate(url).catch(() => self.clients.openWindow(url))
+      }
+      return self.clients.openWindow(url)
+    })()
+  )
 })

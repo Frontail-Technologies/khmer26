@@ -6,6 +6,7 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 
 import { AccountPageHeader } from "../../components/account-page-header"
 import { NotificationSettings } from "./notification-settings"
+import { PushNotificationsCard } from "@/features/push/push-notifications-card"
 import { PrivacySettings } from "./privacy-settings"
 import { AppearanceSettings } from "./appearance-settings"
 import { SecuritySettings } from "./security-settings"
@@ -71,6 +72,8 @@ export function SettingsView() {
             </button>
           </div>
         )}
+        <PushNotificationsCard />
+
         <NotificationSettings
           settings={notificationPreferences.data ?? DEFAULT_NOTIFICATIONS}
           onChange={handleNotificationChange}
