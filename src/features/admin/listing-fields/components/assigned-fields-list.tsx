@@ -111,9 +111,6 @@ export function AssignedFieldsList({
           <div className="p-10 text-center border border-dashed border-border/70 rounded-xl space-y-2">
             <Sliders size={28} weight="duotone" className="mx-auto text-muted-foreground/60" />
             <p className="text-xs font-bold text-foreground">No listing fields assigned yet</p>
-            <p className="text-xxs text-muted-foreground max-w-sm mx-auto">
-              Assign fields from the reusable field library to build the Post Ad form for this category.
-            </p>
             <Button
               size="sm"
               variant="outline"

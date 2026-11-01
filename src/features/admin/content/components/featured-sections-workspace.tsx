@@ -8,8 +8,8 @@ import {
   Trash,
   ArrowUp,
   ArrowDown,
-  MagnifyingGlass,
 } from "@phosphor-icons/react"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DragReorderList } from "@/components/shared/drag-reorder-list"
@@ -241,21 +241,11 @@ export function FeaturedSectionsWorkspace({
       </div>
 
       <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden flex flex-col min-w-0">
-        <div className="p-3.5 border-b border-border/60">
-          <div className="relative max-w-sm">
-            <MagnifyingGlass
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search featured sections..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8.5 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search featured sections" }}
+          activeCount={0}
+          onReset={() => {}}
+        />
 
         <div className="overflow-x-auto min-w-0 flex-1">
           <Table>

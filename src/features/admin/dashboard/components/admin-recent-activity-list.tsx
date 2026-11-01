@@ -13,10 +13,10 @@ export function AdminRecentActivityList() {
   const activities = data?.recentActivity ?? []
 
   return (
-    <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="p-4 sm:p-5 pb-3 flex flex-row items-center justify-between border-b border-border/60">
+    <Card className="rounded-2xl border border-border/60 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
         <div className="space-y-0.5">
-          <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+          <CardTitle className="text-sm font-bold text-foreground">
             Audit Activity
           </CardTitle>
         </div>

@@ -4,7 +4,6 @@ import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
-  MagnifyingGlass,
   Plus,
   CaretRight,
   CaretDown,
@@ -22,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -176,41 +176,27 @@ export function CategoryTreeList({ categories: fallbackCategories = [] }: Catego
   return (
     <div className="space-y-4">
       <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden">
-        <div className="p-3.5 sm:p-4 border-b border-border/60 bg-muted/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <MagnifyingGlass
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search categories, subcategories, or slug..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
+        <AdminFilterBar
+          search={{ value: search, onChange: setSearch, placeholder: "Search categories" }}
+          activeCount={0}
+          onReset={() => {}}
+          trailing={
             <Button
               size="sm"
               onClick={handleOpenAddRoot}
-              className="h-9 px-3.5 text-xs font-bold gap-1.5 rounded-lg cursor-pointer shrink-0"
+              className="ml-auto h-9 px-3.5 text-xs font-bold gap-1.5 rounded-lg cursor-pointer shrink-0"
             >
               <Plus size={14} weight="bold" />
               <span>Add Category</span>
             </Button>
-          </div>
-        </div>
+          }
+        />
 
         <div className="divide-y divide-border/60">
           {filteredCategories.length === 0 ? (
             <div className="p-12 text-center space-y-2">
               <Folder size={32} weight="duotone" className="mx-auto text-muted-foreground/60" />
               <p className="text-xs font-bold text-foreground">No categories found</p>
-              <p className="text-xxs text-muted-foreground">
-                Try searching for a different name or create a new category.
-              </p>
             </div>
           ) : (
             filteredCategories.map((category) => {

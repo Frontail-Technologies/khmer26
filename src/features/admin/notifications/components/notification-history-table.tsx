@@ -9,7 +9,7 @@ import {
   getPaginationRowModel,
   type SortingState,
 } from "@tanstack/react-table"
-import { MagnifyingGlass, Eye } from "@phosphor-icons/react"
+import { Eye } from "@phosphor-icons/react"
 import {
   Table,
   TableBody,
@@ -26,6 +26,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -135,21 +136,11 @@ export function NotificationHistoryTable({
 
   return (
     <>
-      <div className="p-3 sm:p-4 border-b border-border/60">
-        <div className="relative max-w-sm">
-          <MagnifyingGlass
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Search sent notifications..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </div>
-      </div>
+      <AdminFilterBar
+        search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search notifications" }}
+        activeCount={0}
+        onReset={() => {}}
+      />
 
       <div className="hidden md:block overflow-x-auto min-w-0">
         <Table>

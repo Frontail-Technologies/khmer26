@@ -111,7 +111,7 @@ export function VerificationTable({ initialData }: VerificationTableProps) {
         onValueChange={(value) => value && handleTabChange(value)}
         className="border-b border-border/60 bg-card px-3 sm:px-4 overflow-x-auto no-scrollbar"
       >
-        <TabsList variant="line">
+        <TabsList variant="chips">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
               <span>{tab.label}</span>

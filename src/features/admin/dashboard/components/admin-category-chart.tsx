@@ -16,19 +16,12 @@ export function AdminCategoryChart() {
     count: cat.activeListings,
     percent: totalActiveListings > 0 ? Math.round((cat.activeListings / totalActiveListings) * 100) : 0,
   }))
-  const listingTotal = Math.max(data?.listings?.total ?? 0, 1)
-  const statusSummary = [
-    { label: "Active", count: data?.listings?.active ?? 0, percent: ((data?.listings?.active ?? 0) / listingTotal) * 100, color: "bg-primary" },
-    { label: "Pending", count: data?.listings?.pendingReview ?? 0, percent: ((data?.listings?.pendingReview ?? 0) / listingTotal) * 100, color: "bg-accent" },
-    { label: "Flagged", count: data?.listings?.flagged ?? 0, percent: ((data?.listings?.flagged ?? 0) / listingTotal) * 100, color: "bg-destructive" },
-    { label: "Expired", count: data?.listings?.expired ?? 0, percent: ((data?.listings?.expired ?? 0) / listingTotal) * 100, color: "bg-muted-foreground" },
-  ]
 
   return (
-    <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 flex flex-row items-center justify-between">
+    <Card className="rounded-2xl border border-border/60 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
         <div className="space-y-0.5">
-          <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+          <CardTitle className="text-sm font-bold text-foreground">
             Category Breakdown
           </CardTitle>
         </div>
@@ -62,31 +55,6 @@ export function AdminCategoryChart() {
           ))}
         </div>
 
-        <div className="pt-4 border-t border-border/60 space-y-2.5">
-          <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground block">
-            Listing Health Status
-          </span>
-          <div className="h-2 w-full rounded-full bg-muted/60 flex overflow-hidden">
-            {statusSummary.map((s) => (
-              <div
-                key={s.label}
-                className={s.color}
-                style={{ width: `${s.percent}%` }}
-                title={`${s.label}: ${formatCount(s.count)}`}
-              />
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 pt-1.5">
-            {statusSummary.map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs">
-                <span className={`size-2 rounded-full ${s.color} shrink-0`} />
-                <span className="text-muted-foreground">{s.label}:</span>
-                <span className="font-bold text-foreground">{formatCount(s.count)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </CardContent>
     </Card>
   )

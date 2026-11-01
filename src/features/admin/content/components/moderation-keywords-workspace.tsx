@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { MagnifyingGlass, PencilSimple, Plus, Trash, WarningCircle } from "@phosphor-icons/react"
+import { PencilSimple, Plus, Trash, WarningCircle } from "@phosphor-icons/react"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -58,13 +59,13 @@ export function ModerationKeywordsWorkspace() {
 
   return (
     <Card className="rounded-lg">
-      <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="relative min-w-0 flex-1 sm:max-w-md">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-          <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search review keywords..." className="pl-9" />
-        </div>
-        <Button onClick={() => openForm()}><Plus /> Add keyword</Button>
-      </div>
+      <AdminFilterBar
+        search={{ value: search, onChange: setSearch, placeholder: "Search keywords" }}
+        activeCount={0}
+        onReset={() => {}}
+        className="sm:px-5"
+        trailing={<Button className="ml-auto shrink-0" onClick={() => openForm()}><Plus /> Add keyword</Button>}
+      />
 
       {query.isError ? (
         <div className="p-8 text-center"><p className="text-sm font-medium">Review keywords could not be loaded.</p><Button variant="outline" className="mt-3" onClick={() => query.refetch()}>Try again</Button></div>

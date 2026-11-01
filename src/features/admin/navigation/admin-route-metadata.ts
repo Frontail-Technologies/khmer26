@@ -13,20 +13,14 @@ export const ADMIN_ROUTE_METADATA: Record<string, AdminRouteInfo> = {
   "/admin/listings": {
     title: "Listings",
     subtitle: "Review, moderate and manage marketplace listings.",
-    badge: "14 Pending",
-    badgeVariant: "secondary",
   },
   "/admin/verifications": {
     title: "Seller Verifications",
     subtitle: "Review identity and business verification requests.",
-    badge: "5 Pending",
-    badgeVariant: "secondary",
   },
   "/admin/reports": {
     title: "Reports",
     subtitle: "Review marketplace reports and community moderation cases.",
-    badge: "8 Open",
-    badgeVariant: "destructive",
   },
   "/admin/reports/reasons": {
     title: "Report Reasons",

@@ -10,7 +10,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
   Star,
   ArrowCounterClockwise,
   EyeSlash,
@@ -28,15 +27,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-  type SelectOption,
-} from "@/components/ui/select"
+import type { SelectOption } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import {
   Dialog,
   DialogContent,
@@ -228,8 +220,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
     },
   })
 
-  const hasActiveFilters =
-    Boolean(searchQuery) || ratingFilter !== "all" || statusFilter !== "all"
+  const activeFilterCount = [ratingFilter, statusFilter].filter((value) => value !== "all").length
 
   const handleReset = () => {
     setSearchQuery("")
@@ -251,7 +242,7 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
           onValueChange={(val) => val && setActiveTab(val as ReviewTabKey)}
           className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
         >
-          <TabsList variant="line">
+          <TabsList variant="chips">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.key} value={tab.key} className="gap-2">
                 <span>{tab.label}</span>
@@ -266,73 +257,14 @@ export function ReviewWorkspace({ initialReviews = [] }: ReviewWorkspaceProps) {
           </TabsList>
         </Tabs>
 
-        <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 min-w-[240px]">
-            <MagnifyingGlass
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search review text, reviewer, seller, listing..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <Select
-              value={ratingFilter}
-              items={RATING_OPTIONS}
-              onValueChange={(val) => setRatingFilter(val ?? "all")}
-            >
-              <SelectTrigger className="h-9 text-xs w-[120px] shrink-0">
-                <SelectValue placeholder="All Ratings">
-                  {(val) => getSelectOptionLabel(RATING_OPTIONS, val, "All Ratings")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {RATING_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={statusFilter}
-              items={STATUS_OPTIONS}
-              onValueChange={(val) => setStatusFilter(val ?? "all")}
-            >
-              <SelectTrigger className="h-9 text-xs w-[125px] shrink-0">
-                <SelectValue placeholder="All Statuses">
-                  {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-              >
-                <ArrowCounterClockwise size={14} className="mr-1" />
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search reviews" }}
+          activeCount={activeFilterCount}
+          onReset={handleReset}
+        >
+          <AdminFilterSelect label="Rating" value={ratingFilter} onChange={setRatingFilter} options={RATING_OPTIONS} widthClassName="w-32" />
+          <AdminFilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} widthClassName="w-36" />
+        </AdminFilterBar>
 
         <div className="hidden md:block overflow-x-auto min-w-0">
           <Table>

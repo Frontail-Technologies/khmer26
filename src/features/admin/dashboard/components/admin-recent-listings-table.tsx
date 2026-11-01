@@ -78,10 +78,10 @@ export function AdminRecentListingsTable() {
   }
 
   return (
-    <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="p-4 sm:p-5 pb-3 flex flex-row items-center justify-between border-b border-border/60">
+    <Card className="rounded-2xl border border-border/60 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
         <div className="space-y-0.5">
-          <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+          <CardTitle className="text-sm font-bold text-foreground">
             Recent Listings
           </CardTitle>
         </div>
@@ -118,8 +118,8 @@ export function AdminRecentListingsTable() {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">Seller</th>
-                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">
+                <th className="max-md:hidden py-3 px-3 font-bold text-2xs uppercase tracking-wider">Seller</th>
+                <th className="max-sm:hidden py-3 px-3 font-bold text-2xs uppercase tracking-wider">
                   <button
                     type="button"
                     onClick={() => handleSort("price")}
@@ -155,8 +155,8 @@ export function AdminRecentListingsTable() {
                     )}
                   </button>
                 </th>
-                <th className="py-3 px-3 font-bold text-2xs uppercase tracking-wider">Submitted</th>
-                <th className="py-3 px-5 font-bold text-2xs uppercase tracking-wider text-right">Actions</th>
+                <th className="max-lg:hidden py-3 px-3 font-bold text-2xs uppercase tracking-wider">Submitted</th>
+                <th className="max-sm:hidden py-3 px-5 font-bold text-2xs uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -191,10 +191,10 @@ export function AdminRecentListingsTable() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 text-muted-foreground truncate max-w-28 text-xxs font-medium">
+                    <td className="max-md:hidden py-3.5 px-3 text-muted-foreground truncate max-w-28 text-xxs font-medium">
                       {listing.sellerEmail ?? "Unknown seller"}
                     </td>
-                    <td className="py-3.5 px-3 font-bold text-foreground">
+                    <td className="max-sm:hidden py-3.5 px-3 font-bold text-foreground">
                       {formatPrice(listing.price, listing.currency)}
                     </td>
                     <td className="py-3.5 px-3">
@@ -212,10 +212,10 @@ export function AdminRecentListingsTable() {
                           {statusLabel}
                       </Badge>
                     </td>
-                    <td className="py-3.5 px-3 text-muted-foreground text-xxs">
+                    <td className="max-lg:hidden py-3.5 px-3 text-muted-foreground text-xxs">
                       {formatAdminDateTime(listing.createdAt)}
                     </td>
-                    <td className="py-3.5 px-5 text-right">
+                    <td className="max-sm:hidden py-3.5 px-5 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={

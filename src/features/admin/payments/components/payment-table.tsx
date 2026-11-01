@@ -1,5 +1,7 @@
 "use client"
 
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
+
 import { useState, useMemo } from "react"
 import {
   flexRender,
@@ -10,8 +12,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
-  ArrowCounterClockwise,
   Eye,
 } from "@phosphor-icons/react"
 import {
@@ -25,15 +25,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-  type SelectOption,
-} from "@/components/ui/select"
+import type { SelectOption } from "@/components/ui/select"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -136,7 +128,6 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
     },
   })
 
-  const hasActiveFilters = Boolean(searchQuery) || statusFilter !== "all"
 
   const handleReset = () => {
     setSearchQuery("")
@@ -157,7 +148,7 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
           onValueChange={(val) => val && setActiveTab(val as PaymentTabKey)}
           className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
         >
-          <TabsList variant="line">
+          <TabsList variant="chips">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key
               return (
@@ -180,54 +171,13 @@ export function PaymentTable({ initialPayments = [] }: PaymentTableProps) {
           </TabsList>
         </Tabs>
 
-        <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 min-w-[240px]">
-            <MagnifyingGlass
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search payment reference or payer..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <Select
-              value={statusFilter}
-              items={STATUS_OPTIONS}
-              onValueChange={(val) => setStatusFilter(val ?? "all")}
-            >
-              <SelectTrigger className="h-9 text-xs w-[130px] shrink-0">
-                <SelectValue placeholder="All Statuses">
-                  {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
-              >
-                <ArrowCounterClockwise size={14} className="mr-1" />
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search payments" }}
+          activeCount={statusFilter !== "all" ? 1 : 0}
+          onReset={handleReset}
+        >
+          <AdminFilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} widthClassName="w-36" />
+        </AdminFilterBar>
 
         <div className="hidden md:block overflow-x-auto min-w-0">
           <Table>

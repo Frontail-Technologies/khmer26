@@ -1,6 +1,16 @@
 import { apiClient } from '@/lib/api/client';
 
+export interface AdminDailyTrend {
+  /** UTC day, YYYY-MM-DD; oldest first, one entry per day. */
+  day: string;
+  listings: number;
+  users: number;
+  revenue: number;
+  messages: number;
+}
+
 export interface AdminDashboardData {
+  trends?: AdminDailyTrend[];
   users?: {
     total: number;
     active: number;

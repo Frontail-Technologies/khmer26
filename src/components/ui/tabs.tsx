@@ -29,6 +29,8 @@ const tabsListVariants = cva(
       variant: {
         default: "bg-muted",
         line: "gap-5 bg-transparent border-b border-border/60 w-full justify-start overflow-x-auto no-scrollbar group-data-horizontal/tabs:h-auto",
+        /** Swipeable rounded filter chips (admin status filters, phone-friendly). */
+        chips: "gap-1.5 bg-transparent w-full justify-start overflow-x-auto no-scrollbar rounded-none p-0 py-2.5 group-data-horizontal/tabs:h-auto [scrollbar-width:none]",
       },
     },
     defaultVariants: {
@@ -60,6 +62,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "data-active:bg-background data-active:text-foreground",
         "group-data-[variant=line]/tabs-list:h-11 group-data-[variant=line]/tabs-list:flex-none group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:border-x-0 group-data-[variant=line]/tabs-list:border-t-0 group-data-[variant=line]/tabs-list:border-b-2 group-data-[variant=line]/tabs-list:border-transparent group-data-[variant=line]/tabs-list:px-0 group-data-[variant=line]/tabs-list:py-0 group-data-[variant=line]/tabs-list:font-semibold group-data-[variant=line]/tabs-list:data-active:border-primary group-data-[variant=line]/tabs-list:data-active:text-foreground",
+        "group-data-[variant=chips]/tabs-list:h-8 group-data-[variant=chips]/tabs-list:flex-none group-data-[variant=chips]/tabs-list:rounded-full group-data-[variant=chips]/tabs-list:border-border/70 group-data-[variant=chips]/tabs-list:bg-card group-data-[variant=chips]/tabs-list:px-3 group-data-[variant=chips]/tabs-list:text-xs group-data-[variant=chips]/tabs-list:font-semibold group-data-[variant=chips]/tabs-list:data-active:border-primary/40 group-data-[variant=chips]/tabs-list:data-active:bg-primary/10 group-data-[variant=chips]/tabs-list:data-active:text-primary group-data-[variant=chips]/tabs-list:data-active:shadow-none active:scale-[0.97]",
         className,
       )}
       {...props}

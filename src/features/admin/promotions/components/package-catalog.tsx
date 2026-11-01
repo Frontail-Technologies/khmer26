@@ -149,7 +149,7 @@ export function PackageCatalog() {
           <div className="p-8 text-center text-xs text-muted-foreground">Loading packages…</div>
         ) : packages.length === 0 ? (
           <div className="p-8 text-center text-xs text-muted-foreground">
-            No packages yet. Create one to let sellers promote their listings.
+            No packages yet
           </div>
         ) : (
           <div className="divide-y divide-border/60">

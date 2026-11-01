@@ -299,9 +299,7 @@ export function CategoryDetailWorkspace({
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      Subcategories under this category taxonomy branch.
-                    </p>
+                    <span />
                     <Button
                       size="sm"
                       onClick={() => setIsAddSubOpen(true)}
@@ -316,9 +314,6 @@ export function CategoryDetailWorkspace({
                     <div className="p-8 text-center border border-dashed border-border/70 rounded-xl space-y-2">
                       <Folder size={28} weight="duotone" className="mx-auto text-muted-foreground/60" />
                       <p className="text-xs font-bold text-foreground">No subcategories assigned</p>
-                      <p className="text-xxs text-muted-foreground">
-                        Add subcategories to organize listings and configure specific listing fields.
-                      </p>
                     </div>
                   ) : (
                     <div className="divide-y divide-border/60 border border-border/60 rounded-xl overflow-hidden">

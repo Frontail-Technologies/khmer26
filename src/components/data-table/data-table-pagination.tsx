@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl"
-import { LocalizedText } from "@/components/i18n/localized-text"
 import {
   CaretLeft,
   CaretRight,
@@ -33,19 +32,20 @@ export function DataTablePagination<TData>({
     label: `${size}`,
   }))
 
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 px-1 py-1 sm:px-2 sm:py-3 min-w-0 w-full overflow-hidden">
-      <div className="text-xs text-muted-foreground text-center sm:text-left shrink-0">
-        {tDynamic("showingResults", {
-          start: rowCount === 0 ? 0 : pageIndex * pageSize + 1,
-          end: Math.min((pageIndex + 1) * pageSize, rowCount),
-          total: rowCount,
-        })}
-      </div>
+  // A single page needs no footer at all.
+  if (rowCount <= (pageSizeOptions[0] ?? pageSize) && pageCount <= 1) return null
 
-      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 sm:gap-6 min-w-0 max-w-full">
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <span className="text-xs text-muted-foreground whitespace-nowrap"><LocalizedText id="rowsPerPage" /></span>
+  const start = rowCount === 0 ? 0 : pageIndex * pageSize + 1
+  const end = Math.min((pageIndex + 1) * pageSize, rowCount)
+  const navButton = "h-9 w-9 rounded-full text-muted-foreground hover:text-foreground cursor-pointer md:h-8 md:w-8 md:rounded-lg"
+
+  return (
+    <div className="flex w-full min-w-0 items-center justify-between gap-3 px-1 py-2 sm:px-2">
+      <div className="flex items-center gap-3 text-xs text-muted-foreground tabular-nums">
+        <span>
+          <span className="font-semibold text-foreground">{start}–{end}</span> / {rowCount}
+        </span>
+        <div className="hidden items-center md:flex">
           <Select
             value={`${pageSize}`}
             items={pageSizeSelectOptions}
@@ -53,7 +53,7 @@ export function DataTablePagination<TData>({
               if (val) table.setPageSize(Number(val))
             }}
           >
-            <SelectTrigger className="h-8 w-16 sm:w-18 text-xs bg-background rounded-lg border-input px-2">
+            <SelectTrigger aria-label={tGenerated("rowsPerPage")} className="h-8 w-18 rounded-lg border-input bg-background px-2 text-xs">
               <SelectValue>
                 {(val) => getSelectOptionLabel(pageSizeSelectOptions, val, `${pageSize}`)}
               </SelectValue>
@@ -67,56 +67,52 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div className="text-xs font-semibold text-foreground whitespace-nowrap shrink-0">
-          {tDynamic("pageOf", { page: pageIndex + 1, totalPages: pageCount })}
-        </div>
-
-        <div className="flex items-center gap-1 shrink-0">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-            aria-label={tGenerated("firstPage")}
-          >
-            <CaretDoubleLeft size={13} weight="bold" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            aria-label={tGenerated("previousPage")}
-          >
-            <CaretLeft size={13} weight="bold" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            aria-label={tGenerated("nextPage")}
-          >
-            <CaretRight size={13} weight="bold" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-            onClick={() => table.setPageIndex(pageCount - 1)}
-            disabled={!table.getCanNextPage()}
-            aria-label={tGenerated("lastPage")}
-          >
-            <CaretDoubleRight size={13} weight="bold" />
-          </Button>
-        </div>
+      <div className="flex shrink-0 items-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          className={`${navButton} hidden md:inline-flex`}
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+          aria-label={tGenerated("firstPage")}
+        >
+          <CaretDoubleLeft size={13} weight="bold" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={navButton}
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          aria-label={tGenerated("previousPage")}
+        >
+          <CaretLeft size={14} weight="bold" />
+        </Button>
+        <span className="min-w-12 text-center text-xs font-semibold text-foreground tabular-nums" aria-label={tDynamic("pageOf", { page: pageIndex + 1, totalPages: pageCount })}>
+          {pageIndex + 1} / {pageCount}
+        </span>
+        <Button
+          variant="outline"
+          size="icon"
+          className={navButton}
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          aria-label={tGenerated("nextPage")}
+        >
+          <CaretRight size={14} weight="bold" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={`${navButton} hidden md:inline-flex`}
+          onClick={() => table.setPageIndex(pageCount - 1)}
+          disabled={!table.getCanNextPage()}
+          aria-label={tGenerated("lastPage")}
+        >
+          <CaretDoubleRight size={13} weight="bold" />
+        </Button>
       </div>
     </div>
   )

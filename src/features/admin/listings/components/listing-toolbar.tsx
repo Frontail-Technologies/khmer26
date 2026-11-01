@@ -1,28 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import {
-  MagnifyingGlass,
-  Funnel,
-  ArrowCounterClockwise,
-} from "@phosphor-icons/react"
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-} from "@/components/ui/select"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-} from "@/components/ui/sheet"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 
 interface ListingToolbarProps {
   searchQuery: string
@@ -65,237 +43,34 @@ export function ListingToolbar({
   provinceFilter,
   onProvinceChange,
   onReset,
-  hasActiveFilters,
   sortOrder = "newest",
   onSortOrderChange,
   categoryOptions,
   provinceOptions,
 }: ListingToolbarProps) {
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   const categories = [{ value: "all", label: "All Categories" }, ...categoryOptions]
   const provinces = [{ value: "all", label: "All Provinces" }, ...provinceOptions]
+  const activeCount = [categoryFilter, sellerTypeFilter, provinceFilter].filter(Boolean).length
+  const fromAll = (setter: (value: string) => void) => (value: string) => setter(value === "all" ? "" : value)
 
   return (
-    <div className="p-3.5 sm:p-4 border-b border-border/60 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-muted/10">
-      <div className="relative flex-1 max-w-md">
-        <MagnifyingGlass
-          size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+    <AdminFilterBar
+      search={{ value: searchQuery, onChange: onSearchChange, placeholder: "Search listings" }}
+      activeCount={activeCount}
+      onReset={onReset}
+    >
+      <AdminFilterSelect label="Category" value={categoryFilter || "all"} onChange={fromAll(onCategoryChange)} options={categories} widthClassName="w-44" />
+      <AdminFilterSelect label="Seller type" value={sellerTypeFilter || "all"} onChange={fromAll(onSellerTypeChange)} options={SELLER_TYPE_OPTIONS} widthClassName="w-36" />
+      <AdminFilterSelect label="Province" value={provinceFilter || "all"} onChange={fromAll(onProvinceChange)} options={provinces} />
+      {onSortOrderChange && (
+        <AdminFilterSelect
+          label="Sort"
+          value={sortOrder}
+          onChange={(value) => onSortOrderChange(value as NonNullable<ListingToolbarProps["sortOrder"]>)}
+          options={SORT_OPTIONS}
+          widthClassName="w-40"
         />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search listing title, ID, seller or location..."
-          className="h-9 w-full pl-9 pr-3 text-xs bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
-        />
-      </div>
-
-      <div className="hidden lg:flex items-center gap-2 flex-wrap">
-        <div className="w-44">
-          <Select
-            items={categories}
-            value={categoryFilter || "all"}
-            onValueChange={(val) => onCategoryChange(val === "all" ? "" : (val ?? ""))}
-          >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
-              <SelectValue placeholder="All Categories">
-                {(val) => getSelectOptionLabel(categories, val, "All Categories")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start">
-              {categories.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-36">
-          <Select
-            items={SELLER_TYPE_OPTIONS}
-            value={sellerTypeFilter || "all"}
-            onValueChange={(val) => onSellerTypeChange(val === "all" ? "" : (val ?? ""))}
-          >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
-              <SelectValue placeholder="All Seller Types">
-                {(val) => getSelectOptionLabel(SELLER_TYPE_OPTIONS, val, "All Seller Types")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start">
-              {SELLER_TYPE_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-40">
-          <Select
-            items={provinces}
-            value={provinceFilter || "all"}
-            onValueChange={(val) => onProvinceChange(val === "all" ? "" : (val ?? ""))}
-          >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
-              <SelectValue placeholder="All Provinces">
-                {(val) => getSelectOptionLabel(provinces, val, "All Provinces")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start">
-              {provinces.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="w-40">
-          <Select
-            items={SORT_OPTIONS}
-            value={sortOrder}
-            onValueChange={(val) => onSortOrderChange?.(val as "newest" | "oldest" | "price_asc" | "price_desc")}
-          >
-            <SelectTrigger size="sm" className="h-9 text-xs bg-background rounded-lg">
-              <SelectValue placeholder="Sort By">
-                {(val) => getSelectOptionLabel(SORT_OPTIONS, val, "Newest First")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent side="bottom" align="start">
-              {SORT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onReset}
-            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 cursor-pointer rounded-lg"
-          >
-            <ArrowCounterClockwise size={13} />
-            <span>Reset</span>
-          </Button>
-        )}
-      </div>
-
-      <div className="flex lg:hidden items-center justify-between gap-2">
-        <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-          <SheetTrigger
-            render={
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 text-xs font-semibold gap-1.5 rounded-lg flex-1 cursor-pointer bg-background"
-              >
-                <Funnel size={14} />
-                <span>Filters {hasActiveFilters && "(Active)"}</span>
-              </Button>
-            }
-          />
-          <SheetContent side="bottom" className="p-4 rounded-t-xl max-h-[85dvh] space-y-4">
-            <SheetHeader>
-              <SheetTitle className="text-sm font-bold">Filter Listings</SheetTitle>
-            </SheetHeader>
-
-            <div className="space-y-3 pt-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Category</label>
-                <Select
-                  items={categories}
-                  value={categoryFilter || "all"}
-                  onValueChange={(val) => onCategoryChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-lg">
-                    <SelectValue placeholder="All Categories">
-                      {(val) => getSelectOptionLabel(categories, val, "All Categories")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {categories.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Seller Type</label>
-                <Select
-                  items={SELLER_TYPE_OPTIONS}
-                  value={sellerTypeFilter || "all"}
-                  onValueChange={(val) => onSellerTypeChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-lg">
-                    <SelectValue placeholder="All Seller Types">
-                      {(val) => getSelectOptionLabel(SELLER_TYPE_OPTIONS, val, "All Seller Types")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {SELLER_TYPE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Province</label>
-                <Select
-                  items={provinces}
-                  value={provinceFilter || "all"}
-                  onValueChange={(val) => onProvinceChange(val === "all" ? "" : (val ?? ""))}
-                >
-                  <SelectTrigger size="default" className="h-10 text-xs bg-background rounded-lg">
-                    <SelectValue placeholder="All Provinces">
-                      {(val) => getSelectOptionLabel(provinces, val, "All Provinces")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent side="bottom">
-                    {provinces.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <SheetFooter className="flex-row gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onReset}
-                className="flex-1 text-xs rounded-lg"
-              >
-                Reset
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setMobileSheetOpen(false)}
-                className="flex-1 text-xs font-bold rounded-lg"
-              >
-                Apply Filters
-              </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </div>
+      )}
+    </AdminFilterBar>
   )
 }

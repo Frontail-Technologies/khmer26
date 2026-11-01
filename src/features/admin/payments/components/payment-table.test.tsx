@@ -58,7 +58,7 @@ describe('<PaymentTable />', () => {
   it('filters payments when searching by payer name', () => {
     renderWithProviders(<PaymentTable initialPayments={mockPayments} />);
 
-    const searchInput = screen.getByPlaceholderText(/search payment reference or payer/i);
+    const searchInput = screen.getByPlaceholderText(/search payments/i);
     fireEvent.change(searchInput, { target: { value: 'Chann' } });
 
     expect(screen.getAllByText('Chann Vanna')[0]).toBeInTheDocument();

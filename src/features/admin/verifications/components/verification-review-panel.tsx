@@ -107,9 +107,7 @@ export function VerificationReviewPanel({ request }: VerificationReviewPanelProp
           {request.status === "approved" && (
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
-              <p className="leading-relaxed">
-                This seller has been approved and verified. The trust badge is active on their profile.
-              </p>
+              <p className="font-semibold">Verified seller</p>
             </div>
           )}
 

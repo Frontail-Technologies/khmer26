@@ -311,9 +311,7 @@ export function ListingModerationPanel({ listing }: ListingModerationPanelProps)
           {listing.status === "active" && (
             <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-success text-xs flex items-start gap-2">
               <CheckCircle size={16} className="shrink-0 mt-0.5" weight="fill" />
-              <p className="leading-relaxed">
-                This listing is active and published across the marketplace search index.
-              </p>
+              <p className="font-semibold">Live on marketplace</p>
             </div>
           )}
 

@@ -2,13 +2,13 @@
 
 import { useState, useMemo } from "react"
 import {
-  MagnifyingGlass,
   Plus,
   PencilSimple,
   Prohibit,
   CheckCircle,
   Trash,
 } from "@phosphor-icons/react"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -104,30 +104,21 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
   return (
     <>
       <Card className="rounded-xl border-0 bg-card shadow-2xs overflow-hidden flex flex-col">
-        <div className="p-3.5 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <MagnifyingGlass
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search report reasons..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <Button
-            size="sm"
-            onClick={handleOpenAdd}
-            className="h-9 text-xs font-semibold gap-1.5 rounded-lg cursor-pointer shrink-0"
-          >
-            <Plus size={14} weight="bold" />
-            <span>Add Reason</span>
-          </Button>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search reasons" }}
+          activeCount={0}
+          onReset={() => {}}
+          trailing={
+            <Button
+              size="sm"
+              onClick={handleOpenAdd}
+              className="ml-auto h-9 text-xs font-semibold gap-1.5 rounded-lg cursor-pointer shrink-0"
+            >
+              <Plus size={14} weight="bold" />
+              <span>Add Reason</span>
+            </Button>
+          }
+        />
 
         <div className="hidden md:block flex-1">
           <Table>
@@ -304,10 +295,7 @@ export function ReportReasonsTable({ initialData: fallbackData = [] }: ReportRea
           ))}
         </div>
 
-        <div className="border-t border-border/60 bg-muted/10 p-3 text-xxs text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{filteredReasons.length}</span> of{" "}
-          <span className="font-semibold text-foreground">{reasons.length}</span> report reasons
-        </div>
+
       </Card>
 
       <ReportReasonDialog

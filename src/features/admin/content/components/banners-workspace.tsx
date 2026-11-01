@@ -7,7 +7,6 @@ import {
   Plus,
   PencilSimple,
   Trash,
-  MagnifyingGlass,
   UploadSimple,
   X,
   SpinnerGap,
@@ -29,6 +28,7 @@ import {
   SelectValue,
   getSelectOptionLabel,
 } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import {
   Sheet,
   SheetContent,
@@ -303,63 +303,17 @@ export function BannersWorkspace({ initialBanners: fallbackBanners = [] }: Banne
       </div>
 
       <Card className="bg-card border-0 shadow-2xs rounded-xl overflow-hidden flex flex-col min-w-0">
-        <div className="p-3.5 border-b border-border/60 flex flex-col sm:flex-row gap-2.5">
-          <div className="relative flex-1 min-w-0">
-            <MagnifyingGlass
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search banners by title or destination..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8.5 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Select
-              value={placementFilter}
-              onValueChange={(val) => {
-                if (val) setPlacementFilter(val)
-              }}
-            >
-              <SelectTrigger className="w-44 h-8.5 text-xs">
-                <SelectValue>
-                  {(val: string) => getSelectOptionLabel(PLACEMENT_OPTIONS, val, "All Placements")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {PLACEMENT_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={statusFilter}
-              onValueChange={(val) => {
-                if (val) setStatusFilter(val)
-              }}
-            >
-              <SelectTrigger className="w-32 h-8.5 text-xs">
-                <SelectValue>
-                  {(val: string) => getSelectOptionLabel(STATUS_FILTER_OPTIONS, val, "All Statuses")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_FILTER_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search banners" }}
+          activeCount={[placementFilter, statusFilter].filter((value) => value !== "all").length}
+          onReset={() => {
+            setPlacementFilter("all")
+            setStatusFilter("all")
+          }}
+        >
+          <AdminFilterSelect label="Placement" value={placementFilter} onChange={setPlacementFilter} options={PLACEMENT_OPTIONS} widthClassName="w-44" />
+          <AdminFilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_FILTER_OPTIONS} widthClassName="w-32" />
+        </AdminFilterBar>
 
         <div className="overflow-x-auto min-w-0 flex-1">
           <Table>

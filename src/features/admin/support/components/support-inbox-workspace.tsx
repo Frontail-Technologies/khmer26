@@ -1,10 +1,10 @@
 "use client"
 
 import { useDeferredValue, useState } from "react"
-import { CaretLeft, CaretRight, MagnifyingGlass } from "@phosphor-icons/react"
+import { CaretLeft, CaretRight } from "@phosphor-icons/react"
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -119,17 +119,16 @@ export function SupportInboxWorkspace() {
   return (
     <div className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-2xs">
       <Tabs value={status} onValueChange={(value) => { if (value) { setStatus(value as typeof status); setPage(1) } }} className="border-b border-border/60 bg-muted/20 px-3 pt-2.5 sm:px-4">
-        <TabsList variant="line">
+        <TabsList variant="chips">
           <TabsTrigger value="all">All</TabsTrigger>
           {STATUS_OPTIONS.map((option) => <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>)}
         </TabsList>
       </Tabs>
-      <div className="border-b border-border/60 p-3 sm:p-4">
-        <div className="relative max-w-xl">
-          <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-          <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} placeholder="Search name, email, or message..." className="pl-9" />
-        </div>
-      </div>
+      <AdminFilterBar
+        search={{ value: search, onChange: (value) => { setSearch(value); setPage(1) }, placeholder: "Search requests" }}
+        activeCount={0}
+        onReset={() => {}}
+      />
       <div className="overflow-x-auto">
         <Table>
           <TableHeader><TableRow className="bg-muted/60"><TableHead>Request</TableHead><TableHead>Sender</TableHead><TableHead>Subject</TableHead><TableHead>Status</TableHead><TableHead>Received</TableHead></TableRow></TableHeader>

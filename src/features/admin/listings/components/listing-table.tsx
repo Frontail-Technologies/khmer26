@@ -209,7 +209,7 @@ export function ListingTable() {
         }}
         className="border-b border-border/60 bg-card px-3 sm:px-4 overflow-x-auto no-scrollbar"
       >
-        <TabsList variant="line">
+        <TabsList variant="chips">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key
             return (
@@ -250,7 +250,10 @@ export function ListingTable() {
         onReset={handleReset}
         hasActiveFilters={hasActiveFilters}
         sortOrder={sortOrder}
-        onSortOrderChange={setSortOrder}
+        onSortOrderChange={(value) => {
+          setSortOrder(value)
+          handleMobileSortChange(value)
+        }}
         categoryOptions={categoryOptions}
         provinceOptions={provinceOptions}
       />
@@ -342,7 +345,6 @@ export function ListingTable() {
         <ListingMobileCards
           data={filteredData}
           sortBy={mobileSort}
-          onSortChange={handleMobileSortChange}
         />
       </div>
 

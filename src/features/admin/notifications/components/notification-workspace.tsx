@@ -35,7 +35,7 @@ export function NotificationWorkspace({
           onValueChange={(val) => val && setActiveTab(val as NotificationTabKey)}
           className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
         >
-          <TabsList variant="line">
+          <TabsList variant="chips">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key
               return (

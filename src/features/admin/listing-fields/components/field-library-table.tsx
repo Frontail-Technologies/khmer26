@@ -338,9 +338,7 @@ export function FieldLibraryTable({ fields, onCreate, onUpdate, onDelete }: Fiel
         </div>
 
         <div className="flex items-center justify-between pt-3 text-xs text-muted-foreground">
-          <span>
-            Showing {filteredData.length} total field definitions
-          </span>
+          <span className="tabular-nums">{filteredData.length}</span>
 
           <div className="flex items-center gap-1.5">
             <Button

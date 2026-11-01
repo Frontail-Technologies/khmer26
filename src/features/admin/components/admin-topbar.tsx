@@ -41,15 +41,15 @@ export function AdminTopbar({ className }: AdminTopbarProps) {
   return (
     <header
       className={cn(
-        "flex h-16 w-full items-center justify-between border-b border-border/70 bg-card/90 backdrop-blur-md px-4 sm:px-6 shadow-2xs select-none shrink-0 sticky top-0 z-20",
+        "flex h-[calc(3.5rem+env(safe-area-inset-top,0px))] md:h-16 w-full items-center justify-between gap-2 border-b border-border/70 bg-card/85 backdrop-blur-xl backdrop-saturate-150 px-4 sm:px-6 shadow-2xs select-none shrink-0 sticky top-0 z-20 pt-[env(safe-area-inset-top,0px)] md:pt-0",
         className
       )}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <SidebarTrigger className="rounded-lg hover:bg-muted/60" />
+        <SidebarTrigger className="rounded-lg hover:bg-muted/60 max-md:hidden" />
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-sm sm:text-base font-bold text-foreground truncate tracking-tight">
+            <h1 className="text-lg md:text-base font-extrabold md:font-bold text-foreground truncate tracking-tight">
               {routeInfo.title}
             </h1>
             {routeInfo.badge && (

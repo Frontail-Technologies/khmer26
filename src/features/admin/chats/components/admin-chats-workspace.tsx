@@ -525,9 +525,6 @@ export function AdminChatsWorkspace({
             <div className="min-h-0 flex-1 flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground space-y-2">
               <ChatTeardropText size={36} className="text-muted-foreground/40" />
               <p className="font-semibold text-foreground">Select a conversation to inspect</p>
-              <p className="text-xxs text-muted-foreground max-w-xs">
-                Review message history, participant details, and linked marketplace listings.
-              </p>
             </div>
           )}
         </div>

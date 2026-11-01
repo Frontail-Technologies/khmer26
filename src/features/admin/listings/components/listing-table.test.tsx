@@ -127,7 +127,7 @@ describe('<ListingTable />', () => {
   it('filters listings by search input', () => {
     renderWithProviders(<ListingTable />);
 
-    const searchInput = screen.getByPlaceholderText(/search listing title, ID, seller or location/i);
+    const searchInput = screen.getByPlaceholderText(/search listings/i);
     fireEvent.change(searchInput, { target: { value: 'Honda' } });
 
     expect(screen.getAllByText('Honda Click 125i 2022')[0]).toBeInTheDocument();

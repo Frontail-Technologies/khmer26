@@ -10,8 +10,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
-  ArrowCounterClockwise,
   Eye,
 } from "@phosphor-icons/react"
 import {
@@ -24,15 +22,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-  type SelectOption,
-} from "@/components/ui/select"
+import type { SelectOption } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterField, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { createAuditColumns } from "../columns"
@@ -138,7 +129,7 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
     },
   })
 
-  const hasActiveFilters = Boolean(searchQuery) || moduleFilter !== "all" || Boolean(actionFilter) || Boolean(dateFrom) || Boolean(dateTo)
+  const activeFilterCount = [moduleFilter !== "all", Boolean(actionFilter), Boolean(dateFrom), Boolean(dateTo)].filter(Boolean).length
 
   const handleReset = () => {
     setSearchQuery("")
@@ -151,80 +142,40 @@ export function AuditTable({ initialEntries = [] }: AuditTableProps) {
   return (
     <div className="space-y-3.5 sm:space-y-4">
       <div className="min-w-0 rounded-xl border border-border/70 bg-card overflow-hidden shadow-2xs">
-        <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 min-w-[240px]">
-            <MagnifyingGlass
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search audit log" }}
+          activeCount={activeFilterCount}
+          onReset={handleReset}
+        >
+          <AdminFilterSelect label="Module" value={moduleFilter} onChange={setModuleFilter} options={MODULE_OPTIONS} widthClassName="w-36" />
+          <AdminFilterField label="Action">
             <input
               type="text"
-              placeholder="Search audit log by admin, action, or target entity..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <Select
-              value={moduleFilter}
-              items={MODULE_OPTIONS}
-              onValueChange={(val) => setModuleFilter(val ?? "all")}
-            >
-              <SelectTrigger className="h-9 text-xs w-[140px] shrink-0">
-                <SelectValue placeholder="All Modules">
-                  {(val) => getSelectOptionLabel(MODULE_OPTIONS, val, "All Modules")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {MODULE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <input
-              type="text"
-              placeholder="Filter by action..."
+              placeholder="Filter by action"
+              aria-label="Filter by action"
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36 shrink-0"
+              className="h-9 w-36 rounded-full border border-input bg-transparent px-3.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-3 focus:ring-primary/15"
             />
-
-            <div className="flex items-center gap-1 shrink-0">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9 px-2 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36"
-                aria-label="Date from"
-              />
-              <span className="text-xs text-muted-foreground">–</span>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-9 px-2 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring w-36"
-                aria-label="Date to"
-              />
-            </div>
-
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-              >
-                <ArrowCounterClockwise size={14} className="mr-1" />
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+          </AdminFilterField>
+          <AdminFilterField label="Date range">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-9 w-36 rounded-full border border-input bg-transparent px-3 text-xs text-foreground focus:outline-none focus:ring-3 focus:ring-primary/15"
+              aria-label="Date from"
+            />
+            <span className="text-xs text-muted-foreground">–</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-9 w-36 rounded-full border border-input bg-transparent px-3 text-xs text-foreground focus:outline-none focus:ring-3 focus:ring-primary/15"
+              aria-label="Date to"
+            />
+          </AdminFilterField>
+        </AdminFilterBar>
 
         <div className="hidden md:block overflow-x-auto min-w-0">
           <Table>

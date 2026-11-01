@@ -28,7 +28,6 @@ export function VerificationMobileCards({ data }: VerificationMobileCardsProps) 
     return (
       <div className="rounded-xl border border-dashed border-border/70 p-8 text-center bg-card">
         <p className="text-xs font-semibold text-foreground">No verification requests found</p>
-        <p className="text-xxs text-muted-foreground mt-1">Try changing your search keywords or active filters.</p>
       </div>
     )
   }

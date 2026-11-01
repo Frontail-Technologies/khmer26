@@ -11,8 +11,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
-  ArrowCounterClockwise,
   Eye,
   Storefront,
 } from "@phosphor-icons/react"
@@ -26,15 +24,8 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-  type SelectOption,
-} from "@/components/ui/select"
+import type { SelectOption } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -120,7 +111,7 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
     },
   })
 
-  const hasActiveFilters = Boolean(searchQuery) || planFilter !== "all" || statusFilter !== "all"
+  const activeFilterCount = [planFilter, statusFilter].filter((value) => value !== "all").length
 
   const handleReset = () => {
     setSearchQuery("")
@@ -130,73 +121,14 @@ export function SubscriberTable({ initialSubscribers }: SubscriberTableProps) {
 
   return (
     <>
-      <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1 min-w-[240px]">
-          <MagnifyingGlass
-            size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Search seller or business name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9.5 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <Select
-            value={planFilter}
-            items={PLAN_OPTIONS}
-            onValueChange={(val) => setPlanFilter(val ?? "all")}
-          >
-            <SelectTrigger className="h-9 text-xs w-[140px]">
-              <SelectValue placeholder="All Plans">
-                {(val) => getSelectOptionLabel(PLAN_OPTIONS, val, "All Plans")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {PLAN_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={statusFilter}
-            items={STATUS_OPTIONS}
-            onValueChange={(val) => setStatusFilter(val ?? "all")}
-          >
-            <SelectTrigger className="h-9 text-xs w-[130px]">
-              <SelectValue placeholder="All Statuses">
-                {(val) => getSelectOptionLabel(STATUS_OPTIONS, val, "All Statuses")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <ArrowCounterClockwise size={14} className="mr-1" />
-              Reset
-            </Button>
-          )}
-        </div>
-      </div>
+      <AdminFilterBar
+        search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search subscribers" }}
+        activeCount={activeFilterCount}
+        onReset={handleReset}
+      >
+        <AdminFilterSelect label="Plan" value={planFilter} onChange={setPlanFilter} options={PLAN_OPTIONS} widthClassName="w-36" />
+        <AdminFilterSelect label="Status" value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} widthClassName="w-36" />
+      </AdminFilterBar>
 
       <div className="hidden md:block overflow-x-auto min-w-0">
         <Table>

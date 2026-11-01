@@ -10,7 +10,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
   ShieldCheck,
   UserGear,
   Plus,
@@ -35,9 +34,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  getSelectOptionLabel,
   type SelectOption,
 } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import {
   Dialog,
   DialogContent,
@@ -245,43 +244,13 @@ export function RolesWorkspace({
 
         {activeTab === "staff" ? (
           <>
-            <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1 min-w-[240px]">
-                <MagnifyingGlass
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Search staff name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                <Select
-                  value={roleFilter}
-                  items={ROLE_OPTIONS}
-                  onValueChange={(val) => setRoleFilter(val ?? "all")}
-                >
-                  <SelectTrigger className="h-9 text-xs w-[140px] shrink-0">
-                    <SelectValue placeholder="All Roles">
-                      {(val) => getSelectOptionLabel(ROLE_OPTIONS, val, "All Roles")}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-              </div>
-            </div>
+            <AdminFilterBar
+              search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search staff" }}
+              activeCount={roleFilter !== "all" ? 1 : 0}
+              onReset={() => setRoleFilter("all")}
+            >
+              <AdminFilterSelect label="Role" value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} widthClassName="w-36" />
+            </AdminFilterBar>
 
             <div className="hidden md:block overflow-x-auto min-w-0">
               <Table>

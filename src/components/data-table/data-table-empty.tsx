@@ -12,7 +12,7 @@ interface DataTableEmptyProps {
 export function DataTableEmpty({
   colSpan,
   title = "No results found",
-  description = "There are no records matching your criteria.",
+  description,
   className,
 }: DataTableEmptyProps) {
   if (colSpan === undefined) {

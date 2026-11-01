@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PaperPlaneTilt, Info } from "@phosphor-icons/react"
+import { PaperPlaneTilt } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -125,10 +125,7 @@ export function NotificationComposer() {
         />
 
         <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-xxs text-muted-foreground">
-            <Info size={14} className="shrink-0 text-muted-foreground" />
-            <span>Delivery is processed in bounded background batches, not instantly.</span>
-          </div>
+          <span />
 
           <Button
             type="submit"

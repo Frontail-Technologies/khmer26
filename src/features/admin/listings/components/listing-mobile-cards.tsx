@@ -63,9 +63,6 @@ export function ListingMobileCards({
     return (
       <div className="rounded-xl p-8 text-center bg-card shadow-2xs">
         <p className="text-xs font-semibold text-foreground">No listings found</p>
-        <p className="text-xxs text-muted-foreground mt-1">
-          Try changing your search keywords or active filters.
-        </p>
       </div>
     )
   }

@@ -33,10 +33,10 @@ export function AdminPlatformDistributionCard() {
   const subscriptionTotal = Math.max(data?.subscriptions?.active ?? 0, 1)
 
   return (
-    <Card className="rounded-xl border-0 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 flex flex-row items-center justify-between">
+    <Card className="rounded-2xl border border-border/60 bg-card p-0 shadow-2xs overflow-hidden h-full flex flex-col justify-between gap-0 py-0">
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2">
-          <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+          <CardTitle className="text-sm font-bold text-foreground">
             Seller & Tier Breakdown
           </CardTitle>
         </div>

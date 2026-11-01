@@ -70,9 +70,6 @@ export function VerificationDocumentViewer({
               </div>
               <div className="space-y-1 max-w-sm">
                 <p className="text-xs font-bold text-foreground">{currentDoc.title}</p>
-                <p className="text-xxs text-muted-foreground">
-                  Official PDF document uploaded by seller for administrative verification.
-                </p>
               </div>
             </div>
           ) : (

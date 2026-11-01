@@ -23,7 +23,7 @@ export function ListingAdminGallery({ images, title }: ListingAdminGalleryProps)
         <Images size={36} className="mx-auto text-muted-foreground/60 mb-2" />
         <p className="text-xs font-semibold text-foreground">No images submitted</p>
         <p className="text-xxs text-muted-foreground">
-          This listing does not have any attached photographs.
+          No photos
         </p>
       </Card>
     )

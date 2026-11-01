@@ -12,8 +12,6 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import {
-  MagnifyingGlass,
-  ArrowCounterClockwise,
   Sparkle,
   Star,
   Lightning,
@@ -32,15 +30,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  getSelectOptionLabel,
-  type SelectOption,
-} from "@/components/ui/select"
+import type { SelectOption } from "@/components/ui/select"
+import { AdminFilterBar, AdminFilterSelect } from "@/components/admin/admin-filter-bar"
 import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 import { DataTableEmpty } from "@/components/data-table/data-table-empty"
 import { StatusBadge, type StatusTone } from "@/components/shared/status-badge"
@@ -177,8 +168,6 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
     },
   })
 
-  const hasActiveFilters = Boolean(searchQuery) || typeFilter !== "all"
-
   const handleReset = () => {
     setSearchQuery("")
     setTypeFilter("all")
@@ -198,7 +187,7 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
           onValueChange={(val) => val && setActiveTab(val as PromotionTabKey)}
           className="border-b border-border/60 bg-muted/20 px-3 sm:px-4 pt-2.5 overflow-x-auto no-scrollbar"
         >
-          <TabsList variant="line">
+          <TabsList variant="chips">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key
               return (
@@ -221,54 +210,13 @@ export function PromotionTable({ initialPromotions }: PromotionTableProps) {
           </TabsList>
         </Tabs>
 
-        <div className="p-3 sm:p-4 border-b border-border/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 min-w-[240px]">
-            <MagnifyingGlass
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="text"
-              placeholder="Search listing, seller, or ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9.5 pr-3 rounded-lg bg-background border border-input text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <Select
-              value={typeFilter}
-              items={TYPE_OPTIONS}
-              onValueChange={(val) => setTypeFilter(val ?? "all")}
-            >
-              <SelectTrigger className="h-9 text-xs w-[140px] shrink-0">
-                <SelectValue placeholder="All Types">
-                  {(val) => getSelectOptionLabel(TYPE_OPTIONS, val, "All Types")}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
-              >
-                <ArrowCounterClockwise size={14} className="mr-1" />
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+        <AdminFilterBar
+          search={{ value: searchQuery, onChange: setSearchQuery, placeholder: "Search promotions" }}
+          activeCount={typeFilter !== "all" ? 1 : 0}
+          onReset={handleReset}
+        >
+          <AdminFilterSelect label="Type" value={typeFilter} onChange={setTypeFilter} options={TYPE_OPTIONS} widthClassName="w-36" />
+        </AdminFilterBar>
 
         <div className="hidden md:block overflow-x-auto min-w-0">
           <Table>

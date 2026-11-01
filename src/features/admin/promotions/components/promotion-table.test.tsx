@@ -63,7 +63,7 @@ describe('<PromotionTable />', () => {
     expect(screen.getAllByText('Toyota Prius 2015 Silver')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Modern Villa Sen Sok')[0]).toBeInTheDocument();
 
-    const searchInput = screen.getByPlaceholderText(/search listing, seller, or id/i);
+    const searchInput = screen.getByPlaceholderText(/search promotions/i);
     fireEvent.change(searchInput, { target: { value: 'Prius' } });
 
     expect(screen.getAllByText('Toyota Prius 2015 Silver')[0]).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('<PromotionTable />', () => {
   it('renders empty state when no items match the filter', () => {
     renderWithProviders(<PromotionTable initialPromotions={mockPromotions} />);
 
-    const searchInput = screen.getByPlaceholderText(/search listing, seller, or id/i);
+    const searchInput = screen.getByPlaceholderText(/search promotions/i);
     fireEvent.change(searchInput, { target: { value: 'Nonexistent Listing XYZ' } });
 
     expect(screen.getAllByText(/no promotions found/i)[0]).toBeInTheDocument();
