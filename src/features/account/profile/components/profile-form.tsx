@@ -102,24 +102,36 @@ export function ProfileForm({ account }: ProfileFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs sm:p-6">
-        <CardContent className="space-y-6 p-0">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <Avatar className="h-18 w-18 shrink-0 border-2 border-border/80 sm:h-20 sm:w-20">
-              <AvatarImage src={displayedAvatar} alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary">
-                {displayName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1 space-y-2">
+    <form onSubmit={handleSubmit} className="max-sm:pb-24">
+      {/* Phones: no outer card; each section is its own rounded group and inputs are thumb-sized. */}
+      <Card className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs sm:p-6 max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none max-sm:ring-0 max-sm:[&_input]:h-12 max-sm:[&_input]:rounded-xl max-sm:[&_[data-slot=select-trigger]]:h-12 max-sm:[&_[data-slot=select-trigger]]:w-full max-sm:[&_[data-slot=select-trigger]]:rounded-xl max-sm:[&_textarea]:rounded-xl">
+        <CardContent className="space-y-6 p-0 max-sm:space-y-4">
+          <div className="flex items-center gap-4 sm:gap-5 max-sm:flex-col max-sm:gap-3 max-sm:pt-2 max-sm:text-center">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploader.isUploading}
+              className="pressable relative shrink-0 rounded-full"
+              aria-label={tGenerated("changePhoto")}
+            >
+              <Avatar className="h-18 w-18 border-2 border-border/80 sm:h-20 sm:w-20 max-sm:h-24 max-sm:w-24">
+                <AvatarImage src={displayedAvatar} alt={displayName} />
+                <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary max-sm:text-2xl">
+                  {displayName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-md">
+                {uploader.isUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={15} weight="fill" />}
+              </span>
+            </button>
+            <div className="min-w-0 flex-1 space-y-2 max-sm:w-full">
               <div>
                 <h2 className="truncate text-base font-bold sm:text-lg">{displayName}</h2>
                 <p className="truncate text-xs text-muted-foreground">@{username || emailName}</p>
               </div>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => handlePhoto(event.target.files)} />
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" size="xs" className="h-8 gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={uploader.isUploading}>
+              <div className="flex flex-wrap gap-2 max-sm:justify-center">
+                <Button type="button" variant="outline" size="xs" className="h-8 gap-1.5 max-sm:hidden" onClick={() => fileInputRef.current?.click()} disabled={uploader.isUploading}>
                   {uploader.isUploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
                   {uploader.isUploading ? `Uploading ${uploader.items[0]?.progress ?? 0}%` : tGenerated("changePhoto")}
                 </Button>
@@ -135,8 +147,8 @@ export function ProfileForm({ account }: ProfileFormProps) {
             </div>
           </div>
 
-          <Separator />
-          <section className="space-y-4">
+          <Separator className="max-sm:hidden" />
+          <section className="space-y-4 max-sm:rounded-2xl max-sm:border max-sm:border-border/60 max-sm:bg-card max-sm:p-4">
             <h3 className="text-sm font-bold sm:text-base"><LocalizedText id="basicInformation" /></h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label={tGenerated("fullName")} icon={<User size={14} />}><Input value={fullName} onChange={(event) => { setFullName(event.target.value); setIsDirty(true) }} maxLength={100} required /></Field>
@@ -149,8 +161,8 @@ export function ProfileForm({ account }: ProfileFormProps) {
             <Field label={tGenerated("bioDescription")}><Textarea value={bio} onChange={(event) => { setBio(event.target.value); setIsDirty(true) }} rows={4} maxLength={1000} placeholder={tGenerated("tellBuyersAboutYourselfOrYourStore")} /></Field>
           </section>
 
-          <Separator />
-          <section className="space-y-4">
+          <Separator className="max-sm:hidden" />
+          <section className="space-y-4 max-sm:rounded-2xl max-sm:border max-sm:border-border/60 max-sm:bg-card max-sm:p-4">
             <h3 className="flex items-center gap-2 text-sm font-bold sm:text-base"><Storefront size={16} className="text-primary" /><LocalizedText id="sellerProfile" /></h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label={tGenerated("sellerType")}><Select value={sellerType} onValueChange={(value) => { setSellerType(value as SellerType); setIsDirty(true) }}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="individual"><LocalizedText id="individualSeller" /></SelectItem><SelectItem value="business"><LocalizedText id="businessStore" /></SelectItem><SelectItem value="dealer"><LocalizedText id="dealer" /></SelectItem></SelectContent></Select></Field>
@@ -158,9 +170,10 @@ export function ProfileForm({ account }: ProfileFormProps) {
             </div>
           </section>
 
-          <div className="flex flex-col items-stretch justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center">
-            <p className="min-h-5 text-xs text-muted-foreground">{isDirty ? tGenerated("youHaveUnsavedChanges") : current ? tGenerated("profileUpToDate") : tGenerated("completeProfileToSell")}</p>
-            <Button type="submit" disabled={!canSave} className="h-10 gap-2 px-6 font-bold">
+          {/* Phones: Save stays under the thumb as a sticky bottom bar. */}
+          <div className="flex flex-col items-stretch justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-40 max-sm:gap-1.5 max-sm:border-border/60 max-sm:bg-background/90 max-sm:px-4 max-sm:pt-2.5 max-sm:pb-[max(0.75rem,env(safe-area-inset-bottom))] max-sm:backdrop-blur-xl">
+            <p className="min-h-5 text-xs text-muted-foreground max-sm:min-h-0 max-sm:text-center max-sm:text-xxs">{isDirty ? tGenerated("youHaveUnsavedChanges") : current ? tGenerated("profileUpToDate") : tGenerated("completeProfileToSell")}</p>
+            <Button type="submit" disabled={!canSave} className="h-10 gap-2 px-6 font-bold max-sm:h-12 max-sm:rounded-xl max-sm:text-[15px]">
               {saveProfile.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} weight="fill" />}
               {saveProfile.isPending ? tGenerated("saving") : tGenerated("saveChanges")}
             </Button>

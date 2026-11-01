@@ -15,11 +15,13 @@ export function AccountPageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 pb-6 border-b border-border/70 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:pb-6 lg:border-b lg:border-border/70",
+        !action && "max-lg:hidden",
         className
       )}
     >
-      <div>
+      {/* On phones the sticky account app bar already shows the title. */}
+      <div className="max-lg:sr-only">
         <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
           {title}
         </h1>

@@ -20,7 +20,7 @@ export const BOTTOM_NAV: NavLink[] = [
   { label: "Explore", messageKey: "explore", href: "/search", icon: "Compass" },
   { label: "Sell", messageKey: "sell", href: "/post-ad", icon: "Plus", accent: true },
   { label: "Messages", messageKey: "messages_f1702b", href: "/messages", icon: "ChatCircle", authOnly: true },
-  { label: "Profile", messageKey: "profile", href: "/account/profile", icon: "User", authOnly: true },
+  { label: "Profile", messageKey: "profile", href: "/account", icon: "User", authOnly: true },
 ]
 
 export const ACCOUNT_NAV: NavLink[] = [

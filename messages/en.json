@@ -1253,5 +1253,21 @@
     "pushIosInstall": "On iPhone, add offerupkh to your Home Screen first, then turn notifications on from the installed app.",
     "pushEnabledToast": "Notifications turned on",
     "pushFailed": "Couldn't turn on notifications. Please try again."
+  },
+  "accountHub": {
+    "title": "Account",
+    "editProfile": "Edit profile",
+    "completeProfile": "Your profile is {percent}% complete",
+    "completeProfileCta": "Finish it to build trust with buyers",
+    "myAds": "My ads",
+    "buyingSelling": "Buying & selling",
+    "accountSection": "Account",
+    "preferences": "Preferences",
+    "helpSection": "Help & legal",
+    "language": "Language",
+    "darkMode": "Dark mode",
+    "viewStore": "View my public store",
+    "emailVerified": "Email verified",
+    "plan": "Plan"
   }
 }

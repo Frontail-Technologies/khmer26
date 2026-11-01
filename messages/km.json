@@ -1253,5 +1253,21 @@
     "pushIosInstall": "នៅលើ iPhone សូមបន្ថែម offerupkh ទៅអេក្រង់ដើមជាមុនសិន រួចបើកការជូនដំណឹងពីកម្មវិធីដែលបានដំឡើង។",
     "pushEnabledToast": "បានបើកការជូនដំណឹង",
     "pushFailed": "មិនអាចបើកការជូនដំណឹងបានទេ។ សូមព្យាយាមម្តងទៀត។"
+  },
+  "accountHub": {
+    "title": "គណនី",
+    "editProfile": "កែប្រែប្រវត្តិរូប",
+    "completeProfile": "ប្រវត្តិរូបរបស់អ្នកបានបំពេញ {percent}%",
+    "completeProfileCta": "បំពេញឱ្យរួច ដើម្បីបង្កើតទំនុកចិត្តពីអ្នកទិញ",
+    "myAds": "ការផ្សាយរបស់ខ្ញុំ",
+    "buyingSelling": "ការទិញ និងលក់",
+    "accountSection": "គណនី",
+    "preferences": "ចំណូលចិត្ត",
+    "helpSection": "ជំនួយ និងច្បាប់",
+    "language": "ភាសា",
+    "darkMode": "របៀបងងឹត",
+    "viewStore": "មើលហាងសាធារណៈរបស់ខ្ញុំ",
+    "emailVerified": "អ៊ីមែលបានផ្ទៀងផ្ទាត់",
+    "plan": "គម្រោង"
   }
 }

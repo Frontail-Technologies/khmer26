@@ -8,7 +8,9 @@ export function shouldShowMobileBottomNavigation(pathname: string): boolean {
     pathname === "/post-ad" ||
     pathname.startsWith("/post-ad/") ||
     pathname.startsWith("/listing/") ||
-    pathname.startsWith("/seller/")
+    pathname.startsWith("/seller/") ||
+    // Profile editing has its own sticky Save bar at the bottom.
+    pathname.startsWith("/account/profile")
   ) {
     return false
   }
@@ -52,5 +54,6 @@ export function shouldShowAppFooter(pathname: string): boolean {
 
 /** Mobile-only: listing detail starts directly with the gallery (Back/Save/Share overlay it). */
 export function shouldHideAppHeaderOnMobile(pathname: string): boolean {
-  return pathname.startsWith("/listing/")
+  // Account pages bring their own app bar (hub title, or back + title on sub-pages).
+  return pathname.startsWith("/listing/") || pathname === "/account" || pathname.startsWith("/account/")
 }

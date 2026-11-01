@@ -52,7 +52,7 @@ export function MobileBottomNavigation() {
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : item.href === "/account/profile"
+              : item.href === "/account"
                 ? pathname.startsWith("/account")
                 : pathname.startsWith(item.href);
           const isSell = item.accent;

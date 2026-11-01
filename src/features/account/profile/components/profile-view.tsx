@@ -33,7 +33,7 @@ export function ProfileView() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <AccountPageHeader title={tGenerated("profile")} action={<Badge variant="outline" className="border-primary/20 bg-primary/10 text-xs font-bold text-primary">{tDynamic("profileComplete", { percent: completion(query.data) })}</Badge>} />
+      <AccountPageHeader title={tGenerated("profile")} action={<Badge variant="outline" className="border-primary/20 bg-primary/10 text-xs font-bold text-primary max-lg:hidden">{tDynamic("profileComplete", { percent: completion(query.data) })}</Badge>} />
       <div className="grid grid-cols-1 items-start gap-5 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-8"><ProfileForm key={query.data.sellerProfile?.updatedAt ?? "new"} account={query.data} /></div>
         <div className="lg:sticky lg:top-20 lg:col-span-4"><VerificationCard account={query.data} /></div>

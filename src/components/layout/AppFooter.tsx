@@ -22,7 +22,7 @@ export function AppFooter() {
   }
 
   return (
-    <footer className={`mt-auto bg-card ${pathname.startsWith("/listing/") ? "pb-20 md:pb-0" : ""}`}>
+    <footer className={`mt-auto bg-card ${pathname.startsWith("/listing/") ? "pb-20 md:pb-0" : ""} ${pathname.startsWith("/account") ? "max-lg:hidden" : ""}`}>
       <div className="border-t border-border pt-6 sm:pt-8 pb-8 sm:pb-10">
         <div className="mx-auto max-w-350 px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-5 sm:gap-6 md:grid-cols-5 md:gap-8">
