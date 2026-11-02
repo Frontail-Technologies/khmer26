@@ -12,17 +12,45 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = "k26:install-dismissed-at"
+/** Cookie mirror of the dismissal: survives where localStorage is blocked (private mode, in-app browsers). */
+const DISMISS_COOKIE = "k26_install_dismissed"
 const DISMISS_DAYS = 14
+const DISMISS_MS = DISMISS_DAYS * 24 * 60 * 60 * 1000
 /** Ask only after the visitor has had a moment with the site, never on first paint. */
 const SHOW_DELAY_MS = 20_000
 
-function recentlyDismissed(): boolean {
+/** Covers this page view even if both storages fail. */
+let dismissedThisSession = false
+
+/** Test hook: simulate a new page load (the session flag lives in module memory). */
+export function resetInstallPromptSessionForTests() {
+  dismissedThisSession = false
+}
+
+function dismissedAt(): number {
+  let at = 0
   try {
-    const at = Number(window.localStorage.getItem(DISMISS_KEY))
-    return Number.isFinite(at) && Date.now() - at < DISMISS_DAYS * 24 * 60 * 60 * 1000
+    at = Number(window.localStorage.getItem(DISMISS_KEY)) || 0
   } catch {
-    return false
+    // Storage blocked; fall back to the cookie below.
   }
+  const cookie = document.cookie.match(new RegExp(`(?:^|; )${DISMISS_COOKIE}=(\\d+)`))
+  return Math.max(at, cookie ? Number(cookie[1]) : 0)
+}
+
+function recentlyDismissed(): boolean {
+  return dismissedThisSession || Date.now() - dismissedAt() < DISMISS_MS
+}
+
+function rememberDismissal() {
+  dismissedThisSession = true
+  const now = String(Date.now())
+  try {
+    window.localStorage.setItem(DISMISS_KEY, now)
+  } catch {
+    // Storage can be unavailable; the cookie and session flag still hold it.
+  }
+  document.cookie = `${DISMISS_COOKIE}=${now}; path=/; max-age=${DISMISS_DAYS * 24 * 60 * 60}; samesite=lax`
 }
 
 function isStandalone(): boolean {
@@ -49,18 +77,28 @@ export function InstallPrompt() {
     if (!window.matchMedia("(max-width: 767px)").matches) return
 
     let timer: number | undefined
+    // Browsers may fire beforeinstallprompt more than once per visit; re-check the dismissal every
+    // time (and again when the delay ends) so a closed card never comes back.
+    const showLater = (next: "native" | "ios") => {
+      if (timer) window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        if (!recentlyDismissed() && !isStandalone()) setMode(next)
+      }, SHOW_DELAY_MS)
+    }
     const onPrompt = (event: Event) => {
       event.preventDefault()
+      if (recentlyDismissed()) return
       setDeferred(event as BeforeInstallPromptEvent)
-      timer = window.setTimeout(() => setMode("native"), SHOW_DELAY_MS)
+      showLater("native")
     }
-    const onInstalled = () => setMode(null)
+    const onInstalled = () => {
+      rememberDismissal()
+      setMode(null)
+    }
 
     window.addEventListener("beforeinstallprompt", onPrompt)
     window.addEventListener("appinstalled", onInstalled)
-    if (isIosSafari()) {
-      timer = window.setTimeout(() => setMode("ios"), SHOW_DELAY_MS)
-    }
+    if (isIosSafari()) showLater("ios")
 
     return () => {
       if (timer) window.clearTimeout(timer)
@@ -72,11 +110,7 @@ export function InstallPrompt() {
   if (!mode) return null
 
   const dismiss = () => {
-    try {
-      window.localStorage.setItem(DISMISS_KEY, String(Date.now()))
-    } catch {
-      // Storage can be unavailable (private mode); dismissal then lasts for this page view.
-    }
+    rememberDismissal()
     setMode(null)
   }
 
