@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor } from "@testing-library/react"
 import { renderWithProviders } from "@/test/test-utils"
 
 // Each case re-imports the component (its Google client id is read at module load), which is slow.
@@ -23,8 +23,8 @@ async function loadComponent() {
   return (await import("../components/social-auth-buttons")).SocialAuthButtons
 }
 
-const googleSlot = (container: HTMLElement) => container.querySelector<HTMLElement>(".opacity-0")!
-const googleButton = () => screen.getByText("Continue with Google").closest("button")!
+const googleSlot = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-slot="google-button"]')!
+const fallbackButton = () => screen.queryByRole("button", { name: /continue with google/i })
 
 beforeEach(() => {
   // jsdom has no ResizeObserver; the component only needs it to exist.
@@ -37,43 +37,40 @@ afterEach(() => {
   delete (window as unknown as { google?: GoogleStub }).google
 })
 
-describe("<SocialAuthButtons /> Google control accessibility", () => {
-  it("keeps our button as the accessible control when Google isn't available, and the empty overlay inert", async () => {
+describe("<SocialAuthButtons /> Google widget mode", () => {
+  it("shows our button as the control when Google isn't configured, with the empty widget slot inert", async () => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "")
     const SocialAuthButtons = await loadComponent()
     const { container } = renderWithProviders(<SocialAuthButtons />)
 
-    const button = googleButton()
+    const button = fallbackButton()!
+    expect(button).toBeInTheDocument()
     expect(button).not.toHaveAttribute("aria-hidden")
-    expect(button).not.toHaveAttribute("tabindex")
-    expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument()
     expect(googleSlot(container)).toHaveAttribute("inert")
+
+    fireEvent.click(button)
+    expect(screen.getByText("Google sign-in is not configured.")).toBeInTheDocument()
   })
 
-  it("exposes Google's real button and hides only our decorative skin when Google is ready", async () => {
+  it("renders Google's own button visibly and drops our placeholder once Google is ready", async () => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "test-client-id")
     const stub: GoogleStub = { accounts: { id: { initialize: vi.fn(), renderButton: vi.fn() } } }
     ;(window as unknown as { google: GoogleStub }).google = stub
     const SocialAuthButtons = await loadComponent()
     const { container } = renderWithProviders(<SocialAuthButtons />)
 
-    const slot = googleSlot(container)
     await waitFor(() => expect(stub.accounts.id.renderButton).toHaveBeenCalled())
-    await waitFor(() => expect(googleButton()).toHaveAttribute("aria-hidden", "true"))
+    await waitFor(() => expect(fallbackButton()).toBeNull())
 
-    // Our button is a visual skin only: out of the tab order and the accessibility tree.
-    expect(googleButton()).toHaveAttribute("tabindex", "-1")
-    // Google's real control is reachable and is not inside any aria-hidden ancestor.
+    const slot = googleSlot(container)
+    // Visible and interactive: never hidden behind opacity, inert or aria-hidden (the old overlay bug).
+    expect(slot.className).not.toContain("opacity-0")
     expect(slot).not.toHaveAttribute("inert")
-    expect(slot).not.toHaveAttribute("aria-hidden")
     expect(slot.closest('[aria-hidden="true"]')).toBeNull()
-    expect(stub.accounts.id.renderButton.mock.calls[0]![0]).toBe(slot)
-  })
-
-  it("shows a visible focus ring on the wrapper so the transparent Google button is never an invisible focus stop", async () => {
-    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "")
-    const SocialAuthButtons = await loadComponent()
-    const { container } = renderWithProviders(<SocialAuthButtons />)
-    expect(googleSlot(container).parentElement!.className).toContain("focus-within:ring-2")
+    const [target, options] = stub.accounts.id.renderButton.mock.calls[0]!
+    expect(target).toBe(slot)
+    expect(options).toMatchObject({ text: "continue_with", locale: "en" })
+    expect(options.width).toBeGreaterThanOrEqual(200)
+    expect(options.width).toBeLessThanOrEqual(400)
   })
 })

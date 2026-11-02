@@ -3,6 +3,8 @@
 import { LocalizedText } from "@/components/i18n/localized-text"
 
 import { useEffect, useRef, useState } from "react"
+import { useLocale } from "next-intl"
+import { useTheme } from "next-themes"
 import { SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { useGoogleAuth, useTelegramAuth, friendlyAuthError } from "../hooks/use-auth"
@@ -26,7 +28,10 @@ declare global {
               theme?: "outline" | "filled_blue" | "filled_black"
               size?: "large" | "medium" | "small"
               text?: "signin_with" | "signup_with" | "continue_with" | "signin"
+              shape?: "rectangular" | "pill" | "circle" | "square"
+              logo_alignment?: "left" | "center"
               width?: number
+              locale?: string
             }
           ) => void
         }
@@ -82,6 +87,7 @@ function TelegramIcon() {
 
 function useGsiLoaded() {
   const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
   const initialized = useRef(false)
 
   useEffect(() => {
@@ -107,10 +113,12 @@ function useGsiLoaded() {
     script.async = true
     script.defer = true
     script.onload = () => setLoaded(true)
+    // Blocked by an ad/privacy blocker or the network: say so instead of "loading" forever.
+    script.onerror = () => setFailed(true)
     document.head.appendChild(script)
   }, [])
 
-  return { loaded, initialized }
+  return { loaded, failed, initialized }
 }
 
 function useTelegramLoaded() {
@@ -144,7 +152,9 @@ function useTelegramLoaded() {
   return loaded
 }
 
-const GOOGLE_BUTTON_NATIVE_HEIGHT = 40
+/** Google's widget accepts 200-400px widths. */
+const GOOGLE_BUTTON_MAX_WIDTH = 400
+const GOOGLE_BUTTON_MIN_WIDTH = 200
 
 export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [googleError, setGoogleError] = useState<string | null>(null)
@@ -154,7 +164,7 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
 
   const googleAuth = useGoogleAuth()
   const telegramAuth = useTelegramAuth()
-  const { loaded: gsiLoaded } = useGsiLoaded()
+  const { loaded: gsiLoaded, failed: gsiFailed } = useGsiLoaded()
   const telegramLoaded = useTelegramLoaded()
 
   const onCredentialRef = useRef<(credential: string) => void>(() => {})
@@ -168,31 +178,48 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
     }
   })
 
-  // Google renders its own click-to-open popup account chooser; we overlay it
-  // invisibly on our styled button. Popup close/cancel fires no callback, so no error is shown.
-  useEffect(() => {
-    const slot = googleSlotRef.current
-    const wrap = googleWrapRef.current
-    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !slot || !wrap || !window.google?.accounts?.id) return
+  const locale = useLocale()
+  const { resolvedTheme } = useTheme()
+  const [googleRendered, setGoogleRendered] = useState(false)
 
+  useEffect(() => {
+    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !window.google?.accounts?.id) return
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       ux_mode: "popup",
       auto_select: false,
       callback: (response) => onCredentialRef.current(response.credential),
     })
+  }, [gsiLoaded])
 
+  // Widget mode: Google's own button is rendered visibly and is the real control. (It used to sit
+  // invisible over our styled button, but Google's clickjacking protection makes some browsers
+  // ignore clicks on a hidden button, so "Continue with Google" sometimes did nothing.)
+  useEffect(() => {
+    const slot = googleSlotRef.current
+    const wrap = googleWrapRef.current
+    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !slot || !wrap || !window.google?.accounts?.id) return
+
+    let lastWidth = 0
     const render = () => {
-      const width = Math.round(wrap.clientWidth)
+      const width = Math.max(
+        GOOGLE_BUTTON_MIN_WIDTH,
+        Math.min(GOOGLE_BUTTON_MAX_WIDTH, Math.round(wrap.clientWidth))
+      )
+      if (width === lastWidth) return
+      lastWidth = width
       slot.innerHTML = ""
       window.google!.accounts.id.renderButton(slot, {
         type: "standard",
-        theme: "outline",
+        theme: resolvedTheme === "dark" ? "filled_black" : "outline",
         size: "large",
         text: "continue_with",
+        shape: "rectangular",
+        logo_alignment: "center",
         width,
+        locale,
       })
-      slot.style.transform = `scaleY(${wrap.clientHeight / GOOGLE_BUTTON_NATIVE_HEIGHT})`
+      setGoogleRendered(true)
     }
     render()
 
@@ -200,19 +227,20 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
       window.addEventListener("resize", render)
       return () => window.removeEventListener("resize", render)
     }
-
     const observer = new ResizeObserver(render)
     observer.observe(wrap)
     return () => observer.disconnect()
-  }, [gsiLoaded])
+  }, [gsiLoaded, resolvedTheme, locale])
 
-  // When Google's own button is rendered it is the real control: it is exposed to assistive tech
-  // and our styled button is only its visual skin. Otherwise our button is the (fallback) control.
-  const googleActive = gsiLoaded && Boolean(GOOGLE_CLIENT_ID)
+  const googleActive = gsiLoaded && Boolean(GOOGLE_CLIENT_ID) && googleRendered
 
   const handleGoogleFallbackClick = () => {
     if (!GOOGLE_CLIENT_ID) {
       setGoogleError("Google sign-in is not configured.")
+      return
+    }
+    if (gsiFailed) {
+      setGoogleError("Google sign-in couldn't load. Check your connection or ad blocker, then reload.")
       return
     }
     if (!gsiLoaded) {
@@ -253,36 +281,33 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
       <div className="space-y-1">
         <div
           ref={googleWrapRef}
-          className="group relative mx-auto h-11 w-full max-w-100 rounded-lg focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background sm:h-12"
+          className="relative mx-auto flex min-h-11 w-full max-w-100 items-center justify-center sm:min-h-12"
         >
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleFallbackClick}
-            disabled={googlePending}
-            aria-hidden={googleActive || undefined}
-            tabIndex={googleActive ? -1 : undefined}
-            className="w-full h-full border-border/90 bg-card text-foreground group-hover:bg-muted font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
-          >
-            {googlePending ? (
-              <span className="flex items-center gap-2">
-                <SpinnerGap size={18} className="animate-spin" />
-                <span><LocalizedText id="signingIn" /></span>
-              </span>
-            ) : (
-              <>
-                <GoogleIcon />
-                <span><LocalizedText id="continueWithGoogle" /></span>
-              </>
-            )}
-          </Button>
+          {/* Placeholder while Google's script loads, or the control itself if Google is unavailable. */}
+          {!googleActive && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleFallbackClick}
+              className="h-11 w-full border-border/90 bg-card text-foreground hover:bg-muted font-semibold text-xs sm:h-12 sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
+            >
+              <GoogleIcon />
+              <span><LocalizedText id="continueWithGoogle" /></span>
+            </Button>
+          )}
           <div
             ref={googleSlotRef}
+            data-slot="google-button"
+            className={googleActive ? "flex w-full justify-center" : "pointer-events-none absolute inset-0 overflow-hidden opacity-0"}
+            aria-hidden={googleActive ? undefined : true}
             inert={!googleActive}
-            className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-lg opacity-0 ${
-              googlePending ? "pointer-events-none" : ""
-            }`}
           />
+          {googlePending && (
+            <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-card/90 text-xs font-semibold text-foreground sm:text-sm">
+              <SpinnerGap size={18} className="animate-spin" />
+              <span><LocalizedText id="signingIn" /></span>
+            </div>
+          )}
         </div>
         {googleError && (
           <p className="text-xs text-destructive text-center">{googleError}</p>
