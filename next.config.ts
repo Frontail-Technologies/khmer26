@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { execSync } from "node:child_process";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -19,6 +20,22 @@ const r2Pattern = (() => {
 })();
 
 const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * Version-skew protection: a tab left open across a deploy otherwise keeps requesting the previous
+ * build's chunks, and client navigations (links, buttons that route) silently fail until a reload.
+ * With an ID per deploy, Next detects the mismatch and does a full reload instead.
+ * NEXT_DEPLOYMENT_ID wins when the deploy sets it; otherwise the git commit of the build is used.
+ */
+const deploymentId = (() => {
+  if (process.env.NEXT_DEPLOYMENT_ID) return process.env.NEXT_DEPLOYMENT_ID;
+  if (!isProd) return undefined;
+  try {
+    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || undefined;
+  } catch {
+    return undefined;
+  }
+})();
 
 /**
  * Baseline hardening for every response. The CSP covers framing, plugins, <base> and form targets;
@@ -51,6 +68,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  ...(deploymentId ? { deploymentId } : {}),
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 7,
