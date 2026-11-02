@@ -3,8 +3,6 @@
 import { LocalizedText } from "@/components/i18n/localized-text"
 
 import { useEffect, useRef, useState } from "react"
-import { useLocale } from "next-intl"
-import { useTheme } from "next-themes"
 import { SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { useGoogleAuth, useTelegramAuth, friendlyAuthError } from "../hooks/use-auth"
@@ -14,26 +12,13 @@ declare global {
   interface Window {
     google?: {
       accounts: {
-        id: {
-          initialize: (cfg: {
+        oauth2: {
+          initTokenClient: (cfg: {
             client_id: string
-            callback: (res: { credential: string }) => void
-            auto_select?: boolean
-            ux_mode?: "popup" | "redirect"
-          }) => void
-          renderButton: (
-            parent: HTMLElement,
-            opts: {
-              type?: "standard" | "icon"
-              theme?: "outline" | "filled_blue" | "filled_black"
-              size?: "large" | "medium" | "small"
-              text?: "signin_with" | "signup_with" | "continue_with" | "signin"
-              shape?: "rectangular" | "pill" | "circle" | "square"
-              logo_alignment?: "left" | "center"
-              width?: number
-              locale?: string
-            }
-          ) => void
+            scope: string
+            callback: (res: { access_token?: string; error?: string }) => void
+            error_callback?: (err: { type: "popup_failed_to_open" | "popup_closed" | "unknown" }) => void
+          }) => GoogleTokenClient
         }
       }
     }
@@ -47,6 +32,10 @@ declare global {
     }
     onTelegramAuth?: (data: TelegramAuthPayload) => void
   }
+}
+
+interface GoogleTokenClient {
+  requestAccessToken: (overrides?: { prompt?: string }) => void
 }
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""
@@ -88,19 +77,18 @@ function TelegramIcon() {
 function useGsiLoaded() {
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
-  const initialized = useRef(false)
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return
 
-    if (typeof window !== "undefined" && window.google?.accounts?.id) {
+    if (typeof window !== "undefined" && window.google?.accounts?.oauth2) {
       setTimeout(() => setLoaded(true), 0)
       return
     }
 
     if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
       const poll = setInterval(() => {
-        if (window.google?.accounts?.id) {
+        if (window.google?.accounts?.oauth2) {
           clearInterval(poll)
           setLoaded(true)
         }
@@ -118,7 +106,7 @@ function useGsiLoaded() {
     document.head.appendChild(script)
   }, [])
 
-  return { loaded, failed, initialized }
+  return { loaded, failed }
 }
 
 function useTelegramLoaded() {
@@ -152,89 +140,51 @@ function useTelegramLoaded() {
   return loaded
 }
 
-/** Google's widget accepts 200-400px widths. */
-const GOOGLE_BUTTON_MAX_WIDTH = 400
-const GOOGLE_BUTTON_MIN_WIDTH = 200
-
 export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [googleError, setGoogleError] = useState<string | null>(null)
   const [telegramError, setTelegramError] = useState<string | null>(null)
-  const googleSlotRef = useRef<HTMLDivElement>(null)
-  const googleWrapRef = useRef<HTMLDivElement>(null)
 
   const googleAuth = useGoogleAuth()
   const telegramAuth = useTelegramAuth()
   const { loaded: gsiLoaded, failed: gsiFailed } = useGsiLoaded()
   const telegramLoaded = useTelegramLoaded()
 
-  const onCredentialRef = useRef<(credential: string) => void>(() => {})
+  const onAccessTokenRef = useRef<(accessToken: string) => void>(() => {})
   useEffect(() => {
-    onCredentialRef.current = (credential: string) => {
+    onAccessTokenRef.current = (accessToken: string) => {
       setGoogleError(null)
-      googleAuth.mutate(credential, {
-        onSuccess: () => onSuccess?.(),
-        onError: (err) => setGoogleError(friendlyAuthError(err)),
-      })
+      googleAuth.mutate(
+        { accessToken },
+        {
+          onSuccess: () => onSuccess?.(),
+          onError: (err) => setGoogleError(friendlyAuthError(err)),
+        }
+      )
     }
   })
 
-  const locale = useLocale()
-  const { resolvedTheme } = useTheme()
-  const [googleRendered, setGoogleRendered] = useState(false)
-
+  // Our own styled button opens Google's OAuth popup directly; there is no hidden Google iframe to
+  // swallow clicks (Google's clickjacking protection made some browsers ignore an invisible one).
+  const tokenClientRef = useRef<GoogleTokenClient | null>(null)
   useEffect(() => {
-    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !window.google?.accounts?.id) return
-    window.google.accounts.id.initialize({
+    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !window.google?.accounts?.oauth2) return
+    tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      ux_mode: "popup",
-      auto_select: false,
-      callback: (response) => onCredentialRef.current(response.credential),
+      scope: "openid email profile",
+      callback: (res) => {
+        if (res.access_token) onAccessTokenRef.current(res.access_token)
+        else if (res.error && res.error !== "access_denied") setGoogleError("Google sign-in failed. Please try again.")
+      },
+      error_callback: (err) => {
+        // Closing the popup is a normal cancel; a blocked popup needs the visitor's help.
+        if (err.type === "popup_failed_to_open") {
+          setGoogleError("Your browser blocked the Google window. Allow pop-ups for this site and try again.")
+        }
+      },
     })
   }, [gsiLoaded])
 
-  // Widget mode: Google's own button is rendered visibly and is the real control. (It used to sit
-  // invisible over our styled button, but Google's clickjacking protection makes some browsers
-  // ignore clicks on a hidden button, so "Continue with Google" sometimes did nothing.)
-  useEffect(() => {
-    const slot = googleSlotRef.current
-    const wrap = googleWrapRef.current
-    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !slot || !wrap || !window.google?.accounts?.id) return
-
-    let lastWidth = 0
-    const render = () => {
-      const width = Math.max(
-        GOOGLE_BUTTON_MIN_WIDTH,
-        Math.min(GOOGLE_BUTTON_MAX_WIDTH, Math.round(wrap.clientWidth))
-      )
-      if (width === lastWidth) return
-      lastWidth = width
-      slot.innerHTML = ""
-      window.google!.accounts.id.renderButton(slot, {
-        type: "standard",
-        theme: resolvedTheme === "dark" ? "filled_black" : "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "rectangular",
-        logo_alignment: "center",
-        width,
-        locale,
-      })
-      setGoogleRendered(true)
-    }
-    render()
-
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", render)
-      return () => window.removeEventListener("resize", render)
-    }
-    const observer = new ResizeObserver(render)
-    observer.observe(wrap)
-    return () => observer.disconnect()
-  }, [gsiLoaded, resolvedTheme, locale])
-
-  const googleActive = gsiLoaded && Boolean(GOOGLE_CLIENT_ID) && googleRendered
-
-  const handleGoogleFallbackClick = () => {
+  const handleGoogleAuth = () => {
     if (!GOOGLE_CLIENT_ID) {
       setGoogleError("Google sign-in is not configured.")
       return
@@ -243,9 +193,13 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
       setGoogleError("Google sign-in couldn't load. Check your connection or ad blocker, then reload.")
       return
     }
-    if (!gsiLoaded) {
+    if (!tokenClientRef.current) {
       setGoogleError("Google sign-in is loading. Please try again.")
+      return
     }
+    setGoogleError(null)
+    // Must run inside the click so the browser allows the popup.
+    tokenClientRef.current.requestAccessToken()
   }
 
   const handleTelegramAuth = () => {
@@ -279,36 +233,25 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
   return (
     <div className="space-y-2.5">
       <div className="space-y-1">
-        <div
-          ref={googleWrapRef}
-          className="relative mx-auto flex min-h-11 w-full max-w-100 items-center justify-center sm:min-h-12"
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleGoogleAuth}
+          disabled={googlePending}
+          className="w-full h-11 sm:h-12 border-border/90 bg-card text-foreground hover:bg-muted font-semibold text-xs sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
         >
-          {/* Placeholder while Google's script loads, or the control itself if Google is unavailable. */}
-          {!googleActive && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoogleFallbackClick}
-              className="h-11 w-full border-border/90 bg-card text-foreground hover:bg-muted font-semibold text-xs sm:h-12 sm:text-sm gap-2.5 rounded-lg cursor-pointer shadow-2xs transition-colors"
-            >
-              <GoogleIcon />
-              <span><LocalizedText id="continueWithGoogle" /></span>
-            </Button>
-          )}
-          <div
-            ref={googleSlotRef}
-            data-slot="google-button"
-            className={googleActive ? "flex w-full justify-center" : "pointer-events-none absolute inset-0 overflow-hidden opacity-0"}
-            aria-hidden={googleActive ? undefined : true}
-            inert={!googleActive}
-          />
-          {googlePending && (
-            <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-card/90 text-xs font-semibold text-foreground sm:text-sm">
+          {googlePending ? (
+            <span className="flex items-center gap-2">
               <SpinnerGap size={18} className="animate-spin" />
               <span><LocalizedText id="signingIn" /></span>
-            </div>
+            </span>
+          ) : (
+            <>
+              <GoogleIcon />
+              <span><LocalizedText id="continueWithGoogle" /></span>
+            </>
           )}
-        </div>
+        </Button>
         {googleError && (
           <p className="text-xs text-destructive text-center">{googleError}</p>
         )}

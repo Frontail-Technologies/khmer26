@@ -58,8 +58,11 @@ export async function resetPassword(resetSecret: string, newPassword: string): P
   return res.data;
 }
 
-export async function googleAuth(idToken: string): Promise<AuthUser> {
-  const res = await apiClient.post<AuthResult>('/auth/google', { idToken });
+/** Google sign-in: an ID token (Google's button / One Tap) or an OAuth access token (our popup). */
+export type GoogleCredential = { idToken: string } | { accessToken: string };
+
+export async function googleAuth(credential: GoogleCredential): Promise<AuthUser> {
+  const res = await apiClient.post<AuthResult>('/auth/google', credential);
   return res.data.user;
 }
 

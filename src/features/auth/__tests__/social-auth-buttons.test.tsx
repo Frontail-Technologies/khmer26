@@ -8,14 +8,18 @@ vi.setConfig({ testTimeout: 30_000 })
 // The icon barrel has thousands of exports and dominates the cold import; the icons are irrelevant here.
 vi.mock("@phosphor-icons/react", () => ({ SpinnerGap: () => null }))
 
+const googleMutate = vi.fn()
 vi.mock("../hooks/use-auth", () => ({
-  useGoogleAuth: () => ({ mutate: vi.fn(), isPending: false }),
+  useGoogleAuth: () => ({ mutate: googleMutate, isPending: false }),
   useTelegramAuth: () => ({ mutate: vi.fn(), isPending: false }),
   friendlyAuthError: () => "error",
 }))
 
-type GoogleStub = {
-  accounts: { id: { initialize: ReturnType<typeof vi.fn>; renderButton: ReturnType<typeof vi.fn> } }
+type TokenConfig = {
+  client_id: string
+  scope: string
+  callback: (res: { access_token?: string; error?: string }) => void
+  error_callback?: (err: { type: string }) => void
 }
 
 async function loadComponent() {
@@ -23,54 +27,77 @@ async function loadComponent() {
   return (await import("../components/social-auth-buttons")).SocialAuthButtons
 }
 
-const googleSlot = (container: HTMLElement) => container.querySelector<HTMLElement>('[data-slot="google-button"]')!
-const fallbackButton = () => screen.queryByRole("button", { name: /continue with google/i })
+const googleButton = () => screen.getByRole("button", { name: /continue with google/i })
+
+/** Installs a fake Google token client and returns hooks to drive it. */
+function stubGoogle() {
+  let config: TokenConfig | null = null
+  const requestAccessToken = vi.fn()
+  const initTokenClient = vi.fn((cfg: TokenConfig) => {
+    config = cfg
+    return { requestAccessToken }
+  })
+  ;(window as unknown as { google: unknown }).google = { accounts: { oauth2: { initTokenClient } } }
+  return { initTokenClient, requestAccessToken, config: () => config! }
+}
 
 beforeEach(() => {
-  // jsdom has no ResizeObserver; the component only needs it to exist.
-  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} unobserve() {} })
+  googleMutate.mockReset()
 })
 
 afterEach(() => {
   vi.unstubAllEnvs()
-  vi.unstubAllGlobals()
-  delete (window as unknown as { google?: GoogleStub }).google
+  delete (window as unknown as { google?: unknown }).google
 })
 
-describe("<SocialAuthButtons /> Google widget mode", () => {
-  it("shows our button as the control when Google isn't configured, with the empty widget slot inert", async () => {
-    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "")
+describe("<SocialAuthButtons /> Google sign-in", () => {
+  it("keeps our styled button, with no hidden Google overlay to swallow clicks", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "test-client-id")
+    stubGoogle()
     const SocialAuthButtons = await loadComponent()
     const { container } = renderWithProviders(<SocialAuthButtons />)
 
-    const button = fallbackButton()!
-    expect(button).toBeInTheDocument()
-    expect(button).not.toHaveAttribute("aria-hidden")
-    expect(googleSlot(container)).toHaveAttribute("inert")
-
-    fireEvent.click(button)
-    expect(screen.getByText("Google sign-in is not configured.")).toBeInTheDocument()
+    expect(googleButton()).toBeVisible()
+    expect(container.querySelector("iframe, .opacity-0, [data-slot='google-button']")).toBeNull()
   })
 
-  it("renders Google's own button visibly and drops our placeholder once Google is ready", async () => {
+  it("opens Google's popup from our button and signs in with the access token", async () => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "test-client-id")
-    const stub: GoogleStub = { accounts: { id: { initialize: vi.fn(), renderButton: vi.fn() } } }
-    ;(window as unknown as { google: GoogleStub }).google = stub
+    const google = stubGoogle()
     const SocialAuthButtons = await loadComponent()
-    const { container } = renderWithProviders(<SocialAuthButtons />)
+    renderWithProviders(<SocialAuthButtons />)
 
-    await waitFor(() => expect(stub.accounts.id.renderButton).toHaveBeenCalled())
-    await waitFor(() => expect(fallbackButton()).toBeNull())
+    await waitFor(() => expect(google.initTokenClient).toHaveBeenCalled())
+    expect(google.config()).toMatchObject({ client_id: "test-client-id", scope: "openid email profile" })
 
-    const slot = googleSlot(container)
-    // Visible and interactive: never hidden behind opacity, inert or aria-hidden (the old overlay bug).
-    expect(slot.className).not.toContain("opacity-0")
-    expect(slot).not.toHaveAttribute("inert")
-    expect(slot.closest('[aria-hidden="true"]')).toBeNull()
-    const [target, options] = stub.accounts.id.renderButton.mock.calls[0]!
-    expect(target).toBe(slot)
-    expect(options).toMatchObject({ text: "continue_with", locale: "en" })
-    expect(options.width).toBeGreaterThanOrEqual(200)
-    expect(options.width).toBeLessThanOrEqual(400)
+    fireEvent.click(googleButton())
+    expect(google.requestAccessToken).toHaveBeenCalledTimes(1)
+
+    google.config().callback({ access_token: "ya29.token" })
+    expect(googleMutate).toHaveBeenCalledWith({ accessToken: "ya29.token" }, expect.anything())
+  })
+
+  it("explains a blocked popup, and treats closing the popup as a quiet cancel", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "test-client-id")
+    const google = stubGoogle()
+    const SocialAuthButtons = await loadComponent()
+    renderWithProviders(<SocialAuthButtons />)
+    await waitFor(() => expect(google.initTokenClient).toHaveBeenCalled())
+
+    google.config().error_callback?.({ type: "popup_closed" })
+    await waitFor(() => expect(screen.queryByText(/blocked the google window/i)).toBeNull())
+
+    google.config().error_callback?.({ type: "popup_failed_to_open" })
+    expect(await screen.findByText(/blocked the google window/i)).toBeInTheDocument()
+    expect(googleMutate).not.toHaveBeenCalled()
+  })
+
+  it("says so when Google isn't configured", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "")
+    const SocialAuthButtons = await loadComponent()
+    renderWithProviders(<SocialAuthButtons />)
+
+    fireEvent.click(googleButton())
+    expect(screen.getByText("Google sign-in is not configured.")).toBeInTheDocument()
   })
 })

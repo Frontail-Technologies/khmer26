@@ -179,7 +179,7 @@ export function useGoogleAuth() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (idToken: string) => authApi.googleAuth(idToken),
+    mutationFn: (credential: authApi.GoogleCredential) => authApi.googleAuth(credential),
     onSuccess: (user) => {
       queryClient.setQueryData(authKeys.session(), user);
       router.push(resolveNextPath());
