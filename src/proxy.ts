@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { isAdminHostname, normalizeHostname } from '@/lib/admin-host';
+import { isProtectedPath } from '@/lib/constants/route-policy';
 
-const PROTECTED_PREFIXES = [
-  '/account',
-  '/messages',
-  '/post-ad',
-  '/notifications',
-  '/checkout',
-];
 
 // Session cookie names (30-day TTL) — dev and prod variants.
 // We check only the long-lived session cookie, not the 15-minute access token cookie,
@@ -49,11 +43,7 @@ function handleAdminHost(request: NextRequest): NextResponse {
   return NextResponse.rewrite(internalUrl);
 }
 
-function isProtected(pathname: string): boolean {
-  return PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + '/')
-  );
-}
+const isProtected = isProtectedPath;
 
 function hasSessionCookie(request: NextRequest): boolean {
   const cookies = request.cookies;

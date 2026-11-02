@@ -63,3 +63,15 @@ export async function serverApiGet<T>(path: string, options: ServerApiOptions = 
   if (!payload.success || payload.data === undefined) throw new Error(`API ${path} returned an invalid envelope`)
   return payload.data
 }
+
+/**
+ * True when this render answers an in-app (client-side) navigation rather than a full page load.
+ * Browsers mark the router's RSC fetches `Sec-Fetch-Dest: empty` and page loads `document`; crawlers
+ * that send neither count as a page load, so they always get server-fetched content.
+ * On a client navigation the browser's React Query cache (often warmed by hover/touch prefetch)
+ * renders the page instantly, so server prefetching there only delays the transition.
+ */
+export async function isClientNavigation(): Promise<boolean> {
+  const store = await headers()
+  return store.get("sec-fetch-dest") === "empty"
+}

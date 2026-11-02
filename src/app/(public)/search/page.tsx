@@ -21,7 +21,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 export default function SearchPage() {
   return (
     <Container className="py-2 pb-14">
-      <Suspense fallback={<CategoryPageSkeleton />}>
+      <Suspense fallback={<CategoryPageSkeleton withHeader={false} />}>
         <SearchPageContent />
       </Suspense>
     </Container>

@@ -323,7 +323,19 @@
   animation-delay: calc(min(var(--i, 0), 12) * 35ms);
 }
 
-/* ───────────────────────── View transitions (route changes) ───────────────────────── */
+/* ───────────────────────── Route changes ───────────────────────── */
+
+/* New page fades in (opacity only, so fixed/sticky children keep their containing block). */
+@keyframes k26-page-in {
+  from {
+    opacity: 0;
+  }
+}
+.k26-page-in {
+  animation: k26-page-in 180ms cubic-bezier(0.25, 1, 0.5, 1) backwards;
+}
+
+/* ───────────────────────── View transitions ───────────────────────── */
 
 :root {
   --vt-exit: 120ms;
@@ -389,7 +401,8 @@
     animation-duration: 0s !important;
     animation-delay: 0s !important;
   }
-  .reveal {
+  .reveal,
+  .k26-page-in {
     animation: none;
   }
   .pressable:active {
@@ -397,14 +410,16 @@
   }
 }
 
-/* Skeleton shimmer: a soft light sweep reads as "loading" better than a blink. */
+/* Skeleton shimmer: a soft light sweep reads as "loading" better than a blink.
+   Not named `shimmer`: shadcn/tailwind.css ships a text-shimmer utility of that name (background-clip: text)
+   and Tailwind merges same-named utilities, which made every skeleton paint nothing. */
 @keyframes k26-shimmer {
   100% {
     transform: translateX(100%);
   }
 }
 
-@utility shimmer {
+@utility skeleton-shimmer {
   position: relative;
   overflow: hidden;
   &::after {
@@ -418,7 +433,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shimmer::after {
+  .skeleton-shimmer::after {
     animation: none;
   }
 }

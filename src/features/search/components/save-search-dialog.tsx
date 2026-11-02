@@ -1,11 +1,11 @@
 "use client"
 
+import { openSignInPrompt } from "@/features/auth/lib/sign-in-prompt-store"
 import { useTranslations } from "next-intl"
 
 import { LocalizedText } from "@/components/i18n/localized-text"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Bell, BookmarkSimple } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,6 @@ function suggestedName(filters: SearchFilters): string {
 
 export function SaveSearchDialog({ filters }: { filters: SearchFilters }) {
   const tGenerated = useTranslations("generated")
-  const router = useRouter()
   const { isAuthenticated, isLoading } = useCurrentUser()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(() => suggestedName(filters))
@@ -58,8 +57,7 @@ export function SaveSearchDialog({ filters }: { filters: SearchFilters }) {
         className="h-8 gap-1.5 px-2.5 text-xs font-semibold"
         onClick={() => {
           if (!isAuthenticated) {
-            const here = window.location.pathname + window.location.search
-            router.push(`/login?next=${encodeURIComponent(here)}`)
+            openSignInPrompt()
             return
           }
           setName(suggestedName(filters))

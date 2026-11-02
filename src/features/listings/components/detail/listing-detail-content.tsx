@@ -6,7 +6,7 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ListingDetailSkeleton } from "./listing-detail-skeleton"
 import { Container } from "@/components/layout/Container"
 import { ApiError } from "@/lib/api/client"
 import { toListingCardData } from "@/features/listings/lib/to-listing-card-data"
@@ -39,24 +39,7 @@ const MORE_FROM_SELLER_LIMIT = 4
 
 function DetailSkeleton() {
   const tGenerated = useTranslations("generated")
-  return (
-    <Container className="py-3 sm:py-4">
-      <div
-        aria-busy="true"
-        aria-label={tGenerated("loadingListing")}
-        className="mt-2 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6"
-      >
-        <div className="space-y-4 lg:col-span-8">
-          <Skeleton className="aspect-4/3 sm:aspect-16/10 w-full rounded-2xl" />
-          <Skeleton className="h-40 w-full rounded-xl" />
-        </div>
-        <div className="space-y-4 lg:col-span-4">
-          <Skeleton className="h-56 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-        </div>
-      </div>
-    </Container>
-  )
+  return <ListingDetailSkeleton label={tGenerated("loadingListing")} />
 }
 
 export function ListingDetailContent({ id }: { id: string }) {

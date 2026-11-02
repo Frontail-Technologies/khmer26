@@ -1,3 +1,10 @@
+/** Signed-in areas. The proxy redirects guests away from them; in-app links open the sign-in prompt. */
+export const PROTECTED_PREFIXES = ["/account", "/messages", "/post-ad", "/notifications", "/checkout"] as const
+
+export function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + "/"))
+}
+
 export function shouldShowMobileBottomNavigation(pathname: string): boolean {
   if (
     pathname.startsWith("/admin") ||

@@ -1,19 +1,19 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useCurrentUser } from './use-current-user';
+import { openSignInPrompt } from '../lib/sign-in-prompt-store';
 
+/**
+ * Runs `action` for signed-in visitors. Guests get the "Sign in to continue" prompt in place
+ * (returning them to this page after sign-in) instead of being bounced to /login.
+ */
 export function useRequireAuth() {
   const { isAuthenticated, isLoading } = useCurrentUser();
-  const router = useRouter();
 
   return function requireAuth<T>(action: () => T): T | undefined {
     if (isLoading) return undefined;
     if (!isAuthenticated) {
-      const returnTo =
-        typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/';
-      const safeReturn = returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
-      router.push(`/login?next=${encodeURIComponent(safeReturn)}`);
+      openSignInPrompt();
       return undefined;
     }
     return action();

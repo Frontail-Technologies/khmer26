@@ -1269,5 +1269,12 @@
     "viewStore": "View my public store",
     "emailVerified": "Email verified",
     "plan": "Plan"
+  },
+  "authPrompt": {
+    "title": "Sign in to continue",
+    "body": "Sign in or create a free account to post ads, chat with sellers, save favorites and manage your account.",
+    "signIn": "Sign in",
+    "register": "Create account",
+    "later": "Not now"
   }
 }

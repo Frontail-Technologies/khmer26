@@ -16,6 +16,7 @@ import {
 } from "@phosphor-icons/react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
+import { SNAP_TRACK_CLASS, useSnapCarousel } from "@/hooks/use-snap-carousel"
 import type { GalleryImage } from "@/features/listings/lib/listing-detail-format"
 
 interface ListingGalleryProps {
@@ -29,10 +30,10 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
   const tGenerated = useTranslations("generated")
   const [activeIndex, setActiveIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const touchStartX = useRef<number | null>(null)
-  const touchEndX = useRef<number | null>(null)
   const stripRef = useRef<HTMLDivElement>(null)
   const fullscreenStripRef = useRef<HTMLDivElement>(null)
+  const count = images.length
+  const { trackRef, onScroll, onPointerDown, goTo } = useSnapCarousel(activeIndex, setActiveIndex, count)
 
   // Keep the active thumbnail in view (scrolls the strip only, never the page).
   useEffect(() => {
@@ -44,45 +45,8 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
     }
   }, [activeIndex, isFullscreen])
 
-  const activeImage = images[activeIndex] ?? null
-  const handlePrev = useCallback(() => {
-    setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }, [images.length])
-
-  const handleNext = useCallback(() => {
-    setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }, [images.length])
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX
-  }
-
-  const handleTouchEnd = () => {
-    if (touchStartX.current === null || touchEndX.current === null) return
-    const diff = touchStartX.current - touchEndX.current
-    if (diff > 45) {
-      handleNext()
-    } else if (diff < -45) {
-      handlePrev()
-    }
-    touchStartX.current = null
-    touchEndX.current = null
-  }
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isFullscreen) return
-      if (e.key === "ArrowLeft") handlePrev()
-      if (e.key === "ArrowRight") handleNext()
-      if (e.key === "Escape") setIsFullscreen(false)
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isFullscreen, handlePrev, handleNext])
+  const handlePrev = useCallback(() => goTo(activeIndex - 1), [goTo, activeIndex])
+  const handleNext = useCallback(() => goTo(activeIndex + 1), [goTo, activeIndex])
 
   return (
     <div>
@@ -103,20 +67,25 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
           }
         }}
         onClick={() => images.length > 0 && setIsFullscreen(true)}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         className={cn("relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden bg-muted select-none group shadow-2xs focus-visible:outline-2 focus-visible:outline-primary", images.length > 0 && "cursor-zoom-in")}
       >
-        {activeImage ? (
-          <Image
-            src={activeImage.url}
-            alt={activeImage.alt || title}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
-            className="object-cover transition-transform duration-300 group-hover:scale-102"
-          />
+        {count > 0 ? (
+          <div ref={trackRef} onScroll={onScroll} onPointerDown={onPointerDown} className={cn(SNAP_TRACK_CLASS, "absolute inset-0")}>
+            {images.map((img, idx) => (
+              <div key={img.id || idx} className="relative h-full w-full shrink-0 snap-center snap-always overflow-hidden" aria-hidden={idx !== activeIndex}>
+                <Image
+                  src={img.url}
+                  alt={img.alt || title}
+                  fill
+                  priority={idx === 0}
+                  loading={idx === 0 ? undefined : isNear(idx, activeIndex, count) ? "eager" : "lazy"}
+                  draggable={false}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-102"
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/60">
             <ImageSquare size={56} weight="light" aria-hidden="true" />
@@ -214,6 +183,15 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
           <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md" />
           <DialogPrimitive.Popup
             data-slot="gallery-fullscreen-popup"
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") {
+                e.preventDefault()
+                handlePrev()
+              } else if (e.key === "ArrowRight") {
+                e.preventDefault()
+                handleNext()
+              }
+            }}
             className="fixed inset-0 z-50 flex flex-col justify-between w-screen h-dvh bg-black/95 text-white p-3 sm:p-6 select-none overflow-hidden outline-none"
           >
             <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-3">
@@ -237,17 +215,8 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
             </div>
 
             <div className="relative flex-1 w-full my-2 flex items-center justify-center min-h-0">
-              <div className="relative w-full h-full max-h-[82vh] flex items-center justify-center">
-                {activeImage && (
-                  <Image
-                    src={activeImage.url}
-                    alt={activeImage.alt || title}
-                    fill
-                    priority
-                    sizes="100vw"
-                    className="object-contain"
-                  />
-                )}
+              <div className="relative w-full h-full max-h-[82vh]">
+                <FullscreenTrack images={images} title={title} index={activeIndex} onIndexChange={setActiveIndex} />
               </div>
 
               {images.length > 1 && (
@@ -305,6 +274,44 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+    </div>
+  )
+}
+
+/** The active photo and its neighbours (wrapping) load eagerly so the next swipe never waits. */
+function isNear(idx: number, active: number, count: number) {
+  const distance = Math.abs(idx - active)
+  return distance <= 1 || distance === count - 1
+}
+
+/** Mounted only while the fullscreen viewer is open, so it starts on the photo that was tapped. */
+function FullscreenTrack({
+  images,
+  title,
+  index,
+  onIndexChange,
+}: {
+  images: GalleryImage[]
+  title: string
+  index: number
+  onIndexChange: (index: number) => void
+}) {
+  const { trackRef, onScroll, onPointerDown } = useSnapCarousel(index, onIndexChange, images.length)
+  return (
+    <div ref={trackRef} onScroll={onScroll} onPointerDown={onPointerDown} className={SNAP_TRACK_CLASS}>
+      {images.map((img, idx) => (
+        <div key={`fs-${img.id || idx}`} className="relative h-full w-full shrink-0 snap-center snap-always" aria-hidden={idx !== index}>
+          <Image
+            src={img.url}
+            alt={img.alt || title}
+            fill
+            loading={isNear(idx, index, images.length) ? "eager" : "lazy"}
+            draggable={false}
+            sizes="100vw"
+            className="object-contain"
+          />
+        </div>
+      ))}
     </div>
   )
 }

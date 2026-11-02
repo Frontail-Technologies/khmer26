@@ -9,6 +9,7 @@ import { AppHeader } from "@/components/layout/AppHeader"
 import { AppFooter } from "@/components/layout/AppFooter"
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation"
 import { PwaShell } from "@/components/pwa/pwa-shell"
+import { SignInPrompt } from "@/features/auth/components/sign-in-prompt"
 import { SEO } from "@/lib/constants/site"
 import { cn } from "@/lib/utils"
 import { cookies, headers } from "next/headers"
@@ -16,6 +17,8 @@ import { dehydrate, QueryClient } from "@tanstack/react-query"
 import { authKeys } from "@/lib/query/keys"
 import { getServerCurrentUser } from "@/features/auth/api/auth.server"
 import { isAdminHostname, normalizeHostname } from "@/lib/admin-host"
+import { ListingViewModeProvider } from "@/features/listings/hooks/use-listing-view-mode"
+import { parseViewMode, VIEW_MODE_COOKIE } from "@/features/listings/lib/view-mode"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -106,6 +109,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     })
   }
   const dehydratedState = dehydrate(queryClient)
+  const initialViewMode = parseViewMode(cookieStore.get(VIEW_MODE_COOKIE)?.value)
 
   return (
     <html
@@ -119,6 +123,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AppProviders dehydratedState={dehydratedState}>
+            <ListingViewModeProvider initialMode={initialViewMode}>
             {isAdminRequest ? (
               children
             ) : (
@@ -128,8 +133,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <AppFooter />
                 <MobileBottomNavigation />
                 <PwaShell />
+                <SignInPrompt />
               </>
             )}
+            </ListingViewModeProvider>
           </AppProviders>
         </NextIntlClientProvider>
       </body>

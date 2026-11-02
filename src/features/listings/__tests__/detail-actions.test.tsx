@@ -1,3 +1,4 @@
+import { closeSignInPrompt, getSignInPromptReturnTo } from "@/features/auth/lib/sign-in-prompt-store"
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import { QueryClient } from "@tanstack/react-query"
@@ -41,6 +42,7 @@ import { marketplaceKeys } from "@/lib/query/keys"
 
 beforeEach(() => {
   push.mockReset()
+  closeSignInPrompt()
   authenticated = true
   Object.values(api).forEach((fn) => fn.mockReset())
 })
@@ -64,12 +66,12 @@ describe("patchFavoriteInData (cache updates)", () => {
 })
 
 describe("<FavoriteButton />", () => {
-  it("sends a signed-out visitor to login with the current page as next", () => {
+  it("opens the sign-in prompt for a signed-out visitor, returning to the current page", () => {
     authenticated = false
     renderWithProviders(<FavoriteButton listingId="L1" />)
 
     fireEvent.click(screen.getByRole("button", { name: "Save to favorites" }))
-    expect(push).toHaveBeenCalledWith(expect.stringMatching(/^\/login\?next=/))
+    expect(getSignInPromptReturnTo()).toBe("/")
     expect(api.addFavorite).not.toHaveBeenCalled()
   })
 

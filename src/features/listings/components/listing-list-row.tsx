@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import type { ListingCardData } from "@/types"
 import { ImageSquare, ShieldCheck } from "@phosphor-icons/react/dist/ssr"
 import Image from "next/image"
-import Link from "next/link"
+import { ListingPrefetchLink } from "./listing-prefetch-link"
 import { FavoriteButton } from "./favorite-button"
 
 interface ListingListRowProps {
@@ -39,15 +39,15 @@ export function ListingListRow({
         className
       )}
     >
-      <Link
-        href={`/listing/${listing.slug}`}
+      <ListingPrefetchLink
+        slug={listing.slug}
         className="absolute inset-0 z-0 focus-visible:outline-hidden"
         aria-label={listing.title}
       >
         <span className="sr-only">{listing.title}</span>
-      </Link>
+      </ListingPrefetchLink>
 
-      <div className="relative w-36 sm:w-52 md:w-64 aspect-square sm:aspect-5/4 shrink-0 overflow-hidden bg-muted">
+      <div className="relative w-36 sm:w-52 md:w-64 aspect-square sm:aspect-5/4 shrink-0 overflow-hidden bg-muted pointer-events-none">
         {imageUrl ? (
           <Image
             src={imageUrl}

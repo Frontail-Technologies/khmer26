@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ListingFeedSkeleton } from "@/features/listings/components/listing-skeletons"
 import { useSearchPageState } from "@/features/search/hooks/use-search-page-state"
 import { SearchResultsView } from "@/features/search/components/search-results-view"
 import type { CategoryNavData } from "@/features/search/components/filter-panel"
@@ -29,17 +30,26 @@ import { CategoryEmptyState } from "./category-empty-state"
 import { CategoryPageHeader } from "./category-page-header"
 import { useLocalizedName } from "@/lib/i18n/localized"
 
-export function CategoryPageSkeleton() {
+export function CategoryPageSkeleton({ withHeader = true }: { withHeader?: boolean }) {
   const tGenerated = useTranslations("generated")
   return (
-    <div aria-busy="true" aria-label={tGenerated("loadingCategory")} className="space-y-4 pt-2">
-      <Skeleton className="h-4 w-56" />
-      <Skeleton className="h-8 w-72" />
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-16/10 w-full rounded-xl" />
-        ))}
+    <div aria-busy="true" aria-label={tGenerated("loadingCategory")} className="pt-2">
+      {withHeader && (
+        <div className="space-y-2 pb-3">
+          <Skeleton className="h-4 w-56" />
+          <Skeleton className="h-8 w-64" />
+        </div>
+      )}
+      {/* ResultsToolbar */}
+      <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-border/80 bg-card px-3 py-2 shadow-2xs sm:px-3.5 sm:py-2.5">
+        <Skeleton className="h-4 w-28" />
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Skeleton className="h-8 w-9 rounded-lg sm:w-20 lg:hidden" />
+          <Skeleton className="h-8 w-28 rounded-lg" />
+          <Skeleton className="h-8 w-[60px] rounded-lg" />
+        </div>
       </div>
+      <ListingFeedSkeleton count={12} gridClassName="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" />
     </div>
   )
 }

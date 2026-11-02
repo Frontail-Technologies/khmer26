@@ -1,3 +1,4 @@
+import { closeSignInPrompt, getSignInPromptReturnTo } from "@/features/auth/lib/sign-in-prompt-store"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import { useQuery } from "@tanstack/react-query"
@@ -60,6 +61,7 @@ beforeEach(() => {
   followSeller.mockReset()
   unfollowSeller.mockReset()
   push.mockReset()
+  closeSignInPrompt()
   signedIn = true
 })
 
@@ -107,14 +109,14 @@ describe("Follow", () => {
     expect(screen.queryByRole("button", { name: "Following" })).toBeNull()
   })
 
-  it("sends signed-out visitors to login instead of faking the state", () => {
+  it("opens the sign-in prompt for signed-out visitors instead of faking the state", () => {
     signedIn = false
     setup(detail(false))
 
     fireEvent.click(screen.getByRole("button", { name: "Follow" }))
 
     expect(followSeller).not.toHaveBeenCalled()
-    expect(push).toHaveBeenCalledWith(expect.stringContaining("/login"))
+    expect(getSignInPromptReturnTo()).not.toBeNull()
     expect(screen.getByRole("button", { name: "Follow" })).toBeInTheDocument()
   })
 

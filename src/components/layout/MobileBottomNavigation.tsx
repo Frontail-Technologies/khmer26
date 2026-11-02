@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useOptimisticNav } from "@/hooks/use-optimistic-nav";
 
 function NavIcon({ name, size = 22, active = false }: { name: string; size?: number; active?: boolean }) {
   const props = { size, "aria-hidden": true, weight: active ? "fill" : "regular" } as const;
@@ -36,6 +37,8 @@ function NavIcon({ name, size = 22, active = false }: { name: string; size?: num
 export function MobileBottomNavigation() {
   const tGenerated = useTranslations("generated")
   const pathname = usePathname();
+  const optimistic = useOptimisticNav(pathname);
+  const current = optimistic.current;
 
   if (!shouldShowMobileBottomNavigation(pathname)) {
     return null;
@@ -51,10 +54,8 @@ export function MobileBottomNavigation() {
         {BOTTOM_NAV.map((item) => {
           const isActive =
             item.href === "/"
-              ? pathname === "/"
-              : item.href === "/account"
-                ? pathname.startsWith("/account")
-                : pathname.startsWith(item.href);
+              ? current === "/"
+              : current === item.href || current.startsWith(`${item.href}/`);
           const isSell = item.accent;
 
           if (isSell) {
@@ -66,7 +67,7 @@ export function MobileBottomNavigation() {
                 <Link
                   href={item.href}
                   aria-label={tGenerated(item.messageKey)}
-                  onClick={tapFeedback}
+                  onClick={() => tapFeedback()}
                   className="pressable -mt-5 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-accent to-[oklch(0.62_0.21_35)] text-accent-foreground shadow-lg shadow-accent/40 ring-4 ring-background"
                 >
                   <NavIcon name={item.icon ?? "Plus"} size={24} />
@@ -79,9 +80,18 @@ export function MobileBottomNavigation() {
             <Link
               key={item.href}
               href={item.href}
-              onClick={tapFeedback}
+              onClick={(event) => {
+                tapFeedback();
+                if (item.href === pathname) {
+                  // Re-tapping the current tab scrolls back to the top, like native tab bars.
+                  event.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  return;
+                }
+                optimistic.navigate(item.href);
+              }}
               className={cn(
-                "pressable group relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-2xs font-medium transition-colors duration-200",
+                "pressable group relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-2xs font-medium transition-colors duration-150",
                 isActive
                   ? "text-primary font-bold"
                   : "text-muted-foreground hover:text-foreground",

@@ -7,7 +7,7 @@ import { LocalizedText } from "@/components/i18n/localized-text"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { ArrowCounterClockwise, CheckCircle, SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ListingFeedSkeleton } from "@/features/listings/components/listing-skeletons"
 import { cn } from "@/lib/utils"
 import { ListingGrid } from "@/features/listings/components/listing-grid"
 import { ListingListRow } from "@/features/listings/components/listing-list-row"
@@ -37,10 +37,8 @@ const GRID_CLASS =
 function ResultsSkeleton() {
   const tGenerated = useTranslations("generated")
   return (
-    <div className={GRID_CLASS} aria-busy="true" aria-label={tGenerated("loadingResults")}>
-      {Array.from({ length: 12 }).map((_, i) => (
-        <Skeleton key={i} className="aspect-[4/5] w-full rounded-xl" />
-      ))}
+    <div aria-busy="true" aria-label={tGenerated("loadingResults")}>
+      <ListingFeedSkeleton count={12} gridClassName={GRID_CLASS} />
     </div>
   )
 }

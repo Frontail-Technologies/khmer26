@@ -1,11 +1,11 @@
 "use client"
 
+import { openSignInPrompt } from "@/features/auth/lib/sign-in-prompt-store"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { BookmarkSimple, Heart } from "@phosphor-icons/react"
 import { useState, type MouseEvent } from "react"
-import { useRouter } from "next/navigation"
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user"
 import { useToggleFavorite } from "../hooks/use-toggle-favorite"
 
@@ -30,7 +30,6 @@ export function FavoriteButton({
   favoritedClassName,
 }: FavoriteButtonProps) {
   const tGenerated = useTranslations("generated")
-  const router = useRouter()
   const { isAuthenticated, isLoading } = useCurrentUser()
   const toggle = useToggleFavorite()
 
@@ -47,8 +46,7 @@ export function FavoriteButton({
     if (isLoading || toggle.isPending) return
 
     if (!isAuthenticated) {
-      const here = window.location.pathname + window.location.search
-      router.push(`/login?next=${encodeURIComponent(here)}`)
+      openSignInPrompt()
       return
     }
 

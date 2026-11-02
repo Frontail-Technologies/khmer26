@@ -1,14 +1,10 @@
-import { ViewTransition, type ReactNode } from "react"
+import type { ReactNode } from "react"
 
 /**
- * Wraps a route segment so navigations fade/lift the page in and out (browser View Transitions API).
- * Used from template.tsx, which remounts per navigation so enter/exit fire. Browsers without support
- * simply swap instantly.
+ * Fades each route in as it mounts (template.tsx remounts per navigation). A plain CSS animation on
+ * the new page only: unlike View Transitions there is no snapshot of the old page, no exit phase and
+ * no frozen frame, so taps register immediately and tab switches feel native.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
-  return (
-    <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      {children}
-    </ViewTransition>
-  )
+  return <div className="k26-page-in">{children}</div>
 }
