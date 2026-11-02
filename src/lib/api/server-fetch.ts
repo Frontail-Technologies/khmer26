@@ -1,4 +1,4 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { getApiBaseUrl } from "@/lib/api/base-url"
 
 const AUTH_COOKIE_NAMES = ["k26_access_dev", "__Host-k26_access", "k26_session_dev", "__Secure-k26_session"]
@@ -14,6 +14,21 @@ export async function getAuthCookieHeader(): Promise<string | null> {
     .filter(({ name }) => AUTH_COOKIE_NAMES.includes(name))
     .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
   return pairs.length > 0 ? pairs.join("; ") : null
+}
+
+/**
+ * Server-rendered requests all leave from this server, so the API would rate-limit every visitor as
+ * one. With the shared INTERNAL_API_SECRET (server-only env, never NEXT_PUBLIC_) the API instead
+ * limits personalised renders by the visitor's IP and lets shared cached renders through. The IP is
+ * only sent on personalised (uncached) requests so it never splits the shared data cache.
+ */
+async function internalHeaders(personalised: boolean): Promise<Record<string, string>> {
+  const secret = process.env.INTERNAL_API_SECRET
+  if (!secret) return {}
+  if (!personalised) return { "X-Internal-Secret": secret }
+  const incoming = await headers()
+  const clientIp = incoming.get("x-forwarded-for")?.split(",")[0]?.trim() || incoming.get("x-real-ip")?.trim()
+  return { "X-Internal-Secret": secret, ...(clientIp ? { "X-Client-IP": clientIp } : {}) }
 }
 
 interface ServerApiOptions {
@@ -35,7 +50,11 @@ export async function serverApiGet<T>(path: string, options: ServerApiOptions = 
   const url = `${getApiBaseUrl().replace(/\/$/, "")}${path}`
   const personalised = Boolean(cookieHeader)
   const response = await fetch(url, {
-    headers: { Accept: "application/json", ...(cookieHeader ? { Cookie: cookieHeader } : {}) },
+    headers: {
+      Accept: "application/json",
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+      ...(await internalHeaders(personalised)),
+    },
     signal: AbortSignal.timeout(timeoutMs),
     ...(personalised ? { cache: "no-store" as const } : { next: { revalidate } }),
   })
