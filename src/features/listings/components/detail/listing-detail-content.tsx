@@ -29,7 +29,11 @@ import { ListingSafetyCard } from "./listing-safety-card"
 import { ListingCardsSection } from "./listing-cards-section"
 import { ListingMobileActionBar } from "./listing-mobile-action-bar"
 import { ListingMobileGalleryControls } from "./listing-mobile-gallery-controls"
-import { LoanCalculatorCard } from "./loan-calculator/loan-calculator-card"
+import dynamic from "next/dynamic"
+
+const LoanCalculatorCard = dynamic(() =>
+  import("./loan-calculator/loan-calculator-card").then((m) => m.LoanCalculatorCard)
+)
 
 const MORE_FROM_SELLER_LIMIT = 4
 

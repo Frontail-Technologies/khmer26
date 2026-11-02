@@ -21,7 +21,6 @@ import { TopAdsStrip } from "./top-ads-strip"
 import type { CategoryNavData } from "./filter-panel"
 import { MobileFilterSheet } from "./mobile-filter-sheet"
 import { ResultsToolbar } from "./results-toolbar"
-import { SaveSearchDialog } from "./save-search-dialog"
 
 interface SearchResultsViewProps {
   state: SearchPageState
@@ -100,7 +99,6 @@ export function SearchResultsView({
           activeFilterCount={activeCount}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          extraAction={<SaveSearchDialog filters={filters} />}
           filterControls={
             <FilterBar
               filters={filters}

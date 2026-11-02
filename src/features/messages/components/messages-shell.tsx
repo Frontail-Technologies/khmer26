@@ -101,7 +101,11 @@ export function MessagesShell({ activeConversationId = null }: MessagesShellProp
   }
 
   return (
-    <div className="h-dvh flex bg-background overflow-hidden">
+    <div
+      className={`h-dvh flex bg-background overflow-hidden ${
+        activeConversation ? "" : "max-md:h-[calc(100dvh-var(--mobile-nav-height,4rem)-env(safe-area-inset-bottom,0px))]"
+      }`}
+    >
       <div className={`${activeConversation ? "hidden md:flex" : "flex"} w-full md:w-80 lg:w-96 shrink-0 h-full`}>
         <ConversationList conversations={conversations} selectedId={selectedId} onSelect={(id) => { setSelectedId(id); router.push(`/messages/${id}`) }} className="w-full" />
       </div>

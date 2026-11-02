@@ -29,12 +29,16 @@ const TITLES: Array<{ prefix: string; key: GeneratedMessageKey; action?: BarActi
 export function AccountMobileAppBar() {
   const tGenerated = useTranslations("generated")
   const pathname = usePathname()
-  const match = TITLES.find((item) => pathname === item.prefix || pathname.startsWith(`${item.prefix}/`))
-  if (!match) return null
+  if (pathname === "/account") return null
+  // Unlisted account screens still get a bar (generic title) so no screen is left without one.
+  const match = TITLES.find((item) => pathname === item.prefix || pathname.startsWith(`${item.prefix}/`)) ?? {
+    key: "account" as GeneratedMessageKey,
+    action: undefined,
+  }
 
   return (
     <div
-      className="sticky top-0 z-40 -mx-3 mb-3 flex h-14 items-center gap-1 border-b border-border/60 bg-background/85 px-1 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl backdrop-saturate-150 sm:-mx-4 lg:hidden"
+      className="sticky top-0 z-40 -mx-3 mb-3 flex h-14 items-center gap-1 border-b border-border/60 bg-background/85 px-1 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl backdrop-saturate-150 sm:-mx-4 md:-mx-6 lg:hidden"
       style={{ viewTransitionName: "account-app-bar" }}
     >
       <Link

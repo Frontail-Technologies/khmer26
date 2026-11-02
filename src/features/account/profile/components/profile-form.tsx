@@ -102,7 +102,7 @@ export function ProfileForm({ account }: ProfileFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-sm:pb-24">
+    <form onSubmit={handleSubmit}>
       {/* Phones: no outer card; each section is its own rounded group and inputs are thumb-sized. */}
       <Card className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs sm:p-6 max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none max-sm:ring-0 max-sm:[&_input]:h-12 max-sm:[&_input]:rounded-xl max-sm:[&_[data-slot=select-trigger]]:h-12 max-sm:[&_[data-slot=select-trigger]]:w-full max-sm:[&_[data-slot=select-trigger]]:rounded-xl max-sm:[&_textarea]:rounded-xl">
         <CardContent className="space-y-6 p-0 max-sm:space-y-4">

@@ -52,8 +52,18 @@ export function shouldShowAppFooter(pathname: string): boolean {
   return true
 }
 
-/** Mobile-only: listing detail starts directly with the gallery (Back/Save/Share overlay it). */
+/**
+ * Screens that draw their own top bar on small screens, so the site header must step aside there.
+ * Returns the breakpoint below which the header is hidden, matching that screen's own bar:
+ * listing detail (gallery overlay) and seller pages (MobilePageHeader) switch at md,
+ * account screens (hub header / AccountMobileAppBar) at lg.
+ */
+export function ownMobileHeaderBreakpoint(pathname: string): "md" | "lg" | null {
+  if (pathname === "/account" || pathname.startsWith("/account/")) return "lg"
+  if (pathname.startsWith("/listing/") || pathname.startsWith("/seller/")) return "md"
+  return null
+}
+
 export function shouldHideAppHeaderOnMobile(pathname: string): boolean {
-  // Account pages bring their own app bar (hub title, or back + title on sub-pages).
-  return pathname.startsWith("/listing/") || pathname === "/account" || pathname.startsWith("/account/")
+  return ownMobileHeaderBreakpoint(pathname) !== null
 }

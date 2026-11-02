@@ -28,7 +28,7 @@ import {
 import Link from "next/link"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import { shouldHideAppHeaderOnMobile, shouldShowAppHeader } from "@/lib/constants/route-policy"
+import { ownMobileHeaderBreakpoint, shouldShowAppHeader } from "@/lib/constants/route-policy"
 import { SearchBar } from "./SearchBar"
 import { LanguageSelector } from "./LanguageSelector"
 import { ThemeToggle } from "./ThemeToggle"
@@ -65,7 +65,7 @@ export function AppHeader() {
     <header
       style={{ viewTransitionName: "site-header" }}
       className={`sticky top-0 z-50 w-full max-w-full rounded-b-2xl md:rounded-none border-b border-border/70 bg-card/85 shadow-xs backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter:blur(0))]:bg-card pt-[env(safe-area-inset-top,0px)] ${
-        shouldHideAppHeaderOnMobile(pathname) ? "max-md:hidden" : ""
+        { md: "max-md:hidden", lg: "max-lg:hidden", none: "" }[ownMobileHeaderBreakpoint(pathname) ?? "none"]
       }`}
     >
       <div className="mx-auto flex h-14 w-full max-w-350 items-center justify-between gap-2 px-3 sm:px-4 md:px-6 lg:px-8">
@@ -169,14 +169,6 @@ export function AppHeader() {
         />
 
         <div className="flex items-center gap-0.5 sm:gap-1 md:hidden shrink-0">
-          <Link
-            href="/messages"
-            aria-label={tGenerated("messages_f1702b")}
-            title={tGenerated("messages_f1702b")}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted sm:h-9 sm:w-9"
-          >
-            <ChatCircle size={19} aria-hidden="true" />
-          </Link>
           <NotificationBell enableSocket={false} />
           <LanguageSelector />
           <ThemeToggle />

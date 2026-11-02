@@ -31,6 +31,18 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
   const [isFullscreen, setIsFullscreen] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
+  const stripRef = useRef<HTMLDivElement>(null)
+  const fullscreenStripRef = useRef<HTMLDivElement>(null)
+
+  // Keep the active thumbnail in view (scrolls the strip only, never the page).
+  useEffect(() => {
+    for (const strip of [stripRef.current, fullscreenStripRef.current]) {
+      const thumb = strip?.children[activeIndex] as HTMLElement | undefined
+      if (!strip || !thumb) continue
+      const left = thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2
+      strip.scrollTo?.({ left: Math.max(0, left), behavior: "smooth" })
+    }
+  }, [activeIndex, isFullscreen])
 
   const activeImage = images[activeIndex] ?? null
   const handlePrev = useCallback(() => {
@@ -50,7 +62,7 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
   }
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return
+    if (touchStartX.current === null || touchEndX.current === null) return
     const diff = touchStartX.current - touchEndX.current
     if (diff > 45) {
       handleNext()
@@ -167,7 +179,7 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
       </div>
 
       {images.length > 1 && (
-        <div className="flex items-center gap-0.5 sm:gap-1.5 overflow-x-auto border-t border-border/60 bg-card px-0 py-0.5 sm:px-3 sm:py-2 scrollbar-thin snap-x snap-mandatory scroll-smooth">
+        <div ref={stripRef} className="relative flex items-center gap-0.5 sm:gap-1.5 overflow-x-auto border-t border-border/60 bg-card px-0 py-0.5 sm:px-3 sm:py-2 scrollbar-thin snap-x snap-mandatory scroll-smooth">
           {images.map((img, idx) => {
             const isSelected = idx === activeIndex
             return (
@@ -262,7 +274,7 @@ export function ListingGallery({ images, title, mobileControls }: ListingGallery
             </div>
 
             {images.length > 1 && (
-              <div className="flex items-center justify-center gap-2 overflow-x-auto py-2 border-t border-white/10 scrollbar-none">
+              <div ref={fullscreenStripRef} className="relative flex items-center justify-center gap-2 overflow-x-auto py-2 border-t border-white/10 scrollbar-none">
                 {images.map((img, idx) => {
                   const isSelected = idx === activeIndex
                   return (

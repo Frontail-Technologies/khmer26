@@ -7,6 +7,7 @@ import { ArrowLeft } from "@phosphor-icons/react"
 import { useSeller } from "../api/sellers.queries"
 import { getSellerFollowersPage, getSellerFollowingPage } from "../api/sellers.api"
 import { SellerDirectory } from "./seller-directory"
+import { MobilePageHeader } from "@/components/shared/mobile-page-header"
 
 /** A seller's followers or following list, with tabs to switch between them. */
 export function SellerConnections({ id, initial }: { id: string; initial: "followers" | "following" }) {
@@ -21,7 +22,13 @@ export function SellerConnections({ id, initial }: { id: string; initial: "follo
 
   return (
     <div className="space-y-3">
-      <Link href={base} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+      <MobilePageHeader
+        backHref={base}
+        backLabel={t("backToProfile")}
+        title={seller?.shopName}
+        className="-mx-3 -mt-4 w-auto sm:-mx-4"
+      />
+      <Link href={base} className="hidden items-center gap-1.5 text-sm font-semibold text-primary hover:underline md:inline-flex">
         <ArrowLeft size={14} weight="bold" aria-hidden="true" />
         {seller?.shopName ?? t("backToProfile")}
       </Link>

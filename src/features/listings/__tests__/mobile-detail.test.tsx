@@ -45,9 +45,12 @@ beforeEach(() => {
 })
 
 describe("route policy", () => {
-  it("hides the navbar on mobile for listing detail only, and never changes where the navbar exists", () => {
+  it("hides the navbar on mobile only where the screen has its own bar, and never changes where the navbar exists", () => {
     expect(shouldHideAppHeaderOnMobile("/listing/abc")).toBe(true)
-    for (const path of ["/", "/search", "/categories", "/category/vehicles", "/seller/abc"]) {
+    expect(shouldHideAppHeaderOnMobile("/seller/abc")).toBe(true)
+    expect(shouldHideAppHeaderOnMobile("/seller/abc/followers")).toBe(true)
+    expect(shouldHideAppHeaderOnMobile("/account/notifications")).toBe(true)
+    for (const path of ["/", "/search", "/categories", "/category/vehicles"]) {
       expect(shouldHideAppHeaderOnMobile(path)).toBe(false)
     }
     // Desktop/tablet still render the navbar on listing detail.

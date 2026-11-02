@@ -88,7 +88,7 @@ describe("<ListingDetailContent /> layout rules", () => {
   it("shows the loan calculator only for eligible categories", async () => {
     getListing.mockResolvedValue(makeDetail())
     const { unmount } = renderWithProviders(<ListingDetailContent id="x" />)
-    expect((await screen.findAllByText("Loan Calculator")).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("Loan Calculator", {}, { timeout: 5000 })).length).toBeGreaterThan(0)
     unmount()
 
     getListing.mockResolvedValue(

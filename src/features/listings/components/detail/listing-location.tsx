@@ -10,7 +10,13 @@ import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ListingDetail } from "../../api/listing-detail.api"
 import { formatLocation } from "../../lib/listing-detail-format"
-import { ListingMap } from "./listing-map"
+import dynamic from "next/dynamic"
+
+// The map (maplibre and its CSS) is below the fold: load it after the page, not in the main bundle.
+const ListingMap = dynamic(() => import("./listing-map").then((m) => m.ListingMap), {
+  ssr: false,
+  loading: () => <div className="aspect-video w-full animate-pulse rounded-xl bg-muted" />,
+})
 
 interface ListingLocationProps {
   location: ListingDetail["location"]

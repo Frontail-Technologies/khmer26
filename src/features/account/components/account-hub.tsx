@@ -183,7 +183,7 @@ export function AccountHub() {
   ]
 
   return (
-    <div className="-mx-3 space-y-5 pb-4 sm:-mx-4 lg:hidden">
+    <div className="-mx-3 space-y-3 pb-4 sm:-mx-4 md:-mx-6 lg:hidden">
       <header className="flex items-center justify-between px-4 pt-1">
         <h1 className="text-2xl font-black tracking-tight text-foreground">{t("title")}</h1>
         <div className="flex items-center gap-1">
