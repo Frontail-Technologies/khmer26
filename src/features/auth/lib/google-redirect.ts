@@ -6,7 +6,8 @@
  * server, and the API verifies the token was issued to our client id before signing anyone in.
  *
  * Google Cloud Console must list `${origin}/auth/google/callback` under "Authorized redirect URIs"
- * for each origin (production and localhost).
+ * for each origin (production and localhost). Production always uses the bare domain (see
+ * callbackOrigin), so only https://offerupkh.com/auth/google/callback is needed there.
  */
 
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -32,10 +33,19 @@ function safeNext(next: string | null | undefined): string {
   return next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/"
 }
 
+/**
+ * The site is reachable on both www.<domain> and <domain>; Google only needs to know one. Always
+ * return to the bare domain: if it redirects to www, the browser carries the #fragment across the
+ * redirect, so the reply still lands on the origin (and sessionStorage) where sign-in started.
+ */
+export function callbackOrigin(origin: string): string {
+  return origin.replace(/^(https?:\/\/)www\./i, "$1")
+}
+
 export function buildGoogleAuthUrl(clientId: string, origin: string, state: string): string {
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: origin + GOOGLE_CALLBACK_PATH,
+    redirect_uri: callbackOrigin(origin) + GOOGLE_CALLBACK_PATH,
     response_type: "token",
     scope: "openid email profile",
     state,

@@ -24,6 +24,13 @@ describe("google redirect sign-in", () => {
     expect(url.searchParams.get("scope")).toBe("openid email profile")
   })
 
+  it("always returns to the bare domain, so one redirect URI covers www too", () => {
+    const fromWww = new URL(buildGoogleAuthUrl("cid", "https://www.offerupkh.com", "s1"))
+    expect(fromWww.searchParams.get("redirect_uri")).toBe("https://offerupkh.com/auth/google/callback")
+    const local = new URL(buildGoogleAuthUrl("cid", "http://localhost:3000", "s1"))
+    expect(local.searchParams.get("redirect_uri")).toBe("http://localhost:3000/auth/google/callback")
+  })
+
   it("accepts Google's reply for the sign-in this tab started, once", () => {
     const { state } = startAndGetState()
     const hash = `#access_token=ya29.tok&state=${state}&token_type=Bearer`
