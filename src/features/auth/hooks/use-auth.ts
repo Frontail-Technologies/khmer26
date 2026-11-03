@@ -174,15 +174,21 @@ export function useResetPassword() {
   });
 }
 
+/** `next` overrides the `?next=` lookup (the Google redirect callback carries it in session storage). */
+export type GoogleSignIn = authApi.GoogleCredential & { next?: string };
+
 export function useGoogleAuth() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (credential: authApi.GoogleCredential) => authApi.googleAuth(credential),
-    onSuccess: (user) => {
+    mutationFn: (signIn: GoogleSignIn) =>
+      authApi.googleAuth(
+        'idToken' in signIn ? { idToken: signIn.idToken } : { accessToken: signIn.accessToken }
+      ),
+    onSuccess: (user, { next }) => {
       queryClient.setQueryData(authKeys.session(), user);
-      router.push(resolveNextPath());
+      router.replace(next ?? resolveNextPath());
     },
   });
 }

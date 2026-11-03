@@ -2,26 +2,15 @@
 
 import { LocalizedText } from "@/components/i18n/localized-text"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { SpinnerGap } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
-import { useGoogleAuth, useTelegramAuth, friendlyAuthError } from "../hooks/use-auth"
+import { useTelegramAuth, friendlyAuthError, resolveNextPath } from "../hooks/use-auth"
+import { startGoogleRedirect } from "../lib/google-redirect"
 import type { TelegramAuthPayload } from "../api/auth.api"
 
 declare global {
   interface Window {
-    google?: {
-      accounts: {
-        oauth2: {
-          initTokenClient: (cfg: {
-            client_id: string
-            scope: string
-            callback: (res: { access_token?: string; error?: string }) => void
-            error_callback?: (err: { type: "popup_failed_to_open" | "popup_closed" | "unknown" }) => void
-          }) => GoogleTokenClient
-        }
-      }
-    }
     Telegram?: {
       Login: {
         auth: (
@@ -32,10 +21,6 @@ declare global {
     }
     onTelegramAuth?: (data: TelegramAuthPayload) => void
   }
-}
-
-interface GoogleTokenClient {
-  requestAccessToken: (overrides?: { prompt?: string }) => void
 }
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""
@@ -74,41 +59,6 @@ function TelegramIcon() {
   )
 }
 
-function useGsiLoaded() {
-  const [loaded, setLoaded] = useState(false)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) return
-
-    if (typeof window !== "undefined" && window.google?.accounts?.oauth2) {
-      setTimeout(() => setLoaded(true), 0)
-      return
-    }
-
-    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
-      const poll = setInterval(() => {
-        if (window.google?.accounts?.oauth2) {
-          clearInterval(poll)
-          setLoaded(true)
-        }
-      }, 100)
-      return () => clearInterval(poll)
-    }
-
-    const script = document.createElement("script")
-    script.src = "https://accounts.google.com/gsi/client"
-    script.async = true
-    script.defer = true
-    script.onload = () => setLoaded(true)
-    // Blocked by an ad/privacy blocker or the network: say so instead of "loading" forever.
-    script.onerror = () => setFailed(true)
-    document.head.appendChild(script)
-  }, [])
-
-  return { loaded, failed }
-}
-
 function useTelegramLoaded() {
   const [loaded, setLoaded] = useState(false)
 
@@ -144,62 +94,33 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
   const [googleError, setGoogleError] = useState<string | null>(null)
   const [telegramError, setTelegramError] = useState<string | null>(null)
 
-  const googleAuth = useGoogleAuth()
+  const [googleRedirecting, setGoogleRedirecting] = useState(false)
   const telegramAuth = useTelegramAuth()
-  const { loaded: gsiLoaded, failed: gsiFailed } = useGsiLoaded()
   const telegramLoaded = useTelegramLoaded()
 
-  const onAccessTokenRef = useRef<(accessToken: string) => void>(() => {})
+  // Coming back from Google with the browser's Back button restores this page from the bfcache with
+  // the spinner still showing; reset it.
   useEffect(() => {
-    onAccessTokenRef.current = (accessToken: string) => {
-      setGoogleError(null)
-      googleAuth.mutate(
-        { accessToken },
-        {
-          onSuccess: () => onSuccess?.(),
-          onError: (err) => setGoogleError(friendlyAuthError(err)),
-        }
-      )
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setGoogleRedirecting(false)
     }
-  })
+    window.addEventListener("pageshow", onPageShow)
+    return () => window.removeEventListener("pageshow", onPageShow)
+  }, [])
 
-  // Our own styled button opens Google's OAuth popup directly; there is no hidden Google iframe to
-  // swallow clicks (Google's clickjacking protection made some browsers ignore an invisible one).
-  const tokenClientRef = useRef<GoogleTokenClient | null>(null)
-  useEffect(() => {
-    if (!gsiLoaded || !GOOGLE_CLIENT_ID || !window.google?.accounts?.oauth2) return
-    tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: "openid email profile",
-      callback: (res) => {
-        if (res.access_token) onAccessTokenRef.current(res.access_token)
-        else if (res.error && res.error !== "access_denied") setGoogleError("Google sign-in failed. Please try again.")
-      },
-      error_callback: (err) => {
-        // Closing the popup is a normal cancel; a blocked popup needs the visitor's help.
-        if (err.type === "popup_failed_to_open") {
-          setGoogleError("Your browser blocked the Google window. Allow pop-ups for this site and try again.")
-        }
-      },
-    })
-  }, [gsiLoaded])
-
+  // Full-page redirect to Google's own sign-in page: no Google script, iframe or popup for an ad
+  // blocker or pop-up blocker to break. Google returns to /auth/google/callback.
   const handleGoogleAuth = () => {
     if (!GOOGLE_CLIENT_ID) {
       setGoogleError("Google sign-in is not configured.")
       return
     }
-    if (gsiFailed) {
-      setGoogleError("Google sign-in couldn't load. Check your connection or ad blocker, then reload.")
-      return
-    }
-    if (!tokenClientRef.current) {
-      setGoogleError("Google sign-in is loading. Please try again.")
-      return
-    }
     setGoogleError(null)
-    // Must run inside the click so the browser allows the popup.
-    tokenClientRef.current.requestAccessToken()
+    setGoogleRedirecting(true)
+    // On /login or /register honour ?next=; anywhere else (e.g. a sign-in dialog) come back here.
+    const here = window.location.pathname + window.location.search
+    const isAuthPage = /^\/(login|register)(\/|$)/.test(window.location.pathname)
+    startGoogleRedirect(GOOGLE_CLIENT_ID, isAuthPage ? resolveNextPath() : here)
   }
 
   const handleTelegramAuth = () => {
@@ -227,7 +148,7 @@ export function SocialAuthButtons({ onSuccess }: { onSuccess?: () => void } = {}
     )
   }
 
-  const googlePending = googleAuth.isPending
+  const googlePending = googleRedirecting
   const telegramPending = telegramAuth.isPending
 
   return (
