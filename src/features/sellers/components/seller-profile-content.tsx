@@ -14,6 +14,7 @@ import { useSeller, useSellerListingsInfinite } from "../api/sellers.queries"
 import { SellerBreadcrumbs } from "./seller-breadcrumbs"
 import { SellerProfileHeader } from "./seller-profile-header"
 import { SellerTabs } from "./seller-tabs"
+import { SellerShareButton } from "./seller-share-button"
 
 function ProfileSkeleton() {
   const tGenerated = useTranslations("generated")
@@ -73,11 +74,16 @@ export function SellerProfileContent({ id }: { id: string }) {
 
   return (
     <div className="min-h-dvh bg-background pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-16">
-      <MobilePageHeader backHref="/search" backLabel={tAuth("backToMarketplace")} title={seller.shopName} />
-      <Container className="py-3 sm:py-4">
+      <MobilePageHeader
+        backHref="/search"
+        backLabel={tAuth("backToMarketplace")}
+        title={seller.shopName}
+        action={<SellerShareButton sellerId={seller.id} sellerName={seller.shopName} />}
+      />
+      <Container className="pb-3 sm:py-4">
         <SellerBreadcrumbs sellerName={seller.shopName} />
 
-        <div className="mt-2 space-y-6">
+        <div className="space-y-3 sm:mt-2 sm:space-y-6">
           <SellerProfileHeader
             seller={seller}
             contactListingId={contactListingId}

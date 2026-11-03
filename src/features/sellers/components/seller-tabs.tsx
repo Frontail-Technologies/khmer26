@@ -15,7 +15,8 @@ import { SellerListingsTab } from "./seller-listings-tab"
 import { SellerReviewsTab } from "./seller-reviews-tab"
 
 const countPill =
-  "ml-0.5 rounded-full bg-muted px-2 py-0.5 text-2xs font-bold text-muted-foreground"
+  "rounded-full bg-muted px-1.5 py-px text-2xs font-bold tabular-nums text-muted-foreground group-data-active/trigger:bg-primary/12 group-data-active/trigger:text-primary"
+const trigger = "group/trigger cursor-pointer gap-1.5 text-sm max-sm:flex-1!"
 
 interface SellerTabsProps {
   seller: SellerProfile
@@ -34,22 +35,15 @@ export function SellerTabs({ seller, isOwnProfile }: SellerTabsProps) {
   const reviews = useSellerReviewsInfinite(seller.id)
 
   return (
-    <Tabs defaultValue="listings" className="space-y-6">
-      <div className="flex items-center">
-        <TabsList className="h-10 sm:h-11 p-1 bg-muted/60 border border-border/60 rounded-xl gap-1 w-full sm:w-auto justify-start">
-          <TabsTrigger
-            value="listings"
-            className="h-8 sm:h-9 px-3 text-xs sm:text-sm font-bold gap-2 rounded-lg cursor-pointer"
-          >
+    <Tabs defaultValue="listings" className="gap-4 sm:gap-6">
+      <div className="-mx-3 bg-background px-1 max-md:sticky max-md:top-12 max-md:z-20 sm:mx-0 sm:px-0">
+        <TabsList variant="line" className="gap-0 sm:gap-6">
+          <TabsTrigger value="listings" className={trigger}>
             <Storefront size={16} weight="bold" />
             <span><LocalizedText id="listings" /></span>
             <span className={countPill}>{seller.listingCount}</span>
           </TabsTrigger>
-
-          <TabsTrigger
-            value="reviews"
-            className="h-8 sm:h-9 px-3 text-xs sm:text-sm font-bold gap-2 rounded-lg cursor-pointer"
-          >
+          <TabsTrigger value="reviews" className={trigger}>
             <Star size={16} weight="bold" />
             <span><LocalizedText id="reviews" /></span>
             <span className={countPill}>{seller.rating?.count ?? 0}</span>

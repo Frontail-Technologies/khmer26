@@ -78,7 +78,7 @@ export function HomepageBanner({ banners, className }: HomepageBannerProps) {
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.01]"
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent flex items-center px-4 sm:px-6 md:px-8">
+                <div className={cn("absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent flex items-center px-4 sm:px-6 md:px-8", count > 1 && "sm:pl-14 md:pl-16")}>
                   <div className="max-w-md sm:max-w-lg space-y-1">
                     <h3 className="text-sm sm:text-base md:text-lg font-black text-foreground line-clamp-1">{title}</h3>
                     {banner.destinationLabel && (

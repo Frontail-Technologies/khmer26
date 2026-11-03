@@ -56,8 +56,9 @@ export function AccountFavoritesView() {
       <AccountPageHeader title={tGenerated("savedListings_635379")} />
 
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-          <div className="relative flex-1">
+        {/* Phones: search + view toggle on one row, the two filters on the next at half width each. */}
+        <div className="grid grid-cols-[1fr_auto] items-center gap-2.5 sm:flex sm:flex-row">
+          <div className="relative min-w-0 flex-1">
             <MagnifyingGlass size={16} className="absolute left-3 max-sm:left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
@@ -71,7 +72,7 @@ export function AccountFavoritesView() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-sm:order-3 max-sm:col-span-2">
             <Select value={categoryFilter} onValueChange={(value) => { setCategoryFilter(value as string); setPage(1) }}>
               <SelectTrigger className="h-9 flex-1 sm:w-44 text-xs sm:text-sm bg-background max-sm:min-w-0 max-sm:rounded-full max-sm:bg-card">
                 <Funnel size={14} className="text-muted-foreground shrink-0" />
@@ -97,7 +98,9 @@ export function AccountFavoritesView() {
                 <SelectItem value="price_desc" className="text-xs">{tGenerated("priceHighToLow")}</SelectItem>
               </SelectContent>
             </Select>
+          </div>
 
+          <div className="max-sm:order-2">
             <ListingViewToggle viewMode={viewMode} onChange={setViewMode} />
           </div>
         </div>

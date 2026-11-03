@@ -1,9 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/utils"
+import { LinkTabs } from "@/components/shared/link-tabs"
 
 /** Users / Companies / Posts: each tab is its own page for the same keyword. */
 export function SearchTabs({ q }: { q: string }) {
@@ -17,25 +16,10 @@ export function SearchTabs({ q }: { q: string }) {
   ]
 
   return (
-    <nav aria-label={t("sellers")} className="grid grid-cols-3 gap-2">
-      {tabs.map((tab) => {
-        const active = pathname === tab.path
-        return (
-          <Link
-            key={tab.path}
-            href={tab.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "rounded-lg px-3 py-2.5 text-center text-sm font-semibold transition-colors",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "bg-primary/10 text-primary hover:bg-primary/20"
-            )}
-          >
-            {tab.label}
-          </Link>
-        )
-      })}
-    </nav>
+    <LinkTabs
+      label={t("sellers")}
+      className="-mx-3 px-1 sm:mx-0 sm:px-0"
+      items={tabs.map((tab) => ({ href: tab.href, label: tab.label, active: pathname === tab.path }))}
+    />
   )
 }

@@ -2,12 +2,12 @@
 
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/utils"
 import { ArrowLeft } from "@phosphor-icons/react"
 import { useSeller } from "../api/sellers.queries"
 import { getSellerFollowersPage, getSellerFollowingPage } from "../api/sellers.api"
 import { SellerDirectory } from "./seller-directory"
 import { MobilePageHeader } from "@/components/shared/mobile-page-header"
+import { LinkTabs } from "@/components/shared/link-tabs"
 
 /** A seller's followers or following list, with tabs to switch between them. */
 export function SellerConnections({ id, initial }: { id: string; initial: "followers" | "following" }) {
@@ -21,7 +21,7 @@ export function SellerConnections({ id, initial }: { id: string; initial: "follo
   ]
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1 sm:space-y-3">
       <MobilePageHeader
         backHref={base}
         backLabel={t("backToProfile")}
@@ -33,22 +33,16 @@ export function SellerConnections({ id, initial }: { id: string; initial: "follo
         {seller?.shopName ?? t("backToProfile")}
       </Link>
 
-      <nav aria-label={t("followers")} className="grid grid-cols-2 gap-2">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.key}
-            href={`${base}/${tab.key}`}
-            aria-current={tab.key === initial ? "page" : undefined}
-            className={cn(
-              "rounded-lg px-3 py-2.5 text-center text-sm font-semibold transition-colors",
-              tab.key === initial ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary hover:bg-primary/20"
-            )}
-          >
-            {tab.label}
-            {tab.count !== undefined && <span className="ml-1.5 opacity-80">{tab.count}</span>}
-          </Link>
-        ))}
-      </nav>
+      <LinkTabs
+        label={t("followers")}
+        className="-mx-3 px-1 sm:mx-0 sm:px-0"
+        items={tabs.map((tab) => ({
+          href: `${base}/${tab.key}`,
+          label: tab.label,
+          count: tab.count,
+          active: tab.key === initial,
+        }))}
+      />
 
       {initial === "followers" ? (
         <SellerDirectory

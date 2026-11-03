@@ -30,7 +30,7 @@ export function AccountPaymentsView() {
       {query.isLoading ? (
         <div className="space-y-6"><div className="grid gap-4 sm:grid-cols-3"><Skeleton className="h-24" /><Skeleton className="h-24" /><Skeleton className="h-24" /></div><Skeleton className="h-72" /></div>
       ) : query.isError ? (
-        <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="paymentHistoryCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{query.error instanceof Error ? query.error.message : tGenerated("pleaseTryAgain")}</p><Button variant="outline" className="mt-4" onClick={() => query.refetch()}><LocalizedText id="tryAgain" /></Button></div>
+        <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="paymentHistoryCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{tGenerated("pleaseCheckYourConnectionAndTryAgain")}</p><Button variant="outline" className="mt-4" onClick={() => query.refetch()}><LocalizedText id="tryAgain" /></Button></div>
       ) : (
         <div className="space-y-6">
           <PaymentSummary payments={payments} summary={query.data?.summary ?? { totalPaid: 0, primaryMethod: null }} />

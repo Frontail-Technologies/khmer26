@@ -95,13 +95,12 @@ beforeEach(() => {
 })
 
 describe("seller contact card", () => {
-  it("shows masked numbers and the product-style profile address, never the full number or localhost", async () => {
+  it("shows masked numbers, never the full number or localhost", async () => {
     setup({ seller: makeSeller({ contacts: TWO_CONTACTS }) })
     await heading()
     expect(await screen.findByText("086225xxx")).toBeInTheDocument()
     expect(screen.getByText("0887883xxx")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Smart" })).toBeInTheDocument()
-    expect(screen.getByText(`khmer26.com/seller/${SELLER_ID}`)).toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/localhost|086225333|0887883333/)
   })
 

@@ -28,7 +28,7 @@ export function ProfileView() {
   }
 
   if (query.isError || !query.data) {
-    return <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="profileCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{query.error instanceof Error ? query.error.message : tGenerated("pleaseTryAgain")}</p><Button className="mt-4" variant="outline" onClick={() => query.refetch()}><LocalizedText id="tryAgain" /></Button></div>
+    return <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="profileCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{tGenerated("pleaseCheckYourConnectionAndTryAgain")}</p><Button className="mt-4" variant="outline" onClick={() => query.refetch()}><LocalizedText id="tryAgain" /></Button></div>
   }
 
   return (

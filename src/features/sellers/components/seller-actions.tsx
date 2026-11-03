@@ -46,10 +46,10 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
 
   return (
     <>
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex w-full items-center gap-2 sm:w-auto">
         {canContact && (
           <Button
-            className="h-10 px-4 bg-accent text-accent-foreground hover:bg-accent/90 font-bold text-xs sm:text-sm rounded-lg shadow-sm gap-1.5"
+            className="h-11 flex-1 gap-1.5 rounded-xl bg-accent px-4 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 sm:h-10 sm:flex-none sm:rounded-lg"
             onClick={chat.start}
             disabled={chat.isPending}
           >
@@ -61,7 +61,7 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
         {!isOwnProfile && seller.allowBuyersFollow && (
           <Button
             variant={seller.isFollowing ? "outline" : "secondary"}
-            className={`h-10 gap-1.5 rounded-lg px-3.5 text-xs font-semibold sm:text-sm ${
+            className={`h-11 flex-1 gap-1.5 rounded-xl px-3.5 text-sm font-semibold sm:h-10 sm:flex-none sm:rounded-lg ${
               seller.isFollowing ? "border-primary text-primary hover:bg-primary/5" : ""
             }`}
             onClick={() => follow.toggle(seller.isFollowing)}
@@ -89,7 +89,7 @@ export function SellerActions({ seller, contactListingId, isOwnProfile }: Seller
                 variant="outline"
                 size="icon-sm"
                 aria-label={tGenerated("moreSellerOptions")}
-                className="h-10 w-10 border-border hover:bg-muted"
+                className="size-11 shrink-0 rounded-xl border-border hover:bg-muted sm:size-10 sm:rounded-lg"
               >
                 <DotsThreeVertical size={18} weight="bold" />
               </Button>

@@ -836,7 +836,7 @@
   },
   "shell": {
     "tagline": "{tagline}. Buy and sell anything in Cambodia.",
-    "copyright": "? {year} {site}. All rights reserved.",
+    "copyright": "© {year} {site}. All rights reserved.",
     "homeLabel": "{site} home"
   },
   "dynamic": {
@@ -872,7 +872,7 @@
     "memberSince": "Member since {date}",
     "allCount": "All ({count})",
     "showingListings": "Showing {shown} of {total} listings",
-    "sellPromo": "Make some extra cash by selling this on {site}. Go on, it?s quick and easy.",
+    "sellPromo": "Make some extra cash by selling this on {site}. Go on, it’s quick and easy.",
     "paymentCount": "{count} payments",
     "perMonthOver": "Per month over {term}",
     "reportConversationNamed": "Report conversation with {name}",

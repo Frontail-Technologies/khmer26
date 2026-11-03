@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { SealCheck } from "@phosphor-icons/react"
+import { CaretRight, SealCheck } from "@phosphor-icons/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMediaUrl } from "@/lib/media/get-media-url"
 import type { SellerSearchResult } from "../api/sellers.api"
@@ -15,7 +15,7 @@ export function SellerRow({ seller }: { seller: SellerSearchResult }) {
     <li>
       <Link
         href={`/seller/${encodeURIComponent(seller.id)}`}
-        className="flex items-center gap-3 border-b border-border/70 px-4 py-3 transition-colors last:border-b-0 hover:bg-muted/60"
+        className="flex items-center gap-3 py-3 transition-colors hover:bg-muted/60 active:bg-muted sm:px-4"
       >
         <Avatar className="size-12">
           {avatar && <AvatarImage src={avatar} alt="" />}
@@ -31,6 +31,7 @@ export function SellerRow({ seller }: { seller: SellerSearchResult }) {
             {t("followersCount", { count: seller.followerCount })} · {t("adsCount", { count: seller.listingCount })}
           </p>
         </div>
+        <CaretRight size={16} className="shrink-0 text-muted-foreground/70" aria-hidden="true" />
       </Link>
     </li>
   )

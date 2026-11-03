@@ -24,7 +24,7 @@ export function SubscriptionView() {
     return <div className="space-y-6"><Skeleton className="h-14" /><Skeleton className="h-48" /><div className="grid gap-4 md:grid-cols-2"><Skeleton className="h-72" /><Skeleton className="h-72" /></div></div>
   }
   if (error || !usage.data) {
-    return <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="subscriptionDetailsCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{error instanceof Error ? error.message : tGenerated("pleaseTryAgain")}</p><Button className="mt-4" variant="outline" onClick={() => { usage.refetch(); plans.refetch(); history.refetch() }}><LocalizedText id="tryAgain" /></Button></div>
+    return <div className="rounded-lg border bg-card p-8 text-center"><h2 className="font-bold"><LocalizedText id="subscriptionDetailsCouldNotBeLoaded" /></h2><p className="mt-1 text-sm text-muted-foreground">{tGenerated("pleaseCheckYourConnectionAndTryAgain")}</p><Button className="mt-4" variant="outline" onClick={() => { usage.refetch(); plans.refetch(); history.refetch() }}><LocalizedText id="tryAgain" /></Button></div>
   }
 
   return (

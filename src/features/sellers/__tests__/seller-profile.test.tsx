@@ -113,14 +113,15 @@ beforeEach(() => {
 
 describe("seller header", () => {
   it("shows real name, type, verified badge, member since, listing count, rating and bio", async () => {
-    setup()
+    const { container } = setup()
     expect(await findShopHeading("Angkor Motors")).toBeInTheDocument()
     expect(screen.getByLabelText("Verified seller")).toBeInTheDocument()
     expect(screen.getByText("Dealer")).toBeInTheDocument()
     expect(screen.getByText(/Member since Mar 2024/)).toBeInTheDocument()
-    expect(screen.getByText("2 active listings")).toBeInTheDocument()
+    const stats = container.querySelector("[data-seller-stats]") as HTMLElement
+    expect(stats.textContent).toMatch(/2\s*Listings/)
     expect(screen.getByText("4.5")).toBeInTheDocument()
-    expect(screen.getByText("(4 reviews)")).toBeInTheDocument()
+    expect(screen.getByText("4 reviews")).toBeInTheDocument()
     expect(screen.getByText("Family-run dealership in Phnom Penh.")).toBeInTheDocument()
   })
 
@@ -170,7 +171,7 @@ describe("seller cover image", () => {
     const { container } = setup({ seller: makeSeller({ coverR2Key: null }) })
     await findShopHeading("Angkor Motors")
     expect(container.querySelector('img[src*="cover"]')).toBeNull()
-    expect(container.querySelector(".bg-linear-to-r")).not.toBeNull()
+    expect(container.querySelector("[data-cover-fallback]")).not.toBeNull()
   })
 })
 

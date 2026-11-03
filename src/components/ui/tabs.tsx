@@ -23,12 +23,13 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none data-[variant=line]:p-0",
+  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col",
   {
     variants: {
       variant: {
         default: "bg-muted",
-        line: "gap-5 bg-transparent border-b border-border/60 w-full justify-start overflow-x-auto no-scrollbar group-data-horizontal/tabs:h-auto",
+        // Padding lives here (not in a data-[variant] selector) so a caller's px-* still applies.
+        line: "rounded-none p-0 gap-5 bg-transparent border-b border-border/60 w-full justify-start overflow-x-auto no-scrollbar group-data-horizontal/tabs:h-auto",
         /** Swipeable rounded filter chips (admin status filters, phone-friendly). */
         chips: "gap-1.5 bg-transparent w-full justify-start overflow-x-auto no-scrollbar rounded-none p-0 py-2.5 group-data-horizontal/tabs:h-auto [scrollbar-width:none]",
       },
