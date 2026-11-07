@@ -15,7 +15,7 @@ interface PostAdProgressProps {
   completedSteps: Set<PostAdStep>
 }
 
-const STEPS: { step: PostAdStep; titleKey: GeneratedMessageKey; subtitleKey: GeneratedMessageKey }[] = [
+export const POST_AD_STEPS: { step: PostAdStep; titleKey: GeneratedMessageKey; subtitleKey: GeneratedMessageKey }[] = [
   { step: 1, titleKey: "category", subtitleKey: "chooseListingCategory" },
   { step: 2, titleKey: "details", subtitleKey: "titleSpecsDescription" },
   { step: 3, titleKey: "photos", subtitleKey: "uploadClearImages" },
@@ -30,36 +30,17 @@ export function PostAdProgress({
   completedSteps,
 }: PostAdProgressProps) {
   const tGenerated = useTranslations("generated")
-  const tDynamic = useTranslations("dynamic")
-  const currentStepData = STEPS.find((s) => s.step === currentStep) || STEPS[0]
-  const progressPercent = Math.round(((currentStep - 1) / (STEPS.length - 1)) * 100)
 
   return (
     <div>
-      <div className="md:hidden mb-4 p-3 rounded-xl border border-border/80 bg-card shadow-2xs space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-primary">
-            {tDynamic("stepOf", { step: currentStep, total: STEPS.length })}
-          </span>
-          <span className="font-semibold text-foreground">
-            {currentStepData ? tGenerated(currentStepData.titleKey) : null}
-          </span>
-        </div>
-        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
+      {/* Phones show progress in the PostAdAppBar instead. */}
       <div className="hidden md:block rounded-xl border border-border/80 bg-card p-4 shadow-2xs">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 px-1">
           <LocalizedText id="listingSteps" />
         </h2>
 
         <nav aria-label={tGenerated("postAdProgress")} className="space-y-1.5">
-          {STEPS.map((s) => {
+          {POST_AD_STEPS.map((s) => {
             const isCompleted = completedSteps.has(s.step)
             const isActive = currentStep === s.step
             const isUpcoming = !isCompleted && !isActive

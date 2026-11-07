@@ -23,9 +23,11 @@ interface PostAdPageProps {
 export default async function PostAdPage({ searchParams }: PostAdPageProps) {
   const { edit } = await searchParams
   const isEditing = Boolean(edit)
+  const title = isEditing ? "Edit Listing" : "Create New Listing"
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-card/95 backdrop-blur-md py-3 sm:py-3.5">
+    <div className="min-h-screen bg-background max-md:bg-card">
+      {/* Desktop chrome. Phones get the PostAdAppBar from the wizard instead. */}
+      <header className="sticky top-0 z-40 hidden md:block border-b border-border/80 bg-card/95 backdrop-blur-md py-3 sm:py-3.5">
         <Container>
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center shrink-0" aria-label="offerupkh home">
@@ -47,21 +49,21 @@ export default async function PostAdPage({ searchParams }: PostAdPageProps) {
         </Container>
       </header>
 
-      <div className="border-b border-border/60 bg-card py-4 sm:py-5">
+      <div className="hidden md:block border-b border-border/60 bg-card py-4 sm:py-5">
         <Container>
           <div>
             <span className="text-xxs sm:text-xs font-bold uppercase tracking-wider text-primary">
               <LocalizedText id="sellerWizard" />
             </span>
             <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-              {isEditing ? "Edit Listing" : "Create New Listing"}
+              {title}
             </h1>
           </div>
         </Container>
       </div>
 
-      <Container className="py-6 sm:py-8">
-        <PostAdWizard listingId={edit} />
+      <Container className="max-md:px-0 md:py-8">
+        <PostAdWizard listingId={edit} title={title} />
       </Container>
     </div>
   )

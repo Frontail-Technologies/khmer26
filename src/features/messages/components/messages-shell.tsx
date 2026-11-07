@@ -18,6 +18,7 @@ import {
   useCounterOffer, useCreateOffer, useOfferAction, useSendImage, useSendMessage, useUnarchiveConversation, useUnblockUser,
 } from "../api/messages.queries"
 import { useChatSocket } from "../hooks/use-chat-socket"
+import { ConversationListSkeleton, MessageThreadSkeleton } from "./messages-skeleton"
 import { ConversationList } from "./conversation-list"
 import { ChatHeader } from "./chat-header"
 import { MessageThread } from "./message-thread"
@@ -89,7 +90,15 @@ export function MessagesShell({ activeConversationId = null }: MessagesShellProp
   }
 
   if (conversationsQuery.isPending) {
-    return <div className="flex h-dvh items-center justify-center text-sm text-muted-foreground"><LocalizedText id="loadingConversations" /></div>
+    // Skeleton of the inbox (or of the open thread on phones), so the layout is there before data.
+    return (
+      <div className="flex h-dvh overflow-hidden bg-background max-md:h-[calc(100dvh-var(--mobile-nav-height,4rem)-env(safe-area-inset-bottom,0px))]">
+        <ConversationListSkeleton className={selectedId ? "hidden w-full md:flex md:w-80 lg:w-96 shrink-0" : "w-full md:w-80 lg:w-96 shrink-0"} />
+        <div className={selectedId ? "flex flex-1 flex-col" : "hidden flex-1 flex-col md:flex"}>
+          {selectedId ? <MessageThreadSkeleton /> : <div className="flex-1 border-l border-border/70 bg-card/40" />}
+        </div>
+      </div>
+    )
   }
 
   if (conversationsQuery.isError) {
@@ -116,7 +125,7 @@ export function MessagesShell({ activeConversationId = null }: MessagesShellProp
             <ChatHeader participant={activeConversation.participant} listing={activeConversation.listing} role={activeConversation.role} isBlocked={activeConversation.blocked} isArchived={activeConversation.archived} onBack={() => { setSelectedId(null); router.push("/messages") }} onOpenMakeOffer={() => setMakeOfferOpen(true)} onArchiveConversation={() => (activeConversation.archived ? unarchive : archive).mutate(activeConversation.id, { onSuccess: () => { setSelectedId(null); router.push("/messages") } })} onOpenBlockUser={() => setBlockUserOpen(true)} onOpenReportUser={() => setReportUserOpen(true)} />
             <MobileListingContext listing={activeConversation.listing} />
             {messagesQuery.isPending ? (
-              <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground"><LocalizedText id="loadingMessages" /></div>
+              <MessageThreadSkeleton />
             ) : messagesQuery.isError ? (
               <div className="flex flex-1 items-center justify-center"><Button variant="outline" onClick={() => messagesQuery.refetch()}><LocalizedText id="retryMessages" /></Button></div>
             ) : (

@@ -2,8 +2,7 @@
 
 import { useEffect } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Container } from "@/components/layout/Container"
-import { LoadingState } from "@/components/shared/LoadingState"
+import { ProtectedRouteSkeleton } from "./protected-route-skeleton"
 import { useCurrentUser } from "../hooks/use-current-user"
 
 /**
@@ -24,13 +23,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, [signedOut, pathname, search, router])
 
   if (isLoading || signedOut) {
-    return (
-      <Container className="py-6">
-        <div aria-busy="true">
-          <LoadingState variant="list" count={5} />
-        </div>
-      </Container>
-    )
+    return <ProtectedRouteSkeleton />
   }
 
   return <>{children}</>

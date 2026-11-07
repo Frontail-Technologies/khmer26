@@ -11,8 +11,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("status=sold"),
 }))
 vi.mock("../hooks/use-current-user", () => ({ useCurrentUser: () => session }))
-vi.mock("@/components/shared/LoadingState", () => ({ LoadingState: () => <div>loading</div> }))
-vi.mock("@/components/layout/Container", () => ({ Container: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }))
+vi.mock("./protected-route-skeleton", () => ({ ProtectedRouteSkeleton: () => <div>loading</div> }))
 
 describe("<AuthGate />", () => {
   beforeEach(() => replace.mockClear())
